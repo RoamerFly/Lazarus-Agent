@@ -80,6 +80,9 @@ jobs:
         run: |
           $tag = 'v${{ steps.release.outputs.version }}'
           $notes = "Windows 下载建议：`n- 常规使用：下载 Lazarus-Agent-windows-x64-setup.exe。`n- 免安装或移动存放：下载 portable ZIP，解压后保留 portable.flag。`n`n更新包先校验 Ed25519 签名和 SHA-256；APK 修复仍需在目标设备复测。"
+          if ($tag -eq 'v0.3.0') {
+            $notes = "工作台新增模型配置和工具调用测试。启用后，修复助手可按故障查询隔离设备的共享库，并在重签名后复测候选 APK。默认使用本地规则。`n`n" + $notes
+          }
           if (gh release view $tag 2>$null) {
             gh release upload $tag release/* --clobber
             gh release edit $tag --notes $notes

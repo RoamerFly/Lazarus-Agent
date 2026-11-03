@@ -18,7 +18,9 @@ from fastapi.staticfiles import StaticFiles
 from bench_device import ADB, ARM_LAB, ROOT, TOOLS, Device, invoke, ready, shell
 from diagnose import abi_pruning_plan, assess, inspect_package
 from model_advisor import advise
-from function_probe import probe
+from function_probe import (MAX_LIBRARY_JAR_BYTES, discover_shared_library, extract_missing_class,
+                            probe, resolve_platform_library)
+from model_settings import public_config
 from reviver import INSTALL_FLOOR, repair, run
 from tools.note_smoke import exercise
 from repair_history import add_message, archive_version, record_feedback
@@ -117,9 +119,10 @@ def import_package(folder,api):
 
 @app.get("/api/config")
 def config():
+    model=public_config()
     return {"token":TOKEN,"targets":{str(a):ready(a) for a in INSTALL_FLOOR},"legacy":ready(30),
             "desktop_protocol":1, "demo_label":"旧版记事本" if (ROOT/"old_apk/OI-Notepad-1.3.apk").is_file() else "归档读取器",
-            "model":os.environ.get("REVIVER_MODEL") if os.environ.get("REVIVER_MODEL_URL") else None}
+            "model":model["model"] if model["enabled"] else None}
 
 
 @app.post("/api/import/{api}")
@@ -301,6 +304,11 @@ def work(folder,action):
                 scoped.append((part.stdout+part.stderr).decode("utf-8","replace"))
             text="\n".join(scoped)
             result={"pids":sorted(pids),"evidence":"logcat-pid-scoped"}
+            if "FATAL EXCEPTION" in text:
+                result["java_crash"] = True
+                missing_class = extract_missing_class(text)
+                if missing_class:
+                    result["missing_class"] = missing_class
             missing=re.search(r"(?:dlopen failed: (?:library )?['\"]?(lib[A-Za-z0-9_.+-]+\.so)['\"]?[^\n]*?(?:not found|needed)|could(?:n't| not) find (?:library )?['\"]?(lib[A-Za-z0-9_.+-]+\.so)['\"]?)",text,re.I)
             if missing:
                 result["missing_library"]=next(value for value in missing.groups() if value)
@@ -373,7 +381,7 @@ def work(folder,action):
                     if (result["install"]["exit"] or launch.get("exit")!=0 or
                             "Status: ok" not in launch.get("output","") or
                             result.get("runtime",{}).get("missing_library") or
-                            result.get("runtime",{}).get("native_crash")):
+                            result.get("runtime",{}).get("native_crash") or result.get("runtime",{}).get("java_crash")):
                         raise ValueError("默认安装或启动未通过")
                     functional=None
                     verification_level="仅启动验证"
@@ -448,31 +456,32 @@ def work(folder,action):
             embedded_available=bool(state.get("embedded_native_payload",{}).get("available"))
             functional=None
             libraries=""
-            if not failed and state.get("task"):
+            if not failed and state.get("task") and not original.get("runtime",{}).get("java_crash"):
                 functional=scenario()
-                if functional.get("missing_class"):
-                    libraries=shell(serial,"pm","list","libraries")
+            missing_class=(functional or {}).get("missing_class") or original.get("runtime",{}).get("missing_class")
+            if missing_class:
+                libraries=shell(serial,"pm","list","libraries")
+            library=resolve_platform_library(missing_class,libraries)
+            library_action="try-platform-http-library" if library=="org.apache.http.legacy" else "try-platform-shared-library"
             abi_install_failure="INSTALL_FAILED_NO_MATCHING_ABIS" in original["install"]["output"]
             embedded_needed=embedded_available and (bool(original.get("runtime",{}).get("native_crash")) or
                                                      bool(original.get("runtime",{}).get("missing_library")) or
                                                      bool(functional and functional.get("native_crash")) or
                                                      (failed and (floor or abi_install_failure)))
             isolation_native_experiment=embedded_available and abi_install_failure
+            options=[]
             if embedded_needed:
-                # The map is source-specific and checked again by repair().  It
-                # must be tried from the normal one-click path, while retaining
-                # the original targetSdk: this app's TEXTREL evidence forbids a
-                # silent target upgrade.
-                choice="try-embedded-native-payload"
-            elif functional and functional["result"]!="passed":
-                choice=("try-platform-http-library" if functional.get("missing_class") and
-                        "library:org.apache.http.legacy" in libraries.splitlines() else "report-limit")
-            elif not failed:
-                choice="try-abi-pruning" if native_plan else "test-original"
-            elif floor and assessment["suggested_action"]=="try-installation-floor-repair":
-                choice="try-installation-floor-repair"
-            else:
-                choice="report-limit"
+                options.append("try-embedded-native-payload")
+            if library and not failed:
+                options.append(library_action)
+            if native_plan and not failed:
+                options.append("try-abi-pruning")
+            if floor and assessment["suggested_action"]=="try-installation-floor-repair":
+                options.append("try-installation-floor-repair")
+            if (not options and not failed and not original.get("runtime",{}).get("java_crash")
+                    and (not functional or functional["result"]=="passed")):
+                options.append("test-original")
+            allowed=options+["report-limit"]
             log("根据安装结果、清单与设备架构判断下一步")
             # Transmit only curated evidence. Exclude filenames, paths, code and raw log content.
             err=re.search(r"Failure \[([A-Z0-9_]+)",original["install"]["output"])
@@ -483,7 +492,7 @@ def work(folder,action):
                 evidence["E8_native_runtime_evidence"]=original["runtime"]["evidence"]
                 evidence["E9_abi_pruning_plan"]=native_plan or "no-supported-complete-abi"
             if embedded_available:
-                evidence["E10_embedded_native_payload"]=state["embedded_native_payload"]
+                evidence["E10_embedded_native_payload"]={"available":True,"replacement_count":state["embedded_native_payload"]["replacement_count"]}
                 evidence["E11_embedded_payload_needed"]=embedded_needed
                 if isolation_native_experiment:
                     evidence["E12_isolation_native_experiment"]="INSTALL_FAILED_NO_MATCHING_ABIS"
@@ -493,10 +502,36 @@ def work(folder,action):
                 evidence["E6_functional_test"]=functional["result"]
                 if functional.get("exception"):
                     evidence["E9_exception"]=functional["exception"]
-                if functional.get("missing_class"):
-                    evidence.update(E7_missing_class=functional["missing_class"],E8_platform_library="org.apache.http.legacy" if "library:org.apache.http.legacy" in libraries.splitlines() else "absent")
-            allowed=[choice] if choice=="report-limit" else [choice,"report-limit"]
-            advice=advise(evidence,allowed,choice)
+            if missing_class:
+                evidence.update(E7_missing_class=missing_class,E8_platform_library=library or "absent")
+            def inspect_structure():
+                with ZipFile(src) as archive:
+                    entries=archive.namelist()
+                return {"min_sdk":facts["min_sdk"], "target_sdk":facts["target_sdk"],
+                        "native_abis":facts["native_abis"], "has_native_code":bool(facts["native_abis"]),
+                        "entry_counts":{"dex":sum(bool(re.fullmatch(r"classes(?:[0-9]+)?\.dex", n)) for n in entries),
+                                        "total":len(entries)}}
+            def diagnose_plan(observed, actions):
+                missing = observed.get("E7_missing_class")
+                def lookup():
+                    listing = shell(serial,"dumpsys","package","libraries")
+                    def read_jar(path):
+                        # Only immutable system paths from the local catalog reach this adapter.
+                        size = shell(serial,"stat","-c","%s",path).strip()
+                        if not size.isdecimal() or not 0 < int(size) <= MAX_LIBRARY_JAR_BYTES:
+                            raise ValueError("设备共享库大小超出检查范围")
+                        result = invoke([ADB,"-s",serial,"exec-out","cat",path],20)
+                        if result.returncode or len(result.stdout) != int(size):
+                            raise ValueError("共享库读取不完整")
+                        return result.stdout
+                    return discover_shared_library(missing,listing,read_jar)
+                reply = advise(observed,actions,actions[0],inspect_structure,
+                               lookup_library=lookup if missing and observed.get("E8_platform_library")=="absent" else None)
+                if reply.get("verified_library"):
+                    observed["E8_platform_library"] = reply["verified_library"]
+                return reply
+            advice=diagnose_plan(evidence,allowed)
+            library=advice.get("verified_library",library)
             state["diagnosis"]={"evidence":evidence,"advice":advice}
             log(advice["reason"])
             if advice["action"]=="report-limit":
@@ -507,7 +542,7 @@ def work(folder,action):
             else:
                 path=src
                 result=original
-                if advice["action"] in ("try-installation-floor-repair","try-platform-http-library","try-abi-pruning","try-embedded-native-payload"):
+                if advice["action"] in ("try-installation-floor-repair","try-platform-http-library","try-platform-shared-library","try-abi-pruning","try-embedded-native-payload"):
                     rule="installation-floor" if advice["action"]=="try-installation-floor-repair" else "platform-http-library"
                     remove_abis=()
                     if advice["action"]=="try-abi-pruning":
@@ -517,11 +552,15 @@ def work(folder,action):
                         remove_abis=tuple(native_plan["remove_abis"])
                     elif advice["action"]=="try-embedded-native-payload":
                         rule="embedded-native-payload"
+                    elif advice["action"]=="try-platform-shared-library":
+                        rule="platform-shared-library"
+                    selected_library=library if rule in ("platform-http-library","platform-shared-library") else None
                     expected_removed=list(remove_abis)
                     current=state.get("patch",{})
                     same_candidate=(current.get("rule")==rule and current.get("source_sha256")==facts["sha256"] and
                                     (rule!="embedded-native-payload" or current.get("native_recipe_version")==2) and
-                                    current.get("removed_abis",[])==expected_removed)
+                                    current.get("removed_abis",[])==expected_removed and
+                                    (not selected_library or current.get("added_library")==selected_library))
                     if modified.exists() and not same_candidate:
                         retained=state.get("native_candidate",{})
                         if retained.get("candidate")=="candidate.apk":
@@ -530,13 +569,14 @@ def work(folder,action):
                     if not modified.exists():
                         if rule=="installation-floor":
                             log("调整已定位的安装门槛，重新对齐、签名并验签")
-                        elif rule=="platform-http-library":
+                        elif selected_library:
                             log("声明已验证存在的 Android 共享库，重新对齐、签名并验签")
                         elif rule=="embedded-native-payload":
                             log("已识别包内同架构原生实现；检查引擎版本是否有经核对的位置无关代码补丁")
                         else:
                             log("只剔除缺少已证实核心库的 ABI 目录，重新对齐、签名并验签")
                         fix=repair(src,modified,api,TOOLS,rule,remove_abis,
+                                   shared_library=selected_library, verified_shared_libraries=(selected_library,) if advice.get("verified_library") else (),
                                    modernize_crt=(rule=="embedded-native-payload" and facts["target_sdk"]<INSTALL_FLOOR[api]))
                         if fix.get("pic_libraries"):
                             log(f"已改写 {len(fix['pic_libraries'])} 个库的已知重定位并将目标 API 调整为 {fix['after']}")
@@ -551,21 +591,54 @@ def work(folder,action):
                     # failure becomes observable.  Only then may it be combined
                     # with ABI pruning, and only from the untouched original.
                     chained=abi_pruning_plan(facts,abis,result.get("runtime",{}).get("missing_library"))
-                    if rule!="drop-incomplete-abi" and chained:
+                    if rule not in ("drop-incomplete-abi","embedded-native-payload") and chained:
                         log("修复包运行时仍有精确缺库证据；生成包含相同清单修复的 ABI 剔除候选")
                         if modified.exists():
                             modified.unlink()
                         rules=(rule,"drop-incomplete-abi")
-                        fix=repair(src,modified,api,TOOLS,rules,tuple(chained["remove_abis"]))
+                        fix=repair(src,modified,api,TOOLS,rules,tuple(chained["remove_abis"]),shared_library=selected_library,
+                                   verified_shared_libraries=(selected_library,) if advice.get("verified_library") else ())
                         fix["candidate"]="candidate.apk"
                         state["patch"]=fix
                         result=attempt(modified,"组合修复包")
                         path=modified
+                # A targetSdk install failure can mask a second, unrelated class-loading error.
+                # Rebuild from the input and keep the first candidate intact until signing succeeds.
+                verified_functional=None
+                if path==modified and state["patch"].get("rule")=="installation-floor" and not result["install"]["exit"]:
+                    next_failure=result.get("runtime",{})
+                    if state.get("task") and not next_failure.get("java_crash"):
+                        verified_functional=scenario()
+                        next_failure=verified_functional
+                    second_class=next_failure.get("missing_class")
+                    if second_class:
+                        known=resolve_platform_library(second_class,shell(serial,"pm","list","libraries"))
+                        observed={"E2_device_api":api,"E5_install":"SUCCESS","E7_missing_class":second_class,
+                                  "E8_platform_library":known or "absent","E10_applied_rule":"installation-floor"}
+                        actions=["report-limit"]
+                        if known:
+                            actions.insert(0,"try-platform-http-library" if known=="org.apache.http.legacy" else "try-platform-shared-library")
+                        followup=diagnose_plan(observed,actions)
+                        state["candidate_diagnosis"]={"evidence":observed,"advice":followup}
+                        log(followup["reason"])
+                        if followup["action"]=="report-limit":
+                            raise ValueError("安装门槛修复后仍有未解决的缺类故障")
+                        lib=followup.get("verified_library",known)
+                        staged=folder/("combined-"+uuid.uuid4().hex+".apk")
+                        try:
+                            fix=repair(src,staged,api,TOOLS,("installation-floor","platform-shared-library"),
+                                       shared_library=lib,verified_shared_libraries=(lib,))
+                            staged.replace(modified)
+                        finally:
+                            staged.unlink(missing_ok=True)
+                        state["patch"]={**fix,"source_sha256":facts["sha256"],"candidate":"candidate.apk"}
+                        verified_functional=None
+                        result=attempt(modified,"安装门槛与共享库组合修复包")
                 launch=result.get("launch",{})
                 if (result["install"]["exit"] or launch.get("exit")!=0 or
                         "Status: ok" not in launch.get("output","") or
                         result.get("runtime",{}).get("missing_library") or
-                        result.get("runtime",{}).get("native_crash") or
+                        result.get("runtime",{}).get("native_crash") or result.get("runtime",{}).get("java_crash") or
                         (path==modified and isolation_native_experiment)):
                     log("未通过安装或启动验证")
                     if state.get("patch",{}).get("rule")=="embedded-native-payload":
@@ -579,7 +652,7 @@ def work(folder,action):
                 else:
                     level="启动已验证，功能待核验"
                     if state.get("task"):
-                        functional=scenario() if path==modified else functional
+                        functional=(verified_functional or scenario()) if path==modified else functional
                         if not functional or functional["result"]!="passed" or functional.get("native_crash"):
                             if path==modified and functional:
                                 observed={"E2_device_api":api,"E5_install":"SUCCESS","E6_functional_test":functional["result"],

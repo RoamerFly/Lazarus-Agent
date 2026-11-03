@@ -16,3 +16,8 @@
 .askbox .row { justify-content: space-between; }
 .askbox pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #edf5f2; color: #294a48; padding: 10px; border-radius: 8px; font: inherit; line-height: 1.65; }
 .resource-location { display:grid; grid-template-columns: 1fr auto; align-items:center; gap:4px 10px; margin:13px 0; } .resource-location code { grid-column:1; overflow-wrap:anywhere; color:#426764; } .resource-location button { grid-column:2; grid-row:1/3; }
+.model-settings { display:grid; gap:11px; }
+.model-settings label { display:grid; gap:5px; color:#325b59; font-size:13px; }
+.model-settings label.row { display:flex; align-items:center; }
+.model-settings input[type="url"],.model-settings input[type="text"],.model-settings input[type="password"] { width:100%; }
+.model-tool-trace { margin:9px 0; padding:8px 10px; border-radius:9px; background:#eef7f4; color:#426764; font-size:12px; overflow-wrap:anywhere; }

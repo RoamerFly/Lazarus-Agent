@@ -24,7 +24,7 @@ class AssistantChatTests(unittest.TestCase):
         open_endpoint.assert_not_called()
 
     def test_explicit_model_without_configuration_falls_back(self):
-        with patch.dict(os.environ,{"REVIVER_MODEL_URL":"","REVIVER_MODEL":""},clear=False):
+        with patch("assistant_chat.get_config",return_value={"url":"","model":"","key":"","enabled":False}):
             answer=assistant_chat.answer_question(STATE,"修复流程是什么？",use_model=True)
         self.assertEqual(answer["source"],"fallback:not-configured")
         self.assertIn("本地说明",answer["text"])

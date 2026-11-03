@@ -1,3 +1,4 @@
+from app_version import APP_VERSION
 import hashlib
 from pathlib import Path
 import tempfile
@@ -18,7 +19,7 @@ class UpdatesRouterTests(unittest.TestCase):
         response = client.get("/api/updates/about")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["developer"], "RoamerFly")
-        self.assertEqual(response.json()["version"], "0.2.0")
+        self.assertEqual(response.json()["version"], APP_VERSION)
 
     def test_post_update_flow_requires_token_and_works_with_loopback_middleware(self):
         client = TestClient(workbench.app, base_url="http://127.0.0.1:8767")
