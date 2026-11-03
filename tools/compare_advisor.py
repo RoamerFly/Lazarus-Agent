@@ -36,8 +36,8 @@ def compare(live=False):
         if live:
             # Every case receives the same choices. Labels and historical advice stay local.
             reply = advise(evidence, list(ACTIONS), "report-limit")
-            row["model_status"] = reply["source"] if reply["source"] == "model" else reply["model_status"]
-            if reply["source"] == "model":
+            row["model_status"] = reply["source"] if reply["source"] == "model-tools" else reply["model_status"]
+            if reply["source"] == "model-tools":
                 row["model_reply"] = reply
                 row["model_match"] = reply["action"] == expected
         rows.append(row)

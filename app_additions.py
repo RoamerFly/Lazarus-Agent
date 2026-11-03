@@ -2,6 +2,7 @@
 import os
 from fastapi import HTTPException
 
+import model_settings
 from assistant_chat import answer_question
 from storage_paths import resolve_storage_paths, jobs_dir
 import bench_device
@@ -10,6 +11,25 @@ from runtime_prepare import RuntimePreparation
 
 def install_routes(app, load_job, operation_lock=None):
     runtime = RuntimePreparation(operation_lock)
+    @app.get("/api/model/settings")
+    def model_config():
+        return model_settings.public_config()
+
+    @app.post("/api/model/settings")
+    def save_model(body: dict):
+        try:
+            return model_settings.save_config(body)
+        except model_settings.ModelSettingsError as exc:
+            raise HTTPException(400, str(exc)) from exc
+
+    @app.post("/api/model/test")
+    def test_model(body: dict):
+        try:
+            result = model_settings.test_connection(model_settings.preview_config(body))
+            return {**result, "message": "连接成功。模型已返回有效的工具调用。"}
+        except model_settings.ModelSettingsError as exc:
+            raise HTTPException(400, str(exc)) from exc
+
     def locations():
         storage=resolve_storage_paths()
         return {"root":("存储根",storage.root),"jobs":("任务、证据和各版本 APK",jobs_dir()),

@@ -1,0 +1,17 @@
+{
+  "model_endpoint": "本地模拟的 Chat Completions 服务，无真实大模型参与",
+  "target": "Android 16 API 36 x86_64 模拟器",
+  "original_missing_class": "android.test.mock.MockResources",
+  "operation": "Use archived helper",
+  "expected": "Helper ready",
+  "tool_trace": [
+    "read_runtime_summary",
+    "lookup_shared_library",
+    "select_repair"
+  ],
+  "verified_library": "android.test.mock",
+  "repair": "platform-shared-library",
+  "functional_result": "passed",
+  "export_sha256": "62b317444a3e4a56e4af2aa35bc0a76075774b42c0f52fe4581c2f0e6a248006",
+  "installed_sha256": "62b317444a3e4a56e4af2aa35bc0a76075774b42c0f52fe4581c2f0e6a248006"
+}

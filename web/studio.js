@@ -47,8 +47,12 @@ function render(){
   }
   if(!issues.children.length)issues.textContent="静态检查未发现已知阻断项，仍需运行验证。";
   const diag=(job.candidate_diagnosis||job.diagnosis)?.advice;
-  const method=diag?.source==="model"?"模型 "+diag.model:diag?.model_status?.startsWith("fallback:")?"模型不可用，已回退到规则":"本地规则";
+  const method=(diag?.source==="model"||diag?.source==="model-tools")?"模型 "+diag.model:diag?.model_status?.startsWith("fallback:")?"模型不可用，已回退到规则":"本地规则";
   el("advice").textContent=diag?method+" · "+diag.reason+(diag.evidence_ids?" ["+diag.evidence_ids.join(", ")+"]":""):"运行修复后显示本次诊断依据。";
+  const trace=el("modelToolTrace");
+  const names=Array.isArray(diag?.tool_trace)?diag.tool_trace.map(item=>typeof item==="string"?item:item?.name).filter(name=>typeof name==="string"&&/^[a-z_]{1,80}$/.test(name)):[];
+  trace.hidden=!names.length;
+  trace.textContent=names.length?"本轮模型读取的受限工具："+names.join("、"):"";
   const events=el("events"),offset=events.scrollTop,atEnd=events.scrollHeight-events.scrollTop-events.clientHeight<10;
   events.replaceChildren();
   job.events.forEach(x=>{const li=document.createElement("li");li.textContent=new Date(x.time).toLocaleTimeString()+"　"+x.text;events.append(li);});

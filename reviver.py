@@ -107,13 +107,14 @@ def _tool_temp_root() -> Path:
     raise RuntimeError("Android build tools require an ASCII TEMP path; set REVIVER_TOOL_TEMP to an ASCII directory")
 
 
-def repair(source, output, api, tools, rule="installation-floor", remove_abis=(), modernize_crt=False):
+def repair(source, output, api, tools, rule="installation-floor", remove_abis=(), modernize_crt=False,
+           shared_library=None, verified_shared_libraries=()):
     if api not in INSTALL_FLOOR:
         raise ValueError("Unsupported Android API")
     if source.resolve() == output.resolve() or output.exists():
         raise ValueError("Use a new output path")
     rules=(rule,) if isinstance(rule,str) else tuple(rule)
-    if not rules or any(item not in {"installation-floor","platform-http-library","drop-incomplete-abi","embedded-native-payload","arm-crt-floor"} for item in rules):
+    if not rules or any(item not in {"installation-floor","platform-http-library","platform-shared-library","drop-incomplete-abi","embedded-native-payload","arm-crt-floor"} for item in rules):
         raise ValueError("Unknown repair rule")
     if len(set(rules)) != len(rules):
         raise ValueError("Duplicate repair rule")
@@ -124,6 +125,15 @@ def repair(source, output, api, tools, rule="installation-floor", remove_abis=()
         raise ValueError("ABI removal requires the drop-incomplete-abi rule and explicit ABI names")
     if "embedded-native-payload" in rules and len(rules) != 1:
         raise ValueError("embedded-native-payload must preserve the original manifest and cannot be combined with other rules")
+    if "platform-http-library" in rules:
+        if shared_library not in (None, "org.apache.http.legacy"):
+            raise ValueError("platform-http-library only declares org.apache.http.legacy")
+        shared_library = "org.apache.http.legacy"
+    if ("platform-shared-library" in rules or "platform-http-library" in rules) != bool(shared_library):
+        raise ValueError("Platform shared library repair requires an explicit allow-listed library")
+    verified_shared_libraries=tuple(verified_shared_libraries or ())
+    if shared_library and shared_library not in verified_shared_libraries and shared_library not in {"org.apache.http.legacy", "android.test.runner", "android.test.base", "android.test.mock"}:
+        raise ValueError("Shared library was not verified by the device inspector")
     if any(not re.fullmatch(r"[A-Za-z0-9_.+-]+", abi) for abi in remove_abis):
         raise ValueError("Invalid ABI name")
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -194,20 +204,20 @@ def repair(source, output, api, tools, rule="installation-floor", remove_abis=()
                     raise ValueError("No ARM CRT text relocations to repair")
                 manifest,previous=update_manifest(original_manifest,INSTALL_FLOOR[api])
                 changes={"before":previous,"after":INSTALL_FLOOR[api],"pic_libraries":sorted(replacements)}
-            elif "installation-floor" in rules:
-                textrel=[item.filename for item in src.infolist()
-                         if library_member(item.filename) and elf_uses_textrel(src.read(item))]
-                if textrel and INSTALL_FLOOR[api] >= 23:
-                    raise ValueError("Refusing targetSdk upgrade: DT_TEXTREL blocks modern linker: "+", ".join(textrel))
-                manifest, previous = update_manifest(original_manifest, INSTALL_FLOOR[api])
-                changes={"before":previous,"after":INSTALL_FLOOR[api]}
-            elif "platform-http-library" in rules:
-                from runtime_patch import declare_legacy_http, LIBRARY
-                manifest=declare_legacy_http(original_manifest)
-                changes={"added_library":LIBRARY}
             else:
                 manifest=original_manifest
                 changes={}
+                if "installation-floor" in rules:
+                    textrel=[item.filename for item in src.infolist()
+                             if library_member(item.filename) and elf_uses_textrel(src.read(item))]
+                    if textrel and INSTALL_FLOOR[api] >= 23:
+                        raise ValueError("Refusing targetSdk upgrade: DT_TEXTREL blocks modern linker: "+", ".join(textrel))
+                    manifest, previous = update_manifest(original_manifest, INSTALL_FLOOR[api])
+                    changes={"before":previous,"after":INSTALL_FLOOR[api]}
+                if shared_library:
+                    from runtime_patch import declare_shared_library
+                    manifest=declare_shared_library(manifest,shared_library,verified_shared_libraries)
+                    changes["added_library"]=shared_library
             if "drop-incomplete-abi" in rules:
                 remaining={library_member(item.filename)[0] for item in src.infolist()
                            if library_member(item.filename) and library_member(item.filename)[0] not in remove_abis}

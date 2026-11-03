@@ -6,10 +6,9 @@ answer.  A configured OpenAI-compatible endpoint is optional and is contacted
 only when the caller explicitly opts in.
 """
 import json
-import os
 import re
-from urllib.parse import urlsplit
-from urllib.request import Request, urlopen
+from urllib.request import Request
+from model_settings import get_config, safe_urlopen as urlopen
 
 
 MAX_QUESTION = 800
@@ -80,7 +79,7 @@ def _offline_answer(state, question):
     export = facts["verified_export"]
     if "key" in q or "密钥" in q or "模型" in q or "api" in q:
         return ("默认由本地规则和当前任务记录回答，不发送问题，也不需要 API Key。只有手动勾选“使用已配置模型解释”且本机已设置模型地址与模型名时，"
-                "才会发送问题和经过脱敏压缩的任务摘要；本机 HTTP 端点可不设 Key。模型缺失、超时或输出不合规时会自动回退到本地说明。")
+                "才会发送问题和精简任务摘要。修复流程可另外在“模型配置”中启用工具调用。本机 HTTP 端点可不设 Key。模型缺失、超时或输出不合规时会自动回退到本地说明。")
     if "任意" in q or "所有" in q or "都能" in q or "支持" in q:
         return ("可导入标准 APK 并进行受限的静态检查、候选修复和验证；但不能承诺任意旧 APK 都能修好。"
                 "没有源码、缺失原生 ABI、服务端下线、版权/签名依赖或特定功能崩溃，都可能超出当前证据支持的修复规则。"
@@ -100,17 +99,6 @@ def _offline_answer(state, question):
     return "当前目标为 %s。%s。历史版本：%s。当前保留 %d 条本地运行记录。" % (target, result, version_text, facts["event_count"])
 
 
-def _model_config():
-    base = os.environ.get("REVIVER_MODEL_URL", "").rstrip("/")
-    model = os.environ.get("REVIVER_MODEL", "")
-    if not base or not model:
-        return None, None
-    parsed = urlsplit(base)
-    if parsed.scheme != "https" and not (parsed.scheme == "http" and parsed.hostname in {"127.0.0.1", "localhost", "::1"}):
-        return None, None
-    return base, model
-
-
 def answer_question(state, question, use_model=False):
     """Explain a job without creating any side effect.  Returns source + text."""
     if not isinstance(question, str) or not question.strip() or len(question.strip()) > MAX_QUESTION:
@@ -119,7 +107,8 @@ def answer_question(state, question, use_model=False):
     offline = _offline_answer(state, question)
     if not use_model:
         return {"source": "offline", "text": offline, "evidence": compact_evidence(state)}
-    base, model = _model_config()
+    config = get_config()
+    base, model = config['url'], config['model']
     if not base:
         return {"source": "fallback:not-configured", "text": "未配置可用模型，以下使用本地说明：" + offline,
                 "evidence": compact_evidence(state)}
@@ -132,7 +121,7 @@ def answer_question(state, question, use_model=False):
                {"role": "user", "content": json.dumps({"question": question, "evidence": facts}, ensure_ascii=False)}],
                "temperature": 0, "max_tokens": 600}
     headers = {"Content-Type": "application/json"}
-    key = os.environ.get("REVIVER_MODEL_KEY")
+    key = config["key"]
     if key:
         headers["Authorization"] = "Bearer " + key
     try:

@@ -1,7 +1,11 @@
 """Append one Android platform shared library declaration to compiled AXML."""
 import struct
+import re
 
 LIBRARY = "org.apache.http.legacy"
+KNOWN_SHARED_LIBRARIES = frozenset({
+    "org.apache.http.legacy", "android.test.runner", "android.test.base", "android.test.mock",
+})
 NO_INDEX = 0xffffffff
 
 
@@ -47,7 +51,22 @@ def strings_and_append(pool, wanted):
     return old_values,values,bytes(out)
 
 
-def declare_legacy_http(data):
+def _approved_library(library, discovered_libraries):
+    discovered_libraries = tuple(discovered_libraries or ())
+    if any(not isinstance(name, str) or not re.fullmatch(r"[A-Za-z][A-Za-z0-9_.-]{0,99}", name)
+           for name in discovered_libraries):
+        raise ValueError("Invalid verified shared-library record")
+    return library in KNOWN_SHARED_LIBRARIES or library in discovered_libraries
+
+
+def declare_shared_library(data, library, discovered_libraries=()):
+    """Declare one allow-listed platform library in binary AndroidManifest.xml.
+
+    The caller must have obtained the library name from device evidence.  This
+    function deliberately does not accept arbitrary manifest attributes.
+    """
+    if not _approved_library(library, discovered_libraries):
+        raise ValueError("Unsupported platform shared library")
     if struct.unpack_from("<HHI",data)!=(3,8,len(data)):
         raise ValueError("Unsupported binary manifest")
     out=bytearray(data[:8])
@@ -59,7 +78,7 @@ def declare_legacy_http(data):
         if hdr<8 or size<hdr or offset+size>len(data):raise ValueError("Malformed AXML chunk")
         chunk=data[offset:offset+size]
         if kind==1:
-            old,values,chunk=strings_and_append(chunk,["uses-library",LIBRARY])
+            old,values,chunk=strings_and_append(chunk,["uses-library",library])
         elif kind==0x180:
             ids=struct.unpack_from(f"<{(size-hdr)//4}I",chunk,hdr)
         elif kind==0x102:
@@ -70,14 +89,14 @@ def declare_legacy_http(data):
                     pos=hdr+first+step*i
                     attr=struct.unpack_from("<I",chunk,pos+4)[0]
                     if attr<len(ids) and ids[attr]==0x01010003 and chunk[pos+15]==3:
-                        if old[struct.unpack_from("<I",chunk,pos+16)[0]]==LIBRARY:
-                            raise ValueError("Legacy library already declared")
+                        if old[struct.unpack_from("<I",chunk,pos+16)[0]]==library:
+                            raise ValueError("Platform shared library already declared")
         elif kind==0x103 and old[struct.unpack_from("<I",chunk,hdr+4)[0]]=="application":
             if seen: raise ValueError("Multiple application nodes")
             elem=values.index("uses-library")
             ns=values.index("http://schemas.android.com/apk/res/android")
             name=ids.index(0x01010003)
-            attr=struct.pack("<IIIHBBI",ns,name,NO_INDEX,8,0,3,values.index(LIBRARY))
+            attr=struct.pack("<IIIHBBI",ns,name,NO_INDEX,8,0,3,values.index(library))
             line=struct.unpack_from("<I",chunk,8)[0]
             out+=struct.pack("<HHIIIIIHHHHHH",0x102,16,56,line,NO_INDEX,NO_INDEX,elem,20,20,1,0,0,0)+attr
             out+=struct.pack("<HHIIIII",0x103,16,24,line,NO_INDEX,NO_INDEX,elem)
@@ -87,3 +106,8 @@ def declare_legacy_http(data):
     if not seen: raise ValueError("Missing application element")
     struct.pack_into("<I",out,4,len(out))
     return bytes(out)
+
+
+def declare_legacy_http(data):
+    """Backward-compatible name for the previously audited HTTP repair."""
+    return declare_shared_library(data, LIBRARY)
