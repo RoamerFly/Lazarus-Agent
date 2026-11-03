@@ -1,0 +1,54 @@
+{
+  "sample": "org.ggbond.archivereader",
+  "input_sha256": "7b8e200984dee500def40a9684fd2de9ced885ca1d04c63771d1d473b597dcce",
+  "fix_rule": "platform-http-library",
+  "apk_sha256": "e10a1a2943e83c4d855a828b145cb36dd2cc53c049d0b1b37048df024ac95d72",
+  "task": {
+    "tap": "Open archived record",
+    "expect": "Read OK: HTTP/1.1"
+  },
+  "targets": [
+    {
+      "api": 34,
+      "status": "passed",
+      "level": "指定功能已验证",
+      "installed_sha256": "e10a1a2943e83c4d855a828b145cb36dd2cc53c049d0b1b37048df024ac95d72",
+      "environment": {
+        "sdk": 34,
+        "supported_abis": [
+          "x86_64"
+        ],
+        "primary_cpu_abi": null,
+        "type": "android-emulator"
+      }
+    },
+    {
+      "api": 35,
+      "status": "passed",
+      "level": "指定功能已验证",
+      "installed_sha256": "e10a1a2943e83c4d855a828b145cb36dd2cc53c049d0b1b37048df024ac95d72",
+      "environment": {
+        "sdk": 35,
+        "supported_abis": [
+          "x86_64"
+        ],
+        "primary_cpu_abi": null,
+        "type": "android-emulator"
+      }
+    },
+    {
+      "api": 36,
+      "status": "passed",
+      "level": "指定功能已验证",
+      "installed_sha256": "e10a1a2943e83c4d855a828b145cb36dd2cc53c049d0b1b37048df024ac95d72",
+      "environment": {
+        "sdk": 36,
+        "supported_abis": [
+          "x86_64"
+        ],
+        "primary_cpu_abi": null,
+        "type": "android-emulator"
+      }
+    }
+  ]
+}

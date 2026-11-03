@@ -15,14 +15,36 @@ def add_message(state, role, text, **metadata):
     state.setdefault("messages", []).append({"role": role, "text": text, **metadata})
 
 
+def compatibility_scope(state):
+    """Return compact, immutable-enough evidence for one matrix acceptance."""
+    matrix=state.get("compatibility")
+    if not isinstance(matrix,dict) or matrix.get("status")!="passed":
+        return None
+    rows=[]
+    for row in matrix.get("rows",[]):
+        if row.get("status")!="passed":
+            return None
+        rows.append({key:row.get(key) for key in
+                     ("api","installed_sha256","verification_level","verified_environment")})
+    return {"artifact_api":matrix.get("artifact_api"),"targets":matrix.get("targets",[]).copy(),"rows":rows}
+
+
 def archive_version(folder, state):
     """Copy an accepted export before later attempts can replace candidate.apk."""
     export = state.get("export")
     if not export:
         return None
     versions = state.setdefault("versions", [])
+    scope=compatibility_scope(state)
     for version in versions:
         if version["sha256"] == export["sha256"]:
+            if scope:
+                # A repeated status request must not manufacture a second
+                # record, while a later validation on a different target set
+                # or environment must remain independently visible.
+                scopes=version.setdefault("verification_scopes",[])
+                if scope not in scopes:
+                    scopes.append(scope)
             return version
     directory = folder / "versions"
     directory.mkdir(exist_ok=True)
@@ -38,6 +60,13 @@ def archive_version(folder, state):
         temp.unlink(missing_ok=True)
     version = {"number": number, "sha256": export["sha256"], "level": export["level"],
                "environment": export.get("verified_environment"), "phone": "待真机复测"}
+    if scope:
+        # Keep the acceptance scope with the immutable archived artifact,
+        # without copying verbose emulator logs into every version record.
+        version["compatibility"] = {"artifact_api": scope["artifact_api"],
+                                    "targets": scope["targets"].copy(),
+                                    "status": "passed"}
+        version["verification_scopes"]=[scope]
     if state.get("attempt_feedback"):
         version["feedback_id"]=state["attempt_feedback"]
     versions.append(version)

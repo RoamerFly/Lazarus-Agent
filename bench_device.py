@@ -7,12 +7,70 @@ import subprocess
 import sys
 import time
 import tempfile
+from offline_kit import discover_sdk
+from storage_paths import configure_environment
 
 ROOT = Path(__file__).resolve().parent
-SDK = Path(os.environ.get("REVIVER_SDK",r"E:\Software\Android-Tool\Sdk"))
-LAB = Path(os.environ.get("REVIVER_LAB",r"E:\Agent\android-reviver-lab"))
+PATHS = configure_environment()
+# Resource discovery deliberately avoids shutil.which/Android Studio and works
+# when a portable EXE is launched with an empty PATH.
+SDK = discover_sdk() or Path(os.environ.get("REVIVER_SDK", r"E:\Software\Android-Tool\Sdk"))
+_legacy_arm_lab = Path(r"E:\Agent\android-reviver-lab")
+_storage_explicit = bool(os.environ.get("LAZARUS_STORAGE_ROOT") or os.environ.get("LAZARUS_PORTABLE") or os.environ.get("LAZARUS_PORTABLE_ROOT"))
+# Preserve the already paired 77 GiB ARM lab in normal upgrades.  Explicit
+# portable/QA storage is intentionally isolated and never borrows that state.
+LAB = Path(os.environ["REVIVER_LAB"]) if os.environ.get("REVIVER_LAB") else (
+    _legacy_arm_lab if _legacy_arm_lab.is_dir() and not _storage_explicit else PATHS.runtime("android-lab")
+)
 ADB = SDK/"platform-tools/adb.exe"
-TOOLS = Path(os.environ.get("REVIVER_BUILD_TOOLS",str(SDK/"build-tools/36.0.0")))
+
+
+def _build_tools() -> Path:
+    explicit = os.environ.get("REVIVER_BUILD_TOOLS", "").strip()
+    if explicit:
+        return Path(explicit)
+    preferred = SDK / "build-tools" / "36.0.0"
+    if (preferred / "zipalign.exe").is_file() and (preferred / "lib" / "apksigner.jar").is_file():
+        return preferred
+    available = sorted((SDK / "build-tools").glob("*") if (SDK / "build-tools").is_dir() else (), reverse=True)
+    return next((item for item in available if (item / "zipalign.exe").is_file() and (item / "lib" / "apksigner.jar").is_file()), preferred)
+
+
+TOOLS = _build_tools()
+
+
+def refresh_toolchain(sdk: Path | None = None) -> dict[str, str]:
+    """Activate a just-prepared controlled SDK without restarting the desktop."""
+    global SDK, ADB, TOOLS
+    if sdk is not None:
+        os.environ["REVIVER_SDK"] = str(sdk)
+    SDK = discover_sdk() or Path(os.environ.get("REVIVER_SDK", r"E:\Software\Android-Tool\Sdk"))
+    ADB = SDK / "platform-tools" / "adb.exe"
+    TOOLS = _build_tools()
+    # These modules historically imported ADB/TOOLS by value. Refresh their
+    # bindings too, otherwise an on-demand runtime would be prepared correctly
+    # but the already-running workbench would continue to call the old SDK.
+    for name in ("workbench", "game_probe", "function_probe", "tools.serve_arm_lab", "tools.replay_workbench"):
+        consumer = sys.modules.get(name)
+        if consumer is None:
+            continue
+        if hasattr(consumer, "ADB"):
+            consumer.ADB = ADB
+        if hasattr(consumer, "TOOLS"):
+            consumer.TOOLS = TOOLS
+        if hasattr(consumer, "SDK"):
+            consumer.SDK = SDK
+    return {"sdk": str(SDK), "adb": str(ADB), "build_tools": str(TOOLS)}
+
+
+def _powershell() -> str:
+    """Locate PowerShell even when the portable verification run has no PATH."""
+    found = shutil.which("pwsh") or shutil.which("powershell")
+    if found:
+        return found
+    system_root = Path(os.environ.get("SystemRoot", r"C:\Windows"))
+    windows_ps = system_root / "System32" / "WindowsPowerShell" / "v1.0" / "powershell.exe"
+    return str(windows_ps) if windows_ps.is_file() else "powershell"
 PORT = {30:5570,34:5574,35:5576,36:5578}
 ARM_LAB = "127.0.0.1:19636"
 ARM_PAIRING = LAB/"redroid16/workbench-instance"
@@ -89,8 +147,10 @@ def name_at(serial):
 def avd_ready(api):
     base=SDK/f"system-images/android-{api}"
     images=[base/tag/"x86_64/system.img" for tag in ("google_apis_playstore","google_apis","default")]
-    cache=Path(os.environ.get("LOCALAPPDATA","."))/"LegacyApkReviver/lab-sdk"
+    cache=PATHS.runtime("android-lab")/"lab-sdk"
     images.append(cache/f"system-images/android-{api}/default/x86_64/system.img")
+    legacy=Path(os.environ.get("LOCALAPPDATA","."))/"LegacyApkReviver/lab-sdk"
+    images.append(legacy/f"system-images/android-{api}/default/x86_64/system.img")
     if api==30:
         old=Path(os.environ.get("REVIVER_OLD_SDK",r"D:\android\AndroidSDK"))
         images.append(old/"system-images/android-30/google_apis_playstore/x86/system.img")
@@ -147,7 +207,7 @@ class Device:
         # The detached emulator can inherit Windows pipe handles. Waiting for pipe EOF
         # would block until the emulator exits even though PowerShell already returned.
         with tempfile.TemporaryFile() as log:
-            proc=subprocess.run(list(map(str,[shutil.which("pwsh") or "powershell","-NoProfile","-File",ROOT/"tools/start_lab.ps1",
+            proc=subprocess.run(list(map(str,[_powershell(),"-NoProfile","-File",ROOT/"tools/start_lab.ps1",
                          "-Api",api,"-Name",name,"-Port",PORT[api],"-Sdk",SDK,"-Lab",LAB,"-ResetBench"])),
                          stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT,timeout=40,creationflags=getattr(subprocess,"CREATE_NO_WINDOW",0))
             if proc.returncode:

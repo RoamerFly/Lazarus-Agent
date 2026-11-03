@@ -12,8 +12,12 @@ import time
 from urllib.error import URLError
 from urllib.request import urlopen
 
-HOME = Path(os.environ["LOCALAPPDATA"]) / "LegacyApkReviver"
-HOME.mkdir(parents=True, exist_ok=True)
+from app_version import APP_NAME, APP_VERSION
+from storage_paths import configure_environment
+
+# Must run before importing workbench/reviver: those legacy modules read their
+# storage environment at import time.
+PATHS = configure_environment()
 
 
 def find_edge():
@@ -33,6 +37,17 @@ def existing_app(url):
 
 
 def main():
+    if "--version" in sys.argv:
+        print(f"{APP_NAME} {APP_VERSION}")
+        return
+    if "--self-test" in sys.argv:
+        payload = {"name": APP_NAME, "version": APP_VERSION, "platform": "Windows" if os.name == "nt" else "unsupported"}
+        print(json.dumps(payload, ensure_ascii=False))
+        return
+    if "--apply-update" in sys.argv:
+        from apply_update import main as apply_main
+        apply_main()
+        return
     if "--serve-arm-lab" in sys.argv:
         from tools.serve_arm_lab import serve
         serve()
@@ -71,7 +86,7 @@ def main():
                 time.sleep(.1)
             else:
                 raise RuntimeError("本地服务启动超时。")
-        profile = HOME / "desktop-edge"
+        profile = PATHS.data / "desktop-edge"
         subprocess.run([str(edge), f"--app={url}", f"--user-data-dir={profile}",
                         "--no-first-run", "--disable-first-run-ui", "--window-size=1280,900"],check=True)
     finally:
@@ -84,7 +99,7 @@ def main():
 
 
 if __name__=="__main__":
-    logging.basicConfig(filename=HOME/"desktop.log",level=logging.INFO,encoding="utf8")
+    logging.basicConfig(filename=PATHS.logs/"desktop.log",level=logging.INFO,encoding="utf8")
     try:
         main()
     except Exception as error:

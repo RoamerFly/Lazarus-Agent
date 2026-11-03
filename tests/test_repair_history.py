@@ -38,3 +38,32 @@ class HistoryTests(unittest.TestCase):
             self.assertFalse(list((root/"versions").glob("*.apk")))
             with self.assertRaises(HTTPException):
                 record_feedback(root,state,{"text":"好了","kind":"works","version":99})
+
+    def test_archived_version_keeps_multi_target_acceptance_scope(self):
+        with tempfile.TemporaryDirectory() as data:
+            root=Path(data)
+            content=b"matrix"
+            (root/"candidate.apk").write_bytes(content)
+            state={"export":{"file":"candidate.apk","sha256":hashlib.sha256(content).hexdigest(),"level":"启动已验证",
+                             "verified_targets":[34,36]},
+                   "compatibility":{"artifact_api":36,"targets":[34,36],"status":"passed"}}
+            archive_version(root,state)
+            self.assertEqual(state["versions"][0]["compatibility"],
+                             {"artifact_api":36,"targets":[34,36],"status":"passed"})
+
+    def test_same_bytes_keep_separate_matrix_scopes(self):
+        with tempfile.TemporaryDirectory() as data:
+            root=Path(data)
+            content=b"same"
+            (root/"candidate.apk").write_bytes(content)
+            export={"file":"candidate.apk","sha256":hashlib.sha256(content).hexdigest(),"level":"启动已验证"}
+            state={"export":export,"compatibility":{"artifact_api":36,"targets":[36],"status":"passed",
+                   "rows":[{"api":36,"status":"passed","installed_sha256":export["sha256"],
+                            "verification_level":"仅启动验证","verified_environment":{"sdk":36}}]}}
+            archive_version(root,state)
+            state["compatibility"]={"artifact_api":36,"targets":[34,36],"status":"passed","rows":[
+                {"api":34,"status":"passed","installed_sha256":export["sha256"],"verification_level":"仅启动验证","verified_environment":{"sdk":34}},
+                {"api":36,"status":"passed","installed_sha256":export["sha256"],"verification_level":"指定功能已验证","verified_environment":{"sdk":36}}]}
+            archive_version(root,state)
+            self.assertEqual(len(state["versions"]),1)
+            self.assertEqual(len(state["versions"][0]["verification_scopes"]),2)

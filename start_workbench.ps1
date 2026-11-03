@@ -7,7 +7,7 @@ if (-not (Test-Path -LiteralPath $python)){
     python -m venv $venv
     if($LASTEXITCODE){throw 'Unable to create Python virtual environment'}
 }
-& $python -c 'import fastapi, uvicorn, cv2' 2>$null
+& $python -c 'import fastapi, uvicorn, cv2, cryptography' 2>$null
 if($LASTEXITCODE){
     & $python -m pip install -r requirements.txt
     if($LASTEXITCODE){throw 'Unable to install workbench dependencies'}

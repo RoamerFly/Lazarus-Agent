@@ -5,10 +5,32 @@ param(
     [string]$Sdk = 'E:\Software\Android-Tool\Sdk',
     [string]$Lab = 'E:\Agent\android-reviver-lab',
     [switch]$Window,
-    [switch]$ResetBench
+    [switch]$ResetBench,
+    [switch]$DryRun
 )
 $ErrorActionPreference='Stop'
+function Use-AsciiPath([string]$OriginalPath, [switch]$CreateTarget) {
+    # emulator.exe still rejects SDK, AVD and image paths containing non-ASCII
+    # characters on some Windows builds. A stable local junction keeps a
+    # portable resource pack usable when it was extracted under a Chinese path.
+    $OriginalPath=[IO.Path]::GetFullPath($OriginalPath)
+    if ($CreateTarget) { New-Item -ItemType Directory -Force -Path $OriginalPath | Out-Null }
+    if ($OriginalPath -cmatch '^[\x00-\x7F]+$') { return $OriginalPath }
+    $temp=[IO.Path]::GetTempPath()
+    if ($temp -cnotmatch '^[\x00-\x7F]+$') { throw 'Android emulator needs an ASCII temporary directory; set TEMP/TMP to an ASCII path before starting verification.' }
+    $bytes=[Text.Encoding]::UTF8.GetBytes($OriginalPath)
+    $hash=([Security.Cryptography.SHA256]::Create().ComputeHash($bytes) | ForEach-Object { $_.ToString('x2') }) -join ''
+    $bridgeRoot=Join-Path $temp 'Lazarus-Agent-sdk-links'
+    $bridge=Join-Path $bridgeRoot $hash.Substring(0,16)
+    if (-not (Test-Path -LiteralPath $bridge)) {
+        New-Item -ItemType Directory -Force -Path $bridgeRoot | Out-Null
+        New-Item -ItemType Junction -Path $bridge -Target $OriginalPath | Out-Null
+    }
+    return $bridge
+}
 if ($Port % 2) { throw 'Use an even emulator console port' }
+$Sdk=Use-AsciiPath $Sdk
+$Lab=Use-AsciiPath $Lab -CreateTarget
 $emulator=Join-Path $Sdk 'emulator\emulator.exe'
 $adb=Join-Path $Sdk 'platform-tools\adb.exe'
 if ((& $adb devices) -match "^emulator-$Port\s") { throw "Port $Port already has an emulator" }
@@ -53,6 +75,10 @@ $env:ANDROID_HOME=$Sdk
 $env:Path="$(Join-Path $Sdk 'platform-tools');$env:Path"
 $arguments=@('-avd',$Name,'-port',$Port,'-no-boot-anim','-no-snapshot','-gpu','software')
 if ($ResetBench) { $arguments+='-wipe-data' }
+if ($DryRun) {
+    [Console]::Out.WriteLine(([PSCustomObject]@{Sdk=$Sdk;Lab=$Lab;AvdHome=$avd;Profile=$profile;Image=$image;Api=$Api;Name=$Name;Port=$Port;Architecture=$abi;Tag=$tag} | ConvertTo-Json -Compress))
+    exit 0
+}
 $style='Normal'
 if (-not $Window) { $arguments+=@('-no-window','-no-audio'); $style='Hidden' }
 $process=Start-Process $emulator -ArgumentList $arguments -WindowStyle $style -PassThru -RedirectStandardOutput "$Lab\$Name.stdout" -RedirectStandardError "$Lab\$Name.stderr"

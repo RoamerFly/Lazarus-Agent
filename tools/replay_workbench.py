@@ -15,6 +15,10 @@ from urllib.request import Request, urlopen
 
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from storage_paths import jobs_dir
+
 ARCHIVE_TASK = {"tap": "Open archived record", "expect": "Read OK: HTTP/1.1"}
 
 
@@ -116,7 +120,7 @@ def replay(case, api, port, directory):
     if case=="pacific":
         from verify_pacific_trial import audit_web
         require(report.get("export") and report.get("training"), "Training did not pass; see report.json")
-        jobs=Path(os.environ.get("REVIVER_JOBS",str(Path(os.environ["LOCALAPPDATA"])/"LegacyApkReviver/jobs")))
+        jobs=jobs_dir()
         name=report["training"]["evidence_folder"]
         require(re.fullmatch(r"[a-f0-9]{32}",job["id"]) and re.fullmatch(r"training-[a-f0-9]{10}",name),
                 "Unexpected training evidence path")
@@ -176,7 +180,7 @@ def replay(case, api, port, directory):
 
 def collect_share_evidence(report,directory):
     """Keep the screenshots, UI dump and crash trace beside this local acceptance report."""
-    jobs=Path(os.environ.get("REVIVER_JOBS",str(Path(os.environ["LOCALAPPDATA"])/"LegacyApkReviver/jobs")))
+    jobs=jobs_dir()
     require(re.fullmatch(r"[0-9a-f]{32}",report["id"]), "Unexpected job ID")
     probe=report["tests"][-1]["functional_test"]["evidence_folder"]
     require(re.fullmatch(r"probe-[0-9a-f]{10}",probe),"Unexpected evidence folder")

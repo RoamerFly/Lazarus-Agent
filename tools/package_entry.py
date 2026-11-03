@@ -29,14 +29,15 @@ def build():
         root=Path(temp)
         repo=root/"source";repo.mkdir()
         kit=root/"entry";kit.mkdir()
-        for filename in ("workbench.py","bench_device.py","diagnose.py","reviver.py","model_advisor.py",
-                         "runtime_patch.py","function_probe.py","game_probe.py","asset_native_repair.py","native_elf.py","arm_crt_pic.py","requirements.txt","start_workbench.ps1",
-                         "运行指南.md","初赛复核说明.md",".gitignore","old_apk/OI-Notepad-1.3.apk","old_apk/样本来源与校验.md"):
-            copy_file(ROOT/filename,repo/filename)
-        for directory in ("tools","fixtures","web","artifacts/candidates"):
-            for p in (ROOT/directory).rglob("*"):
-                if p.is_file() and p.name!="native-proxy-repaired.apk" and "__pycache__" not in p.parts and p.suffix in {".py",".java",".xml",".apk",".html",".css",".js",".md",".txt",".ps1"}:
-                    copy_file(p,repo/p.relative_to(ROOT))
+        # Use the public source inventory so new runtime modules and build
+        # helpers cannot disappear from the competition snapshot.
+        for name in git(ROOT,"ls-files","-z").decode("utf-8").split("\0"):
+            if name:
+                copy_file(ROOT/name,repo/name)
+        copy_file(ROOT/"old_apk/OI-Notepad-1.3.apk",repo/"old_apk/OI-Notepad-1.3.apk")
+        for p in (ROOT/"artifacts/candidates").iterdir():
+            if p.is_file() and p.suffix in {".txt",".md",".apk"}:
+                copy_file(p,repo/p.relative_to(ROOT))
         for folder in (ROOT/"evidence").iterdir():
             if folder.is_file() and folder.name in {"legacy-preview.json","android16-device.json"}:
                 copy_file(folder,repo/folder.relative_to(ROOT))
@@ -70,7 +71,7 @@ def build():
             p.write_text(t,encoding="utf-8")
         zip_tree(repo,kit/"F01-源代码.zip")
         git(repo,"init","-b","main")
-        git(repo,"-c","core.autocrlf=false","add","-A")
+        git(repo,"-c","core.autocrlf=false","add","--force",".")
         git(repo,"-c","user.name=APK Reviver","-c","user.email=build@localhost",
             "-c","commit.gpgSign=false","commit","-m","F01 offline review snapshot")
         git(repo,"bundle","create",str(kit/"F01-源代码.bundle"),"--all")
@@ -82,6 +83,7 @@ def build():
             copy_file(OUT/filename,kit/filename)
         for filename in ("初赛复核说明.md","运行指南.md"):
             copy_file(ROOT/filename,kit/filename)
+        copy_file(ROOT/"dist/Lazarus-Agent.exe",kit/"Windows桌面版/Lazarus-Agent.exe")
         for p in (ROOT/"artifacts/candidates").iterdir():
             if p.suffix in {".txt",".md",".apk"}:copy_file(p,kit/"可分发样本"/p.name)
         copy_file(ROOT/"evidence/peer-web/archive-broken-api35-download.apk",kit/"可分发样本/团队归档读取器-修复版-api35.apk")
