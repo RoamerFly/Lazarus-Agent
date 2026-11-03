@@ -35,6 +35,9 @@ def build():
             if name:
                 copy_file(ROOT/name,repo/name)
         copy_file(ROOT/"old_apk/OI-Notepad-1.3.apk",repo/"old_apk/OI-Notepad-1.3.apk")
+        for p in (ROOT/"artifacts/candidates").iterdir():
+            if p.is_file() and p.suffix in {".txt",".md",".apk"}:
+                copy_file(p,repo/p.relative_to(ROOT))
         for folder in (ROOT/"evidence").iterdir():
             if folder.is_file() and folder.name in {"legacy-preview.json","android16-device.json"}:
                 copy_file(folder,repo/folder.relative_to(ROOT))
