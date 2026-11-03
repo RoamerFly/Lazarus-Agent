@@ -13,6 +13,8 @@ import tempfile
 from zipfile import ZipFile
 
 from native_elf import elf_uses_textrel, library_member
+from offline_kit import discover_java_home, java_environment
+from storage_paths import configure_environment
 
 INSTALL_FLOOR = {34: 23, 35: 24, 36: 24}
 ANDROID_TARGET_SDK = 0x01010270
@@ -62,8 +64,23 @@ def run(command, env=None, cwd=None):
     return proc.stdout
 
 
+def _signing_home() -> Path:
+    """Use the existing normal-install key, never export it to portable data."""
+    paths = configure_environment()
+    home = paths.data / "signing"
+    legacy_root = os.environ.get("LOCALAPPDATA", "").strip()
+    legacy = Path(legacy_root) / "LegacyApkReviver" / "signing" if legacy_root else None
+    storage_explicit = bool(os.environ.get("LAZARUS_STORAGE_ROOT") or os.environ.get("LAZARUS_PORTABLE") or os.environ.get("LAZARUS_PORTABLE_ROOT"))
+    # Upgrading the normal desktop install keeps its established signing
+    # identity.  Portable/explicit storage creates a separate identity rather
+    # than exporting a user's private key into the portable package.
+    if not storage_explicit and legacy and (legacy / "lab.p12").is_file() and (legacy / "lab.pass").is_file():
+        return legacy
+    return home
+
+
 def test_key(env):
-    home = Path(env["LOCALAPPDATA"]) / "LegacyApkReviver" / "signing"
+    home = _signing_home()
     home.mkdir(parents=True, exist_ok=True)
     key, password = home/"lab.p12", home/"lab.pass"
     if not password.exists():
@@ -71,10 +88,23 @@ def test_key(env):
             f.write(secrets.token_urlsafe(32))
     env["REVIVER_KEYPASS"] = password.read_text(encoding="ascii")
     if not key.exists():
-        run(["keytool", "-genkeypair", "-storetype", "PKCS12", "-keystore", key,
+        java_home = discover_java_home()
+        keytool = java_home / "bin" / "keytool.exe" if java_home else "keytool"
+        run([keytool, "-genkeypair", "-storetype", "PKCS12", "-keystore", key,
              "-storepass:env", "REVIVER_KEYPASS", "-alias", "reviver", "-keyalg", "RSA",
              "-keysize", "3072", "-validity", "3650", "-dname", "CN=Legacy APK Reviver Local Test"], env)
     return key
+
+
+def _tool_temp_root() -> Path:
+    """Return a Windows tool-safe staging path (aapt/zipalign reject Unicode paths)."""
+    candidates = [os.environ.get("REVIVER_TOOL_TEMP", ""), os.environ.get("TEMP", ""), r"C:\Temp"]
+    for candidate in candidates:
+        if candidate and candidate.isascii():
+            root = Path(candidate) / "Lazarus-Agent-work"
+            root.mkdir(parents=True, exist_ok=True)
+            return root
+    raise RuntimeError("Android build tools require an ASCII TEMP path; set REVIVER_TOOL_TEMP to an ASCII directory")
 
 
 def repair(source, output, api, tools, rule="installation-floor", remove_abis=(), modernize_crt=False):
@@ -97,7 +127,9 @@ def repair(source, output, api, tools, rule="installation-floor", remove_abis=()
     if any(not re.fullmatch(r"[A-Za-z0-9_.+-]+", abi) for abi in remove_abis):
         raise ValueError("Invalid ABI name")
     output.parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(dir=output.parent) as directory:
+    # Keep the transient unsigned/aligned paths ASCII even when the user chose
+    # an APK from a Chinese folder.  Python handles the final rename itself.
+    with tempfile.TemporaryDirectory(dir=_tool_temp_root()) as directory:
         work = Path(directory)
         unsigned, aligned, signed = [work/name for name in ("unsigned.apk","aligned.apk","signed.apk")]
         with ZipFile(source) as src:
@@ -197,14 +229,27 @@ def repair(source, output, api, tools, rule="installation-floor", remove_abis=()
                         with src.open(item) as a, dst.open(item,"w") as b:
                             shutil.copyfileobj(a,b)
         run([(tools/"zipalign.exe").resolve(), "-p", "4", unsigned.name, aligned.name],cwd=work)
-        env = os.environ.copy()
+        env = java_environment(os.environ.copy())
         key = test_key(env)
-        signer = ["java","-jar",tools/"lib/apksigner.jar"]
+        java_home = discover_java_home()
+        java = java_home / "bin" / "java.exe" if java_home else "java"
+        signer = [java,"-jar",tools/"lib/apksigner.jar"]
         run(signer+["sign","--ks", key, "--ks-pass","env:REVIVER_KEYPASS","--out",signed,aligned],env)
-        run(signer+["verify","--min-sdk-version",str(api),"--verbose", signed])
+        run(signer+["verify","--min-sdk-version",str(api),"--verbose", signed],env)
         with signed.open("rb") as f:
             digest = hashlib.file_digest(f,"sha256").hexdigest()
-        signed.rename(output)
+        # Signing tools need an ASCII path, which may be on a different drive
+        # from a portable job. Publish only a complete, hash-checked copy.
+        with tempfile.TemporaryDirectory(dir=output.parent) as staging:
+            staged=Path(staging)/"verified.apk"
+            shutil.copyfile(signed,staged)
+            with staged.open("rb") as f:
+                if hashlib.file_digest(f,"sha256").hexdigest()!=digest:
+                    raise ValueError("复制后的候选 APK 哈希不一致")
+            if os.name=="nt":
+                staged.rename(output)
+            else:
+                os.link(staged,output)
     label=rules[0] if len(rules)==1 else "+".join(rules)
     return {"rule":label, "rules":list(rules), "api":api, **changes,
             "candidate":str(output),"sha256":digest,"runtime":"not-tested"}

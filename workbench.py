@@ -22,10 +22,12 @@ from function_probe import probe
 from reviver import INSTALL_FLOOR, repair, run
 from tools.note_smoke import exercise
 from repair_history import add_message, archive_version, record_feedback
+from compatibility_matrix import finish_matrix, new_matrix, normalize_targets, set_row
+from storage_paths import jobs_dir
 
 OI_HASH="3c5f3ebcbbae199a403304e195b63f29198729467d7900f85c28a18be9695539"
 PACIFIC_HASH="9697bb72668ec713bca647b26878210df30c76d65cc7a927d4a1a844591c8180"
-STORAGE=Path(os.environ.get("REVIVER_JOBS",str(Path(os.environ["LOCALAPPDATA"])/"LegacyApkReviver/jobs")))
+STORAGE=jobs_dir()
 STORAGE.mkdir(parents=True,exist_ok=True)
 TOKEN=secrets.token_urlsafe(32)
 INSTANCE=uuid.uuid4().hex
@@ -343,6 +345,93 @@ def work(folder,action):
             state["tests"][-1]["functional_test"]=value
             log(value["message"])
             return value
+        def verify_selected_targets(path,export):
+            """Install one immutable candidate into every explicitly selected API.
+
+            The repair above is deliberately performed once for the job's
+            selected API.  This phase never rebuilds it for a lower API: every
+            row proves the hash that will actually be exported.
+            """
+            nonlocal api, serial, abis
+            matrix=state.get("compatibility")
+            targets=matrix.get("targets") if isinstance(matrix,dict) else None
+            if not matrix or not targets:
+                return True
+            with path.open("rb") as artifact_file:
+                digest=hashlib.file_digest(artifact_file,"sha256").hexdigest()
+            log("开始对同一候选包逐个执行所选 Android 版本的全新安装、启动与功能复测")
+            for target_api in targets:
+                set_row(matrix,target_api,status="running")
+                save(folder,state)
+                try:
+                    serial=device.ensure(folder.name,target_api,log,facts["native_abis"])
+                    api=target_api
+                    abis=shell(serial,"getprop","ro.product.cpu.abilist").split(",")
+                    result=attempt(path,f"修复包（Android {target_api-20}）")
+                    result["matrix_api"]=target_api
+                    launch=result.get("launch",{})
+                    if (result["install"]["exit"] or launch.get("exit")!=0 or
+                            "Status: ok" not in launch.get("output","") or
+                            result.get("runtime",{}).get("missing_library") or
+                            result.get("runtime",{}).get("native_crash")):
+                        raise ValueError("默认安装或启动未通过")
+                    functional=None
+                    verification_level="仅启动验证"
+                    if state.get("task"):
+                        functional=scenario()
+                        if functional.get("result")!="passed" or functional.get("native_crash"):
+                            raise ValueError("指定功能复测未通过")
+                        verification_level="指定功能已验证"
+                    elif facts["sha256"]==OI_HASH:
+                        smoke_dir=folder/("matrix-smoke-"+uuid.uuid4().hex[:10])
+                        exercise(str(ADB),serial,smoke_dir)
+                        functional=json.loads((smoke_dir/"result.json").read_text())
+                        if functional.get("installed_sha256")!=digest:
+                            raise ValueError("笔记功能复测中的设备 APK 哈希不符")
+                        verification_level="笔记功能已验证"
+                    elif target_api==36 and facts["sha256"]==PACIFIC_HASH:
+                        from game_probe import exercise_game
+                        trial_dir=folder/("matrix-training-"+uuid.uuid4().hex[:10])
+                        functional=exercise_game(serial,facts["package"],trial_dir,log)
+                        if runtime_evidence().get("native_crash"):
+                            raise ValueError("训练功能复测中目标应用发生原生崩溃")
+                        verification_level="生涯训练功能已验证"
+                    elif launch.get("focused_package")!=facts["package"]:
+                        raise ValueError("未确认目标应用进入前台")
+                    installed=shell(serial,"pm","path",facts["package"]).splitlines()
+                    if len(installed)!=1 or not re.fullmatch(r"package:/data/app/[\w./=+~-]+/base\.apk",installed[0]):
+                        raise ValueError("无法确认设备上的独立 APK 路径")
+                    installed_hash=shell(serial,"sha256sum","'"+installed[0].removeprefix("package:")+"'",timeout=120).split()[0]
+                    if installed_hash!=digest:
+                        raise ValueError("设备上的 APK 哈希与候选文件不符")
+                    details=shell(serial,"dumpsys","package",facts["package"])
+                    chosen=re.search(r"(?m)^\s*primaryCpuAbi=(\S+)",details)
+                    verified_environment={
+                        "sdk":target_api,"supported_abis":abis,
+                        "primary_cpu_abi":chosen.group(1) if chosen and chosen.group(1)!="null" else None,
+                        "type":"redroid-arm-lab" if serial==ARM_LAB else "android-emulator"}
+                    set_row(matrix,target_api,status="passed",candidate=result,functional=functional,
+                            verification_level=verification_level,installed_sha256=installed_hash,
+                            verified_environment=verified_environment)
+                    log(f"Android {target_api-20} 已以相同哈希完成复测")
+                except Exception as exc:
+                    message=str(exc)[:1200]
+                    unavailable="缺少 API" in message and "模拟器镜像" in message
+                    set_row(matrix,target_api,status="unavailable" if unavailable else "failed",failure=message)
+                    log(f"Android {target_api-20} 复测未通过：{message}")
+                finally:
+                    save(folder,state)
+            passed=finish_matrix(matrix,export)
+            if passed:
+                # This is redundant with compatibility.targets by design: it
+                # keeps downloaded reports intelligible to older clients.
+                export["verified_targets"]=targets.copy()
+                log("所有选定 Android 版本均已验证，可导出同一候选包")
+            else:
+                state["export"]=None
+                log("存在未通过或不可用的目标环境；不导出候选包")
+            save(folder,state)
+            return passed
         if action=="candidate":
             if not modified.exists():
                 raise ValueError("此任务还没有候选包")
@@ -544,18 +633,36 @@ def work(folder,action):
                         raise ValueError("设备上的 APK 哈希与导出文件不符")
                     details=shell(serial,"dumpsys","package",facts["package"])
                     chosen=re.search(r"(?m)^\s*primaryCpuAbi=(\S+)",details)
-                    state["export"]={"file":path.name,"level":level,"sha256":digest,
+                    proposal={"file":path.name,"level":level,"sha256":digest,
                                      "installed_sha256":installed_hash,"verified_environment":{
                                          "sdk":result["api"],"supported_abis":abis,
                                          "primary_cpu_abi":chosen.group(1) if chosen and chosen.group(1)!="null" else None,
                                          "type":"redroid-arm-lab" if serial==ARM_LAB else "android-emulator"},
                                      "signer_certificates_sha256":signing_fingerprints(path,api)}
+                    if not verify_selected_targets(path,proposal):
+                        raise ValueError("所选 Android 版本未全部通过复测，候选包未导出")
+                    state["export"]=proposal
                     if state.get("native_candidate",{}).get("sha256")==digest:
                         state.pop("native_candidate",None)
                     log(level)
+        matrix=state.get("compatibility")
+        if action=="repair" and matrix and matrix["status"]=="running" and not state.get("export"):
+            raise ValueError("主目标未产生可复测的 APK，无法确认所选范围")
         state["status"]="ready"
     except Exception as exc:
         state["status"]="error"
+        matrix=state.get("compatibility")
+        if isinstance(matrix,dict) and matrix.get("status")=="running":
+            # A primary build/verification failure means no immutable artifact
+            # existed to test on the remaining environments.  Preserve that
+            # fact as a failed matrix rather than leaving a misleading spinner.
+            finish_matrix(matrix,None)
+            for row in matrix["rows"]:
+                if row["status"] in ("pending","running"):
+                    if row["api"]==state["api"]:
+                        set_row(matrix,row["api"],status="failed",failure=str(exc)[:600])
+                    else:
+                        set_row(matrix,row["api"],status="skipped",failure="主目标未产生可验证的文件")
         log(str(exc)[:1200])
     finally:
         try:
@@ -585,6 +692,7 @@ def begin(job:str,action:str,body:dict|None=None):
     if not operation.acquire(blocking=False):
         raise HTTPException(409,"另一项设备操作正在进行")
     try:
+        body=dict(body or {})
         state=read(folder)
         state.pop("attempt_feedback",None)
         if action=="retry":
@@ -593,23 +701,35 @@ def begin(job:str,action:str,body:dict|None=None):
                 raise HTTPException(400,"请先反馈要继续修复的问题")
             action="repair"
             state["attempt_feedback"]=issue["id"]
-            if not (body or {}).get("task"):
-                body={"task":issue.get("task")}
+            if not body.get("task"):
+                body["task"]=issue.get("task")
             add_message(state,"assistant","开始按本次反馈重新诊断和验证。",feedback_id=issue["id"])
         if action=="repair":
             archive_version(folder,state)
-            task=(body or {}).get("task")
+            task=body.get("task")
             if task is not None and (not isinstance(task,dict) or
                     not all(isinstance(task.get(k),str) and 0<len(task[k])<=120 for k in ("tap","expect"))):
                 raise HTTPException(400,"请同时填写控件文案与预期内容")
             state["task"]=task
             state["export"]=None
+            if "targets" in body:
+                try:
+                    targets=normalize_targets(body["targets"],INSTALL_FLOOR,state["api"])
+                except ValueError as exc:
+                    raise HTTPException(422,str(exc)) from exc
+                if max(targets)!=state["api"]:
+                    raise HTTPException(422,"多目标验证的最高 Android API 必须与当前任务目标一致；请先切换目标版本")
+                state["compatibility"]=new_matrix(targets,state["api"])
+            else:
+                # Absence, unlike an empty array, means legacy one-target
+                # behavior and keeps existing API clients compatible.
+                state.pop("compatibility",None)
             for key in ("training","acceptance","candidate_diagnosis"):
                 state.pop(key,None)
         state.update(status="running",action=action,worker=INSTANCE)
         save(folder,state)
         threading.Thread(target=work,args=(folder,action),daemon=True).start()
-        return {"started":True}
+        return {"started":True,"targets":state.get("compatibility",{}).get("targets",[state["api"]])}
     except Exception:
         operation.release()
         raise
@@ -671,5 +791,10 @@ def download(job:str,kind:str):
         raise HTTPException(409,"尚未验证可导出的安装包")
     return FileResponse(folder/state["export"]["file"],filename=f"{state['package']['package']}-api{state['api']}.apk")
 
+
+from app_additions import install_routes
+from updates_router import router as updates_router
+app.include_router(updates_router)
+install_routes(app,lambda job: read(job_dir(job)))
 
 app.mount("/",StaticFiles(directory=ROOT/"web",html=True),name="web")

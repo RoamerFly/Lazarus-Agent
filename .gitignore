@@ -19,4 +19,6 @@ __pycache__/
 *.keystore
 *.pem
 *.key
+!update/
+!update/lazarus-update-public.pem
 fixtures/native-proxy/native-proxy-repaired.apk

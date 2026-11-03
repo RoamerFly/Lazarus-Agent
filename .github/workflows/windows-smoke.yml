@@ -1,0 +1,36 @@
+name: Windows smoke
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test-and-package:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Set isolated CI storage
+        shell: pwsh
+        run: '"LAZARUS_STORAGE_ROOT=$env:RUNNER_TEMP\lazarus-agent-smoke" >> $env:GITHUB_ENV'
+      - name: Install test and packaging dependencies
+        run: python -m pip install --upgrade pip; python -m pip install -r requirements.txt pyinstaller
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Build Windows desktop executable
+        shell: pwsh
+        run: .\build_desktop.ps1
+      - name: Smoke test packaged executable
+        shell: pwsh
+        run: |
+          $process = Start-Process -FilePath .\dist\Lazarus-Agent.exe -ArgumentList '--self-test' -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw "桌面程序自检失败，退出码：$($process.ExitCode)" }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Lazarus-Agent-windows-smoke
+          path: dist/Lazarus-Agent.exe
+          if-no-files-found: error
+          retention-days: 7
