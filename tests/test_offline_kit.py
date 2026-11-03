@@ -13,7 +13,7 @@ import reviver
 class OfflineKitTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory()
-        self.root = Path(self.temp.name)
+        self.root = Path(self.temp.name).resolve()
         self.sdk = self.root / "sdk"
         self.images = self.root / "images"
         self.java = self.root / "java"

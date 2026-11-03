@@ -8,13 +8,14 @@
   let latest = null;
   let polling = null;
   let jobId = null;
+  let tokenPromise = null;
   dialog.innerHTML = `
     <form method="dialog" class="about-card">
       <button class="about-close" aria-label="关闭" value="close">×</button>
       <p class="eyebrow">LAZARUS AGENT</p><h2>关于与更新</h2>
       <p id="aboutVersion">正在读取版本信息…</p>
       <p class="about-copy">遗留 Android 软件复活智能体。本地优先处理 APK，修复结果仍需在目标设备上复测。</p>
-      <p id="developerLine" class="about-copy"></p>
+      <p class="about-copy">开发者：<a id="developerLink" href="#">RoamerFly</a></p>
       <div class="about-actions">
         <button id="checkUpdates" type="button">检查更新</button>
         <button id="downloadUpdate" type="button" hidden>下载已验证更新</button>
@@ -33,8 +34,17 @@
   const ignore = dialog.querySelector("#ignoreUpdate");
   const setStatus = (text) => { status.textContent = text; };
   const external = (url) => window.open(url, "_blank", "noopener,noreferrer");
+  const token = async () => {
+    if (!tokenPromise) tokenPromise = fetch("/api/config").then(async (response) => {
+      const info = await response.json();
+      if (!response.ok || !info.token) throw new Error("无法取得本地工作台授权令牌。");
+      return info.token;
+    });
+    return tokenPromise;
+  };
   const request = async (path, options = {}) => {
-    const response = await fetch(`${api}${path}`, { method: "POST", ...options });
+    const headers = { ...(options.headers || {}), "x-reviver-token": await token() };
+    const response = await fetch(`${api}${path}`, { method: "POST", ...options, headers });
     const body = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(body.detail || "操作失败，请稍后重试。");
     return body;
@@ -47,7 +57,9 @@
     const info = await response.json();
     if (!response.ok) throw new Error(info.detail || "读取版本失败。");
     dialog.querySelector("#aboutVersion").textContent = `当前版本 v${info.version} · ${info.platform}`;
-    dialog.querySelector("#developerLine").textContent = `开发者：${info.developer}`;
+    const developer = dialog.querySelector("#developerLink");
+    developer.textContent = info.developer;
+    developer.onclick = (event) => { event.preventDefault(); external(info.developer_url); };
     dialog.querySelector("#projectLink").onclick = (event) => { event.preventDefault(); external(info.repository_url); };
     dialog.querySelector("#issuesLink").onclick = (event) => { event.preventDefault(); external(info.issues_url); };
   }

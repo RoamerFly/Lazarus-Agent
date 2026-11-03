@@ -4,9 +4,13 @@ Windows 桌面版「遗留软件复活智能体」。导入旧 APK，选择 Andr
 
 ## 启动
 
-从 [Releases](https://github.com/RoamerFly/Lazarus-Agent/releases) 下载 Lazarus-Agent.exe。桌面程序自带 Python 和 Web 服务，用 Microsoft Edge 的独立应用窗口显示界面。运行 APK 或生成修复包还需要 Android SDK、对应的模拟器镜像和 JDK。启动后点击“修复记录”可恢复历史任务。
+从 [Releases](https://github.com/RoamerFly/Lazarus-Agent/releases) 下载 Lazarus-Agent.exe。桌面程序自带 Python 和 Web 服务，用 Microsoft Edge 的独立应用窗口显示界面。首次运行 APK 时，工作台检查 Android SDK、Java 和所选系统镜像，优先复用本机已有资源；需要联网时在你同意发布方条款后，从官方来源仅下载所缺组件。下载可取消，应用更新不会重新打包镜像。启动后点击“修复记录”可恢复历史任务。
 
 设置 `REVIVER_SDK` 指向 Android SDK 根目录（包括 platform-tools、emulator、build-tools），按需设置 `REVIVER_BUILD_TOOLS`、`REVIVER_LAB`。默认本地端口为 8767，可通过 `REVIVER_PORT` 调整。任务数据位于 `%LOCALAPPDATA%\LegacyApkReviver\jobs`。初次使用前见[运行指南](运行指南.md)。若桌面版与旧网页服务使用同一端口，请先退出旧服务。
+
+## 轻量安装与按需准备
+
+普通用户只需下载一个 Windows 安装器或便携 ZIP。安装器和便携 ZIP 是两种交付方式，任选其一。选择目标 Android 版本后会检查环境；未选择的系统镜像不会随安装器下载。工具按发布方摘要校验、在暂存目录完整解压后发布，成功安装的压缩包会被移除。需要离线现场演示时，可提前在同一台设备上准备相应版本，或由 SDK 许可持有人按 [离线资源说明](OFFLINE_LAB.md) 自行组装可选资源包。
 
 ## 同一份 APK 的多版本验证
 

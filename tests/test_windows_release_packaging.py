@@ -13,8 +13,12 @@ class WindowsReleasePackagingTests(unittest.TestCase):
         self.assertIn('InstallDir "$LOCALAPPDATA\\Programs\\Lazarus Agent"', script)
         self.assertIn("SilentInstall normal", script)
         self.assertIn("SilentUnInstall normal", script)
-        self.assertNotIn("RMDir /r", script)
-        self.assertNotIn("Lazarus-Agent\\data", script)
+        self.assertNotIn('RMDir /r "$INSTDIR"', script)
+        self.assertIn('"${DATA_ROOT}\\temp"', script)
+        self.assertIn('"/DELOUTPUT"', script)
+        self.assertIn('StrCmp $DeleteOutput 1', script)
+        self.assertNotIn('"${DATA_ROOT}\\jobs"', script)
+        self.assertIn('"/CLEARCACHE"', script)
 
     def test_release_ci_installs_and_calls_the_known_nsis_compiler(self):
         workflow = (ROOT / ".github" / "workflows" / "release-windows.yml").read_text(encoding="utf-8")

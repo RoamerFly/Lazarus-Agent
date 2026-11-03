@@ -795,6 +795,6 @@ def download(job:str,kind:str):
 from app_additions import install_routes
 from updates_router import router as updates_router
 app.include_router(updates_router)
-install_routes(app,lambda job: read(job_dir(job)))
+install_routes(app,lambda job: read(job_dir(job)),operation)
 
 app.mount("/",StaticFiles(directory=ROOT/"web",html=True),name="web")

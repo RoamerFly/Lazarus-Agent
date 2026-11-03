@@ -9,6 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import threading
@@ -16,7 +17,8 @@ import uuid
 
 from fastapi import APIRouter, HTTPException
 
-from app_version import APP_NAME, APP_VERSION, DEVELOPER_NAME, ISSUES_URL, REPOSITORY_URL
+from app_version import APP_NAME, APP_VERSION, DEVELOPER_NAME, DEVELOPER_URL, ISSUES_URL, REPOSITORY_URL
+from storage_paths import configure_environment
 from updater import (
     DownloadProgress, UpdateCancelled, UpdateError, check_for_update, download_asset,
     ignore_version, ignored_version, preferred_asset_kind, verify_asset_file,
@@ -77,7 +79,7 @@ def _require_manifest():
 
 @router.get("/about")
 def about() -> dict[str, str]:
-    return {"name": APP_NAME, "version": APP_VERSION, "developer": DEVELOPER_NAME,
+    return {"name": APP_NAME, "version": APP_VERSION, "developer": DEVELOPER_NAME, "developer_url": DEVELOPER_URL,
             "repository_url": REPOSITORY_URL, "issues_url": ISSUES_URL,
             "platform": "Windows" if os.name == "nt" else "unsupported"}
 
@@ -172,12 +174,24 @@ def _completed_artifact() -> tuple[object, str, Path]:
 
 @router.post("/install")
 def install() -> dict[str, object]:
-    _, kind, artifact = _completed_artifact()
+    manifest, kind, artifact = _completed_artifact()
     if not getattr(sys, "frozen", False):
         raise HTTPException(status_code=409, detail="开发态不支持覆盖当前 Python 启动器。")
     mode = "installer" if kind == "windows-x64-installer" else "portable"
     if mode == "portable" and kind != "windows-x64-portable-exe":
         raise HTTPException(status_code=400, detail="未知更新包类型。")
-    subprocess.Popen([sys.executable, "--apply-update", "--mode", mode, "--source", str(artifact),
-                      "--target", sys.executable, "--parent-pid", str(os.getpid())], close_fds=True)
+    # A Windows executable remains locked while it is the process image. Run a
+    # trusted byte-for-byte copy from user temp instead, so the original target
+    # can be replaced after this desktop process exits.
+    helper_dir = configure_environment().temp / "update-helper" / uuid.uuid4().hex
+    helper_dir.mkdir(parents=True, exist_ok=False)
+    helper = helper_dir / "Lazarus-Agent-update-helper.exe"
+    shutil.copy2(sys.executable, helper)
+    expected = manifest.assets[kind].sha256
+    try:
+        subprocess.Popen([str(helper), "--apply-update", "--mode", mode, "--source", str(artifact),
+                          "--source-sha256", expected, "--target", sys.executable,
+                          "--parent-pid", str(os.getpid()), "--version", manifest.version], close_fds=True)
+    except OSError as error:
+        raise HTTPException(status_code=500, detail="无法启动独立更新进程。") from error
     return {"started": True, "close_app": True, "message": "请关闭工作台，更新完成后会自动重新启动。"}

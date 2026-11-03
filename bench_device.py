@@ -39,6 +39,30 @@ def _build_tools() -> Path:
 TOOLS = _build_tools()
 
 
+def refresh_toolchain(sdk: Path | None = None) -> dict[str, str]:
+    """Activate a just-prepared controlled SDK without restarting the desktop."""
+    global SDK, ADB, TOOLS
+    if sdk is not None:
+        os.environ["REVIVER_SDK"] = str(sdk)
+    SDK = discover_sdk() or Path(os.environ.get("REVIVER_SDK", r"E:\Software\Android-Tool\Sdk"))
+    ADB = SDK / "platform-tools" / "adb.exe"
+    TOOLS = _build_tools()
+    # These modules historically imported ADB/TOOLS by value. Refresh their
+    # bindings too, otherwise an on-demand runtime would be prepared correctly
+    # but the already-running workbench would continue to call the old SDK.
+    for name in ("workbench", "game_probe", "function_probe", "tools.serve_arm_lab", "tools.replay_workbench"):
+        consumer = sys.modules.get(name)
+        if consumer is None:
+            continue
+        if hasattr(consumer, "ADB"):
+            consumer.ADB = ADB
+        if hasattr(consumer, "TOOLS"):
+            consumer.TOOLS = TOOLS
+        if hasattr(consumer, "SDK"):
+            consumer.SDK = SDK
+    return {"sdk": str(SDK), "adb": str(ADB), "build_tools": str(TOOLS)}
+
+
 def _powershell() -> str:
     """Locate PowerShell even when the portable verification run has no PATH."""
     found = shutil.which("pwsh") or shutil.which("powershell")

@@ -5,9 +5,11 @@ from fastapi import HTTPException
 from assistant_chat import answer_question
 from storage_paths import resolve_storage_paths, jobs_dir
 import bench_device
+from runtime_prepare import RuntimePreparation
 
 
-def install_routes(app, load_job):
+def install_routes(app, load_job, operation_lock=None):
+    runtime = RuntimePreparation(operation_lock)
     def locations():
         storage=resolve_storage_paths()
         return {"root":("存储根",storage.root),"jobs":("任务、证据和各版本 APK",jobs_dir()),
@@ -47,3 +49,18 @@ def install_routes(app, load_job):
     @app.post("/api/jobs/{job}/ask")
     def ask_job(job: str, body: dict):
         return explain(load_job(job), body)
+
+    @app.get("/api/runtime")
+    def runtime_status():
+        return runtime.status()
+
+    @app.post("/api/runtime/prepare")
+    def runtime_prepare(body: dict):
+        try:
+            return runtime.start(body.get("targets"), body.get("accept_terms", False))
+        except (ValueError, PermissionError, RuntimeError) as exc:
+            raise HTTPException(409 if isinstance(exc, RuntimeError) else 400, str(exc)) from exc
+
+    @app.post("/api/runtime/cancel")
+    def runtime_cancel():
+        return runtime.cancel()

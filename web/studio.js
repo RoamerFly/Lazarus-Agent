@@ -1,6 +1,6 @@
 const el=id=>document.getElementById(id);
 let config, job=null, sending=false, screenBusy=false, polling=false;
-let askUi;
+let askUi, runtimeUi;
 function notice(s){el("notice").textContent=s;}
 async function api(url,method="GET",body=null){
   const headers={};
@@ -12,6 +12,12 @@ async function api(url,method="GET",body=null){
   return out;
 }
 function path(end){return "/api/jobs/"+job.id+end;}
+async function ensureRuntime(targets,resume){
+  if(!runtimeUi)return true;
+  const ready=await runtimeUi.ensure(targets,resume);
+  if(!ready)notice("所选版本正在等待本地运行环境；完成后请再次继续。");
+  return ready;
+}
 const labels={"installation-floor":"原包目标级别低于系统安装门槛","native-abi-mismatch":"原生库与设备架构不匹配","requires-newer-platform":"应用需要较新的 Android 版本","native-textrel-blocks-target-upgrade":"原生库含文本重定位，直接提升目标 API 会影响加载"};
 function render(){
   const busy=sending||job?.status==="running";
@@ -83,6 +89,7 @@ async function loadJob(file,demo){
   try{
     const targets=selectedTargets();
     if(!targets.length)throw Error("请至少选择一个目标版本。");
+    if(!await ensureRuntime(targets,()=>loadJob(file,demo)))return;
     job=await api("/api/import/"+Math.max(...targets)+(demo?"?demo=true":""),"POST",file);
     el("message").value="";el("attachment").value="";el("attachmentName").textContent="";
     el("taskTap").value="";el("taskExpect").value="";lastFile=file;isDemo=demo;localStorage.setItem("reviverJob",job.id);el("screen").hidden=true;el("standby").hidden=false;notice("已导入 · Android "+(job.api-20));
@@ -91,6 +98,16 @@ async function loadJob(file,demo){
 el("file").onchange=e=>{if(e.target.files[0])loadJob(e.target.files[0],false);};
 el("demo").onclick=()=>loadJob(null,true);
 el("target").onchange=async()=>{
+  const requested=Number(el("target").value);
+  if(!await ensureRuntime(selectedTargets(),()=>{
+    el("target").value=requested;
+    el("target").dispatchEvent(new Event("change"));
+  })){
+    // The job still points at its old verified target.  Restore the selector
+    // so the user can deliberately select the newly prepared target later.
+    if(job && el("scope").value==="single")el("target").value=job.api;
+    render();return;
+  }
   if(!job || el("scope").value!=="single"){render();return;}
   sending=true;render();
   try{
@@ -109,6 +126,7 @@ document.querySelectorAll("[data-act]").forEach(b=>b.onclick=async()=>{
     if(["repair","retry"].includes(act)){
       const targets=selectedTargets();
       if(!targets.length)throw Error("请至少选择一个目标版本。");
+      if(!await ensureRuntime(targets,()=>b.click()))return;
       const highest=Math.max(...targets);
       if(job.api!==highest){
         if(act==="retry")throw Error("变更目标范围后请点击「修复并验证」，原任务仍保留在修复记录中。");
@@ -130,12 +148,17 @@ el("refresh").onclick=refreshScreen;el("back").onclick=()=>sendInput({event:"bac
 el("send").onclick=()=>sendInput({event:"text",value:el("text").value});
 (async()=>{try{
   config=await api("/api/config");el("engine").textContent=config.model?"模型已配置":"本地规则可用";
-  for(const a of Object.keys(config.targets).map(Number).sort((a,b)=>b-a)){const o=new Option("Android "+(a-20)+(config.targets[a]?"":" · 缺少镜像"),a);o.disabled=!config.targets[a];el("target").add(o);}
+  for(const a of Object.keys(config.targets).map(Number).sort((a,b)=>b-a)){const o=new Option("Android "+(a-20)+(config.targets[a]?"":" · 按需准备"),a);el("target").add(o);}
   el("demo").textContent="示例 · "+(config.demo_label||"旧版记事本");
   if(config.targets[35])el("target").value=35;
   buildScopeControls();
+  runtimeUi=LazarusRuntimePrepare.bind({api,notice});
   bindResources();
   askUi=LazarusAsk.bind({api,getJob:()=>job,notice});
+  // Range/multi-select edits only update the stated validation scope.  A
+  // download begins on a concrete import, target switch, or repair action,
+  // avoiding a premature image download while a checkbox combination is
+  // still being chosen.
   el("scope").onchange=()=>render();
   const old=localStorage.getItem("reviverJob");if(old){try{job=await api("/api/jobs/"+old);restoreScope(job);}catch{localStorage.removeItem("reviverJob");}}
   render();

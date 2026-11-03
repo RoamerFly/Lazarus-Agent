@@ -60,10 +60,12 @@ def discover_sdk() -> Path | None:
     kit = default_kit_root()
     candidates.extend((kit / "android-sdk", kit / "lab-sdk"))
     # Existing controlled runtime is a source for the first kit build.
+    local = os.environ.get("LOCALAPPDATA", "").strip()
+    if local:
+        candidates.append(Path(local) / "Lazarus-Agent" / "runtimes" / "android-lab" / "lab-sdk")
     candidates.append(configure_environment().runtime("android-lab") / "lab-sdk")
-    legacy = os.environ.get("LOCALAPPDATA", "").strip()
-    if legacy:
-        candidates.append(Path(legacy) / "LegacyApkReviver" / "lab-sdk")
+    if local:
+        candidates.append(Path(local) / "LegacyApkReviver" / "lab-sdk")
     candidates.append(Path(r"E:\Software\Android-Tool\Sdk"))
     seen: set[Path] = set()
     for candidate in candidates:
@@ -81,6 +83,10 @@ def discover_java_home() -> Path | None:
     if explicit:
         candidates.append(Path(explicit))
     candidates.append(default_kit_root() / "jre")
+    local = os.environ.get("LOCALAPPDATA", "").strip()
+    if local:
+        candidates.append(Path(local) / "Lazarus-Agent" / "runtimes" / "android-lab" / "java")
+    candidates.append(configure_environment().runtime("android-lab") / "java")
     configured = os.environ.get("JAVA_HOME", "").strip()
     if configured:
         candidates.append(Path(configured))
