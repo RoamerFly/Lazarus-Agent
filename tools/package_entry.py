@@ -68,7 +68,7 @@ def build():
             p.write_text(t,encoding="utf-8")
         zip_tree(repo,kit/"F01-源代码.zip")
         git(repo,"init","-b","main")
-        git(repo,"-c","core.autocrlf=false","add","-A")
+        git(repo,"-c","core.autocrlf=false","add","--force",".")
         git(repo,"-c","user.name=APK Reviver","-c","user.email=build@localhost",
             "-c","commit.gpgSign=false","commit","-m","F01 offline review snapshot")
         git(repo,"bundle","create",str(kit/"F01-源代码.bundle"),"--all")

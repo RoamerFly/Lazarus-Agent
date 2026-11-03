@@ -18,7 +18,7 @@ from tools.prepare_lab import _extract_without_overwrite
 class PrepareLabSafetyTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory()
-        self.root = Path(self.temp.name)
+        self.root = Path(self.temp.name).resolve()
 
     def tearDown(self) -> None:
         self.temp.cleanup()
