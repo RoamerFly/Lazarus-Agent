@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>遗留软件复活智能体 · APK 工作台</title><link rel="stylesheet" href="/studio.css"><script defer src="/studio.js"></script></head>
+<body><header><b>遗留软件复活智能体</b><span>APK 兼容性工作台</span><small id="engine">连接中</small></header>
+<main><section class="upper"><div><p class="eyebrow">ANDROID / COMPATIBILITY LAB</p><h1>旧应用修复工作台</h1><p class="sub">导入安卓安装包，在选定的系统中运行、修复并核对结果。</p></div>
+<div class="import"><div class="row"><label for="target">目标系统</label><select id="target"></select></div><div class="row"><label class="file">选择 APK<input id="file" type="file" accept=".apk"></label><button id="demo">使用旧版记事本</button></div><small id="notice" role="status">请选择安装包</small></div></section>
+<section class="grid"><div class="card"><p class="eyebrow">01 / PACKAGE</p><h2 id="appname">安装包诊断</h2><div id="facts" class="empty">导入后可查看版本、目标级别和签名信息。</div>
+<h3>兼容性判断</h3><div id="issues" class="empty">等待安装包</div><h3>模型与规则</h3><div id="advice" class="muted">运行修复后显示本次诊断依据。</div>
+<details><summary>设置要验证的操作</summary><p>记事本样本默认验证保存与重开。其他应用可填写一个控件和点击后应出现的内容。</p>
+<label>点击控件 <input id="taskTap" maxlength="120" placeholder="控件文字、描述或资源 ID"></label>
+<label>预期内容 <input id="taskExpect" maxlength="120" placeholder="目标页面上的文字或控件 ID"></label></details>
+<div class="buttons"><button data-act="original">直接运行原包</button><button data-act="legacy">查看旧版原貌</button><button class="primary" data-act="repair">修复并验证</button><button data-act="candidate">运行修复包</button></div></div>
+<div class="card device"><div class="sectionhead"><div><p class="eyebrow">02 / PREVIEW</p><h2>安卓设备</h2></div><button id="refresh">刷新画面</button></div>
+<div id="surface"><img id="screen" alt="模拟器实时截图，可点击操作" hidden><div id="standby">运行应用后在此操作</div></div>
+<div class="row controls"><button id="back">返回</button><input id="text" placeholder="英文、数字或空格" maxlength="80"><button id="send">输入</button></div></div>
+<div class="card record"><div class="sectionhead"><div><p class="eyebrow">03 / EVIDENCE</p><h2>运行记录与交付</h2></div><div id="badge">等待任务</div></div>
+<ol id="events"></ol><div class="row exports"><a id="report" hidden>下载诊断报告</a><a id="apk" class="primary" hidden>下载 APK</a><a id="nativeCandidate" hidden>下载试验候选 APK（未验收）</a><span id="verdict"></span></div>
+</div></section></main><footer>重邮GGBond　/　中国电科“网信杯” F01 创意方案</footer></body></html>
