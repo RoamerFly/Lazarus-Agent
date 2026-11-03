@@ -11,6 +11,7 @@ import time
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from bench_device import ADB, ARM_LAB, ARM_PAIRING, LAB
 
+NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 SSH = ["wsl", "-d", "Ubuntu-New", "--exec", "ssh", "-T", "-p", "19237",
        "-i", "/home/fly/reviver-lab/lab-key", "-o", "BatchMode=yes", "-o", "ConnectTimeout=5",
        "-o", "UserKnownHostsFile=/home/fly/reviver-lab/arm64-known-hosts",
@@ -43,19 +44,19 @@ while data:=sock.recv(65536):
 
 
 def guest(script, timeout):
-    return subprocess.run(SSH + ["sudo sh -s"], input=script.encode(), capture_output=True, timeout=timeout)
+    return subprocess.run(SSH + ["sudo sh -s"], input=script.encode(), capture_output=True, timeout=timeout, creationflags=NO_WINDOW)
 
 
 def prepare_guest():
     lab = LAB / "redroid16"
     listeners = subprocess.check_output(["wsl","-d","Ubuntu-New","--exec","ss","-H","-ltn","sport","=",":19237"],
-                                        timeout=30)
+                                        timeout=30, creationflags=NO_WINDOW)
     if not listeners.strip():
         if not all((lab/name).is_file() for name in ("guest-arm64-overlay.qcow2","debian-12-generic-arm64.qcow2","seed.iso")):
             raise RuntimeError("ARM 实验室磁盘尚未配置")
         with (lab/"workbench-vm.log").open("ab") as log:
             subprocess.Popen(["wsl","-d","Ubuntu-New","--cd",str(lab),"--exec","sh","-c",BOOT],
-                             stdin=subprocess.DEVNULL,stdout=log,stderr=log)
+                             stdin=subprocess.DEVNULL,stdout=log,stderr=log,creationflags=NO_WINDOW)
     for _ in range(75):
         if guest("test \"$(uname -m)\" = aarch64", 15).returncode == 0:
             break
@@ -98,7 +99,7 @@ def forward(connection, identity):
               "exec nsenter -t \"$p\" -n python3 -c "+shlex.quote(BRIDGE))
     with connection, subprocess.Popen(SSH + ["sudo sh -c "+shlex.quote(remote)],
                                       stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,
-                                      bufsize=0) as proc:
+                                      bufsize=0,creationflags=NO_WINDOW) as proc:
         def upload():
             try:
                 while data := connection.recv(65536):
@@ -132,7 +133,7 @@ def serve():
         server.bind(("127.0.0.1",19636))
         identity = prepare_guest()
         server.listen(3)
-        subprocess.Popen([str(ADB),"connect",ARM_LAB],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+        subprocess.Popen([str(ADB),"connect",ARM_LAB],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,creationflags=NO_WINDOW)
         while True:
             connection, _ = server.accept()
             threading.Thread(target=forward,args=(connection,identity),daemon=True).start()

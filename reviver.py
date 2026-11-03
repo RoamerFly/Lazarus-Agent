@@ -55,7 +55,8 @@ def update_manifest(data, target):
 
 def run(command, env=None, cwd=None):
     proc = subprocess.run([str(arg) for arg in command], capture_output=True, env=env,
-                          encoding="utf-8", errors="replace", timeout=180, cwd=cwd)
+                          encoding="utf-8", errors="replace", timeout=180, cwd=cwd,
+                          creationflags=getattr(subprocess,"CREATE_NO_WINDOW",0))
     if proc.returncode:
         raise RuntimeError((proc.stderr or proc.stdout).strip())
     return proc.stdout

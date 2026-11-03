@@ -19,7 +19,8 @@ def exercise(adb, serial, output):
     if output.exists():
         raise FileExistsError("Use a new evidence folder")
     def cmd(*parts):
-        return subprocess.check_output([adb,"-s",serial,*parts], timeout=35)
+        return subprocess.check_output([adb,"-s",serial,*parts], timeout=35,
+                                       creationflags=getattr(subprocess,"CREATE_NO_WINDOW",0))
     if not serial.startswith("emulator-") or not cmd("emu","avd","name").startswith(b"Reviver"):
         raise ValueError("Requires a dedicated Reviver lab AVD")
     output.mkdir(parents=True)

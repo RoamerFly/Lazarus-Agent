@@ -43,7 +43,8 @@ def ensure_arm_lab(progress):
         return True
     progress("正在恢复已配对的离线 ARM 实验室，首次启动可能需要数分钟")
     with (ARM_PAIRING.parent/"workbench-relay.log").open("ab") as log:
-        relay=subprocess.Popen([sys.executable, ROOT/"tools/serve_arm_lab.py"],stdin=subprocess.DEVNULL,
+        entry="--serve-arm-lab" if getattr(sys,"frozen",False) else ROOT/"tools/serve_arm_lab.py"
+        relay=subprocess.Popen([sys.executable, entry],stdin=subprocess.DEVNULL,
                                stdout=log,stderr=log,creationflags=subprocess.CREATE_NO_WINDOW)
     deadline=time.monotonic()+1800
     # Another relay can already own the reserved port while Android finishes booting.
@@ -66,7 +67,7 @@ def ensure_arm_lab(progress):
 
 
 def invoke(args,timeout=120):
-    return subprocess.run(list(map(str,args)),capture_output=True,timeout=timeout)
+    return subprocess.run(list(map(str,args)),capture_output=True,timeout=timeout,creationflags=getattr(subprocess,"CREATE_NO_WINDOW",0))
 
 
 def output(proc):
@@ -148,7 +149,7 @@ class Device:
         with tempfile.TemporaryFile() as log:
             proc=subprocess.run(list(map(str,[shutil.which("pwsh") or "powershell","-NoProfile","-File",ROOT/"tools/start_lab.ps1",
                          "-Api",api,"-Name",name,"-Port",PORT[api],"-Sdk",SDK,"-Lab",LAB,"-ResetBench"])),
-                         stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT,timeout=40)
+                         stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT,timeout=40,creationflags=getattr(subprocess,"CREATE_NO_WINDOW",0))
             if proc.returncode:
                 log.seek(0)
                 raise RuntimeError(log.read().decode("utf-8","replace")[-1200:])
