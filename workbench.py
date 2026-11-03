@@ -21,6 +21,7 @@ from model_advisor import advise
 from function_probe import probe
 from reviver import INSTALL_FLOOR, repair, run
 from tools.note_smoke import exercise
+from repair_history import add_message, archive_version, record_feedback
 
 OI_HASH="3c5f3ebcbbae199a403304e195b63f29198729467d7900f85c28a18be9695539"
 PACIFIC_HASH="9697bb72668ec713bca647b26878210df30c76d65cc7a927d4a1a844591c8180"
@@ -115,6 +116,7 @@ def import_package(folder,api):
 @app.get("/api/config")
 def config():
     return {"token":TOKEN,"targets":{str(a):ready(a) for a in INSTALL_FLOOR},"legacy":ready(30),
+            "desktop_protocol":1, "demo_label":"旧版记事本" if (ROOT/"old_apk/OI-Notepad-1.3.apk").is_file() else "归档读取器",
             "model":os.environ.get("REVIVER_MODEL") if os.environ.get("REVIVER_MODEL_URL") else None}
 
 
@@ -126,7 +128,10 @@ async def ingest(api:int,request:Request,demo:bool=False):
     folder.mkdir()
     try:
         if demo:
-            shutil.copyfile(ROOT/"old_apk/OI-Notepad-1.3.apk",folder/"original.apk")
+            source=ROOT/"old_apk/OI-Notepad-1.3.apk"
+            if not source.is_file():
+                source=ROOT/"fixtures/archive-reader/archive-reader-broken.apk"
+            shutil.copyfile(source,folder/"original.apk")
         else:
             size=0
             with (folder/"original.apk").open("xb") as f:
@@ -143,11 +148,67 @@ async def ingest(api:int,request:Request,demo:bool=False):
 
 @app.get("/api/jobs/{job}")
 def status(job:str):
-    state=read(job_dir(job))
+    folder=job_dir(job)
+    state=read(folder)
+    if state.get("export") and not state.get("versions") and operation.acquire(blocking=False):
+        try:
+            state=read(folder)
+            archive_version(folder,state)
+            save(folder,state)
+        finally:
+            operation.release()
     if state["status"]=="running" and state.get("worker")!=INSTANCE:
         state.update(status="error",export=None)
         state["events"].append({"time":now(),"text":"上次执行被工作台重启中断，可重新验证。"})
     return state
+
+
+@app.get("/api/jobs")
+def history():
+    jobs=[]
+    for file in STORAGE.glob("*/state.json"):
+        if not re.fullmatch(r"[0-9a-f]{32}",file.parent.name):
+            continue
+        try:
+            s=read(file.parent)
+            jobs.append({"id":s["id"],"label":s["package"]["label"],"api":s["api"],"created":s["created"],
+                         "updated":s.get("updated",s["created"]),"phone":(s.get("versions") or [{}])[-1].get("phone")})
+        except (OSError,KeyError,ValueError):
+            continue
+    return sorted(jobs,key=lambda j:j["updated"],reverse=True)
+
+
+@app.post("/api/jobs/{job}/feedback")
+def feedback(job:str,body:dict):
+    folder=job_dir(job)
+    if not operation.acquire(blocking=False):
+        raise HTTPException(409,"请等待当前验证结束再记录反馈")
+    try:
+        state=read(folder)
+        archive_version(folder,state)
+        record_feedback(folder,state,body)
+        state["updated"]=now()
+        save(folder,state)
+        return state
+    finally:
+        operation.release()
+
+
+@app.get("/api/jobs/{job}/versions/{number}")
+def version_file(job:str,number:int):
+    folder=job_dir(job)
+    state=read(folder)
+    if not any(v["number"]==number for v in state.get("versions",[])):
+        raise HTTPException(404,"没有这个版本")
+    return FileResponse(folder/"versions"/f"{number}.apk",filename=f"{state['package']['package']}-V{number}.apk")
+
+
+@app.get("/api/jobs/{job}/attachments/{name}")
+def feedback_image(job:str,name:str):
+    folder=job_dir(job)
+    if not re.fullmatch(r"[a-f0-9]{32}\.(?:png|jpg)",name) or not (folder/"attachments"/name).is_file():
+        raise HTTPException(404,"没有这张截图")
+    return FileResponse(folder/"attachments"/name)
 
 
 @app.post("/api/jobs/{job}/target/{api}")
@@ -498,6 +559,19 @@ def work(folder,action):
         log(str(exc)[:1200])
     finally:
         try:
+            if action=="repair":
+                previous=len(state.get("versions",[]))
+                if state.get("export"):
+                    try:
+                        version=archive_version(folder,state)
+                        if previous==len(state["versions"]):
+                            add_message(state,"assistant",f"复测使用的文件与 V{version['number']} 相同，已保留原版本。")
+                    except (ValueError,OSError) as exc:
+                        state.update(status="error",export=None)
+                        add_message(state,"assistant",str(exc))
+                else:
+                    msg=state["events"][-1]["text"] if state["events"] else "未通过验证"
+                    add_message(state,"assistant",f"本轮未产生已验证的新版本。{msg}")
             save(folder,state)
         finally:
             operation.release()
@@ -506,13 +580,24 @@ def work(folder,action):
 @app.post("/api/jobs/{job}/action/{action}")
 def begin(job:str,action:str,body:dict|None=None):
     folder=job_dir(job)
-    if action not in {"original","candidate","legacy","repair"}:
+    if action not in {"original","candidate","legacy","repair","retry"}:
         raise HTTPException(400,"未知操作")
     if not operation.acquire(blocking=False):
         raise HTTPException(409,"另一项设备操作正在进行")
     try:
         state=read(folder)
+        state.pop("attempt_feedback",None)
+        if action=="retry":
+            issue=state.get("pending_feedback")
+            if not issue:
+                raise HTTPException(400,"请先反馈要继续修复的问题")
+            action="repair"
+            state["attempt_feedback"]=issue["id"]
+            if not (body or {}).get("task"):
+                body={"task":issue.get("task")}
+            add_message(state,"assistant","开始按本次反馈重新诊断和验证。",feedback_id=issue["id"])
         if action=="repair":
+            archive_version(folder,state)
             task=(body or {}).get("task")
             if task is not None and (not isinstance(task,dict) or
                     not all(isinstance(task.get(k),str) and 0<len(task[k])<=120 for k in ("tap","expect"))):

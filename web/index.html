@@ -1,18 +1,17 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>遗留软件复活智能体 · APK 工作台</title><link rel="stylesheet" href="/studio.css"><script defer src="/studio.js"></script></head>
-<body><header><b>遗留软件复活智能体</b><span>APK 兼容性工作台</span><small id="engine">连接中</small></header>
-<main><section class="upper"><div><p class="eyebrow">ANDROID / COMPATIBILITY LAB</p><h1>旧应用修复工作台</h1><p class="sub">导入安卓安装包，在选定的系统中运行、修复并核对结果。</p></div>
-<div class="import"><div class="row"><label for="target">目标系统</label><select id="target"></select></div><div class="row"><label class="file">选择 APK<input id="file" type="file" accept=".apk"></label><button id="demo">使用旧版记事本</button></div><small id="notice" role="status">请选择安装包</small></div></section>
-<section class="grid"><div class="card"><p class="eyebrow">01 / PACKAGE</p><h2 id="appname">安装包诊断</h2><div id="facts" class="empty">导入后可查看版本、目标级别和签名信息。</div>
-<h3>兼容性判断</h3><div id="issues" class="empty">等待安装包</div><h3>模型与规则</h3><div id="advice" class="muted">运行修复后显示本次诊断依据。</div>
-<details><summary>设置要验证的操作</summary><p>记事本样本默认验证保存与重开。其他应用可填写一个控件和点击后应出现的内容。</p>
-<label>点击控件 <input id="taskTap" maxlength="120" placeholder="控件文字、描述或资源 ID"></label>
-<label>预期内容 <input id="taskExpect" maxlength="120" placeholder="目标页面上的文字或控件 ID"></label></details>
-<div class="buttons"><button data-act="original">直接运行原包</button><button data-act="legacy">查看旧版原貌</button><button class="primary" data-act="repair">修复并验证</button><button data-act="candidate">运行修复包</button></div></div>
-<div class="card device"><div class="sectionhead"><div><p class="eyebrow">02 / PREVIEW</p><h2>安卓设备</h2></div><button id="refresh">刷新画面</button></div>
-<div id="surface"><img id="screen" alt="模拟器实时截图，可点击操作" hidden><div id="standby">运行应用后在此操作</div></div>
-<div class="row controls"><button id="back">返回</button><input id="text" placeholder="英文、数字或空格" maxlength="80"><button id="send">输入</button></div></div>
-<div class="card record"><div class="sectionhead"><div><p class="eyebrow">03 / EVIDENCE</p><h2>运行记录与交付</h2></div><div id="badge">等待任务</div></div>
-<ol id="events"></ol><div class="row exports"><a id="report" hidden>下载诊断报告</a><a id="apk" class="primary" hidden>下载 APK</a><a id="nativeCandidate" hidden>下载试验候选 APK（未验收）</a><span id="verdict"></span></div>
-</div></section></main><footer>重邮GGBond　/　中国电科“网信杯” F01 创意方案</footer></body></html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lazarus Agent · 遗留软件复活智能体</title><link rel="stylesheet" href="/studio.css"><script defer src="/studio.js"></script></head>
+<body><header><div class="brand"><i class="cube"></i>遗留软件复活智能体</div><nav><button id="home" aria-current="page">工作台</button><button id="history">修复记录</button></nav><small class="edition">F01 <b>/</b> LAZARUS</small></header>
+<main><div class="heading"><div><small>LAZARUS &nbsp;/&nbsp; ANDROID LAB</small><h1>修复工作台</h1></div><span class="online" id="engine">连接中</span></div>
+<dialog id="historyDialog"><div class="row between"><h2>修复记录</h2><button id="closeHistory">关闭</button></div><div id="jobList"></div></dialog>
+<section class="grid"><article class="card"><div class="row between"><div class="row"><i class="apkicon">APK</i><h2 id="appname">导入旧应用</h2></div><label class="file">选择 APK<input id="file" type="file" accept=".apk"></label></div>
+<div class="row target"><label for="target">目标系统</label><select id="target"></select><span id="arch" class="pill">待导入</span></div>
+<div id="surface"><img id="screen" alt="目标设备实时画面" hidden><span class="previewtag">▶ &nbsp;运行预览</span><div id="standby"><span class="screenmark">▣</span><strong>等待运行应用</strong><small>导入 APK 后，在此查看目标设备画面</small></div></div>
+<div class="row controls"><button id="refresh">刷新</button><button id="back">返回</button><input id="text" placeholder="输入英文或数字" maxlength="80"><button id="send">发送至设备</button></div>
+<div class="buttons"><button class="primary" data-act="repair">修复并验证</button><button data-act="original">运行原包</button><button id="demo">使用示例</button></div>
+<small id="notice" role="status">选择一个 APK 开始修复</small><div class="sectionlabel">版本与交付</div><div id="versions" class="stack"><small>通过验证后可在这里下载独立 APK。</small></div>
+<div class="row exports"><a id="apk" class="primary" hidden>下载当前 APK</a><a id="nativeCandidate" hidden>下载试验候选</a></div><small id="verdict"></small></article>
+<article class="card chat"><div class="row"><i class="bot">••</i><h2>修复对话</h2><i class="dot"></i></div><div id="messages" class="messages" aria-live="polite"><div class="bubble">导入旧 APK 后，我会在你选择的 Android 版本上试运行。你可以把真机复测结果和问题截图发在这里。</div></div>
+<div class="quick row"><button id="works">✓ 真机可运行</button><button id="problem">反馈新问题</button><button data-act="retry">继续修复</button></div>
+<div class="composer"><textarea id="message" placeholder="描述问题、复现步骤或真机复测结果…" maxlength="2000"></textarea><div class="row between"><label class="attach">＋ 截图<input type="file" id="attachment" accept="image/png,image/jpeg"></label><span id="attachmentName"></span><select id="feedbackVersion" aria-label="反馈版本"></select><button id="sendMessage" class="primary">发送 ↑</button></div></div>
+<details id="taskDetails"><summary>设置复现步骤</summary><label>点击控件<input id="taskTap" maxlength="120" placeholder="按钮文字或资源 ID"></label><label>预期结果<input id="taskExpect" maxlength="120" placeholder="点击后应该出现的内容"></label></details></article>
+<details class="card diagnostics"><summary>运行记录与诊断 <span id="badge">等待任务</span></summary><h3>安装包信息</h3><div id="facts"></div><h3>兼容性判断</h3><div id="issues"></div><p id="advice"></p><ol id="events"></ol><div class="buttons"><a id="report" hidden>下载诊断报告</a><button data-act="legacy">查看旧版原貌</button><button data-act="candidate">运行修复包</button></div></details></section></main><footer>重邮 GGBond &nbsp;·&nbsp; 电科网信杯 F01</footer></body></html>

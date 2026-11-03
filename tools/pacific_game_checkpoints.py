@@ -4,12 +4,13 @@ Run directly with Python, OpenCV and NumPy to replay the reference and control f
 The images are test inputs. Device validation must call locate() on live screenshots.
 """
 from pathlib import Path
+import os
 
 import cv2
 import numpy as np
 
 
-ROOT = Path(__file__).resolve().parents[1] / "evidence" / "pacific-rim"
+ROOT = Path(os.environ.get("REVIVER_GAME_REFERENCES", Path(__file__).resolve().parents[1] / "evidence" / "pacific-rim"))
 REF = ROOT / "pic-trial"
 STAGES = {
     "intro": ("api30-screen.png", [(185, 301, 1096, 374), (307, 238, 970, 262)]),

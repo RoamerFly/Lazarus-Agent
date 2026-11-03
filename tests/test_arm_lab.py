@@ -38,7 +38,10 @@ class ArmLabTests(unittest.TestCase):
     def test_compatibility_notice_with_shifted_window(self):
         # Move the reference dialog by the vertical offset observed when a
         # second system window was underneath it. App-owned copies must fail.
-        frame = gray(ROOT / "redroid16-canary-screen.png")
+        reference = ROOT / "redroid16-canary-screen.png"
+        if not reference.is_file():
+            self.skipTest("Private lab screenshot not installed")
+        frame = gray(reference)
         moved = frame.copy()
         moved[:-11] = frame[11:]
         self.assertEqual(system_prompt("u0 DeprecatedAbiDialog}", moved), (520, 274))

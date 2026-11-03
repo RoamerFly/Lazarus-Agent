@@ -17,6 +17,7 @@ function render(){
   document.querySelectorAll("[data-act]").forEach(b=>b.disabled=!job||busy||b.dataset.act==="candidate"&&!job?.patch||b.dataset.act==="legacy"&&!config?.legacy);
   for(const id of ["file","demo","target"])el(id).disabled=busy||!config;
   for(const id of ["back","send","refresh"])el(id).disabled=!job||busy;
+  renderChat(busy);
   if(!job)return;
   const f=job.package;
   el("appname").textContent=f.label;
@@ -73,7 +74,8 @@ async function loadJob(file,demo){
   sending=true;render();notice("正在校验签名、读取清单…");
   try{
     job=await api("/api/import/"+el("target").value+(demo?"?demo=true":""),"POST",file);
-    lastFile=file;isDemo=demo;sessionStorage.setItem("reviverJob",job.id);el("screen").hidden=true;el("standby").hidden=false;notice("已导入 · Android "+(job.api-20));
+    el("message").value="";el("attachment").value="";el("attachmentName").textContent="";
+    el("taskTap").value="";el("taskExpect").value="";lastFile=file;isDemo=demo;localStorage.setItem("reviverJob",job.id);el("screen").hidden=true;el("standby").hidden=false;notice("已导入 · Android "+(job.api-20));
   }catch(e){notice(e.message);if(job)el("target").value=job.api;}finally{sending=false;render();}
 }
 el("file").onchange=e=>{if(e.target.files[0])loadJob(e.target.files[0],false);};
@@ -83,7 +85,7 @@ el("target").onchange=async()=>{
   sending=true;render();
   try{
     job=await api(path("/target/"+el("target").value),"POST");
-    sessionStorage.setItem("reviverJob",job.id);
+    localStorage.setItem("reviverJob",job.id);
     el("screen").hidden=true;el("standby").hidden=false;
     notice("已沿用原包 · Android "+(job.api-20));
   }catch(e){notice(e.message);el("target").value=job.api;}
@@ -92,8 +94,8 @@ el("target").onchange=async()=>{
 document.querySelectorAll("[data-act]").forEach(b=>b.onclick=async()=>{
   sending=true;render();try{
     const tap=el("taskTap").value.trim(),expect=el("taskExpect").value.trim(),act=b.dataset.act;
-    if(act==="repair" && Boolean(tap)!==Boolean(expect))throw Error("请同时填写点击控件和预期内容。");
-    await api(path("/action/"+act),"POST",act==="repair"&&tap?JSON.stringify({task:{tap,expect}}):null);
+    if(["repair","retry"].includes(act) && Boolean(tap)!==Boolean(expect))throw Error("请同时填写点击控件和预期内容。");
+    await api(path("/action/"+act),"POST",["repair","retry"].includes(act)&&tap?JSON.stringify({task:{tap,expect}}):null);
     job=await api(path(""));notice("可在运行记录中查看进展。");
   }catch(e){notice(e.message);}finally{sending=false;render();}
 });
@@ -106,8 +108,9 @@ el("send").onclick=()=>sendInput({event:"text",value:el("text").value});
 (async()=>{try{
   config=await api("/api/config");el("engine").textContent=config.model?"模型已配置":"本地规则可用";
   for(const a of Object.keys(config.targets).map(Number).sort((a,b)=>b-a)){const o=new Option("Android "+(a-20)+(config.targets[a]?"":" · 缺少镜像"),a);o.disabled=!config.targets[a];el("target").add(o);}
+  el("demo").textContent="示例 · "+(config.demo_label||"旧版记事本");
   if(config.targets[35])el("target").value=35;
-  const old=sessionStorage.getItem("reviverJob");if(old){try{job=await api("/api/jobs/"+old);el("target").value=job.api;}catch{sessionStorage.removeItem("reviverJob");}}
+  const old=localStorage.getItem("reviverJob");if(old){try{job=await api("/api/jobs/"+old);el("target").value=job.api;}catch{localStorage.removeItem("reviverJob");}}
   render();
 }catch(e){notice(e.message);}})();
 setInterval(async()=>{if(!job||sending||polling)return;polling=true;const id=job.id;
@@ -121,3 +124,76 @@ setInterval(()=>{
   lastPreview=now;
   refreshScreen().catch(()=>{});
 },2300);
+let chatSignature="";
+function renderChat(busy){
+  const versions=job?.versions||[], messages=job?.messages||[];
+  for(const id of ["message","sendMessage","attachment","problem"])el(id).disabled=!job||busy;
+  el("works").disabled=!versions.length||busy;
+  document.querySelector('[data-act="retry"]').disabled=!job?.pending_feedback||busy;
+  if(!job)return;
+  el("arch").textContent=job.package.native_abis.join(" · ")||"通用字节码";
+  const signature=JSON.stringify([job.id,versions,messages]);
+  if(signature===chatSignature)return;
+  const same=el("feedbackVersion").dataset.job===job.id;
+  const sameCount=Number(el("feedbackVersion").dataset.count)===versions.length;
+  const selected=same&&sameCount?el("feedbackVersion").value:"";
+  el("feedbackVersion").dataset.count=versions.length;
+  chatSignature=signature;
+  el("versions").replaceChildren();el("feedbackVersion").replaceChildren();
+  el("feedbackVersion").dataset.job=job.id;
+  if(!versions.length){el("versions").textContent="通过验证后可在这里下载独立 APK。";el("feedbackVersion").add(new Option("当前任务",""));}
+  for(const v of [...versions].reverse()){
+    el("feedbackVersion").add(new Option("V"+v.number,v.number));
+    const row=document.createElement("div"),name=document.createElement("strong"),badge=document.createElement("span"),link=document.createElement("a");
+    row.className="version";name.textContent="修复版本 V"+v.number;badge.className="pill";badge.textContent=v.phone;
+    link.textContent="下载 V"+v.number;link.href=path("/versions/"+v.number);
+    row.append(name,badge,link);el("versions").append(row);
+  }
+  if(selected && [...el("feedbackVersion").options].some(o=>o.value===selected))el("feedbackVersion").value=selected;
+  const chat=el("messages");chat.replaceChildren();
+  const entries=messages.length?messages:[{role:"assistant",text:"已导入 "+job.package.label+"。点击「修复并验证」开始，或告诉我你遇到了什么问题。"}];
+  for(const m of entries){
+    const bubble=document.createElement("div");bubble.className="bubble "+m.role;bubble.textContent=(m.kind&&m.version?"V"+m.version+" · ":"")+m.text;
+    if(m.attachment){const image=document.createElement("img");image.alt="问题截图";image.src=path("/attachments/"+m.attachment);bubble.append(image);}
+    chat.append(bubble);
+  }
+  chat.scrollTop=chat.scrollHeight;
+}
+async function feedback(kind){
+  if(!job||sending||job.status==="running")return;
+  const text=el("message").value.trim()||(kind==="works"?"我在真机上试了，这个版本可以运行。":"");
+  if(!text){el("message").focus();notice("请输入问题或复测结果");return;}
+  const num=el("feedbackVersion").value;
+  const body={kind,text,version:num?Number(num):null};
+  const tap=el("taskTap").value.trim(),expect=el("taskExpect").value.trim();
+  if(kind==="issue" && (tap||expect)){if(!tap||!expect){notice("请完整填写复现步骤");return;}body.task={tap,expect};}
+  sending=true;render();
+  try{
+    const f=el("attachment").files[0];
+    if(f){
+      if(f.size>3*1024*1024)throw Error("截图不能超过 3 MiB");
+      body.attachment=await new Promise((ok,fail)=>{const reader=new FileReader();reader.onload=()=>ok(reader.result);reader.onerror=fail;reader.readAsDataURL(f);});
+    }
+    job=await api(path("/feedback"),"POST",JSON.stringify(body));
+    el("message").value="";el("attachment").value="";el("attachmentName").textContent="";
+    notice(kind==="issue"?"反馈已保存，可继续修复。":"真机复测结果已保存。");
+  }catch(e){notice(e.message);}finally{sending=false;render();}
+}
+el("sendMessage").onclick=()=>feedback("issue");el("works").onclick=()=>feedback("works");
+el("problem").onclick=()=>{el("taskDetails").open=true;el("message").focus();};
+el("message").onkeydown=e=>{if(e.key==="Enter"&&e.ctrlKey)feedback("issue");};
+el("attachment").onchange=()=>{el("attachmentName").textContent=el("attachment").files[0]?.name||"";};
+el("home").onclick=()=>el("historyDialog").close();
+el("closeHistory").onclick=()=>el("historyDialog").close();
+el("history").onclick=async()=>{
+  if(sending||job?.status==="running"){notice("请等待当前操作结束");return;}
+  try{
+    const jobs=await api("/api/jobs"),list=el("jobList");list.replaceChildren();
+    for(const j of jobs){const b=document.createElement("button");b.textContent=j.label+" · Android "+(j.api-20)+" · "+new Date(j.updated||j.created).toLocaleString()+(j.phone?" · "+j.phone:"");
+      b.onclick=async()=>{try{job=await api("/api/jobs/"+j.id);localStorage.setItem("reviverJob",job.id);el("target").value=job.api;
+        el("screen").hidden=true;el("standby").hidden=false;el("message").value="";el("attachment").value="";el("attachmentName").textContent="";
+        el("taskTap").value=job.task?.tap||"";el("taskExpect").value=job.task?.expect||"";el("historyDialog").close();render();
+      }catch(e){notice(e.message);}};list.append(b);}
+    if(!jobs.length)list.textContent="还没有修复记录";el("historyDialog").showModal();
+  }catch(e){notice(e.message);}
+};
