@@ -31,6 +31,14 @@ class ModificationUiTests(unittest.TestCase):
         }
         self.assertTrue(required <= parser.ids, required-parser.ids)
 
+    def test_studio_controls_survive_moving_sections_to_dialogs(self):
+        import re
+        parser=_Ids()
+        parser.feed((ROOT/"web/index.html").read_text(encoding="utf-8"))
+        script=(ROOT/"web/studio.js").read_text(encoding="utf-8")
+        required=set(re.findall(r'el\("([^"\n]+)"\)',script))
+        self.assertTrue(required <= parser.ids, required-parser.ids)
+
     def test_modification_script_is_loaded_and_syntax_checked(self):
         page=(ROOT/"web/index.html").read_text(encoding="utf-8")
         self.assertIn('src="/modifications.js"',page)

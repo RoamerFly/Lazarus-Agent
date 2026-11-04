@@ -55,6 +55,12 @@ try:
     chat.scrollTop=chat.scrollHeight;job.messages.push({role:'assistant',text:'自动跟随最新消息'});renderChat(false);
     return {retained,readingOffset,followsEnd:chat.scrollHeight-chat.scrollTop-chat.clientHeight<2};
   }""")
+  # Import a signed fixture through the normal file picker and render the real API state.
+  page.goto('http://127.0.0.1:18767');page.wait_for_function('!document.getElementById("file").disabled')
+  page.locator('#file').set_input_files(str(Path('fixtures/archive-reader/archive-reader-broken.apk').resolve()))
+  page.wait_for_function('job!==null && !!job.assessment',timeout=60000)
+  render_check=page.locator('#badge').inner_text()
+  assert render_check=='就绪',render_check
   page.locator('#message').fill('记住上次打开的文件')
   page.locator('[data-open-dialog=modificationDialog]').click()
   page.locator('#toModification').click()
@@ -78,7 +84,7 @@ try:
    assert all(not c['page_vertical_overflow'] for c in checks if c['width']>=960),checks
    assert all(not c['overflows'] and not c['stress_overflow'] and not c['header_overlaps'] and not c['card_overlaps'] for c in checks),checks
    assert all(not d['scroll'] and not d['clipped'] for c in checks for d in c['dialogs'].values())
-  (out/f'{mode}.json').write_text(json.dumps({'checks':checks,'errors':errors,'chat':chat_checks,'reduced_motion':motion,'focus_outline':focus},ensure_ascii=False,indent=2),encoding='utf8')
+  (out/f'{mode}.json').write_text(json.dumps({'checks':checks,'errors':errors,'chat':chat_checks,'reduced_motion':motion,'focus_outline':focus,'complete_render':render_check},ensure_ascii=False,indent=2),encoding='utf8')
   browser.close()
 finally:server.should_exit=True;t.join()
 
