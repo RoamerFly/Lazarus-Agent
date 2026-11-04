@@ -34,3 +34,97 @@
 .localize-resource { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:8px; padding:7px 8px; border:1px solid #d6e8e5; border-radius:8px; background:white; }
 .localize-resource span { overflow-wrap:anywhere; color:#426764; }
 @media(max-width:620px){.localizationRow { grid-template-columns:1fr 1fr; }.localizationRow button,.localizationVerify { grid-column:span 2; }}
+
+/* Keep the header in normal flow so navigation cannot cover utility actions. */
+header { height:auto; min-height:80px; display:flex; flex-wrap:wrap; gap:16px 24px; }
+header .brand { flex-shrink:0; line-height:1.5; }
+header nav { position:static; transform:none; flex-shrink:0; margin-inline:auto; backdrop-filter:none; }
+header > .row { margin-left:auto; flex-wrap:wrap; justify-content:flex-end; }
+header button { white-space:nowrap; }
+@media(max-width:1100px) {
+  header nav { order:3; flex-basis:100%; justify-content:center; margin:0; }
+}
+@media(max-width:640px) {
+  header { gap:12px; padding-block:16px; }
+  header .brand { flex-basis:100%; font-size:17px; }
+  header > .row { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); width:100%; margin:0; gap:8px; }
+  header > .row button { padding-inline:8px; }
+  header nav { order:1; width:100%; }
+  header > .row { order:2; }
+}
+
+/* Intrinsic sizes and wrapping protect long APK names, paths and action labels. */
+:root { --accent:#08766a; --focus:#086eae; --ink-muted:#466563; line-height:1.55; }
+.row > *, .version > *, .fact > *, .resource-location > * { min-width:0; }
+button, .file, .attach, select { min-height:40px; }
+button, .file, .attach, .version a, .pill { white-space:nowrap; }
+button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible {
+  outline:3px solid var(--focus); outline-offset:3px;
+}
+.file, .attach { position:relative; flex-shrink:0; }
+.file input, .attach input { display:block; position:absolute; width:1px; height:1px; padding:0; opacity:0; }
+.file:focus-within, .attach:focus-within { outline:3px solid var(--focus); outline-offset:3px; }
+.card > .between:first-child { align-items:flex-start; flex-wrap:wrap; }
+.card > .between:first-child > .row { flex:1 1 170px; }
+.apkicon, .bot, .brand img, .dot { flex-shrink:0; }
+h2 { line-height:1.4; overflow-wrap:anywhere; }
+#standby { padding:46px 20px 22px; text-align:center; }
+#standby small { color:#b6d4d0; line-height:1.6; }
+#notice, #verdict { display:block; line-height:1.65; overflow-wrap:anywhere; }
+.controls input { flex:1 1 150px; }
+.version { flex-wrap:wrap; gap:10px; }
+.version strong { flex:1 1 200px; overflow-wrap:anywhere; }
+.version .pill, .version a { flex-shrink:0; }
+.composer .row { display:grid; grid-template-columns:auto minmax(70px,1fr) auto auto; gap:8px; }
+.composer select { margin:0; width:100%; max-width:none; }
+#attachmentName { grid-column:1/-1; grid-row:2; white-space:normal; overflow-wrap:anywhere; color:var(--ink-muted); }
+#attachmentName:empty { display:none; }
+.chat > label, .askbox .row label { display:flex; align-items:flex-start; gap:8px; font-size:13px; line-height:1.6; margin-top:10px; color:var(--ink-muted); }
+input[type="checkbox"] { flex:0 0 16px; width:16px; height:16px; min-height:0; padding:0; margin:3px 0 0; accent-color:var(--accent); }
+.fact { display:grid; grid-template-columns:90px minmax(0,1fr); gap:12px; padding-block:6px; }
+.fact span:first-child { min-width:0; color:var(--ink-muted); }
+.askbox .row, dialog .row, .exports { flex-wrap:wrap; }
+.askbox .row label { flex:1 1 200px; }
+.resource-location { grid-template-columns:minmax(0,1fr) auto; }
+dialog { max-height:calc(100dvh - 32px); max-width:calc(100vw - 24px); overflow:auto; color:#12313b; box-shadow:0 24px 72px #113d432e; }
+dialog .between { gap:12px; }
+dialog p { overflow-wrap:anywhere; }
+.about-card { position:relative; display:grid; gap:14px; padding-top:4px; }
+.about-close { position:absolute; right:0; top:0; min-width:40px; }
+.about-card .eyebrow { padding-right:50px; color:var(--ink-muted); font-size:12px; letter-spacing:.12em; }
+.about-actions, .about-links { display:flex; flex-wrap:wrap; gap:8px; }
+.about-links a { font-size:13px; }
+.about-status { padding:10px 12px; border-radius:10px; background:#edf7f4; overflow-wrap:anywhere; }
+.about-status:empty { display:none; }
+@media(max-width:1040px) { .grid { grid-template-columns:minmax(0,1fr); } .chat .messages { flex:none; min-height:160px; } }
+@media(max-width:620px) {
+  .composer .row { grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
+  #attachmentName { grid-row:3; }
+  .controls { display:grid; grid-template-columns:1fr 1fr; }
+  .controls input { grid-column:1/-1; grid-row:2; width:100%; }
+  .controls #send { grid-column:1/-1; }
+  .version strong { flex-basis:100%; }
+  .version a { margin-left:auto; }
+  .resource-location { grid-template-columns:minmax(0,1fr); }
+  .resource-location button { grid-column:1; grid-row:auto; justify-self:start; }
+  dialog { padding:18px; }
+}
+
+/* Small one-shot motion only; no animated layout, filters, or ambient loops. */
+button, .file, .attach, a { transition:transform 140ms ease-out, background-color 140ms ease-out; }
+button:not(:disabled):active, .file:active, .attach:active { transform:translateY(1px); }
+@media(hover:hover) and (prefers-reduced-motion:no-preference) {
+  button:not(:disabled):hover, .file:hover, .attach:hover { transform:translateY(-1px); }
+}
+@keyframes dialog-enter { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+@keyframes message-enter { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+dialog[open] { animation:dialog-enter 180ms ease-out; }
+.bubble { animation:message-enter 160ms ease-out; }
+@media(prefers-reduced-motion:reduce) {
+  *, *::before, *::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; }
+}
+@media(max-width:620px) {
+  .card > .between:first-child > .row { flex-basis:100%; }
+  .card > .between:first-child .file { margin-left:auto; }
+  .chat > label { min-height:44px; align-items:center; }
+}

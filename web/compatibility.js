@@ -34,6 +34,7 @@ function renderScope(busy){
   el("targetLabel").textContent=mode==="upto"?"验证上限":"目标系统";
   el("scope").disabled=busy;
   for(const check of document.querySelectorAll("#versionsToTest input"))check.disabled=busy;
+  el("scopeSummary").textContent=levels.length ? (levels.length===1?androidName(levels[0]):levels.length+" 个版本")+" · 验证范围" : "选择验证范围";
   const hint=el("scopeHint");
   if(mode==="single")hint.textContent="";
   else if(!levels.length)hint.textContent="请至少选择一个 Android 版本。";

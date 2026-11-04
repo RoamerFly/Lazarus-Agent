@@ -62,7 +62,7 @@ def show_window(url):
     # WebView2 has its own application profile and no browser sign-in UI.
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("RoamerFly.LazarusAgent")
     webview.settings["ALLOW_DOWNLOADS"] = True
-    webview.create_window(APP_NAME, url, width=1280, height=900, min_size=(960, 640))
+    webview.create_window(APP_NAME, url, width=1280, height=900, min_size=(960, 640), maximized=True)
     webview.start(gui="edgechromium", private_mode=False,
                   storage_path=str(PATHS.data / "desktop-webview2"),
                   icon=str(Path(__file__).resolve().parent / "web/assets/lazarus.ico"))

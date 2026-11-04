@@ -1,0 +1,564 @@
+{
+  "version": "0.6.2",
+  "url": "http://127.0.0.1:18767",
+  "stack": "FastAPI + HTML/CSS/vanilla JavaScript + WebView2",
+  "skills": [
+    "web-design-reviewer",
+    "fixing-motion-performance",
+    "ui-ux-pro-max"
+  ],
+  "browser": {
+    "checks": [
+      {
+        "width": 375,
+        "height": 900,
+        "page_vertical_overflow": true,
+        "overflows": false,
+        "header_overlaps": [],
+        "stress_overflow": false,
+        "card_overlaps": [],
+        "dialogs": {
+          "model": {
+            "width": 327,
+            "scroll": false,
+            "clipped": false
+          },
+          "resources": {
+            "width": 327,
+            "scroll": false,
+            "clipped": false
+          },
+          "about": {
+            "width": 327,
+            "scroll": false,
+            "clipped": false
+          },
+          "history": {
+            "width": 327,
+            "scroll": false,
+            "clipped": false
+          },
+          "scope": {
+            "width": 351,
+            "scroll": false,
+            "clipped": false
+          },
+          "delivery": {
+            "width": 351,
+            "scroll": false,
+            "clipped": false
+          },
+          "diagnostics": {
+            "width": 351,
+            "scroll": false,
+            "clipped": false
+          },
+          "translation": {
+            "width": 351,
+            "scroll": false,
+            "clipped": false
+          },
+          "assistant": {
+            "width": 351,
+            "scroll": false,
+            "clipped": false
+          },
+          "task": {
+            "width": 351,
+            "scroll": false,
+            "clipped": false
+          },
+          "modification": {
+            "width": 351,
+            "scroll": false,
+            "clipped": false
+          }
+        }
+      },
+      {
+        "width": 768,
+        "height": 900,
+        "page_vertical_overflow": true,
+        "overflows": false,
+        "header_overlaps": [],
+        "stress_overflow": false,
+        "card_overlaps": [],
+        "dialogs": {
+          "model": {
+            "width": 720,
+            "scroll": false,
+            "clipped": false
+          },
+          "resources": {
+            "width": 720,
+            "scroll": false,
+            "clipped": false
+          },
+          "about": {
+            "width": 720,
+            "scroll": false,
+            "clipped": false
+          },
+          "history": {
+            "width": 720,
+            "scroll": false,
+            "clipped": false
+          },
+          "scope": {
+            "width": 744,
+            "scroll": false,
+            "clipped": false
+          },
+          "delivery": {
+            "width": 744,
+            "scroll": false,
+            "clipped": false
+          },
+          "diagnostics": {
+            "width": 744,
+            "scroll": false,
+            "clipped": false
+          },
+          "translation": {
+            "width": 744,
+            "scroll": false,
+            "clipped": false
+          },
+          "assistant": {
+            "width": 744,
+            "scroll": false,
+            "clipped": false
+          },
+          "task": {
+            "width": 744,
+            "scroll": false,
+            "clipped": false
+          },
+          "modification": {
+            "width": 744,
+            "scroll": false,
+            "clipped": false
+          }
+        }
+      },
+      {
+        "width": 960,
+        "height": 640,
+        "page_vertical_overflow": false,
+        "overflows": false,
+        "header_overlaps": [],
+        "stress_overflow": false,
+        "card_overlaps": [],
+        "dialogs": {
+          "model": {
+            "width": 912,
+            "scroll": false,
+            "clipped": false
+          },
+          "resources": {
+            "width": 912,
+            "scroll": false,
+            "clipped": false
+          },
+          "about": {
+            "width": 760,
+            "scroll": false,
+            "clipped": false
+          },
+          "history": {
+            "width": 912,
+            "scroll": false,
+            "clipped": false
+          },
+          "scope": {
+            "width": 896,
+            "scroll": false,
+            "clipped": false
+          },
+          "delivery": {
+            "width": 896,
+            "scroll": false,
+            "clipped": false
+          },
+          "diagnostics": {
+            "width": 896,
+            "scroll": false,
+            "clipped": false
+          },
+          "translation": {
+            "width": 896,
+            "scroll": false,
+            "clipped": false
+          },
+          "assistant": {
+            "width": 896,
+            "scroll": false,
+            "clipped": false
+          },
+          "task": {
+            "width": 896,
+            "scroll": false,
+            "clipped": false
+          },
+          "modification": {
+            "width": 896,
+            "scroll": false,
+            "clipped": false
+          }
+        }
+      },
+      {
+        "width": 1024,
+        "height": 768,
+        "page_vertical_overflow": false,
+        "overflows": false,
+        "header_overlaps": [],
+        "stress_overflow": false,
+        "card_overlaps": [],
+        "dialogs": {
+          "model": {
+            "width": 960,
+            "scroll": false,
+            "clipped": false
+          },
+          "resources": {
+            "width": 960,
+            "scroll": false,
+            "clipped": false
+          },
+          "about": {
+            "width": 760,
+            "scroll": false,
+            "clipped": false
+          },
+          "history": {
+            "width": 960,
+            "scroll": false,
+            "clipped": false
+          },
+          "scope": {
+            "width": 960,
+            "scroll": false,
+            "clipped": false
+          },
+          "delivery": {
+            "width": 960,
+            "scroll": false,
+            "clipped": false
+          },
+          "diagnostics": {
+            "width": 960,
+            "scroll": false,
+            "clipped": false
+          },
+          "translation": {
+            "width": 960,
+            "scroll": false,
+            "clipped": false
+          },
+          "assistant": {
+            "width": 960,
+            "scroll": false,
+            "clipped": false
+          },
+          "task": {
+            "width": 960,
+            "scroll": false,
+            "clipped": false
+          },
+          "modification": {
+            "width": 960,
+            "scroll": false,
+            "clipped": false
+          }
+        }
+      },
+      {
+        "width": 1280,
+        "height": 640,
+        "page_vertical_overflow": false,
+        "overflows": false,
+        "header_overlaps": [],
+        "stress_overflow": false,
+        "card_overlaps": [],
+        "dialogs": {
+          "model": {
+            "width": 960,
+            "scroll": false,
+            "clipped": false
+          },
+          "resources": {
+            "width": 960,
+            "scroll": false,
+            "clipped": false
+          },
+          "about": {
+            "width": 760,
+            "scroll": false,
+            "clipped": false
+          },
+          "history": {
+            "width": 960,
+            "scroll": false,
+            "clipped": false
+          },
+          "scope": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          },
+          "delivery": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          },
+          "diagnostics": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          },
+          "translation": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          },
+          "assistant": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          },
+          "task": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          },
+          "modification": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          }
+        }
+      },
+      {
+        "width": 1280,
+        "height": 720,
+        "page_vertical_overflow": false,
+        "overflows": false,
+        "header_overlaps": [],
+        "stress_overflow": false,
+        "card_overlaps": [],
+        "dialogs": {
+          "model": {
+            "width": 960,
+            "scroll": false,
+            "clipped": false
+          },
+          "resources": {
+            "width": 960,
+            "scroll": false,
+            "clipped": false
+          },
+          "about": {
+            "width": 760,
+            "scroll": false,
+            "clipped": false
+          },
+          "history": {
+            "width": 960,
+            "scroll": false,
+            "clipped": false
+          },
+          "scope": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          },
+          "delivery": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          },
+          "diagnostics": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          },
+          "translation": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          },
+          "assistant": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          },
+          "task": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          },
+          "modification": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          }
+        }
+      },
+      {
+        "width": 1280,
+        "height": 900,
+        "page_vertical_overflow": false,
+        "overflows": false,
+        "header_overlaps": [],
+        "stress_overflow": false,
+        "card_overlaps": [],
+        "dialogs": {
+          "model": {
+            "width": 960,
+            "scroll": false,
+            "clipped": false
+          },
+          "resources": {
+            "width": 960,
+            "scroll": false,
+            "clipped": false
+          },
+          "about": {
+            "width": 760,
+            "scroll": false,
+            "clipped": false
+          },
+          "history": {
+            "width": 960,
+            "scroll": false,
+            "clipped": false
+          },
+          "scope": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          },
+          "delivery": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          },
+          "diagnostics": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          },
+          "translation": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          },
+          "assistant": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          },
+          "task": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          },
+          "modification": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          }
+        }
+      },
+      {
+        "width": 1920,
+        "height": 1080,
+        "page_vertical_overflow": false,
+        "overflows": false,
+        "header_overlaps": [],
+        "stress_overflow": false,
+        "card_overlaps": [],
+        "dialogs": {
+          "model": {
+            "width": 960,
+            "scroll": false,
+            "clipped": false
+          },
+          "resources": {
+            "width": 960,
+            "scroll": false,
+            "clipped": false
+          },
+          "about": {
+            "width": 760,
+            "scroll": false,
+            "clipped": false
+          },
+          "history": {
+            "width": 960,
+            "scroll": false,
+            "clipped": false
+          },
+          "scope": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          },
+          "delivery": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          },
+          "diagnostics": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          },
+          "translation": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          },
+          "assistant": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          },
+          "task": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          },
+          "modification": {
+            "width": 1120,
+            "scroll": false,
+            "clipped": false
+          }
+        }
+      }
+    ],
+    "errors": [],
+    "chat": {
+      "retained": true,
+      "readingOffset": 0,
+      "followsEnd": true
+    },
+    "reduced_motion": "none",
+    "focus_outline": "solid"
+  },
+  "native": {
+    "title": "Lazarus Agent · 遗留软件复活智能体",
+    "file": true,
+    "headingRemoved": true,
+    "verticalOverflow": false,
+    "viewport": [
+      1280,
+      730
+    ],
+    "dialogCount": 12,
+    "windowState": "Maximized"
+  },
+  "screenshots": "本地 artifacts/ui-review（before-* / workspace-*）",
+  "notes": "长应用名、附件名、版本名称及路径为明确标记的布局压力数据。未调用模型或设备修复。"
+}

@@ -8,7 +8,7 @@ on:
       version:
         description: SemVer without v (must equal app_version.py)
         required: true
-        default: '0.6.1'
+        default: '0.6.2'
       publish:
         description: Create/update GitHub Release
         required: true

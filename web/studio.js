@@ -33,7 +33,7 @@ function render(){
   const f=job.package;
   el("appname").textContent=f.label;
   const grid=el("facts");grid.replaceChildren();grid.className="";
-  for(const [name,val] of [["包名",f.package],["版本",f.version],["系统级别",f.min_sdk+" 起，面向 API "+f.target_sdk],["原生库",f.native_abis.join(", ")||"未发现 lib/*.so"],["签名证书",f.certificate_sha256]]){
+  for(const [name,val] of [["应用名称",f.label],["包名",f.package],["版本",f.version],["系统级别",f.min_sdk+" 起，面向 API "+f.target_sdk],["原生库",f.native_abis.join(", ")||"未发现 lib/*.so"],["签名证书",f.certificate_sha256]]){
     const row=document.createElement("div");row.className="fact";
     for(const value of [name,val]){const v=document.createElement("span");v.textContent=value;row.append(v);}grid.append(row);
   }
@@ -152,9 +152,9 @@ el("screen").onclick=e=>{const rect=e.target.getBoundingClientRect(),img=e.targe
 el("refresh").onclick=refreshScreen;el("back").onclick=()=>sendInput({event:"back"});
 el("send").onclick=()=>sendInput({event:"text",value:el("text").value});
 (async()=>{try{
-  config=await api("/api/config");el("engine").textContent=config.model?"模型已配置":"本地规则可用";
+  config=await api("/api/config");
   for(const a of Object.keys(config.targets).map(Number).sort((a,b)=>b-a)){const o=new Option("Android "+(a-20)+(config.targets[a]?"":" · 按需准备"),a);el("target").add(o);}
-  el("demo").textContent="示例 · "+(config.demo_label||"旧版记事本");
+  el("demo").textContent="载入示例";el("demo").title=config.demo_label||"旧版记事本";
   if(config.targets[35])el("target").value=35;
   buildScopeControls();
   runtimeUi=LazarusRuntimePrepare.bind({api,notice});
@@ -182,7 +182,7 @@ setInterval(()=>{
   lastPreview=now;
   refreshScreen().catch(()=>{});
 },2300);
-let chatSignature="";
+let chatSignature="", chatJobId=null, chatRows=[];
 function renderChat(busy){
   const versions=job?.versions||[], messages=job?.messages||[];
   for(const id of ["message","sendMessage","attachment","problem"])el(id).disabled=!job||busy;
@@ -211,18 +211,28 @@ function renderChat(busy){
     row.append(name,badge,link);el("versions").append(row);
   }
   if(selected && [...el("feedbackVersion").options].some(o=>o.value===selected))el("feedbackVersion").value=selected;
-  const chat=el("messages");chat.replaceChildren();
+  const chat=el("messages");
+  // Read scroll geometry before writes. Keep earlier bubbles stable while a user reads them.
+  const sameJob=chatJobId===job.id, previousOffset=chat.scrollTop;
+  const followEnd=!sameJob || chat.scrollHeight-chat.scrollTop-chat.clientHeight<24;
   const entries=messages.length?messages:[{role:"assistant",text:"已导入 "+job.package.label+"。点击「修复并验证」开始，或告诉我你遇到了什么问题。"}];
-  for(const m of entries){
+  const rows=entries.map(m=>JSON.stringify(m));
+  let prefix=0;
+  if(sameJob)while(prefix<rows.length && prefix<chatRows.length && rows[prefix]===chatRows[prefix])prefix++;
+  while(chat.children.length>prefix)chat.lastElementChild.remove();
+  const additions=document.createDocumentFragment();
+  for(const m of entries.slice(prefix)){
     const bubble=document.createElement("div");bubble.className="bubble "+m.role;bubble.textContent=(m.kind&&m.version?"V"+m.version+" · ":"")+m.text;
     if(m.attachment){const image=document.createElement("img");image.alt="问题截图";image.src=path("/attachments/"+m.attachment);bubble.append(image);}
     if(m.localization_id){
       const link=document.createElement("a");link.textContent="下载汉化 APK";
       link.href=path("/localized/"+encodeURIComponent(m.localization_id));bubble.append(document.createElement("br"),link);
     }
-    chat.append(bubble);
+    additions.append(bubble);
   }
-  chat.scrollTop=chat.scrollHeight;
+  chat.append(additions);
+  chatJobId=job.id;chatRows=rows;
+  chat.scrollTop=followEnd?chat.scrollHeight:previousOffset;
 }
 async function feedback(kind){
   if(!job||sending||job.status==="running")return;
@@ -251,7 +261,7 @@ el("toModification").onclick=()=>{
   modificationUi?.fromMessage(el("message").value.trim());
 };
 el("sendMessage").onclick=()=>feedback("issue");el("works").onclick=()=>feedback("works");
-el("problem").onclick=()=>{el("taskDetails").open=true;el("message").focus();};
+el("problem").onclick=()=>{LazarusDialogs.open("taskDialog");};
 el("message").onkeydown=e=>{if(e.key==="Enter"&&e.ctrlKey)feedback("issue");};
 el("attachment").onchange=()=>{el("attachmentName").textContent=el("attachment").files[0]?.name||"";};
 el("home").onclick=()=>el("historyDialog").close();

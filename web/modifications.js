@@ -224,13 +224,13 @@
       request.value=(matchingRun?.plan?.request||current.modification.plan.request)+"。V"+feedback.version+" 真机反馈："+text(feedback.text);
       plan=null;planSignature="";dirty=true;
       setStatus("已基于 V"+feedback.version+" 回填验收条件和反馈。请先重新生成改造计划。");
-      byId("modificationDetails").open=true;sync();
+      LazarusDialogs.open("modificationDialog");sync();
     }
     kind.addEventListener("change",invalidate);request.addEventListener("input",invalidate);base.addEventListener("change",invalidate);useModel.addEventListener("change",invalidate);
     for(const id of ["rememberFirstTap","rememberFirstExpect","rememberSecondTap","rememberSecondExpect","localeTap","localeExpect","localeRoute"])byId(id).addEventListener("input",invalidate);
     byId("addLocalizationRow").addEventListener("click",()=>{addLocalizationRow();invalidate();});browseButton.addEventListener("click",browseResources);planButton.addEventListener("click",makePlan);runButton.addEventListener("click",executePlan);reviseButton.addEventListener("click",reviseFromFeedback);
     function fromMessage(value){
-      kind.value="auto";request.value=value;invalidate();byId("modificationDetails").open=true;
+      kind.value="auto";request.value=value;invalidate();LazarusDialogs.open("modificationDialog");
       request.focus();notice("请补全改造的验收条件，再生成计划。");
     }
     addLocalizationRow();renderCriteria();return {sync,fromMessage};
