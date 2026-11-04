@@ -1,0 +1,5 @@
+<resources>
+    <string name="screen_name">Tea timer</string>
+    <string name="start_brew">Start timer</string>
+    <string name="active_message">Timer started</string>
+</resources>
