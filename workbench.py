@@ -757,6 +757,28 @@ def work(folder,action):
             operation.release()
 
 
+@app.post("/api/jobs/{job}/modify/plan")
+def plan_modification(job:str,body:dict):
+    from modification_tasks import make_plan
+    folder=job_dir(job)
+    if not operation.acquire(blocking=False):
+        raise HTTPException(409,"请等待当前任务结束")
+    try:
+        state=read(folder)
+        plan=make_plan(state,body)
+        previous=state.get("modification",{})
+        state["modification"]={"plan":plan,"status":"planned","runs":previous.get("runs",[]),
+                               "message":"已保存验收条件，执行时将先验证基准 APK 的实际行为。"}
+        add_message(state,"user",plan["request"],modification_id=plan["id"])
+        state["updated"]=now()
+        save(folder,state)
+        return {"plan":plan}
+    except ValueError as exc:
+        raise HTTPException(422,str(exc)) from exc
+    finally:
+        operation.release()
+
+
 @app.post("/api/jobs/{job}/action/{action}")
 def begin(job:str,action:str,body:dict|None=None):
     folder=job_dir(job)
