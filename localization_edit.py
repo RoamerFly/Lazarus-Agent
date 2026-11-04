@@ -1,6 +1,6 @@
 """Bounded Android string-resource localization transform.
 
-Only simple default ``<string>`` resources are eligible. The public API uses
+Simple default strings and plain items in existing Chinese plural resources are eligible. The public API uses
 their displayed text, while this module writes the Android/XML spelling needed
 to retain special characters and formatter placeholders. It never changes
 dex, smali, plurals, arrays, aliases or non-translatable resources.
@@ -110,6 +110,33 @@ def _is_alias(raw: str) -> bool:
     return raw.lstrip().startswith(("@", "?"))
 
 
+_QUANTITIES = {"zero", "one", "two", "few", "many", "other"}
+
+
+def valid_resource_ref(name):
+    if not isinstance(name, str):
+        return False
+    if _RESOURCE_NAME.fullmatch(name):
+        return True
+    match = re.fullmatch(r"plurals/([A-Za-z_][A-Za-z0-9_.]*)\[([a-z]+)\]", name)
+    return bool(match and match.group(2) in _QUANTITIES)
+
+
+def _text_nodes(root):
+    for element in root.findall("string"):
+        name = element.get("name", "")
+        if _RESOURCE_NAME.fullmatch(name):
+            yield name, element, element
+    for group in root.findall("plurals"):
+        name = group.get("name", "")
+        if not _RESOURCE_NAME.fullmatch(name):
+            continue
+        for element in group.findall("item"):
+            quantity = element.get("quantity")
+            if quantity in _QUANTITIES:
+                yield f"plurals/{name}[{quantity}]", element, group
+
+
 def _simple_strings(path: Path):
     try:
         root = ET.parse(path).getroot()
@@ -118,23 +145,22 @@ def _simple_strings(path: Path):
     if root.tag != "resources":
         return []
     rows = []
-    for element in root.findall("string"):
-        name = element.get("name")
-        if not name or not _RESOURCE_NAME.fullmatch(name) or list(element):
+    for name, element, group in _text_nodes(root):
+        if list(element):
             continue
         if element.text is None or element.tail and element.tail.strip():
             continue
         raw = element.text
         if _is_alias(raw):
             continue
-        formatted = element.get("formatted") != "false"
+        formatted = group.get("formatted") != "false"
         try:
             value = _display_value(raw, formatted)
             _format_info(value, formatted)
         except LocalizationError:
             # It is safer to leave an ambiguous string out of the planner.
             continue
-        rows.append({"name": name, "original": value, "translatable": element.get("translatable") != "false",
+        rows.append({"name": name, "original": value, "translatable": group.get("translatable") != "false",
                      "formatted": formatted, "source_file": path})
     return rows
 
@@ -198,10 +224,8 @@ def _zh_cn_occupied_names(decoded: Path):
                 raise LocalizationError(f"字符串资源 XML 无法解析：{path.as_posix()}") from exc
             if root.tag != "resources":
                 continue
-            for element in root.findall("string"):
-                name = element.get("name")
-                if name and _RESOURCE_NAME.fullmatch(name):
-                    answer[name].append(path.relative_to(decoded).as_posix())
+            for name, _, _group in _text_nodes(root):
+                answer[name].append(path.relative_to(decoded).as_posix())
     return answer
 
 
@@ -214,6 +238,8 @@ def catalog(decoded: Path) -> list[dict]:
         if not row["translatable"]:
             continue
         values = existing.get(row["name"], [])
+        if row["name"].startswith("plurals/") and len(values) != 1:
+            continue
         translated = values[0]["original"] if len(values) == 1 else ""
         rows.append({"name": row["name"], "original": row["original"], "translated": translated})
         if len(rows) >= _MAX_CATALOG:
@@ -241,7 +267,7 @@ def _validate_criteria(criteria):
         raise LocalizationError("资源名必须对应本次原文")
     choices = {}
     for original, name in resources.items():
-        if name is not None and (not isinstance(name, str) or not _RESOURCE_NAME.fullmatch(name)):
+        if name is not None and not valid_resource_ref(name):
             raise LocalizationError("资源名称无效")
         choices[original] = name
     checks = criteria.get("checks")
@@ -283,6 +309,8 @@ def inspect(decoded: Path, criteria: dict) -> dict:
             raise LocalizationError(f"资源标记为不可翻译：{match['name']}")
         _assert_format_compatible(original, translated, match["formatted"])
         current = existing.get(match["name"], [])
+        if match["name"].startswith("plurals/") and (len(current) != 1 or not current[0]["translatable"]):
+            raise LocalizationError("仅支持补译已有中文数量规则，无法唯一定位目标条目")
         declarations = occupied.get(match["name"], [])
         if len(current) > 1 or len(declarations) > 1:
             raise LocalizationError(f"存在重复的 zh-CN 资源，拒绝猜测写入位置：{match['name']}")
@@ -295,7 +323,7 @@ def inspect(decoded: Path, criteria: dict) -> dict:
     plan = {"kind": PLAN_KIND, "criteria": requested, "target_locale": "zh-CN", "edits": edits}
     return {"available": True, "plan": plan,
             "description": "仅为已定位的简单字符串资源新增或更新简体中文覆盖，不改动 dex 或 smali",
-            "scope": "res/values 中可翻译的普通 string；保留格式化占位符，拒绝别名、重复和不安全转义"}
+            "scope": "普通字符串及已有中文数量条目。保留格式化占位符，拒绝别名、重复和不安全转义"}
 
 
 def _target(decoded: Path, relative: str) -> Path:
@@ -354,7 +382,13 @@ def _write_zh_file(path: Path, edits: list[dict]):
         root = ET.Element("resources")
         tree = ET.ElementTree(root)
     by_name = {element.get("name"): element for element in root.findall("string") if element.get("name")}
+    quantities = {key: element for key, element, group in _text_nodes(root) if group is not element}
     for edit in edits:
+        if edit["name"].startswith("plurals/"):
+            if edit["name"] not in quantities:
+                raise LocalizationError("中文数量资源条目已变更")
+            quantities[edit["name"]].text = _android_text(edit["translated"], edit["formatted"])
+            continue
         element = by_name.get(edit["name"])
         if element is None:
             attributes = {"name": edit["name"]}

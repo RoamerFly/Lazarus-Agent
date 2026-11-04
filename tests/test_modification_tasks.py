@@ -46,3 +46,16 @@ class ModificationPlanTests(unittest.TestCase):
                           {"resources": {"Start": "../bad"}}, {"operation": {"tap": "开始"}}):
             with self.subTest(overrides=overrides), self.assertRaises(ValueError):
                 make_plan(self.state, dict(body, criteria=dict(criteria, **overrides)))
+
+
+    def test_menu_path_persists_only_supported_steps(self):
+        criteria = {"translations": {"Character count": "字符计数"},
+                    "checks": [{"original": "Character count", "translated": "字符计数"}],
+                    "route": ["menu", {"en": "Settings", "zh": "设置"}]}
+        body = {"kind": "localize-zh", "request": "汉化设置", "criteria": criteria}
+        self.assertEqual(make_plan(self.state, body)["criteria"]["route"],
+                         ["menu", {"en": "Settings", "zh": "设置", "optional": False}])
+        for route in (["shell input keyevent 4"], ["launch"] * 13, [{"en": "Settings"}],
+                      [{"en": "Settings", "zh": "设置", "optional": "yes"}]):
+            with self.subTest(route=route), self.assertRaises(ValueError):
+                make_plan(self.state, dict(body, criteria=dict(criteria, route=route)))

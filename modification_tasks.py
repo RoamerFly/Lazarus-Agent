@@ -28,7 +28,27 @@ def remember_checks(criteria):
     return {"selects": rows}
 
 
+def locale_route(value):
+    if not isinstance(value, list) or len(value) > 12:
+        raise ValueError("验收页面路径最多允许 12 步")
+    route = []
+    for item in value:
+        if item in ("menu", "launch", "old-app-warning"):
+            route.append(item)
+            continue
+        if not isinstance(item, dict) or set(item) - {"en", "zh", "optional"}:
+            raise ValueError("仅支持菜单、启动、旧版提示或按文本点击")
+        optional = item.get("optional", False)
+        if type(optional) is not bool:
+            raise ValueError("可跳过选项必须为布尔值")
+        route.append({"en": short_text(item.get("en"), "英文控件", 200),
+                      "zh": short_text(item.get("zh"), "中文控件", 200), "optional": optional})
+    return route
+
+
 def localization_checks(criteria):
+    from localization_edit import valid_resource_ref
+
     translations = criteria.get("translations")
     if not isinstance(translations, dict) or not 1 <= len(translations) <= 100:
         raise ValueError("请填写 1 至 100 条译文")
@@ -42,8 +62,7 @@ def localization_checks(criteria):
     resources = criteria.get("resources", {})
     if not isinstance(resources, dict) or not resources.keys() <= entries.keys():
         raise ValueError("资源名称必须对应本次翻译的原文")
-    if any(not isinstance(name, str) or not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.]*", name)
-           for name in resources.values()):
+    if not all(valid_resource_ref(name) for name in resources.values()):
         raise ValueError("字符串资源名称无效")
     checks = criteria.get("checks")
     if not isinstance(checks, list) or not 1 <= len(checks) <= len(entries):
@@ -58,6 +77,8 @@ def localization_checks(criteria):
         visible[original] = translated
     verified = {"translations": entries, "resources": dict(resources),
                 "checks": [{"original": key, "translated": val} for key, val in visible.items()]}
+    if "route" in criteria:
+        verified["route"] = locale_route(criteria["route"])
     operation = criteria.get("operation")
     if operation is not None:
         if not isinstance(operation, dict):

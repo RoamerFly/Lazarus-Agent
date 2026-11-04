@@ -89,22 +89,63 @@ def verify_locale(serial: str, facts: dict, criteria: dict, dest: Path) -> dict:
     def has(nodes: list[ET.Element], text: str) -> bool:
         return any(text in {node.get("text"), node.get("content-desc"), node.get("resource-id")} for node in nodes)
 
-    def start(locale: str) -> tuple[bool, bool, ET.Element]:
-        set_locales((locale,))
-        time.sleep(.8)
-        applied = get_locales() == (locale,)
-        shell(serial, "am", "force-stop", package)
+    def launch():
         launched = invoke([ADB, "-s", serial, "shell", "am", "start", "-W", "-n", package + "/" + launcher], 30)
         if launched.returncode:
             raise RuntimeError("切换应用语言后启动失败")
         time.sleep(.7)
+
+    def focused():
         windows = invoke([ADB, "-s", serial, "shell", "dumpsys", "window", "displays"], 15)
         current = (windows.stdout + windows.stderr).decode("utf-8", "replace")
         match = re.search(r"(?m)^\s*mCurrentFocus=Window\{[^\r\n}]*?\bu\d+\s+([\w.]+)/", current)
-        return bool(match and match.group(1) == package), applied, snapshot(locale)
+        return bool(match and match.group(1) == package)
+
+    def click(node):
+        bounds = re.fullmatch(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", node.get("bounds", ""))
+        if not bounds:
+            raise ValueError("路径控件没有有效边界")
+        x1, y1, x2, y2 = map(int, bounds.groups())
+        if x2 <= x1 or y2 <= y1:
+            raise ValueError("路径控件没有可点击区域")
+        shell(serial, "input", "tap", str((x1+x2)//2), str((y1+y2)//2))
+
+    def start(label, locale):
+        from modification_tasks import locale_route
+        route = locale_route(criteria.get("route", []))
+        set_locales((locale,))
+        time.sleep(.8)
+        applied = get_locales() == (locale,)
+        shell(serial, "am", "force-stop", package)
+        launch()
+        for index, action in enumerate(route, 1):
+            if action == "launch":
+                launch()
+                continue
+            if action == "menu":
+                if not focused():
+                    raise ValueError("目标应用不在前台，不能展开菜单")
+                shell(serial, "input", "keyevent", "82")
+            else:
+                tree = snapshot(f"{label}-route-{index:02d}")
+                if action == "old-app-warning":
+                    system = [n for n in tree.iter("node") if n.get("package")=="android"]
+                    if not any("built for an older version of Android" in n.get("text", "") for n in system):
+                        continue
+                    matches = [n for n in system if n.get("resource-id")=="android:id/button1" and n.get("text")=="OK"]
+                else:
+                    target = action["zh" if locale=="zh-CN" else "en"]
+                    matches = [n for n in owned(tree) if target in (n.get("text"), n.get("content-desc"), n.get("resource-id"))]
+                    if not matches and action["optional"]:
+                        continue
+                if len(matches) != 1:
+                    raise ValueError(f"无法唯一定位验收路径第 {index} 步控件")
+                click(matches[0])
+            time.sleep(.45)
+        return focused(), applied, snapshot(label)
 
     def phase(label: str, locale: str, field: str) -> dict | None:
-        foreground, applied, tree = start(locale)
+        foreground, applied, tree = start(label, locale)
         nodes = owned(tree)
         matches = [has(nodes, row[field]) for row in checks]
         steps.append({"phase": label, "foreground": foreground, "locale_applied": applied,
