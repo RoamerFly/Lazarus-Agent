@@ -1,6 +1,6 @@
 const el=id=>document.getElementById(id);
 let config, job=null, sending=false, screenBusy=false, polling=false;
-let askUi, runtimeUi;
+let askUi, runtimeUi, modificationUi;
 function notice(s){el("notice").textContent=s;}
 async function api(url,method="GET",body=null){
   const headers={};
@@ -21,10 +21,11 @@ async function ensureRuntime(targets,resume){
 const labels={"installation-floor":"原包目标级别低于系统安装门槛","native-abi-mismatch":"原生库与设备架构不匹配","requires-newer-platform":"应用需要较新的 Android 版本","native-textrel-blocks-target-upgrade":"原生库含文本重定位，直接提升目标 API 会影响加载"};
 function render(){
   const busy=sending||job?.status==="running";
-  document.querySelectorAll("[data-act]").forEach(b=>b.disabled=!job||busy||b.dataset.act==="candidate"&&!job?.patch||b.dataset.act==="legacy"&&!config?.legacy);
+  document.querySelectorAll("[data-act]").forEach(b=>b.disabled=!job||busy||b.dataset.act==="candidate"&&!(job?.patch||job?.export?.modification_id)||b.dataset.act==="legacy"&&!config?.legacy);
   for(const id of ["file","demo","target"])el(id).disabled=busy||!config;
   for(const id of ["back","send","refresh"])el(id).disabled=!job||busy;
   askUi?.sync();
+  modificationUi?.sync();
   renderChat(busy);
   renderScope(busy);
   renderMatrix(job);
@@ -159,6 +160,9 @@ el("send").onclick=()=>sendInput({event:"text",value:el("text").value});
   runtimeUi=LazarusRuntimePrepare.bind({api,notice});
   bindResources();
   askUi=LazarusAsk.bind({api,getJob:()=>job,notice});
+  modificationUi=LazarusModifications.bind({api,getJob:()=>job,notice,selectedTargets,ensureRuntime,onStarted:async()=>{
+    job=await api(path(""));notice("改造任务已开始，可在运行记录中查看进展。");
+  }});
   // Range/multi-select edits only update the stated validation scope.  A
   // download begins on a concrete import, target switch, or repair action,
   // avoiding a premature image download while a checkbox combination is
@@ -172,7 +176,7 @@ setInterval(async()=>{if(!job||sending||polling)return;polling=true;const id=job
 },1400);
 let lastPreview=0;
 setInterval(()=>{
-  if(!job?.tests.length || document.hidden)return;
+  if((!job?.tests.length&&!job?.modification) || document.hidden)return;
   const now=Date.now();
   if(job.status==="running" && job.tests.some(test=>test.environment==="redroid-arm-lab") && now-lastPreview<12000)return;
   lastPreview=now;
@@ -235,6 +239,10 @@ async function feedback(kind){
     notice(kind==="issue"?"反馈已保存，可继续修复。":"真机复测结果已保存。");
   }catch(e){notice(e.message);}finally{sending=false;render();}
 }
+el("toModification").onclick=()=>{
+  if(!job||sending||job.status==="running"){notice("请先导入 APK 并等待当前操作结束。");return;}
+  modificationUi?.fromMessage(el("message").value.trim());
+};
 el("sendMessage").onclick=()=>feedback("issue");el("works").onclick=()=>feedback("works");
 el("problem").onclick=()=>{el("taskDetails").open=true;el("message").focus();};
 el("message").onkeydown=e=>{if(e.key==="Enter"&&e.ctrlKey)feedback("issue");};

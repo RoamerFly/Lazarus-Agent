@@ -309,7 +309,11 @@ def build_modified(
             run([java, "-jar", jar, "b", "--frame-path", framework, decoded, "--output", unsigned], env, work)
             run([zipalign, "-p", "-f", "4", unsigned, aligned], env, work)
             key = test_key(env)
-            run([java, "-jar", signer, "sign", "--ks", key, "--ks-pass", "env:REVIVER_KEYPASS", "--out", signed, aligned], env, work)
+            # Do not force the selected verification target into signing.  The
+            # original manifest's minSdk lets apksigner retain schemes required
+            # by older devices; verification below remains target-specific.
+            run([java, "-jar", signer, "sign", "--ks", key,
+                 "--ks-pass", "env:REVIVER_KEYPASS", "--out", signed, aligned], env, work)
             run([java, "-jar", signer, "verify", "--min-sdk-version", str(api), "--verbose", signed], env, work)
         except ApkEditBuildError:
             raise

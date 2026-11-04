@@ -21,3 +21,16 @@
 .model-settings label.row { display:flex; align-items:center; }
 .model-settings input[type="url"],.model-settings input[type="text"],.model-settings input[type="password"] { width:100%; }
 .model-tool-trace { margin:9px 0; padding:8px 10px; border-radius:9px; background:#eef7f4; color:#426764; font-size:12px; overflow-wrap:anywhere; }
+.modificationbox { margin-top:14px; color:#315d5a; font-size:13px; }
+.modificationbox > label,.modificationbox #rememberCriteria > label,.modificationbox #localizeCriteria > label { display:grid; gap:5px; margin-top:10px; }
+.modificationbox textarea,.modificationbox select { width:100%; }
+.modificationbox textarea { min-height:62px; border:1px solid #b6d6d4; border-radius:9px; padding:8px; resize:vertical; }
+.modificationbox #rememberCriteria,.modificationbox #localizeCriteria { margin-top:10px; padding:10px; border:1px solid #d6e8e5; border-radius:10px; background:#f7fcfa; }
+#modificationStatus { white-space:pre-wrap; padding-top:3px; }
+.localizationRow { display:grid; grid-template-columns:minmax(0,.85fr) minmax(0,1fr) minmax(0,1fr) auto auto; gap:6px; margin:7px 0; }
+.localizationRow input { min-width:0; width:100%; }
+.localizationVerify { display:flex!important; align-items:center; gap:3px!important; white-space:nowrap; margin:0!important; }
+.localize-resource-list { display:grid; gap:5px; margin:10px 0; max-height:170px; overflow:auto; }
+.localize-resource { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:8px; padding:7px 8px; border:1px solid #d6e8e5; border-radius:8px; background:white; }
+.localize-resource span { overflow-wrap:anywhere; color:#426764; }
+@media(max-width:620px){.localizationRow { grid-template-columns:1fr 1fr; }.localizationRow button,.localizationVerify { grid-column:span 2; }}

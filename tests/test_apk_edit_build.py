@@ -101,6 +101,8 @@ class ApkEditBuildTests(unittest.TestCase):
         self.assertTrue(output.is_file())
         self.assertEqual(result["source_sha256"], hashlib.sha256(source.read_bytes()).hexdigest())
         self.assertEqual(result["sha256"], hashlib.sha256(b"signed").hexdigest())
+        signing = next(command for command in seen if "sign" in command)
+        self.assertNotIn("--min-sdk-version", signing)
         self.assertTrue(all(all(ord(char) < 128 for char in item) for command in seen for item in command))
 
     def test_transform_must_have_kind(self):
