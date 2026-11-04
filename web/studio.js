@@ -240,6 +240,7 @@ async function feedback(kind){
       body.attachment=await new Promise((ok,fail)=>{const reader=new FileReader();reader.onload=()=>ok(reader.result);reader.onerror=fail;reader.readAsDataURL(f);});
     }
     body.translate_with_model=el("translateWithModel").checked;
+    body.local_translate=el("localTranslate").checked;
     job=await api(path("/message"),"POST",JSON.stringify(body));
     el("message").value="";el("attachment").value="";el("attachmentName").textContent="";
     notice(job.status==="running"?"汉化已开始，进度和下载链接会出现在对话中。":kind==="issue"?"反馈已保存，可继续修复。":"真机复测结果已保存。");

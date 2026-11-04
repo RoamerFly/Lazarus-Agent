@@ -1,0 +1,211 @@
+{
+  "version": "0.6.0",
+  "input": "恐龙战争.apk",
+  "entry": "Edge 工作台，目标 Android 16，发送「汉化成中文」",
+  "source_sha256": "be0eb93df3b9d34994808caef4606eba31b2781c7672eb515824286e38e7ef21",
+  "output_sha256": "0b6649949b69b6235e7addb79325df5f1e356696cc31e1732acc5228a046850f",
+  "size": 28796706,
+  "sdk": 36,
+  "model": "OPUS-MT en→zh / Argos 1.9，本机 CPU 实际推理",
+  "translation": {
+    "translated": 2037,
+    "discovered": 2052,
+    "tables_discovered": 6,
+    "tables_updated": 6,
+    "game_entries_updated": 810,
+    "model_translations": 718,
+    "game_text_total": 810,
+    "embedded_translations": 829,
+    "resources_updated": 347,
+    "image_labels_updated": 51,
+    "images_updated": [
+      {
+        "path": "assets/images/EquipmentStore/Jurassic_Shop.png",
+        "labels": [
+          "Jurassic",
+          "Shop"
+        ]
+      },
+      {
+        "path": "assets/images/medicinal_liquid/empty_slot_potion.png",
+        "labels": [
+          "EMPTY",
+          "SLOT"
+        ]
+      },
+      {
+        "path": "assets/images/plist/arena_2.png",
+        "labels": [
+          "Connection Error",
+          "Connecting..."
+        ]
+      },
+      {
+        "path": "assets/images/plist/campaign_2.png",
+        "labels": [
+          "Map",
+          "Auto",
+          "Troop",
+          "Select"
+        ]
+      },
+      {
+        "path": "assets/images/plist/campaign_result_1.png",
+        "labels": [
+          "You win!",
+          "You lose!"
+        ]
+      },
+      {
+        "path": "assets/images/plist/challenge_boss.png",
+        "labels": [
+          "Ancestor's Treasure",
+          "Lucky",
+          "Wheel"
+        ]
+      },
+      {
+        "path": "assets/images/plist/dinosaur_card.png",
+        "labels": [
+          "DINOSAUR",
+          "WAR",
+          "Dinosaur",
+          "Cards"
+        ]
+      },
+      {
+        "path": "assets/images/plist/dropEgg_2.png",
+        "labels": [
+          "Daily Goals",
+          "Lucky Egg"
+        ]
+      },
+      {
+        "path": "assets/images/plist/EquipmentStore_1.png",
+        "labels": [
+          "EMPTY",
+          "SLOT"
+        ]
+      },
+      {
+        "path": "assets/images/plist/EquipmentStore_2.png",
+        "labels": [
+          "Closed"
+        ]
+      },
+      {
+        "path": "assets/images/plist/level_bg.jpg",
+        "labels": [
+          "CONGRATS!"
+        ]
+      },
+      {
+        "path": "assets/images/plist/loading_1.png",
+        "labels": [
+          "More",
+          "New",
+          "More",
+          "Play",
+          "Play",
+          "Rate",
+          "Rate",
+          "New"
+        ]
+      },
+      {
+        "path": "assets/images/plist/loading_2.jpg",
+        "labels": [
+          "Dinosaur War"
+        ]
+      },
+      {
+        "path": "assets/images/plist/maincity_1.png",
+        "labels": [
+          "Central Base"
+        ]
+      },
+      {
+        "path": "assets/images/plist/market.png",
+        "labels": [
+          "Market"
+        ]
+      },
+      {
+        "path": "assets/images/plist/menu.png",
+        "labels": [
+          "New",
+          "Get more"
+        ]
+      },
+      {
+        "path": "assets/images/plist/moshi_market.png",
+        "labels": [
+          "Crystal",
+          "Shop",
+          "BUY"
+        ]
+      },
+      {
+        "path": "assets/images/plist/new_guide_1.png",
+        "labels": [
+          "WELCOME!"
+        ]
+      },
+      {
+        "path": "assets/images/plist/talk.png",
+        "labels": [
+          "Skip",
+          "Skip"
+        ]
+      },
+      {
+        "path": "assets/images/plist/worldmap_bg.jpg",
+        "labels": [
+          "Mount Jose Erica",
+          "Roxton Basin",
+          "Stonehenge",
+          "Orient Cradle",
+          "Volcano Dalone",
+          "Maple Whiteland"
+        ]
+      },
+      {
+        "path": "assets/images/task_reward/task_complete_title.png",
+        "labels": [
+          "Goal completed!"
+        ]
+      }
+    ],
+    "ocr_regions_detected": 53,
+    "outline_fonts": [
+      {
+        "name": "arial.ttf",
+        "missing": 1433
+      },
+      {
+        "name": "ariblk.ttf",
+        "missing": 1433
+      },
+      {
+        "name": "ARLRDBD.TTF",
+        "missing": 1434
+      }
+    ],
+    "bitmap_atlases_updated": 1,
+    "bitmap_glyphs_added": 1439
+  },
+  "audit": {
+    "nonempty_source_pool_rows": 810,
+    "changed_rows_with_han": 810,
+    "all_pool_ids_preserved": true,
+    "korean_pools_unchanged": true,
+    "zip_crc": true,
+    "test_device": "ReDroid ARM，API 36，zh-CN，覆盖安装后回读安装包哈希",
+    "screens_observed": [
+      "中文启动标题、开始、更多、评分",
+      "中文教程",
+      "部落地图、获取按钮"
+    ],
+    "limit": "品牌标识、玩家存档里的昵称与专名可能保留原文；未通关或逐句人工校译。"
+  }
+}

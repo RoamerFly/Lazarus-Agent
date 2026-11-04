@@ -274,6 +274,10 @@ def run_chat_localization(folder, state, source, run_id, use_model):
         info = result["transform"]
         state.setdefault("localized_candidates", {})[run_id] = result
         text = f"已生成签名汉化候选，已翻译 {info['translated']} 项，扫描到 {info['discovered']} 项。"
+        if "image_labels_updated" in info:
+            text += f" 模型补译 {info['model_translations']} 条不同原文，重绘 {info['image_labels_updated']} 处图片文字。"
+        if "game_text_total" in info:
+            text += f" 游戏文本表已翻译 {info['game_entries_updated']}/{info['game_text_total']} 条非空记录。"
         if "fonts" in info:
             text += f" 已核对 {info['fonts']} 套游戏字库，译文写入英文语言槽。"
         add_message(state, "assistant", text + " 尚待在目标设备上试玩。", localization_id=run_id)
@@ -325,7 +329,7 @@ def chat_message(job: str, body: dict):
         initial = read(folder)
         try:
             threading.Thread(target=run_chat_localization,
-                             args=(folder,state,source,run_id,body.get("translate_with_model") is True),
+                             args=(folder,state,source,run_id,True if body.get("translate_with_model") is True else ("local" if body.get("local_translate") is True else False)),
                              daemon=True).start()
         except RuntimeError:
             state["status"] = "error"

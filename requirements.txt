@@ -1,6 +1,10 @@
 fastapi==0.162.0
 uvicorn==0.54.0
-opencv-python-headless==4.13.0.92
+opencv-python==4.13.0.92
 cryptography>=43,<47
 UnityPy==1.25.4
 fonttools>=4.60,<5
+ctranslate2==4.8.3
+sentencepiece==0.2.2
+opencc-python-reimplemented==0.1.7
+rapidocr_onnxruntime==1.2.3

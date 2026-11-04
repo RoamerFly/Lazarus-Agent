@@ -54,7 +54,14 @@ def main():
         from auto_translation import is_command
         if not is_command("汉化成中文") or not get_typetree().ClassInformation:
             raise RuntimeError("自动汉化资源分析器未完整打包")
-        payload["chat_localization"] = ["android-resources", "unity4-ngui"]
+        from ctranslate2 import Translator
+        from sentencepiece import SentencePieceProcessor
+        from opencc import OpenCC
+        from rapidocr_onnxruntime import RapidOCR
+        if not callable(Translator) or not callable(SentencePieceProcessor) or OpenCC("t2s").convert("龍") != "龙":
+            raise RuntimeError("英译中推理组件不可用")
+        RapidOCR(intra_op_num_threads=1, inter_op_num_threads=1)
+        payload["chat_localization"] = ["android-resources", "unity4-ngui", "local-mt", "texture-ocr"]
         payload["modifications"] = sorted(CAPABILITIES)
         print(json.dumps(payload, ensure_ascii=False))
         return
