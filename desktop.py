@@ -50,6 +50,11 @@ def main():
                 raise RuntimeError(f"改造工具未完整打包：{kind}")
         if not (Path(__file__).resolve().parent / "web/modifications.js").is_file():
             raise RuntimeError("缺少改造工作台页面脚本")
+        from UnityPy.helpers.Tpk import get_typetree
+        from auto_translation import is_command
+        if not is_command("汉化成中文") or not get_typetree().ClassInformation:
+            raise RuntimeError("自动汉化资源分析器未完整打包")
+        payload["chat_localization"] = ["android-resources", "unity4-ngui"]
         payload["modifications"] = sorted(CAPABILITIES)
         print(json.dumps(payload, ensure_ascii=False))
         return

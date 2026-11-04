@@ -94,7 +94,7 @@ async function loadJob(file,demo){
   try{
     const targets=selectedTargets();
     if(!targets.length)throw Error("请至少选择一个目标版本。");
-    if(!await ensureRuntime(targets,()=>loadJob(file,demo)))return;
+    if(!config.editing_ready && !await ensureRuntime(targets,()=>loadJob(file,demo)))return;
     job=await api("/api/import/"+Math.max(...targets)+(demo?"?demo=true":""),"POST",file);
     el("message").value="";el("attachment").value="";el("attachmentName").textContent="";
     el("taskTap").value="";el("taskExpect").value="";lastFile=file;isDemo=demo;localStorage.setItem("reviverJob",job.id);el("screen").hidden=true;el("standby").hidden=false;notice("已导入 · Android "+(job.api-20));
@@ -104,7 +104,7 @@ el("file").onchange=e=>{if(e.target.files[0])loadJob(e.target.files[0],false);};
 el("demo").onclick=()=>loadJob(null,true);
 el("target").onchange=async()=>{
   const requested=Number(el("target").value);
-  if(!await ensureRuntime(selectedTargets(),()=>{
+  if(!config.editing_ready && !await ensureRuntime(selectedTargets(),()=>{
     el("target").value=requested;
     el("target").dispatchEvent(new Event("change"));
   })){
@@ -192,6 +192,7 @@ function renderChat(busy){
   el("arch").textContent=job.package.native_abis.join(" · ")||"通用字节码";
   const signature=JSON.stringify([job.id,versions,messages]);
   if(signature===chatSignature)return;
+  if(el("feedbackVersion").dataset.job!==job.id)el("translateWithModel").checked=false;
   const same=el("feedbackVersion").dataset.job===job.id;
   const sameCount=Number(el("feedbackVersion").dataset.count)===versions.length;
   const selected=same&&sameCount?el("feedbackVersion").value:"";
@@ -215,6 +216,10 @@ function renderChat(busy){
   for(const m of entries){
     const bubble=document.createElement("div");bubble.className="bubble "+m.role;bubble.textContent=(m.kind&&m.version?"V"+m.version+" · ":"")+m.text;
     if(m.attachment){const image=document.createElement("img");image.alt="问题截图";image.src=path("/attachments/"+m.attachment);bubble.append(image);}
+    if(m.localization_id){
+      const link=document.createElement("a");link.textContent="下载汉化 APK";
+      link.href=path("/localized/"+encodeURIComponent(m.localization_id));bubble.append(document.createElement("br"),link);
+    }
     chat.append(bubble);
   }
   chat.scrollTop=chat.scrollHeight;
@@ -234,9 +239,10 @@ async function feedback(kind){
       if(f.size>3*1024*1024)throw Error("截图不能超过 3 MiB");
       body.attachment=await new Promise((ok,fail)=>{const reader=new FileReader();reader.onload=()=>ok(reader.result);reader.onerror=fail;reader.readAsDataURL(f);});
     }
-    job=await api(path("/feedback"),"POST",JSON.stringify(body));
+    body.translate_with_model=el("translateWithModel").checked;
+    job=await api(path("/message"),"POST",JSON.stringify(body));
     el("message").value="";el("attachment").value="";el("attachmentName").textContent="";
-    notice(kind==="issue"?"反馈已保存，可继续修复。":"真机复测结果已保存。");
+    notice(job.status==="running"?"汉化已开始，进度和下载链接会出现在对话中。":kind==="issue"?"反馈已保存，可继续修复。":"真机复测结果已保存。");
   }catch(e){notice(e.message);}finally{sending=false;render();}
 }
 el("toModification").onclick=()=>{

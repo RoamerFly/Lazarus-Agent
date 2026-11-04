@@ -1,0 +1,44 @@
+{
+  "version": "0.5.0",
+  "command": "汉化成中文",
+  "live_model_tested": false,
+  "pacific_rim": {
+    "entry": "原始 APK 导入、聊天命令、任务轮询、下载候选",
+    "original_sha256": "9697bb72668ec713bca647b26878210df30c76d65cc7a927d4a1a844591c8180",
+    "build": {
+      "kind": "unity-ngui-zh",
+      "source_sha256": "055b9441a40c46489e6da66e460003dfc356e1a247465490bf08d0224de1dddb",
+      "sha256": "f0373ebeadcad3dd69f7f4f4646a9c79fe982c3c7278b67cb48fd1940b9e1bc9",
+      "candidate": "candidate.apk",
+      "api": 36,
+      "apktool": {
+        "version": "2.12.1",
+        "sha256": "66cf4524a4a45a7f56567d08b2c9b6ec237bcdd78cee69fd4a59c8a0243aeafa"
+      },
+      "transform": {
+        "translated": 42,
+        "discovered": 561,
+        "tables": 1,
+        "fonts": 5,
+        "model_translations": 0,
+        "resource_files": 29
+      },
+      "compatibility_rules": [
+        "embedded-native-payload"
+      ]
+    },
+    "verified": "Android 16 API 36 工作台配对 ARM 隔离实例，覆盖安装后通过包哈希及解压 OBB 哈希复核。点击标题进入菜单，生涯模式、生存模式、自定义对战、战绩、黑市均可辨读。",
+    "expansion_sha256": "f9645ae24f3104bebb43deea25957ce8eae50df88bf31ce39728a8857ba8fc98",
+    "screenshots_sha256": {
+      "intro": "35bef5cf792713c8a69e4bf67cc73fb991bd414d02e7a2d632a022c81c666843",
+      "career": "63cc9abf7adb4ca18a879df622e360f3d8ef252bfc0eb39182277a54cc892306"
+    }
+  },
+  "oi_notepad": {
+    "entry": "Edge 浏览器上传真实 OI Notepad 1.3、在修复对话输入命令并点击下载",
+    "translated": 2,
+    "discovered": 37,
+    "download_sha256": "83676c43eaf6aca0d4defd19a9a88adf43bca1752dd4b3f36d572b9d2dd8af78"
+  },
+  "coverage": "本轮验证到游戏主菜单。未验证所有译文、后续关卡或用户真机。模型输出校验通过模拟响应测试。"
+}

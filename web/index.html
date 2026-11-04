@@ -17,7 +17,8 @@
 <div class="row exports"><a id="apk" class="primary" hidden>下载当前 APK</a><a id="nativeCandidate" hidden>下载试验候选</a></div><small id="verdict"></small></article>
 <article class="card chat"><div class="row"><i class="bot">••</i><h2>修复对话</h2><i class="dot"></i></div><div id="messages" class="messages" aria-live="polite"><div class="bubble">导入旧 APK 后，我会在你选择的 Android 版本上试运行。你可以把真机复测结果和问题截图发在这里。</div></div>
 <div class="quick row"><button id="works">✓ 真机可运行</button><button id="problem">反馈新问题</button><button data-act="retry">继续修复</button></div>
-<div class="composer"><textarea id="message" placeholder="描述问题、复现步骤或真机复测结果…" maxlength="2000"></textarea><div class="row between"><label class="attach">＋ 截图<input type="file" id="attachment" accept="image/png,image/jpeg"></label><span id="attachmentName"></span><select id="feedbackVersion" aria-label="反馈版本"></select><button type="button" id="toModification">作为改造需求</button><button id="sendMessage" class="primary">发送 ↑</button></div></div>
+<div class="composer"><textarea id="message" placeholder="输入“汉化成中文”生成 APK，或描述真机问题…" maxlength="2000"></textarea><div class="row between"><label class="attach">＋ 截图<input type="file" id="attachment" accept="image/png,image/jpeg"></label><span id="attachmentName"></span><select id="feedbackVersion" aria-label="反馈版本"></select><button type="button" id="toModification">作为改造需求</button><button id="sendMessage" class="primary">发送 ↑</button></div></div>
+<label><input type="checkbox" id="translateWithModel"> 汉化时将未命中离线词库的界面原文发给已配置模型翻译</label>
 <details class="askbox"><summary>问助手 · 流程与兼容性</summary>
 <textarea id="askQuestion" maxlength="800" aria-label="向助手提问" placeholder="例如：这份 APK 在哪些版本上通过了验证？"></textarea>
 <div class="row"><label><input id="askUseModel" type="checkbox"> 将问题与精简证据发送给已配置的模型</label><button id="askSend">提问</button></div>

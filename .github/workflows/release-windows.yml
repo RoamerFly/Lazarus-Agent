@@ -8,7 +8,7 @@ on:
       version:
         description: SemVer without v (must equal app_version.py)
         required: true
-        default: '0.4.0'
+        default: '0.5.0'
       publish:
         description: Create/update GitHub Release
         required: true
@@ -85,6 +85,9 @@ jobs:
           }
           if ($tag -eq 'v0.4.0') {
             $notes = "新增通用功能改造工作流。可验证旧应用是否记住上次打开的文件，并支持扫描、选择和验收简体中文资源改造。改造候选仍须在所选 Android 版本逐项复测。`n`n" + $notes
+          }
+          if ($tag -eq 'v0.5.0') {
+            $notes = "在修复对话输入「汉化成中文」即可分析 APK、补字并下载签名候选。支持普通 Android 字符资源及 Unity 4 NGUI 的部分语言表和位图字库。离线词库默认开启，模型补译可选。已用《环太平洋》和 OI 记事本做入口回归。" + [Environment]::NewLine + [Environment]::NewLine + $notes
           }
           if (gh release view $tag 2>$null) {
             gh release upload $tag release/* --clobber

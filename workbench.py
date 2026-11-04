@@ -169,17 +169,23 @@ def import_package(folder,api):
     return state
 
 
+def editing_ready():
+    from offline_kit import discover_java_home
+    return bool(discover_java_home() and all((TOOLS / name).is_file()
+                for name in ("aapt.exe", "zipalign.exe", "lib/apksigner.jar")))
+
+
 @app.get("/api/config")
 def config():
     model=public_config()
     return {"token":TOKEN,"targets":{str(a):ready(a) for a in INSTALL_FLOOR},"legacy":ready(30),
-            "desktop_protocol":1, "demo_label":"旧版记事本" if (ROOT/"old_apk/OI-Notepad-1.3.apk").is_file() else "归档读取器",
+            "editing_ready":editing_ready(), "desktop_protocol":1, "demo_label":"旧版记事本" if (ROOT/"old_apk/OI-Notepad-1.3.apk").is_file() else "归档读取器",
             "model":model["model"] if model["enabled"] else None}
 
 
 @app.post("/api/import/{api}")
 async def ingest(api:int,request:Request,demo:bool=False):
-    if api not in INSTALL_FLOOR or not ready(api):
+    if api not in INSTALL_FLOOR or not (ready(api) or editing_ready()):
         raise HTTPException(400,"请选择已配置的目标系统")
     folder=STORAGE/uuid.uuid4().hex
     folder.mkdir()
@@ -219,7 +225,11 @@ def status(job:str):
             state=read(folder)
             if state["status"]=="running" and state.get("worker")!=INSTANCE:
                 message="上次执行被工作台重启中断，可重新验证。"
-                state.update(status="error",export=None)
+                if state.get("action")=="chat-localize":
+                    add_message(state,"assistant","汉化被工作台重启中断。可重新发送“汉化成中文”。")
+                    state["status"]="error"
+                else:
+                    state.update(status="error",export=None)
                 state["events"].append({"time":now(),"text":message})
                 if state.get("action")=="modify":
                     change=state["modification"]
@@ -250,6 +260,82 @@ def history():
         except (OSError,KeyError,ValueError):
             continue
     return sorted(jobs,key=lambda j:j["updated"],reverse=True)
+
+
+def run_chat_localization(folder, state, source, run_id, use_model):
+    def progress(text):
+        add_message(state, "assistant", text)
+        save(folder, state)
+    try:
+        from auto_localize import build
+        directory = folder / "localizations" / run_id
+        directory.mkdir(parents=True)
+        result = build(source, directory / "candidate.apk", state["api"], TOOLS, use_model, progress)
+        info = result["transform"]
+        state.setdefault("localized_candidates", {})[run_id] = result
+        text = f"已生成签名汉化候选，已翻译 {info['translated']} 项，扫描到 {info['discovered']} 项。"
+        if "fonts" in info:
+            text += f" 已核对 {info['fonts']} 套游戏字库，译文写入英文语言槽。"
+        add_message(state, "assistant", text + " 尚待在目标设备上试玩。", localization_id=run_id)
+        state["status"] = "ready"
+    except Exception as exc:
+        state["status"] = "error"
+        add_message(state, "assistant", "本次汉化未生成可下载的 APK。" + str(exc)[:600])
+    finally:
+        try:
+            state["updated"] = now()
+            save(folder, state)
+        finally:
+            operation.release()
+
+
+@app.get("/api/jobs/{job}/localized/{run_id}")
+def localized_candidate(job: str, run_id: str):
+    folder = job_dir(job)
+    state = read(folder)
+    if not re.fullmatch("[a-f0-9]{32}", run_id) or run_id not in state.get("localized_candidates", {}):
+        raise HTTPException(404, "汉化候选不存在")
+    path = folder / "localizations" / run_id / "candidate.apk"
+    if not path.is_file():
+        raise HTTPException(404, "候选文件缺失")
+    return FileResponse(path, filename=f"{state['package']['package']}-zh-android-api{state['api']}.apk")
+
+
+@app.post("/api/jobs/{job}/message")
+def chat_message(job: str, body: dict):
+    from auto_translation import is_command
+    if body.get("kind") != "issue" or body.get("attachment") or not is_command(body.get("text")):
+        return feedback(job, body)
+    folder = job_dir(job)
+    if not operation.acquire(blocking=False):
+        raise HTTPException(409, "请等待当前任务结束后再汉化")
+    try:
+        state = read(folder)
+        selected = body.get("version")
+        source = folder / "original.apk"
+        if selected is not None:
+            if type(selected) is not int or not any(v["number"] == selected for v in state.get("versions", [])):
+                raise HTTPException(400, "所选版本不存在")
+            source = folder / "versions" / f"{selected}.apk"
+        run_id = uuid.uuid4().hex
+        add_message(state, "user", body["text"])
+        add_message(state, "assistant", "开始分析并生成汉化候选。")
+        state.update(status="running", action="chat-localize", worker=INSTANCE, updated=now())
+        save(folder,state)
+        initial = read(folder)
+        try:
+            threading.Thread(target=run_chat_localization,
+                             args=(folder,state,source,run_id,body.get("translate_with_model") is True),
+                             daemon=True).start()
+        except RuntimeError:
+            state["status"] = "error"
+            add_message(state, "assistant", "未能启动汉化任务，请重试。")
+            save(folder, state)
+            raise
+        return initial
+    except BaseException:
+        operation.release()
+        raise
 
 
 @app.post("/api/jobs/{job}/feedback")
@@ -288,7 +374,7 @@ def feedback_image(job:str,name:str):
 @app.post("/api/jobs/{job}/target/{api}")
 def change_target(job:str,api:int):
     source=job_dir(job)
-    if api not in INSTALL_FLOOR or not ready(api):
+    if api not in INSTALL_FLOOR or not (ready(api) or editing_ready()):
         raise HTTPException(400,"目标镜像不可用")
     folder=STORAGE/uuid.uuid4().hex
     folder.mkdir()

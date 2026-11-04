@@ -1,8 +1,9 @@
 # -*- mode: python ; coding: utf-8 -*-
 from pathlib import Path
+from PyInstaller.utils.hooks import collect_data_files
 root = Path(SPECPATH)
 a = Analysis([str(root/"desktop.py")], pathex=[str(root)],
-    datas=[(str(root/"web"),"web"),(str(root/"tools/start_lab.ps1"),"tools"),
+    datas=collect_data_files("UnityPy")+[(str(root/"web"),"web"),(str(root/"tools/start_lab.ps1"),"tools"),
            (str(root/"update/lazarus-update-public.pem"),"update"),
            (str(root/"fixtures/archive-reader/archive-reader-broken.apk"),"fixtures/archive-reader")],
     hiddenimports=["uvicorn.logging","uvicorn.loops.asyncio","uvicorn.protocols.http.h11_impl",
