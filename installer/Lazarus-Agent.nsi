@@ -1,6 +1,8 @@
 Unicode true
 RequestExecutionLevel user
 SetCompressor /SOLID lzma
+Icon "..\web\assets\lazarus.ico"
+UninstallIcon "..\web\assets\lazarus.ico"
 
 !ifndef SOURCE_EXE
   !error "Pass /DSOURCE_EXE=path-to-Lazarus-Agent.exe"
@@ -51,6 +53,7 @@ Section "Lazarus Agent (required)" SecMain
   WriteRegStr HKCU "${UNINSTALL_REG_KEY}" "DisplayName" "${APP_NAME}"
   WriteRegStr HKCU "${UNINSTALL_REG_KEY}" "DisplayVersion" "${VERSION}"
   WriteRegStr HKCU "${UNINSTALL_REG_KEY}" "UninstallString" '"$INSTDIR\Uninstall.exe"'
+  WriteRegStr HKCU "${UNINSTALL_REG_KEY}" "DisplayIcon" '"$INSTDIR\${APP_EXE}",0'
   WriteRegDWORD HKCU "${UNINSTALL_REG_KEY}" "NoModify" 1
   WriteRegDWORD HKCU "${UNINSTALL_REG_KEY}" "NoRepair" 1
 !ifndef NO_SHORTCUTS

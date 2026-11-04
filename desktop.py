@@ -5,7 +5,6 @@ import logging
 import os
 from pathlib import Path
 import socket
-import subprocess
 import sys
 import threading
 import time
@@ -20,12 +19,53 @@ from storage_paths import configure_environment
 PATHS = configure_environment()
 
 
-def find_edge():
-    for base in ("PROGRAMFILES(X86)", "PROGRAMFILES", "LOCALAPPDATA"):
-        path = Path(os.environ.get(base, ".")) / "Microsoft/Edge/Application/msedge.exe"
-        if path.is_file():
-            return path
-    raise RuntimeError("请先安装 Microsoft Edge，再启动桌面工作台。")
+def claim_desktop():
+    """Hold one native window per storage location, focusing it on repeat launch."""
+    import hashlib
+    from ctypes import wintypes
+
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel.CreateMutexW.argtypes = [ctypes.c_void_p, wintypes.BOOL, wintypes.LPCWSTR]
+    kernel.CreateMutexW.restype = wintypes.HANDLE
+    identity = hashlib.sha256(str(PATHS.root).casefold().encode()).hexdigest()[:20]
+    handle = kernel.CreateMutexW(None, False, "Local\\Lazarus-Agent-" + identity)
+    if not handle:
+        raise ctypes.WinError(ctypes.get_last_error())
+    if ctypes.get_last_error() != 183:
+        return handle
+    kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+    kernel.CloseHandle(handle)
+    user = ctypes.windll.user32
+    user.FindWindowW.argtypes = [wintypes.LPCWSTR, wintypes.LPCWSTR]
+    user.FindWindowW.restype = wintypes.HWND
+    user.ShowWindow.argtypes = [wintypes.HWND, ctypes.c_int]
+    user.SetForegroundWindow.argtypes = [wintypes.HWND]
+    user.IsIconic.argtypes = [wintypes.HWND]
+    for _ in range(100):
+        window = user.FindWindowW(None, APP_NAME)
+        if window:
+            if user.IsIconic(window):
+                user.ShowWindow(window, 9)
+            user.SetForegroundWindow(window)
+            return None
+        time.sleep(.1)
+    raise RuntimeError("工作台仍在启动，请稍后重新打开。")
+
+
+def show_window(url):
+    import webview
+
+    from webview.platforms.winforms import is_chromium
+    if not is_chromium:
+        raise RuntimeError("请安装 Microsoft Edge WebView2 Runtime 后重新打开工作台。下载地址 https://go.microsoft.com/fwlink/p/?LinkId=2124703")
+
+    # WebView2 has its own application profile and no browser sign-in UI.
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("RoamerFly.LazarusAgent")
+    webview.settings["ALLOW_DOWNLOADS"] = True
+    webview.create_window(APP_NAME, url, width=1280, height=900, min_size=(960, 640))
+    webview.start(gui="edgechromium", private_mode=False,
+                  storage_path=str(PATHS.data / "desktop-webview2"),
+                  icon=str(Path(__file__).resolve().parent / "web/assets/lazarus.ico"))
 
 
 def existing_app(url):
@@ -61,6 +101,10 @@ def main():
         if not callable(Translator) or not callable(SentencePieceProcessor) or OpenCC("t2s").convert("龍") != "龙":
             raise RuntimeError("英译中推理组件不可用")
         RapidOCR(intra_op_num_threads=1, inter_op_num_threads=1)
+        import webview
+        if not callable(webview.create_window) or not (Path(__file__).resolve().parent / "web/assets/lazarus.ico").is_file():
+            raise RuntimeError("桌面窗口或图标组件未完整打包")
+        payload["desktop_renderer"] = "webview2"
         payload["chat_localization"] = ["android-resources", "unity4-ngui", "local-mt", "texture-ocr"]
         payload["modifications"] = sorted(CAPABILITIES)
         print(json.dumps(payload, ensure_ascii=False))
@@ -81,7 +125,9 @@ def main():
             break
     port = int(os.environ.get("REVIVER_PORT", "8767"))
     url = f"http://127.0.0.1:{port}"
-    edge = find_edge()
+    mutex = claim_desktop()
+    if mutex is None:
+        return
     server = None
     service = None
     sock = socket.socket()
@@ -107,9 +153,7 @@ def main():
                 time.sleep(.1)
             else:
                 raise RuntimeError("本地服务启动超时。")
-        profile = PATHS.data / "desktop-edge"
-        subprocess.run([str(edge), f"--app={url}", f"--user-data-dir={profile}",
-                        "--no-first-run", "--disable-first-run-ui", "--window-size=1280,900"],check=True)
+        show_window(url)
     finally:
         if service:
             # Finish an accepted repair even when the window is closed.
@@ -117,6 +161,7 @@ def main():
                 server.should_exit=True
             service.join()
         sock.close()
+        ctypes.windll.kernel32.CloseHandle(ctypes.c_void_p(mutex))
 
 
 if __name__=="__main__":

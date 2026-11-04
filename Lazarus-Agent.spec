@@ -14,4 +14,4 @@ a = Analysis([str(root/"desktop.py")], pathex=[str(root)],
                    "remember_file","apk_edit_build","modification_probe","localization_probe","localization_edit"],
     excludes=["matplotlib","pytest","tkinter","IPython","torch","tensorflow","transformers","ctranslate2.converters","ctranslate2.specs"], noarchive=False)
 pyz = PYZ(a.pure)
-exe = EXE(pyz,a.scripts,a.binaries,a.datas,[],name="Lazarus-Agent",console=False,upx=False)
+exe = EXE(pyz,a.scripts,a.binaries,a.datas,[],name="Lazarus-Agent",icon=str(root/"web/assets/lazarus.ico"),console=False,upx=False)
