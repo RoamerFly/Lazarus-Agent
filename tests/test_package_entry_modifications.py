@@ -40,9 +40,9 @@ class PackageEntryModificationTests(unittest.TestCase):
             report.write_text(__import__("json").dumps({"cases":cases}),encoding="utf-8")
             with patch.object(package_entry,"ROOT",root):
                 returned, verified=package_entry.validated_modification_cases()
-            self.assertEqual(returned,report)
+            self.assertEqual(returned, report.resolve())
             self.assertEqual([case[0] for case in verified],["记住文件","简体中文"])
-            self.assertEqual(verified[0][1],root/package_entry.DEFAULT_MODIFICATION_INPUTS["remember-file"])
+            self.assertEqual(verified[0][1], (root/package_entry.DEFAULT_MODIFICATION_INPUTS["remember-file"]).resolve())
 
     def test_rejects_an_export_when_its_declared_hash_does_not_match(self):
         with tempfile.TemporaryDirectory() as raw:
