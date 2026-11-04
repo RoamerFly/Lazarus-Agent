@@ -11,7 +11,6 @@ dialog { width:min(960px,calc(100vw - 48px)); scrollbar-width:none; }
 dialog::-webkit-scrollbar, .modal-content::-webkit-scrollbar, .messages::-webkit-scrollbar { display:none; }
 #aboutDialog { width:min(760px,calc(100vw - 48px)); }
 #modificationDialog .modal-content { max-width:900px; width:100%; margin-inline:auto; }
-#translationDialog label { display:flex; gap:10px; align-items:center; padding:12px 0; }
 #scopeDialog .compatibility .target { gap:14px; }
 #deliveryDialog .version { padding:16px; }
 @media(min-width:960px) and (min-height:600px) {
@@ -76,3 +75,25 @@ dialog::-webkit-scrollbar, .modal-content::-webkit-scrollbar, .messages::-webkit
 .modal-footer { flex-shrink:0; border-top:1px solid #d4e7e3; padding-top:12px; margin-top:12px; }
 .modal-footer .buttons { margin:0; }
 .modal-header .row { flex-wrap:wrap; justify-content:flex-end; }
+
+/* Dialog sizes follow the task and content, including empty states. */
+dialog { width:min(680px,calc(100vw - 32px)); max-height:calc(100dvh - 48px); }
+.workspace-modal { width:min(720px,calc(100vw - 32px)); height:auto; min-height:min(360px,calc(100dvh - 48px)); max-height:calc(100dvh - 48px); }
+#historyDialog { width:min(600px,calc(100vw - 32px)); min-height:min(300px,calc(100dvh - 48px)); }
+#jobList.empty-state { display:grid; place-items:center; min-height:160px; padding:24px; border:1px dashed #c7ded9; border-radius:14px; background:#f5faf8; color:#53716b; }
+#jobList button { overflow-wrap:anywhere; white-space:normal; }
+#resourcesDialog, #runtimeDialog { width:min(760px,calc(100vw - 32px)); min-height:min(420px,calc(100dvh - 48px)); }
+#aboutDialog { width:min(600px,calc(100vw - 32px)); min-height:min(360px,calc(100dvh - 48px)); }
+#scopeDialog, #taskDialog { width:min(600px,calc(100vw - 32px)); min-height:min(320px,calc(100dvh - 48px)); }
+#modelSettingsDialog { width:min(680px,calc(100vw - 32px)); }
+#diagnosticsDialog { width:min(960px,calc(100vw - 48px)); height:min(680px,calc(100dvh - 48px)); }
+#modificationDialog { width:min(1040px,calc(100vw - 48px)); height:min(780px,calc(100dvh - 48px)); }
+.model-settings select { width:100%; }
+@media(min-width:700px) {
+  .model-settings { grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px 18px; }
+  .model-settings > .between, .model-settings > p, .model-settings > .buttons,
+  .model-settings > label:has(#modelUrl), .model-settings > label:has(#modelKey),
+  .model-settings > label.row { grid-column:1/-1; }
+  .model-settings > label:has(#modelProvider) { grid-column:1; grid-row:3; }
+  .model-settings > label:has(#modelName) { grid-column:2; grid-row:3; }
+}

@@ -231,6 +231,13 @@ def safe_urlopen(request: Request, timeout: int = 15):
     return build_opener(_NoRedirect()).open(request, timeout=timeout)
 
 
+def chat_payload(url: str, payload: dict) -> dict:
+    """Use the existing non-thinking tool protocol with the official DeepSeek API."""
+    if urlsplit(url).hostname == "api.deepseek.com":
+        return {**payload, "thinking": {"type": "disabled"}}
+    return payload
+
+
 def test_connection(config: dict | None = None) -> dict:
     """Confirm a compatible endpoint accepts a bounded function-call request."""
     effective = get_config() if config is None else config
@@ -244,7 +251,7 @@ def test_connection(config: dict | None = None) -> dict:
     headers = {"Content-Type": "application/json"}
     if key:
         headers["Authorization"] = "Bearer " + key
-    request = Request(url + "/chat/completions", data=json.dumps(payload).encode("utf-8"), headers=headers)
+    request = Request(url + "/chat/completions", data=json.dumps(chat_payload(url, payload)).encode("utf-8"), headers=headers)
     try:
         with safe_urlopen(request, timeout=15) as response:
             result = json.loads(response.read(128 * 1024))

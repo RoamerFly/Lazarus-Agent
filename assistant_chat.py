@@ -8,7 +8,7 @@ only when the caller explicitly opts in.
 import json
 import re
 from urllib.request import Request
-from model_settings import get_config, safe_urlopen as urlopen
+from model_settings import get_config, chat_payload, safe_urlopen as urlopen
 
 
 MAX_QUESTION = 800
@@ -125,7 +125,7 @@ def answer_question(state, question, use_model=False):
     if key:
         headers["Authorization"] = "Bearer " + key
     try:
-        request = Request(base + "/chat/completions", data=json.dumps(payload).encode("utf-8"), headers=headers)
+        request = Request(base + "/chat/completions", data=json.dumps(chat_payload(base, payload)).encode("utf-8"), headers=headers)
         with urlopen(request, timeout=12) as response:
             body = json.loads(response.read(128 * 1024))
         text = _short(body["choices"][0]["message"]["content"], MAX_MODEL_ANSWER)

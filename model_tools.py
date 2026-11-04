@@ -8,6 +8,7 @@ from the caller's existing allow-list.
 import json
 import re
 from urllib.parse import urlsplit
+from model_settings import chat_payload
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 
@@ -120,7 +121,7 @@ def _request(url, payload, key):
     headers = {"Content-Type": "application/json"}
     if key:
         headers["Authorization"] = "Bearer " + str(key)
-    request = Request(url + "/chat/completions", data=json.dumps(payload).encode("utf-8"), headers=headers)
+    request = Request(url + "/chat/completions", data=json.dumps(chat_payload(url, payload)).encode("utf-8"), headers=headers)
     try:
         with build_opener(_NoRedirect()).open(request, timeout=20) as response:
             body = response.read(MAX_RESPONSE_BYTES + 1)

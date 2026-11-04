@@ -5,7 +5,7 @@ import json
 import re
 from urllib.request import Request
 
-from model_settings import get_config, safe_urlopen
+from model_settings import get_config, safe_urlopen, chat_payload
 from translation_memory import MEMORY
 
 TOKEN = re.compile(
@@ -93,7 +93,7 @@ def translations(values, use_model, progress, glossary=None):
             if cfg["key"]:
                 headers["Authorization"] = "Bearer " + cfg["key"]
             req = Request(
-                cfg["url"] + "/chat/completions", json.dumps(body).encode(), headers
+                cfg["url"] + "/chat/completions", json.dumps(chat_payload(cfg["url"], body)).encode(), headers
             )
             with safe_urlopen(req, timeout=90) as response:
                 answer = json.loads(response.read(256 * 1024))["choices"][0]["message"][

@@ -192,7 +192,6 @@ function renderChat(busy){
   el("arch").textContent=job.package.native_abis.join(" · ")||"通用字节码";
   const signature=JSON.stringify([job.id,versions,messages]);
   if(signature===chatSignature)return;
-  if(el("feedbackVersion").dataset.job!==job.id)el("translateWithModel").checked=false;
   const same=el("feedbackVersion").dataset.job===job.id;
   const sameCount=Number(el("feedbackVersion").dataset.count)===versions.length;
   const selected=same&&sameCount?el("feedbackVersion").value:"";
@@ -225,7 +224,7 @@ function renderChat(busy){
     const bubble=document.createElement("div");bubble.className="bubble "+m.role;bubble.textContent=(m.kind&&m.version?"V"+m.version+" · ":"")+m.text;
     if(m.attachment){const image=document.createElement("img");image.alt="问题截图";image.src=path("/attachments/"+m.attachment);bubble.append(image);}
     if(m.localization_id){
-      const link=document.createElement("a");link.textContent="下载汉化 APK";
+      const link=document.createElement("a");link.textContent="下载候选 APK";
       link.href=path("/localized/"+encodeURIComponent(m.localization_id));bubble.append(document.createElement("br"),link);
     }
     additions.append(bubble);
@@ -249,11 +248,11 @@ async function feedback(kind){
       if(f.size>3*1024*1024)throw Error("截图不能超过 3 MiB");
       body.attachment=await new Promise((ok,fail)=>{const reader=new FileReader();reader.onload=()=>ok(reader.result);reader.onerror=fail;reader.readAsDataURL(f);});
     }
-    body.translate_with_model=el("translateWithModel").checked;
-    body.local_translate=el("localTranslate").checked;
+    body.use_configured_model=true;
+    body.local_translate=true;
     job=await api(path("/message"),"POST",JSON.stringify(body));
     el("message").value="";el("attachment").value="";el("attachmentName").textContent="";
-    notice(job.status==="running"?"汉化已开始，进度和下载链接会出现在对话中。":kind==="issue"?"反馈已保存，可继续修复。":"真机复测结果已保存。");
+    notice(job.status==="running"?"正在处理，进度和结果会显示在对话中。":kind==="issue"?"反馈已保存，可继续修复。":"真机复测结果已保存。");
   }catch(e){notice(e.message);}finally{sending=false;render();}
 }
 el("toModification").onclick=()=>{
@@ -269,7 +268,7 @@ el("closeHistory").onclick=()=>el("historyDialog").close();
 el("history").onclick=async()=>{
   if(sending||job?.status==="running"){notice("请等待当前操作结束");return;}
   try{
-    const jobs=await api("/api/jobs"),list=el("jobList");list.replaceChildren();
+    const jobs=await api("/api/jobs"),list=el("jobList");list.replaceChildren();list.classList.toggle("empty-state",jobs.length===0);
     for(const j of jobs){const b=document.createElement("button");b.textContent=j.label+" · Android "+(j.api-20)+" · "+new Date(j.updated||j.created).toLocaleString()+(j.phone?" · "+j.phone:"");
       b.onclick=async()=>{try{job=await api("/api/jobs/"+j.id);localStorage.setItem("reviverJob",job.id);restoreScope(job);
         el("screen").hidden=true;el("standby").hidden=false;el("message").value="";el("attachment").value="";el("attachmentName").textContent="";

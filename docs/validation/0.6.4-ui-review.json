@@ -1,0 +1,669 @@
+{
+  "version": "0.6.4",
+  "review": {
+    "checks": [
+      {
+        "width": 375,
+        "height": 900,
+        "page_vertical_overflow": true,
+        "overflows": false,
+        "header_overlaps": [],
+        "stress_overflow": false,
+        "card_overlaps": [],
+        "dialogs": {
+          "model": {
+            "width": 343,
+            "height": 622.453125,
+            "ratio": 0.5510455104551045,
+            "scroll": false,
+            "clipped": false
+          },
+          "resources": {
+            "width": 343,
+            "height": 839.78125,
+            "ratio": 0.4084396978379786,
+            "scroll": false,
+            "clipped": false
+          },
+          "about": {
+            "width": 343,
+            "height": 425.03125,
+            "ratio": 0.8069994853319609,
+            "scroll": false,
+            "clipped": false
+          },
+          "history": {
+            "width": 343,
+            "height": 300,
+            "ratio": 1.1433333333333333,
+            "scroll": false,
+            "clipped": false
+          },
+          "scope": {
+            "width": 343,
+            "height": 852,
+            "ratio": 0.4025821596244131,
+            "scroll": false,
+            "clipped": false
+          },
+          "delivery": {
+            "width": 343,
+            "height": 852,
+            "ratio": 0.4025821596244131,
+            "scroll": false,
+            "clipped": false
+          },
+          "diagnostics": {
+            "width": 327,
+            "height": 680,
+            "ratio": 0.4808823529411765,
+            "scroll": false,
+            "clipped": false
+          },
+          "assistant": {
+            "width": 343,
+            "height": 852,
+            "ratio": 0.4025821596244131,
+            "scroll": false,
+            "clipped": false
+          },
+          "task": {
+            "width": 343,
+            "height": 852,
+            "ratio": 0.4025821596244131,
+            "scroll": false,
+            "clipped": false
+          },
+          "modification": {
+            "width": 327,
+            "height": 780,
+            "ratio": 0.41923076923076924,
+            "scroll": false,
+            "clipped": false
+          }
+        }
+      },
+      {
+        "width": 768,
+        "height": 900,
+        "page_vertical_overflow": true,
+        "overflows": false,
+        "header_overlaps": [],
+        "stress_overflow": false,
+        "card_overlaps": [],
+        "dialogs": {
+          "model": {
+            "width": 680,
+            "height": 567.171875,
+            "ratio": 1.1989311000303038,
+            "scroll": false,
+            "clipped": false
+          },
+          "resources": {
+            "width": 736,
+            "height": 553.0625,
+            "ratio": 1.3307718386258334,
+            "scroll": false,
+            "clipped": false
+          },
+          "about": {
+            "width": 600,
+            "height": 409.78125,
+            "ratio": 1.464195836193091,
+            "scroll": false,
+            "clipped": false
+          },
+          "history": {
+            "width": 600,
+            "height": 300,
+            "ratio": 2,
+            "scroll": false,
+            "clipped": false
+          },
+          "scope": {
+            "width": 600,
+            "height": 852,
+            "ratio": 0.704225352112676,
+            "scroll": false,
+            "clipped": false
+          },
+          "delivery": {
+            "width": 720,
+            "height": 852,
+            "ratio": 0.8450704225352113,
+            "scroll": false,
+            "clipped": false
+          },
+          "diagnostics": {
+            "width": 720,
+            "height": 680,
+            "ratio": 1.0588235294117647,
+            "scroll": false,
+            "clipped": false
+          },
+          "assistant": {
+            "width": 720,
+            "height": 852,
+            "ratio": 0.8450704225352113,
+            "scroll": false,
+            "clipped": false
+          },
+          "task": {
+            "width": 600,
+            "height": 852,
+            "ratio": 0.704225352112676,
+            "scroll": false,
+            "clipped": false
+          },
+          "modification": {
+            "width": 720,
+            "height": 780,
+            "ratio": 0.9230769230769231,
+            "scroll": false,
+            "clipped": false
+          }
+        }
+      },
+      {
+        "width": 960,
+        "height": 640,
+        "page_vertical_overflow": false,
+        "overflows": false,
+        "header_overlaps": [],
+        "stress_overflow": false,
+        "card_overlaps": [],
+        "dialogs": {
+          "model": {
+            "width": 680,
+            "height": 541.171875,
+            "ratio": 1.2565324094124442,
+            "scroll": false,
+            "clipped": false
+          },
+          "resources": {
+            "width": 760,
+            "height": 506.5625,
+            "ratio": 1.500308451573103,
+            "scroll": false,
+            "clipped": false
+          },
+          "about": {
+            "width": 600,
+            "height": 409.78125,
+            "ratio": 1.464195836193091,
+            "scroll": false,
+            "clipped": false
+          },
+          "history": {
+            "width": 600,
+            "height": 300,
+            "ratio": 2,
+            "scroll": false,
+            "clipped": false
+          },
+          "scope": {
+            "width": 600,
+            "height": 592,
+            "ratio": 1.0135135135135136,
+            "scroll": false,
+            "clipped": false
+          },
+          "delivery": {
+            "width": 720,
+            "height": 592,
+            "ratio": 1.2162162162162162,
+            "scroll": false,
+            "clipped": false
+          },
+          "diagnostics": {
+            "width": 912,
+            "height": 592,
+            "ratio": 1.5405405405405406,
+            "scroll": false,
+            "clipped": false
+          },
+          "assistant": {
+            "width": 720,
+            "height": 592,
+            "ratio": 1.2162162162162162,
+            "scroll": false,
+            "clipped": false
+          },
+          "task": {
+            "width": 600,
+            "height": 592,
+            "ratio": 1.0135135135135136,
+            "scroll": false,
+            "clipped": false
+          },
+          "modification": {
+            "width": 912,
+            "height": 592,
+            "ratio": 1.5405405405405406,
+            "scroll": false,
+            "clipped": false
+          }
+        }
+      },
+      {
+        "width": 1024,
+        "height": 768,
+        "page_vertical_overflow": false,
+        "overflows": false,
+        "header_overlaps": [],
+        "stress_overflow": false,
+        "card_overlaps": [],
+        "dialogs": {
+          "model": {
+            "width": 680,
+            "height": 541.171875,
+            "ratio": 1.2565324094124442,
+            "scroll": false,
+            "clipped": false
+          },
+          "resources": {
+            "width": 760,
+            "height": 506.5625,
+            "ratio": 1.500308451573103,
+            "scroll": false,
+            "clipped": false
+          },
+          "about": {
+            "width": 600,
+            "height": 409.78125,
+            "ratio": 1.464195836193091,
+            "scroll": false,
+            "clipped": false
+          },
+          "history": {
+            "width": 600,
+            "height": 300,
+            "ratio": 2,
+            "scroll": false,
+            "clipped": false
+          },
+          "scope": {
+            "width": 600,
+            "height": 720,
+            "ratio": 0.8333333333333334,
+            "scroll": false,
+            "clipped": false
+          },
+          "delivery": {
+            "width": 720,
+            "height": 720,
+            "ratio": 1,
+            "scroll": false,
+            "clipped": false
+          },
+          "diagnostics": {
+            "width": 960,
+            "height": 680,
+            "ratio": 1.411764705882353,
+            "scroll": false,
+            "clipped": false
+          },
+          "assistant": {
+            "width": 720,
+            "height": 720,
+            "ratio": 1,
+            "scroll": false,
+            "clipped": false
+          },
+          "task": {
+            "width": 600,
+            "height": 720,
+            "ratio": 0.8333333333333334,
+            "scroll": false,
+            "clipped": false
+          },
+          "modification": {
+            "width": 976,
+            "height": 720,
+            "ratio": 1.3555555555555556,
+            "scroll": false,
+            "clipped": false
+          }
+        }
+      },
+      {
+        "width": 1280,
+        "height": 640,
+        "page_vertical_overflow": false,
+        "overflows": false,
+        "header_overlaps": [],
+        "stress_overflow": false,
+        "card_overlaps": [],
+        "dialogs": {
+          "model": {
+            "width": 680,
+            "height": 541.171875,
+            "ratio": 1.2565324094124442,
+            "scroll": false,
+            "clipped": false
+          },
+          "resources": {
+            "width": 760,
+            "height": 506.5625305175781,
+            "ratio": 1.5003083611878543,
+            "scroll": false,
+            "clipped": false
+          },
+          "about": {
+            "width": 600,
+            "height": 409.78125,
+            "ratio": 1.464195836193091,
+            "scroll": false,
+            "clipped": false
+          },
+          "history": {
+            "width": 600,
+            "height": 300,
+            "ratio": 2,
+            "scroll": false,
+            "clipped": false
+          },
+          "scope": {
+            "width": 600,
+            "height": 592,
+            "ratio": 1.0135135135135136,
+            "scroll": false,
+            "clipped": false
+          },
+          "delivery": {
+            "width": 720,
+            "height": 592,
+            "ratio": 1.2162162162162162,
+            "scroll": false,
+            "clipped": false
+          },
+          "diagnostics": {
+            "width": 960,
+            "height": 592,
+            "ratio": 1.6216216216216217,
+            "scroll": false,
+            "clipped": false
+          },
+          "assistant": {
+            "width": 720,
+            "height": 592,
+            "ratio": 1.2162162162162162,
+            "scroll": false,
+            "clipped": false
+          },
+          "task": {
+            "width": 600,
+            "height": 592,
+            "ratio": 1.0135135135135136,
+            "scroll": false,
+            "clipped": false
+          },
+          "modification": {
+            "width": 1040,
+            "height": 592,
+            "ratio": 1.7567567567567568,
+            "scroll": false,
+            "clipped": false
+          }
+        }
+      },
+      {
+        "width": 1280,
+        "height": 720,
+        "page_vertical_overflow": false,
+        "overflows": false,
+        "header_overlaps": [],
+        "stress_overflow": false,
+        "card_overlaps": [],
+        "dialogs": {
+          "model": {
+            "width": 680,
+            "height": 541.171875,
+            "ratio": 1.2565324094124442,
+            "scroll": false,
+            "clipped": false
+          },
+          "resources": {
+            "width": 760,
+            "height": 506.5625,
+            "ratio": 1.500308451573103,
+            "scroll": false,
+            "clipped": false
+          },
+          "about": {
+            "width": 600,
+            "height": 409.7812194824219,
+            "ratio": 1.4641959452359379,
+            "scroll": false,
+            "clipped": false
+          },
+          "history": {
+            "width": 600,
+            "height": 300,
+            "ratio": 2,
+            "scroll": false,
+            "clipped": false
+          },
+          "scope": {
+            "width": 600,
+            "height": 672,
+            "ratio": 0.8928571428571429,
+            "scroll": false,
+            "clipped": false
+          },
+          "delivery": {
+            "width": 720,
+            "height": 672,
+            "ratio": 1.0714285714285714,
+            "scroll": false,
+            "clipped": false
+          },
+          "diagnostics": {
+            "width": 960,
+            "height": 672,
+            "ratio": 1.4285714285714286,
+            "scroll": false,
+            "clipped": false
+          },
+          "assistant": {
+            "width": 720,
+            "height": 672,
+            "ratio": 1.0714285714285714,
+            "scroll": false,
+            "clipped": false
+          },
+          "task": {
+            "width": 600,
+            "height": 672,
+            "ratio": 0.8928571428571429,
+            "scroll": false,
+            "clipped": false
+          },
+          "modification": {
+            "width": 1040,
+            "height": 672,
+            "ratio": 1.5476190476190477,
+            "scroll": false,
+            "clipped": false
+          }
+        }
+      },
+      {
+        "width": 1280,
+        "height": 900,
+        "page_vertical_overflow": false,
+        "overflows": false,
+        "header_overlaps": [],
+        "stress_overflow": false,
+        "card_overlaps": [],
+        "dialogs": {
+          "model": {
+            "width": 680,
+            "height": 541.171875,
+            "ratio": 1.2565324094124442,
+            "scroll": false,
+            "clipped": false
+          },
+          "resources": {
+            "width": 760,
+            "height": 506.5625,
+            "ratio": 1.500308451573103,
+            "scroll": false,
+            "clipped": false
+          },
+          "about": {
+            "width": 600,
+            "height": 409.78125,
+            "ratio": 1.464195836193091,
+            "scroll": false,
+            "clipped": false
+          },
+          "history": {
+            "width": 600,
+            "height": 300,
+            "ratio": 2,
+            "scroll": false,
+            "clipped": false
+          },
+          "scope": {
+            "width": 600,
+            "height": 852,
+            "ratio": 0.704225352112676,
+            "scroll": false,
+            "clipped": false
+          },
+          "delivery": {
+            "width": 720,
+            "height": 852,
+            "ratio": 0.8450704225352113,
+            "scroll": false,
+            "clipped": false
+          },
+          "diagnostics": {
+            "width": 960,
+            "height": 680,
+            "ratio": 1.411764705882353,
+            "scroll": false,
+            "clipped": false
+          },
+          "assistant": {
+            "width": 720,
+            "height": 852,
+            "ratio": 0.8450704225352113,
+            "scroll": false,
+            "clipped": false
+          },
+          "task": {
+            "width": 600,
+            "height": 852,
+            "ratio": 0.704225352112676,
+            "scroll": false,
+            "clipped": false
+          },
+          "modification": {
+            "width": 1040,
+            "height": 780,
+            "ratio": 1.3333333333333333,
+            "scroll": false,
+            "clipped": false
+          }
+        }
+      },
+      {
+        "width": 1920,
+        "height": 1080,
+        "page_vertical_overflow": false,
+        "overflows": false,
+        "header_overlaps": [],
+        "stress_overflow": false,
+        "card_overlaps": [],
+        "dialogs": {
+          "model": {
+            "width": 680,
+            "height": 541.171875,
+            "ratio": 1.2565324094124442,
+            "scroll": false,
+            "clipped": false
+          },
+          "resources": {
+            "width": 760,
+            "height": 506.5625,
+            "ratio": 1.500308451573103,
+            "scroll": false,
+            "clipped": false
+          },
+          "about": {
+            "width": 600,
+            "height": 409.78125,
+            "ratio": 1.464195836193091,
+            "scroll": false,
+            "clipped": false
+          },
+          "history": {
+            "width": 600,
+            "height": 300,
+            "ratio": 2,
+            "scroll": false,
+            "clipped": false
+          },
+          "scope": {
+            "width": 600,
+            "height": 1032,
+            "ratio": 0.5813953488372093,
+            "scroll": false,
+            "clipped": false
+          },
+          "delivery": {
+            "width": 720,
+            "height": 1032,
+            "ratio": 0.6976744186046512,
+            "scroll": false,
+            "clipped": false
+          },
+          "diagnostics": {
+            "width": 960,
+            "height": 680,
+            "ratio": 1.411764705882353,
+            "scroll": false,
+            "clipped": false
+          },
+          "assistant": {
+            "width": 720,
+            "height": 1032,
+            "ratio": 0.6976744186046512,
+            "scroll": false,
+            "clipped": false
+          },
+          "task": {
+            "width": 600,
+            "height": 1032,
+            "ratio": 0.5813953488372093,
+            "scroll": false,
+            "clipped": false
+          },
+          "modification": {
+            "width": 1040,
+            "height": 780,
+            "ratio": 1.3333333333333333,
+            "scroll": false,
+            "clipped": false
+          }
+        }
+      }
+    ],
+    "errors": [],
+    "chat": {
+      "retained": true,
+      "readingOffset": 0,
+      "followsEnd": true
+    },
+    "reduced_motion": "none",
+    "focus_outline": "solid",
+    "complete_render": "就绪",
+    "provider_checks": "preset, custom edit, save/reopen, draft-key isolation passed (local API stubs)",
+    "history_cases": "empty and 40 rows passed",
+    "unified_chat": true
+  },
+  "credential_note": "模型设置的测试与保存使用本机接口桩，不连接在线服务；没有使用真实 API Key。",
+  "protocol_note": "官方 DeepSeek 接口请求使用非思考模式，以兼容现有受限工具协议；其他提供方不加该字段。"
+}

@@ -16,7 +16,8 @@ try:
   browser=pw.chromium.launch(channel='msedge',headless=True)
   page=browser.new_page()
   errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
-  page.route('**/api/updates/check*',lambda r:r.fulfill(json={'available':False,'current_version':'0.6.2'}))
+  page.route('**/api/updates/check*',lambda r:r.fulfill(json={'available':False,'current_version':'0.6.4'}))
+  page.route('**/api/jobs',lambda r:r.fulfill(json=[]))
   for width,height in [(375,900),(768,900),(960,640),(1024,768),(1280,640),(1280,720),(1280,900),(1920,1080)]:
    page.set_viewport_size({'width':width,'height':height})
    page.goto('http://127.0.0.1:18767');page.wait_for_function('!document.getElementById("file").disabled')
@@ -37,13 +38,54 @@ try:
     }return bad;
    }""")
    record['dialogs']={}
-   for name,button,close in [('model','modelSettingsButton','closeModelSettings'),('resources','resourcesButton','closeResources'),('about','aboutButton',None),('history','history', 'closeHistory'),('scope','scopeSummary',None),('delivery','[data-open-dialog=deliveryDialog]',None),('diagnostics','[data-open-dialog=diagnosticsDialog]',None),('translation','[data-open-dialog=translationDialog]',None),('assistant','[data-open-dialog=assistantDialog]',None),('task','[data-open-dialog=taskDialog]',None),('modification','[data-open-dialog=modificationDialog]',None)]:
+   for name,button,close in [('model','modelSettingsButton','closeModelSettings'),('resources','resourcesButton','closeResources'),('about','aboutButton',None),('history','history', 'closeHistory'),('scope','scopeSummary',None),('delivery','[data-open-dialog=deliveryDialog]',None),('diagnostics','[data-open-dialog=diagnosticsDialog]',None),('assistant','[data-open-dialog=assistantDialog]',None),('task','[data-open-dialog=taskDialog]',None),('modification','[data-open-dialog=modificationDialog]',None)]:
     page.locator(button if button.startswith('[') else '#'+button).click()
     dialog=page.locator('dialog[open]');dialog.wait_for()
-    record['dialogs'][name]=dialog.evaluate('(e)=>({width:e.getBoundingClientRect().width,scroll:e.scrollWidth>e.clientWidth,clipped:e.getBoundingClientRect().right>innerWidth})')
+    record['dialogs'][name]=dialog.evaluate('(e)=>({width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height,ratio:e.getBoundingClientRect().width/e.getBoundingClientRect().height,scroll:e.scrollWidth>e.clientWidth,clipped:e.getBoundingClientRect().right>innerWidth})')
     page.screenshot(animations='disabled',path=str(out/f'{mode}-{width}x{height}-{name}.png'))
     page.keyboard.press('Escape')
    checks.append(record)
+  page.unroute('**/api/jobs')
+  page.route('**/api/jobs',lambda r:r.fulfill(json=[{'id':str(i),'label':'记录布局测试 '+str(i),'api':36,'created':'2026-11-04T00:00:00Z'} for i in range(40)]))
+  page.locator('#history').click()
+  assert page.locator('#jobList > button').count()==40
+  assert not page.locator('#jobList').evaluate('(e)=>e.classList.contains("empty-state")')
+  page.screenshot(animations='disabled',path=str(out/f'{mode}-history-filled.png'))
+  page.keyboard.press('Escape')
+  # Preset tests intercept only the local settings API; no provider receives a key.
+  submitted=[]
+  stored={'url':'','model':'','has_key':False,'enabled':False,'source':'none'}
+  def model_api(route):
+   if route.request.method=='GET':route.fulfill(json=stored);return
+   data=route.request.post_data_json;submitted.append(data)
+   if route.request.url.endswith('/test'):route.fulfill(json={'message':'本地测试桩验证完成'});return
+   stored.update(url=data['url'],model=data['model'],has_key=bool(data.get('key')),enabled=data['enabled'],source='saved')
+   route.fulfill(json=stored)
+  page.route('**/api/model/settings',model_api)
+  page.route('**/api/model/test',model_api)
+  page.locator('#modelSettingsButton').click();page.wait_for_function('!document.getElementById("modelProvider").disabled')
+  page.locator('#modelProvider').select_option('deepseek')
+  assert page.locator('#modelUrl').input_value()=='https://api.deepseek.com'
+  assert page.locator('#modelName').input_value()=='deepseek-flash'
+  page.screenshot(animations='disabled',path=str(out/f'{mode}-deepseek-preset.png'))
+  page.locator('#modelKey').fill('test-only-draft')
+  page.locator('#modelTest').click();page.wait_for_function('!document.getElementById("modelTest").disabled')
+  page.locator('#modelProvider').select_option('openai')
+  assert page.locator('#modelKey').input_value()==''
+  assert page.locator('#modelUrl').input_value()=='https://api.openai.com/v1'
+  page.locator('#modelName').fill('custom-unit-model')
+  page.locator('#modelTest').click();page.wait_for_function('!document.getElementById("modelTest").disabled')
+  assert submitted[-1]['key']=='', 'A tested draft key crossed provider boundary'
+  page.locator('#modelProvider').select_option('custom')
+  page.locator('#modelUrl').fill('http://127.0.0.1:12345/v1')
+  page.locator('#modelName').fill('local-unit-model')
+  page.locator('#modelSave').click();page.wait_for_function('!document.getElementById("modelSave").disabled')
+  page.keyboard.press('Escape');page.locator('#modelSettingsButton').click()
+  page.wait_for_function('!document.getElementById("modelProvider").disabled')
+  assert page.locator('#modelProvider').input_value()=='custom'
+  assert page.locator('#modelName').input_value()=='local-unit-model'
+  page.keyboard.press('Escape')
+  page.unroute('**/api/model/settings',model_api);page.unroute('**/api/model/test',model_api)
   # Verify incremental rendering and scroll retention using a synthetic chat job.
   page.set_viewport_size({'width':1280,'height':height})
   page.goto('http://127.0.0.1:18767');page.wait_for_function('!document.getElementById("file").disabled')
@@ -66,6 +108,17 @@ try:
   page.locator('#toModification').click()
   assert page.locator('#modificationRequest').input_value()=='记住上次打开的文件'
   page.keyboard.press('Escape')
+  requests=[]
+  state=page.evaluate('job')
+  def message_api(route):
+   requests.append(route.request.post_data_json);route.fulfill(json=state)
+  page.route('**/api/jobs/*/message',message_api)
+  page.locator('#message').fill('汉化成中文');page.locator('#sendMessage').click()
+  page.wait_for_function('!document.getElementById("sendMessage").disabled')
+  assert requests[-1]['use_configured_model'] is True
+  assert 'translate_with_model' not in requests[-1]
+  assert page.locator('[data-open-dialog=translationDialog]').count()==0
+  page.unroute('**/api/jobs/*/message',message_api)
   page.locator('#problem').click()
   assert page.locator('#taskDialog').evaluate('(e)=>e.open')
   page.locator('#taskTap').fill('继续')
@@ -83,8 +136,8 @@ try:
    assert not errors,errors
    assert all(not c['page_vertical_overflow'] for c in checks if c['width']>=960),checks
    assert all(not c['overflows'] and not c['stress_overflow'] and not c['header_overlaps'] and not c['card_overlaps'] for c in checks),checks
-   assert all(not d['scroll'] and not d['clipped'] for c in checks for d in c['dialogs'].values())
-  (out/f'{mode}.json').write_text(json.dumps({'checks':checks,'errors':errors,'chat':chat_checks,'reduced_motion':motion,'focus_outline':focus,'complete_render':render_check},ensure_ascii=False,indent=2),encoding='utf8')
+   assert all(not d['scroll'] and not d['clipped'] and d['ratio']<2.6 for c in checks for d in c['dialogs'].values())
+  (out/f'{mode}.json').write_text(json.dumps({'checks':checks,'errors':errors,'chat':chat_checks,'reduced_motion':motion,'focus_outline':focus,'complete_render':render_check,'provider_checks':'preset, custom edit, save/reopen, draft-key isolation passed (local API stubs)','history_cases':'empty and 40 rows passed','unified_chat':True},ensure_ascii=False,indent=2),encoding='utf8')
   browser.close()
 finally:server.should_exit=True;t.join()
 

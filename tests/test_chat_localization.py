@@ -88,6 +88,16 @@ class ChatLocalizationTests(unittest.TestCase):
         self.assertEqual(spec[-1], 771)
         self.assertEqual(spec[2:5], (256, 256, 48))
 
+    def test_chat_uses_current_agent_configuration_and_keeps_legacy_flags(self):
+        import workbench
+        body={"use_configured_model":True,"local_translate":True}
+        with patch.object(workbench,"public_config",return_value={"enabled":True,"url":"https://unit.test/v1","model":"unit"}):
+            self.assertIs(workbench.chat_model_mode(body),True)
+        with patch.object(workbench,"public_config",return_value={"enabled":False,"url":"","model":""}):
+            self.assertEqual(workbench.chat_model_mode(body),"local")
+        self.assertIs(workbench.chat_model_mode({"translate_with_model":True}),True)
+        self.assertIs(workbench.chat_model_mode({}),False)
+
     def test_chat_endpoint_runs_worker_and_serves_only_published_candidate(self):
         import time
         from fastapi.testclient import TestClient

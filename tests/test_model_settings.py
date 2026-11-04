@@ -18,6 +18,14 @@ class ModelSettingsTests(unittest.TestCase):
         self.addCleanup(self.patch.stop)
         self.addCleanup(self.temp.cleanup)
 
+    def test_official_provider_payload_preserves_generic_protocol(self):
+        payload={"model":"deepseek-flash","messages":[]}
+        adjusted=model_settings.chat_payload("https://api.deepseek.com",payload)
+        self.assertEqual(adjusted["thinking"],{"type":"disabled"})
+        self.assertNotIn("thinking",payload)
+        self.assertIs(model_settings.chat_payload("https://api.openai.com/v1",payload),payload)
+        self.assertIs(model_settings.chat_payload("https://api.deepseek.com.example.test",payload),payload)
+
     def test_url_rejects_remote_http_and_credentials(self):
         with self.assertRaises(model_settings.ModelSettingsError): model_settings.validate_url("http://example.test")
         with self.assertRaises(model_settings.ModelSettingsError): model_settings.validate_url("https://token@example.test")

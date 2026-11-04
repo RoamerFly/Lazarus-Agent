@@ -305,6 +305,16 @@ def localized_candidate(job: str, run_id: str):
     return FileResponse(path, filename=f"{state['package']['package']}-zh-android-api{state['api']}.apk")
 
 
+def chat_model_mode(body):
+    requested = body.get("translate_with_model") is True or body.get("use_model") is True
+    if body.get("use_configured_model") is True:
+        config = public_config()
+        requested = config["enabled"] and bool(config["url"] and config["model"])
+    if requested:
+        return True
+    return "local" if body.get("local_translate") is True else False
+
+
 @app.post("/api/jobs/{job}/message")
 def chat_message(job: str, body: dict):
     from auto_translation import is_command
@@ -329,7 +339,7 @@ def chat_message(job: str, body: dict):
         initial = read(folder)
         try:
             threading.Thread(target=run_chat_localization,
-                             args=(folder,state,source,run_id,True if body.get("translate_with_model") is True else ("local" if body.get("local_translate") is True else False)),
+                             args=(folder,state,source,run_id,chat_model_mode(body)),
                              daemon=True).start()
         except RuntimeError:
             state["status"] = "error"
