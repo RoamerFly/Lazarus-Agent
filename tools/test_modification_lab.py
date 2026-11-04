@@ -58,7 +58,7 @@ SPECS.update({
     "pocket-list": locale_case("pocket-list", "pocket-list-en.apk",
         [("Shopping list", "购物清单"), ("Add eggs", "添加鸡蛋"), ("Eggs added", "已添加鸡蛋")], "已添加鸡蛋"),
     "tea-timer": locale_case("tea-timer", "tea-timer-en.apk",
-        [("Tea timer", "泡茶计时"), ("Start timer", "开始计时"), ("Timer started", "计时已开始")], "计时已开始"),
+        [("Tea timer", "泡茶计时"), ("Start timer", "开始计时"), ("Brew %1$d started", "第 %1$d 泡已开始")], "第 1 泡已开始"),
 })
 
 
@@ -167,4 +167,10 @@ if __name__ == "__main__":
     parser.add_argument("--storage-base", type=Path, default=ROOT / "build/validation-0.4")
     parser.add_argument("--lab", type=Path, help="可选的隔离 AVD 工作目录，会写入 REVIVER_LAB")
     args = parser.parse_args()
-    print(json.dumps(run_case(args.case, args.api, args.timeout, args.out, args.storage_base, args.lab, args.targets), ensure_ascii=False, indent=2))
+    try:
+        report = run_case(args.case, args.api, args.timeout, args.out, args.storage_base, args.lab, args.targets)
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+    finally:
+        workbench = sys.modules.get("workbench")
+        if workbench is not None and workbench.device.owner:
+            workbench.device.stop()
