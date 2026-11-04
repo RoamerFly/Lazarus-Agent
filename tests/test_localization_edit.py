@@ -114,6 +114,13 @@ class LocalizationEditTests(unittest.TestCase):
         names = {row["name"] for row in catalog(self.root)}
         self.assertFalse({"alias", "theme_alias", "closed", "odd", "item_alias"} & names)
 
+    def test_existing_zh_cn_alias_is_not_overwritten_or_duplicated(self):
+        target = self.root / "res/values-zh-rCN/aliases.xml"
+        target.parent.mkdir()
+        target.write_text('<resources><string name="open_record">@string/other</string></resources>', encoding="utf-8")
+        with self.assertRaisesRegex(LocalizationError, "不是可安全编辑"):
+            inspect(self.root, criteria({"Open record": "打开记录"}))
+
     def test_placeholder_rules_allow_indexed_reordering_but_not_unordered_reordering(self):
         path = self.root / "res/values/formats.xml"
         path.write_text('''<resources>

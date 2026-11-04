@@ -182,6 +182,29 @@ def _zh_cn_existing(decoded: Path):
     return answer
 
 
+def _zh_cn_occupied_names(decoded: Path):
+    """Find every declared zh-CN string name, including aliases we cannot edit."""
+    answer: dict[str, list[str]] = defaultdict(list)
+    res = decoded / "res"
+    if not res.is_dir():
+        return answer
+    for folder in sorted(res.iterdir()):
+        if not folder.is_dir() or not _is_zh_cn_directory(folder.name):
+            continue
+        for path in sorted(folder.glob("*.xml")):
+            try:
+                root = ET.parse(path).getroot()
+            except ET.ParseError as exc:
+                raise LocalizationError(f"字符串资源 XML 无法解析：{path.as_posix()}") from exc
+            if root.tag != "resources":
+                continue
+            for element in root.findall("string"):
+                name = element.get("name")
+                if name and _RESOURCE_NAME.fullmatch(name):
+                    answer[name].append(path.relative_to(decoded).as_posix())
+    return answer
+
+
 def catalog(decoded: Path) -> list[dict]:
     """List simple, translatable default strings and known zh-CN values only."""
     decoded = Path(decoded)
@@ -246,6 +269,7 @@ def inspect(decoded: Path, criteria: dict) -> dict:
     for row in _default_resources(decoded):
         indexed[row["original"]].append(row)
     existing = _zh_cn_existing(decoded)
+    occupied = _zh_cn_occupied_names(decoded)
     edits = []
     for original, translated in requested["translations"].items():
         matches = indexed.get(original, [])
@@ -259,8 +283,11 @@ def inspect(decoded: Path, criteria: dict) -> dict:
             raise LocalizationError(f"资源标记为不可翻译：{match['name']}")
         _assert_format_compatible(original, translated, match["formatted"])
         current = existing.get(match["name"], [])
-        if len(current) > 1:
+        declarations = occupied.get(match["name"], [])
+        if len(current) > 1 or len(declarations) > 1:
             raise LocalizationError(f"存在重复的 zh-CN 资源，拒绝猜测写入位置：{match['name']}")
+        if not current and declarations:
+            raise LocalizationError(f"现有 zh-CN 资源不是可安全编辑的普通字符串：{match['name']}")
         target_file = current[0]["source_file"] if current else "res/values-zh-rCN/strings.xml"
         edits.append({"name": match["name"], "original": original, "translated": translated,
                       "formatted": match["formatted"], "source_file": match["source_file"],
@@ -282,7 +309,7 @@ def _target(decoded: Path, relative: str) -> Path:
 def _android_text(value: str, formatted: bool) -> str:
     """Encode user-visible text as an Android string-resource literal."""
     _format_info(value, formatted)
-    out, index = [], 0
+    out, index, seen_nonspace = [], 0, False
     while index < len(value):
         char = value[index]
         if formatted and char == "%":
@@ -304,10 +331,12 @@ def _android_text(value: str, formatted: bool) -> str:
             out.append("\\'")
         elif char == '"':
             out.append('\\"')
-        elif index == 0 and char in "@?":
+        elif not seen_nonspace and char in "@?":
             out.append("\\" + char)
         else:
             out.append(char)
+        if not char.isspace():
+            seen_nonspace = True
         index += 1
     return "".join(out)
 

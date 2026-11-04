@@ -70,7 +70,17 @@
         for(const [label,proof] of [["基准复现",run.baseline],["回编对照",run.control]]){
           if(proof)entries.push([label,text(proof.result),text(proof.message)].filter(Boolean).join(" · "));
         }
-        if(run.build)entries.push(["候选构建",text(run.build.sha256)?"已完成":"已记录",text(run.build.message)].filter(Boolean).join(" · "));
+        if(run.build){
+          const change=run.build.transform||{};
+          entries.push("候选 APK · SHA-256 "+text(run.build.sha256));
+          const files=change.changed_files||(change.changed_file?[change.changed_file]:[]);
+          for(const file of files)entries.push("修改 "+file+(change.target_method?" · "+change.target_method:""));
+          if(Number.isInteger(change.edits))entries.push("写入 "+change.edits+" 条简体中文资源");
+        }
+        for(const row of run.compatibility?.rows||[]){
+          const result=row.functional;
+          entries.push(["Android "+(row.api-20),result?.message||row.failure||row.status].filter(Boolean).join(" · "));
+        }
       }
       for(const run of runs.slice(-8)){
         const label=[text(run.step)||text(run.kind)||"验证",text(run.message)].filter(Boolean).join(" · ");
