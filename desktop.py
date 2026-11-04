@@ -42,6 +42,15 @@ def main():
         return
     if "--self-test" in sys.argv:
         payload = {"name": APP_NAME, "version": APP_VERSION, "platform": "Windows" if os.name == "nt" else "unsupported"}
+        from modification_runner import capability
+        from modification_tasks import CAPABILITIES
+        for kind in CAPABILITIES:
+            adapter, probe = capability(kind)
+            if not all(callable(tool) for tool in (adapter.inspect, adapter.apply, probe)):
+                raise RuntimeError(f"改造工具未完整打包：{kind}")
+        if not (Path(__file__).resolve().parent / "web/modifications.js").is_file():
+            raise RuntimeError("缺少改造工作台页面脚本")
+        payload["modifications"] = sorted(CAPABILITIES)
         print(json.dumps(payload, ensure_ascii=False))
         return
     if "--apply-update" in sys.argv:

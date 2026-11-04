@@ -8,7 +8,8 @@ a = Analysis([str(root/"desktop.py")], pathex=[str(root)],
     hiddenimports=["uvicorn.logging","uvicorn.loops.asyncio","uvicorn.protocols.http.h11_impl",
                    "uvicorn.lifespan.on","uvicorn.lifespan.off","game_probe","tools.serve_arm_lab",
                    "cryptography.hazmat.backends.openssl","cryptography.hazmat.bindings._rust",
-                   "apply_update","updater","updates_router"],
+                   "apply_update","updater","updates_router","modification_tasks","modification_runner",
+                   "remember_file","apk_edit_build","modification_probe","localization_probe","localization_edit"],
     excludes=["matplotlib","pytest","tkinter","IPython"], noarchive=False)
 pyz = PYZ(a.pure)
 exe = EXE(pyz,a.scripts,a.binaries,a.datas,[],name="Lazarus-Agent",console=False,upx=False)

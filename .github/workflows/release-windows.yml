@@ -8,7 +8,7 @@ on:
       version:
         description: SemVer without v (must equal app_version.py)
         required: true
-        default: '0.2.0'
+        default: '0.4.0'
       publish:
         description: Create/update GitHub Release
         required: true
@@ -82,6 +82,9 @@ jobs:
           $notes = "Windows 下载建议：`n- 常规使用：下载 Lazarus-Agent-windows-x64-setup.exe。`n- 免安装或移动存放：下载 portable ZIP，解压后保留 portable.flag。`n`n更新包先校验 Ed25519 签名和 SHA-256；APK 修复仍需在目标设备复测。"
           if ($tag -eq 'v0.3.0') {
             $notes = "工作台新增模型配置和工具调用测试。启用后，修复助手可按故障查询隔离设备的共享库，并在重签名后复测候选 APK。默认使用本地规则。`n`n" + $notes
+          }
+          if ($tag -eq 'v0.4.0') {
+            $notes = "新增通用功能改造工作流。可验证旧应用是否记住上次打开的文件，并支持扫描、选择和验收简体中文资源改造。改造候选仍须在所选 Android 版本逐项复测。`n`n" + $notes
           }
           if (gh release view $tag 2>$null) {
             gh release upload $tag release/* --clobber
