@@ -26,6 +26,20 @@
       remove.addEventListener("click",()=>{if(rows.children.length>1){row.remove();invalidate();}});
       row.append(resource,original,translated,verify,remove);rows.append(row);
     }
+    const routeActions={"菜单":"menu","启动应用":"launch","关闭旧版系统提示":"old-app-warning"};
+    function readRoute(strict){
+      return byId("localeRoute").value.split("\n").map(line=>line.trim()).filter(Boolean).map(line=>{
+        if(Object.hasOwn(routeActions,line))return routeActions[line];
+        const optional=line.startsWith("?");
+        const labels=(optional?line.slice(1):line).split("|").map(value=>value.trim());
+        if(strict&&(labels.length!==2||!labels[0]||!labels[1]))throw Error("路径每行填写动作名或 英文控件 | 中文控件。");
+        return {en:labels[0],zh:labels[1]||"",optional};
+      });
+    }
+    function routeText(route){
+      return (route||[]).map(step=>typeof step==="string"?Object.keys(routeActions).find(k=>routeActions[k]===step):
+        (step.optional?"? ":"")+step.en+" | "+step.zh).join("\n");
+    }
     function readTranslations({strict=true}={}){
       const translations=Object.create(null), resources=Object.create(null), checks=[];
       for(const row of rows.querySelectorAll(".localizationRow")){
@@ -41,7 +55,8 @@
       if(strict&&!checks.length)throw Error("请至少勾选一条译文作为界面验收项。");
       const tap=byId("localeTap").value.trim(),expect=byId("localeExpect").value.trim();
       if(strict&&Boolean(tap)!==Boolean(expect))throw Error("请同时填写操作控件和预期结果。");
-      return {translations,resources,checks,...(tap||expect?{operation:{tap,expect}}:{})};
+      const route=readRoute(strict);
+      return {translations,resources,checks,...(route.length?{route}:{}),...(tap||expect?{operation:{tap,expect}}:{})};
     }
     function criteria({strict=true}={}){
       if(previewKind()==="localize-zh")return readTranslations({strict});
@@ -109,6 +124,7 @@
       if(livePlan.base_version!==undefined&&[...base.options].some(option=>option.value===String(livePlan.base_version)))base.value=String(livePlan.base_version);
       useModel.checked=Boolean(livePlan.use_model);
       const input=livePlan.criteria||{};
+      byId("localeRoute").value=routeText(input.route);
       byId("localeTap").value=text(input.operation?.tap);byId("localeExpect").value=text(input.operation?.expect);
       if(Array.isArray(input.selects)&&input.selects.length>=2){
         byId("rememberFirstTap").value=text(input.selects[0].tap);byId("rememberFirstExpect").value=text(input.selects[0].expect);
@@ -124,7 +140,7 @@
       const current=getJob(), changed=current?.id!==jobId;
       if(changed){
         request.value="";kind.value="auto";base.value="";useModel.checked=false;
-        for(const id of ["rememberFirstTap","rememberFirstExpect","rememberSecondTap","rememberSecondExpect","localeTap","localeExpect"])byId(id).value="";
+        for(const id of ["rememberFirstTap","rememberFirstExpect","rememberSecondTap","rememberSecondExpect","localeTap","localeExpect","localeRoute"])byId(id).value="";
         rows.replaceChildren();addLocalizationRow();resourceList.replaceChildren();resourceList.hidden=true;
         jobId=current?.id||null;plan=null;planSignature="";dirty=false;updateBaseOptions(current);restorePlan(current?.modification?.plan);setStatus(describe(current?.modification));}
       else updateBaseOptions(current);
@@ -211,7 +227,7 @@
       byId("modificationDetails").open=true;sync();
     }
     kind.addEventListener("change",invalidate);request.addEventListener("input",invalidate);base.addEventListener("change",invalidate);useModel.addEventListener("change",invalidate);
-    for(const id of ["rememberFirstTap","rememberFirstExpect","rememberSecondTap","rememberSecondExpect","localeTap","localeExpect"])byId(id).addEventListener("input",invalidate);
+    for(const id of ["rememberFirstTap","rememberFirstExpect","rememberSecondTap","rememberSecondExpect","localeTap","localeExpect","localeRoute"])byId(id).addEventListener("input",invalidate);
     byId("addLocalizationRow").addEventListener("click",()=>{addLocalizationRow();invalidate();});browseButton.addEventListener("click",browseResources);planButton.addEventListener("click",makePlan);runButton.addEventListener("click",executePlan);reviseButton.addEventListener("click",reviseFromFeedback);
     function fromMessage(value){
       kind.value="auto";request.value=value;invalidate();byId("modificationDetails").open=true;

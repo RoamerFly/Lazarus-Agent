@@ -1,6 +1,7 @@
 import tempfile
 from pathlib import Path
 import unittest
+import xml.etree.ElementTree as ET
 
 from localization_edit import LocalizationError, apply, catalog, inspect
 
@@ -28,6 +29,22 @@ class LocalizationEditTests(unittest.TestCase):
         base.mkdir(parents=True)
         (base / "strings.xml").write_text(DEFAULT, encoding="utf-8")
         self.addCleanup(self.temp.cleanup)
+
+    def test_existing_untranslated_quantity_keeps_other_entries_and_format(self):
+        source = '<resources><plurals name="items"><item quantity="one">One item</item><item quantity="other">%d items</item></plurals></resources>'
+        (self.root / "res/values/plurals.xml").write_text(source, encoding="utf8")
+        request = criteria({"%d items": "%d 项"}, {"%d items": "plurals/items[other]"})
+        with self.assertRaises(ValueError):
+            inspect(self.root, request)
+        target = self.root / "res/values-zh-rCN/plurals.xml"
+        target.parent.mkdir()
+        target.write_text(source, encoding="utf8")
+        with self.assertRaises(ValueError):
+            inspect(self.root, criteria({"%d items": "若干项"}))
+        apply(self.root, inspect(self.root, request)["plan"])
+        items = ET.parse(target).findall(".//item")
+        self.assertEqual([(n.get("quantity"), n.text) for n in items], [("one", "One item"), ("other", "%d 项")])
+        self.assertIn({"name": "plurals/items[other]", "original": "%d items", "translated": "%d 项"}, catalog(self.root))
 
     def test_catalog_inspect_and_apply_creates_zh_cn_resource(self):
         rows = catalog(self.root)
