@@ -25,10 +25,17 @@ def transform(decoded, use_model, progress):
         if (not row["translated"] or row["translated"] == row["original"])
         and not re.search(r"(?i)api_?key|secret|token|password|client_?id|url|endpoint", row["name"])
     ]
-    if not rows:
-        raise ValueError("未发现可补译的普通 Android 字符串资源")
+    from indexed_text import discover
+
+    pools = discover(assets)
+    pool_text = {value for pool in pools.values() for _, value in pool.rows}
+    if pools:
+        progress(f"识别到 {len(pools)} 张 Java 索引文本表，包含 {len(pool_text)} 个不同文本")
+    if not rows and not pools:
+        raise ValueError("未发现可补译的 Android 字符串或支持的游戏文本表")
     progress(f"发现 {len(rows)} 个候选 Android 字符串，检查已有中文资源和格式占位符")
-    mapped, model_count = translations((row["original"] for row in rows), use_model, progress)
+    sources = [row["original"] for row in rows]
+    mapped, model_count = translations([*sorted(pool_text), *sources], use_model, progress)
     applied = 0
     for row in rows:
         src = row["original"]
@@ -43,6 +50,34 @@ def transform(decoded, use_model, progress):
         plan = localization_edit.inspect(decoded, criteria)["plan"]
         localization_edit.apply(decoded, plan)
         applied += 1
+    if pools:
+        from android_game_fonts import update
+
+        updated_tables = updated_entries = 0
+        for path, pool in pools.items():
+            matches = sum(value in mapped for _, value in pool.rows)
+            if matches:
+                path.write_bytes(pool.translated(mapped))
+                updated_tables += 1
+                updated_entries += matches
+        if not updated_tables:
+            raise ValueError("识别到游戏文本表，但未得到可写入的游戏译文。可启用模型翻译后重试")
+        font_report = update(assets, mapped.values())
+        progress(
+            f"已回读 {updated_tables} 张改写的文本表，核对 {len(font_report['outline_fonts'])} 个轮廓字体，"
+            f"向 {font_report['bitmap_atlases_updated']} 张位图字库补入 {font_report['bitmap_glyphs_added']} 个字形"
+        )
+        return {
+            "kind": "android-indexed-text-zh",
+            "translated": applied + updated_entries,
+            "discovered": len(rows) + sum(len(t.rows) for t in pools.values()),
+            "resources_updated": applied,
+            "tables_discovered": len(pools),
+            "tables_updated": updated_tables,
+            "game_entries_updated": updated_entries,
+            "model_translations": model_count,
+            **font_report,
+        }
     return {
         "kind": "android-resources-zh",
         "discovered": len(rows),

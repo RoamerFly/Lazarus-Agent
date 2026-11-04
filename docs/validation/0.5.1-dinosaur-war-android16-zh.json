@@ -1,0 +1,67 @@
+{
+  "app": "恐龙战争",
+  "version": "0.5.1",
+  "action": "Edge 打开工作台，导入同一原包，发送「汉化成中文」，点击下载",
+  "original_sha256": "be0eb93df3b9d34994808caef4606eba31b2781c7672eb515824286e38e7ef21",
+  "baseline": {
+    "version": "0.5.0",
+    "android_resources_only": 16
+  },
+  "result": {
+    "kind": "android-indexed-text-zh",
+    "source_sha256": "4c9bdd3a130fc0938284f70dc338e3c9968ca7783721a285fea87169ffd500f4",
+    "sha256": "77450773fe18972a2b1e26f048db79bc0a1aae23fc93fc2adc54cc96a451f506",
+    "candidate": "candidate.apk",
+    "api": 35,
+    "apktool": {
+      "version": "2.12.1",
+      "sha256": "66cf4524a4a45a7f56567d08b2c9b6ec237bcdd78cee69fd4a59c8a0243aeafa"
+    },
+    "transform": {
+      "translated": 100,
+      "discovered": 1170,
+      "resources_updated": 69,
+      "tables_discovered": 6,
+      "tables_updated": 6,
+      "game_entries_updated": 31,
+      "model_translations": 0,
+      "outline_fonts": [
+        {
+          "name": "arial.ttf",
+          "missing": 358
+        },
+        {
+          "name": "ariblk.ttf",
+          "missing": 358
+        },
+        {
+          "name": "ARLRDBD.TTF",
+          "missing": 358
+        }
+      ],
+      "bitmap_atlases_updated": 1,
+      "bitmap_glyphs_added": 359
+    },
+    "input_sha256": "be0eb93df3b9d34994808caef4606eba31b2781c7672eb515824286e38e7ef21",
+    "compatibility_rules": [
+      "installation-floor"
+    ]
+  },
+  "verification": {
+    "api": 36,
+    "locale": "zh-CN",
+    "device": "工作台配对的 ReDroid ARM 隔离实例",
+    "physical_phone_tested": false,
+    "installed_sha256": "77450773fe18972a2b1e26f048db79bc0a1aae23fc93fc2adc54cc96a451f506",
+    "upgrade_over_baseline": true,
+    "observed": "游戏标题与第一段可读中文教程，覆盖安装后原有教程进度可用",
+    "english_tables_changed": 6,
+    "table_entries_changed": 31,
+    "original_atlas_pixels_preserved": true,
+    "screenshots_sha256": {
+      "改造前-教程": "f97930b4cbdd78a535cd7a60c435ad5aa18fa51e4293a4e941f5f2293dac4839",
+      "改造后-教程": "619dfd45cd9976dea46dea0a38c524e514ef72ea4aed854c648413cb58d7daad"
+    },
+    "limit": "开场图片中的按钮仍是英文。后续关卡未验收。"
+  }
+}
