@@ -1,0 +1,145 @@
+{
+  "app": "OI Notepad 1.3",
+  "package": "org.openintents.notepad",
+  "sdk": 36,
+  "device": "Android 16 x86_64 AOSP 模拟器",
+  "physical_phone_tested": false,
+  "original": {
+    "file": "OI-Notepad-1.3.apk",
+    "sha256": "3c5f3ebcbbae199a403304e195b63f29198729467d7900f85c28a18be9695539",
+    "target_sdk": 15,
+    "install_result": "INSTALL_FAILED_DEPRECATED_SDK_VERSION"
+  },
+  "compatibility_base": {
+    "sha256": "db3b580da11f520c14b5dc964c5fd3a2b43857e3397083afb39ab33bc873d63e",
+    "target_sdk": 24,
+    "note_smoke": "passed"
+  },
+  "unmodified_rebuild": {
+    "result": "failed",
+    "message": "zh-CN 下第 1 条文字仍为原文",
+    "sha256": "3d0279fc89c6c7bfd81da75deb551c4e80e798783faf0d30351e372adaa9652e"
+  },
+  "baseline": {
+    "result": "failed",
+    "message": "zh-CN 下第 1 条文字仍为原文"
+  },
+  "translations": {
+    "%d words.": "共 %d 个词。",
+    "One word.": "共 1 个词。",
+    "No compatible extension available to display full info (Help/FAQ, Contact Developers, Feature request, Donations).": "未安装可显示完整帮助、常见问题、开发者联系方式、功能建议及捐赠信息的扩展。",
+    "Get OI Support": "获取 OI 支持",
+    "OI Support": "OI 支持",
+    "Support": "支持与帮助",
+    "Create and share your notes with OI Notepad.": "使用 OI 记事本创建和分享笔记。",
+    "Share": "分享",
+    "No application available for sharing.": "没有可用于分享的应用。",
+    "Word count": "字数统计",
+    "Marquee note titles.": "滚动显示长标题",
+    "Continuously scroll note titles that are too long.": "笔记标题过长时自动滚动显示。",
+    "Character count": "字符计数",
+    "Show character count in editor": "在编辑器中显示字符数",
+    "Do not show character count in editor": "在编辑器中隐藏字符数",
+    "Deletion Confirmation": "确认删除",
+    "Are you sure you want to delete this note?": "确定要删除这条笔记吗？",
+    "New note": "新建笔记"
+  },
+  "criteria": {
+    "route": [
+      "old-app-warning",
+      {
+        "en": "ACCEPT",
+        "zh": "接受",
+        "optional": true
+      },
+      "launch",
+      {
+        "en": "CONTINUE",
+        "zh": "继续",
+        "optional": true
+      },
+      "launch",
+      "menu",
+      {
+        "en": "Settings",
+        "zh": "设置",
+        "optional": false
+      }
+    ],
+    "checks": [
+      {
+        "original": "Marquee note titles.",
+        "translated": "滚动显示长标题"
+      },
+      {
+        "original": "Continuously scroll note titles that are too long.",
+        "translated": "笔记标题过长时自动滚动显示。"
+      },
+      {
+        "original": "Character count",
+        "translated": "字符计数"
+      }
+    ],
+    "operation": {
+      "tap": "字符计数",
+      "expect": "在编辑器中显示字符数"
+    }
+  },
+  "export": {
+    "file": "OI-Notepad-1.3-简体中文补全-Android16.apk",
+    "sha256": "368db0d9ece21e3f065c503f3869709aa894679294a2cad2ba4bea8623d21b03",
+    "bytes": 466062,
+    "target_sdk": 24,
+    "signer_sha256": [
+      "4c50a10b1cdf3eab5af2691e5974c418d9bb41e1eb504ec722c00777890a1a71"
+    ],
+    "installed_sha256": "368db0d9ece21e3f065c503f3869709aa894679294a2cad2ba4bea8623d21b03",
+    "apk_signature_verified": true
+  },
+  "locale_validation": [
+    {
+      "phase": "en-US",
+      "foreground": true,
+      "locale_applied": true,
+      "app_nodes": true,
+      "matches": [
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "phase": "zh-CN",
+      "foreground": true,
+      "locale_applied": true,
+      "app_nodes": true,
+      "matches": [
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "phase": "zh-CN-operation",
+      "tap": "字符计数",
+      "expect": "在编辑器中显示字符数",
+      "matched": true
+    },
+    {
+      "phase": "en-US-return",
+      "foreground": true,
+      "locale_applied": true,
+      "app_nodes": true,
+      "matches": [
+        true,
+        true,
+        true
+      ]
+    }
+  ],
+  "fresh_install": {
+    "saved_note_reopened": true,
+    "word_count_result": "共 1 个词。",
+    "verified_sha256": "368db0d9ece21e3f065c503f3869709aa894679294a2cad2ba4bea8623d21b03"
+  }
+}
