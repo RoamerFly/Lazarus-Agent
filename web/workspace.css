@@ -72,3 +72,7 @@ dialog::-webkit-scrollbar, .modal-content::-webkit-scrollbar, .messages::-webkit
 .modificationbox > label.row { display:flex; align-items:center; }
 
 #appname { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+
+.modal-footer { flex-shrink:0; border-top:1px solid #d4e7e3; padding-top:12px; margin-top:12px; }
+.modal-footer .buttons { margin:0; }
+.modal-header .row { flex-wrap:wrap; justify-content:flex-end; }
