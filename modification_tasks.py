@@ -28,8 +28,52 @@ def remember_checks(criteria):
     return {"selects": rows}
 
 
+def localization_checks(criteria):
+    translations = criteria.get("translations")
+    if not isinstance(translations, dict) or not 1 <= len(translations) <= 100:
+        raise ValueError("请填写 1 至 100 条译文")
+    entries = {}
+    for original, translated in translations.items():
+        original = short_text(original, "原文", 500)
+        translated = short_text(translated, "译文", 500)
+        if original == translated or original in entries:
+            raise ValueError("原文必须唯一且与译文不同")
+        entries[original] = translated
+    resources = criteria.get("resources", {})
+    if not isinstance(resources, dict) or not resources.keys() <= entries.keys():
+        raise ValueError("资源名称必须对应本次翻译的原文")
+    if any(not isinstance(name, str) or not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.]*", name)
+           for name in resources.values()):
+        raise ValueError("字符串资源名称无效")
+    checks = criteria.get("checks")
+    if not isinstance(checks, list) or not 1 <= len(checks) <= len(entries):
+        raise ValueError("请标记至少一条启动界面中可见的译文用于验收")
+    visible = {}
+    for row in checks:
+        if not isinstance(row, dict):
+            raise ValueError("译文验收项格式无效")
+        original, translated = row.get("original"), row.get("translated")
+        if not isinstance(original, str) or original not in entries or entries[original] != translated or original in visible:
+            raise ValueError("验收项必须与本次翻译逐项对应")
+        visible[original] = translated
+    verified = {"translations": entries, "resources": dict(resources),
+                "checks": [{"original": key, "translated": val} for key, val in visible.items()]}
+    operation = criteria.get("operation")
+    if operation is not None:
+        if not isinstance(operation, dict):
+            raise ValueError("验收操作格式无效")
+        verified["operation"] = {key: short_text(operation.get(key), label, 500)
+                                 for key, label in (("tap", "操作控件"), ("expect", "操作后的界面文字"))}
+    return verified
+
+
 # Every supported edit declares how it is requested and how the result is tested.
 CAPABILITIES = {
+    "localize-zh": {
+        "description": "为选定字符串增加简体中文，验证中英文切换与回退",
+        "match": r"汉化|简体中文|翻译.{0,12}中文|中文.{0,8}(翻译|语言|界面)|locali[sz]e",
+        "checks": localization_checks,
+    },
     "remember-file": {
         "description": "记住上次打开的文件，强制停止后重开并核对两份文件的正文",
         "match": r"(记住|记忆|恢复|继续|重新打开|上次|最后).*?(文件|文档|记录)|remember.*file",

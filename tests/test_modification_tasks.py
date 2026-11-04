@@ -34,3 +34,15 @@ class ModificationPlanTests(unittest.TestCase):
             self.assertNotIn("source_sha256",str(request.call_args))
             request.side_effect=ModelToolError("unavailable")
             self.assertEqual(make_plan(self.state,dict(self.body,use_model=True))["tool_source"],"fallback")
+
+    def test_language_checks_can_be_a_visible_subset(self):
+        criteria = {"translations": {"Tea timer": "泡茶计时", "Start": "开始"},
+                    "checks": [{"original": "Start", "translated": "开始"}]}
+        body = {"request": "把界面汉化", "criteria": criteria}
+        plan = make_plan(self.state, body)
+        self.assertEqual(plan["kind"], "localize-zh")
+        self.assertEqual(plan["criteria"]["checks"], criteria["checks"])
+        for overrides in ({"checks": []}, {"checks": [{"original": "x", "translated": "开始"}]},
+                          {"resources": {"Start": "../bad"}}, {"operation": {"tap": "开始"}}):
+            with self.subTest(overrides=overrides), self.assertRaises(ValueError):
+                make_plan(self.state, dict(body, criteria=dict(criteria, **overrides)))
