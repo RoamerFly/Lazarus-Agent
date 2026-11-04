@@ -122,4 +122,3 @@ class ModificationProbeTests(unittest.TestCase):
                                                         {"selects": [{"tap": "Open B", "expect": "Record B"}]},
                                                         Path(temp) / "evidence")
         self.assertEqual(report["result"], "insufficient")
-

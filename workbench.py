@@ -162,9 +162,26 @@ def status(job:str):
             save(folder,state)
         finally:
             operation.release()
-    if state["status"]=="running" and state.get("worker")!=INSTANCE:
-        state.update(status="error",export=None)
-        state["events"].append({"time":now(),"text":"上次执行被工作台重启中断，可重新验证。"})
+    if state["status"]=="running" and state.get("worker")!=INSTANCE and operation.acquire(blocking=False):
+        try:
+            state=read(folder)
+            if state["status"]=="running" and state.get("worker")!=INSTANCE:
+                message="上次执行被工作台重启中断，可重新验证。"
+                state.update(status="error",export=None)
+                state["events"].append({"time":now(),"text":message})
+                if state.get("action")=="modify":
+                    change=state["modification"]
+                    change.update(status="interrupted",message=message)
+                    change["runs"][-1].update(status="interrupted",failure=message)
+                    matrix=state["compatibility"]
+                    matrix.update(status="failed",artifact=None)
+                    for row in matrix["rows"]:
+                        if row["status"] in {"pending","running"}:
+                            row.update(status="skipped",failure=message)
+                    change["runs"][-1]["compatibility"]=matrix
+                save(folder,state)
+        finally:
+            operation.release()
     return state
 
 
@@ -441,6 +458,15 @@ def work(folder,action):
             save(folder,state)
             return passed
         if action=="candidate":
+            export = state.get("export") or {}
+            if export.get("modification_id"):
+                from modification_runner import digest
+                version = next((v for v in state.get("versions", []) if v["sha256"] == export["sha256"]), None)
+                if not version:
+                    raise ValueError("找不到已验证的改造版本")
+                modified = folder / "versions" / f"{version['number']}.apk"
+                if digest(modified) != export["sha256"]:
+                    raise ValueError("归档 APK 哈希与验收记录不符")
             if not modified.exists():
                 raise ValueError("此任务还没有候选包")
             attempt(modified,"修复包")
@@ -757,6 +783,37 @@ def work(folder,action):
             operation.release()
 
 
+@app.post("/api/jobs/{job}/modify/resources")
+def modification_resources(job: str, body: dict):
+    from apk_edit_build import inspect_decoded
+    from localization_edit import catalog
+    from modification_runner import digest
+    folder = job_dir(job)
+    if not operation.acquire(blocking=False):
+        raise HTTPException(409, "请等待当前任务结束")
+    try:
+        state = read(folder)
+        base = body.get("base_version")
+        source = folder / "original.apk"
+        expected = state["package"]["sha256"]
+        if base is not None:
+            if type(base) is not int:
+                raise ValueError("基准版本无效")
+            version = next((v for v in state.get("versions", []) if v["number"] == base), None)
+            if version is None:
+                raise ValueError("找不到选定版本")
+            source = folder / "versions" / f"{base}.apk"
+            expected = version["sha256"]
+        if digest(source) != expected:
+            raise ValueError("基准 APK 哈希不符")
+        report = inspect_decoded(source, TOOLS, lambda decoded: {"strings": catalog(decoded)})
+        return {**report["inspection"], "source_sha256": expected}
+    except (ValueError, RuntimeError, OSError) as exc:
+        raise HTTPException(422, str(exc)[:1200]) from exc
+    finally:
+        operation.release()
+
+
 @app.post("/api/jobs/{job}/modify/plan")
 def plan_modification(job:str,body:dict):
     from modification_tasks import make_plan
@@ -777,6 +834,29 @@ def plan_modification(job:str,body:dict):
         raise HTTPException(422,str(exc)) from exc
     finally:
         operation.release()
+
+
+@app.post("/api/jobs/{job}/modify/run")
+def run_modification(job:str,body:dict):
+    from modification_runner import run_worker, start_run
+    folder=job_dir(job)
+    if not operation.acquire(blocking=False):
+        raise HTTPException(409,"已有设备操作正在执行")
+    try:
+        state=read(folder)
+        archive_version(folder,state)
+        start_run(state,body.get("plan_id"))
+        state["worker"]=INSTANCE
+        save(folder,state)
+        threading.Thread(target=run_worker,args=(folder,state,device,save,signing_fingerprints,now,operation),
+                         daemon=True).start()
+        return {"started":True}
+    except ValueError as exc:
+        operation.release()
+        raise HTTPException(409,str(exc)) from exc
+    except Exception:
+        operation.release()
+        raise
 
 
 @app.post("/api/jobs/{job}/action/{action}")
