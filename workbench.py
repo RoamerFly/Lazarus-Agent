@@ -8,6 +8,7 @@ import re
 import secrets
 import shutil
 import threading
+import time
 import uuid
 from zipfile import ZipFile
 
@@ -38,6 +39,7 @@ app=FastAPI(docs_url=None,redoc_url=None,openapi_url=None)
 device=Device()
 operation=threading.Lock()
 state_lock=threading.RLock()
+STATE_IO_ATTEMPTS=6
 
 
 def now():
@@ -64,16 +66,66 @@ def job_dir(job):
     return STORAGE/job
 
 
+def _transient_state_error(exc):
+    return isinstance(exc,PermissionError) or (isinstance(exc,OSError) and getattr(exc,"winerror",None) in {5,32})
+
+
+def _state_retry_pause(attempt):
+    time.sleep(0.02*(2**attempt))
+
+
+def _read_state_file(path):
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
 def read(folder):
-    with state_lock:
-        return json.loads((folder/"state.json").read_text(encoding="utf-8"))
+    folder=Path(folder)
+    last_error=None
+    for attempt in range(STATE_IO_ATTEMPTS):
+        try:
+            # Keep the original global lock, but only around this one short
+            # filesystem read. The writer uses an atomic replace.
+            with state_lock:
+                state=_read_state_file(folder/"state.json")
+            return state
+        except (OSError,json.JSONDecodeError) as exc:
+            # A concurrent Windows replace can briefly deny the read.
+            # Invalid JSON is also retried because an external legacy
+            # writer may not provide atomic replacement.
+            if not (_transient_state_error(exc) or isinstance(exc,json.JSONDecodeError)):
+                raise
+            last_error=exc
+            if attempt+1<STATE_IO_ATTEMPTS:
+                _state_retry_pause(attempt)
+    raise last_error
 
 
 def save(folder,state):
-    with state_lock:
-        temp=folder/"state.tmp"
-        temp.write_text(json.dumps(state,ensure_ascii=False,indent=2),encoding="utf-8")
-        temp.replace(folder/"state.json")
+    folder=Path(folder)
+    payload=json.dumps(state,ensure_ascii=False,indent=2)
+    target=folder/"state.json"
+    last_error=None
+    for attempt in range(STATE_IO_ATTEMPTS):
+        # Do not reuse state.tmp: another process can otherwise remove or
+        # lock it between write and replacement on Windows.
+        temp=folder/(".state-"+str(os.getpid())+"-"+uuid.uuid4().hex+".tmp")
+        try:
+            with state_lock:
+                temp.write_text(payload,encoding="utf-8")
+                os.replace(temp,target)
+            return
+        except OSError as exc:
+            last_error=exc
+            if not _transient_state_error(exc):
+                raise
+            if attempt+1<STATE_IO_ATTEMPTS:
+                _state_retry_pause(attempt)
+        finally:
+            try:
+                temp.unlink(missing_ok=True)
+            except OSError:
+                pass
+    raise last_error
 
 
 def signing_fingerprints(apk, api=None):
@@ -162,9 +214,26 @@ def status(job:str):
             save(folder,state)
         finally:
             operation.release()
-    if state["status"]=="running" and state.get("worker")!=INSTANCE:
-        state.update(status="error",export=None)
-        state["events"].append({"time":now(),"text":"上次执行被工作台重启中断，可重新验证。"})
+    if state["status"]=="running" and state.get("worker")!=INSTANCE and operation.acquire(blocking=False):
+        try:
+            state=read(folder)
+            if state["status"]=="running" and state.get("worker")!=INSTANCE:
+                message="上次执行被工作台重启中断，可重新验证。"
+                state.update(status="error",export=None)
+                state["events"].append({"time":now(),"text":message})
+                if state.get("action")=="modify":
+                    change=state["modification"]
+                    change.update(status="interrupted",message=message)
+                    change["runs"][-1].update(status="interrupted",failure=message)
+                    matrix=state["compatibility"]
+                    matrix.update(status="failed",artifact=None)
+                    for row in matrix["rows"]:
+                        if row["status"] in {"pending","running"}:
+                            row.update(status="skipped",failure=message)
+                    change["runs"][-1]["compatibility"]=matrix
+                save(folder,state)
+        finally:
+            operation.release()
     return state
 
 
@@ -441,6 +510,15 @@ def work(folder,action):
             save(folder,state)
             return passed
         if action=="candidate":
+            export = state.get("export") or {}
+            if export.get("modification_id"):
+                from modification_runner import digest
+                version = next((v for v in state.get("versions", []) if v["sha256"] == export["sha256"]), None)
+                if not version:
+                    raise ValueError("找不到已验证的改造版本")
+                modified = folder / "versions" / f"{version['number']}.apk"
+                if digest(modified) != export["sha256"]:
+                    raise ValueError("归档 APK 哈希与验收记录不符")
             if not modified.exists():
                 raise ValueError("此任务还没有候选包")
             attempt(modified,"修复包")
@@ -755,6 +833,82 @@ def work(folder,action):
             save(folder,state)
         finally:
             operation.release()
+
+
+@app.post("/api/jobs/{job}/modify/resources")
+def modification_resources(job: str, body: dict):
+    from apk_edit_build import inspect_decoded
+    from localization_edit import catalog
+    from modification_runner import digest
+    folder = job_dir(job)
+    if not operation.acquire(blocking=False):
+        raise HTTPException(409, "请等待当前任务结束")
+    try:
+        state = read(folder)
+        base = body.get("base_version")
+        source = folder / "original.apk"
+        expected = state["package"]["sha256"]
+        if base is not None:
+            if type(base) is not int:
+                raise ValueError("基准版本无效")
+            version = next((v for v in state.get("versions", []) if v["number"] == base), None)
+            if version is None:
+                raise ValueError("找不到选定版本")
+            source = folder / "versions" / f"{base}.apk"
+            expected = version["sha256"]
+        if digest(source) != expected:
+            raise ValueError("基准 APK 哈希不符")
+        report = inspect_decoded(source, TOOLS, lambda decoded: {"strings": catalog(decoded)})
+        return {**report["inspection"], "source_sha256": expected}
+    except (ValueError, RuntimeError, OSError) as exc:
+        raise HTTPException(422, str(exc)[:1200]) from exc
+    finally:
+        operation.release()
+
+
+@app.post("/api/jobs/{job}/modify/plan")
+def plan_modification(job:str,body:dict):
+    from modification_tasks import make_plan
+    folder=job_dir(job)
+    if not operation.acquire(blocking=False):
+        raise HTTPException(409,"请等待当前任务结束")
+    try:
+        state=read(folder)
+        plan=make_plan(state,body)
+        previous=state.get("modification",{})
+        state["modification"]={"plan":plan,"status":"planned","runs":previous.get("runs",[]),
+                               "message":"已保存验收条件，执行时将先验证基准 APK 的实际行为。"}
+        add_message(state,"user",plan["request"],modification_id=plan["id"])
+        state["updated"]=now()
+        save(folder,state)
+        return {"plan":plan}
+    except ValueError as exc:
+        raise HTTPException(422,str(exc)) from exc
+    finally:
+        operation.release()
+
+
+@app.post("/api/jobs/{job}/modify/run")
+def run_modification(job:str,body:dict):
+    from modification_runner import run_worker, start_run
+    folder=job_dir(job)
+    if not operation.acquire(blocking=False):
+        raise HTTPException(409,"已有设备操作正在执行")
+    try:
+        state=read(folder)
+        archive_version(folder,state)
+        start_run(state,body.get("plan_id"))
+        state["worker"]=INSTANCE
+        save(folder,state)
+        threading.Thread(target=run_worker,args=(folder,state,device,save,signing_fingerprints,now,operation),
+                         daemon=True).start()
+        return {"started":True}
+    except ValueError as exc:
+        operation.release()
+        raise HTTPException(409,str(exc)) from exc
+    except Exception:
+        operation.release()
+        raise
 
 
 @app.post("/api/jobs/{job}/action/{action}")

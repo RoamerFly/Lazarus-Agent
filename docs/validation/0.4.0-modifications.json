@@ -1,0 +1,681 @@
+{
+  "version": "0.4.0",
+  "environment": "团队自制 APK，Android x86_64 专用模拟器",
+  "model": "本地规则，未调用远程模型",
+  "evidence": "0.4.0-界面验收.zip",
+  "cases": [
+    {
+      "name": "文件阅读器",
+      "kind": "remember-file",
+      "targets": [
+        36
+      ],
+      "input": "fixtures/file-reader/file-reader-forgets-selection.apk",
+      "source_sha256": "4049359b01c7c7348d7d2bc4c4efdb27a7844975f3dc147a1cef0996632de9ac",
+      "signer_certificates_sha256": [
+        "37208bcd3e976399164138355d0180ccce0377ced3186f82eb1dea9df8a39cb8"
+      ],
+      "artifact": "fixtures/verified/reader-remember-file.apk",
+      "sha256": "c8e063e8095710b14564b6e53848f8169c40314a481e8b7b9dec2a78aa3548cc",
+      "criteria": {
+        "selects": [
+          {
+            "tap": "Open record B",
+            "expect": "Report B: South sensor calibration"
+          },
+          {
+            "tap": "Open record A",
+            "expect": "Report A: North sensor baseline"
+          }
+        ]
+      },
+      "baseline": {
+        "result": "failed",
+        "message": "冷启动后没有恢复所选内容：Report B: South sensor calibration",
+        "failed_step": 1,
+        "installed_sha256": "4049359b01c7c7348d7d2bc4c4efdb27a7844975f3dc147a1cef0996632de9ac",
+        "verified_environment": {
+          "sdk": 36,
+          "supported_abis": [
+            "x86_64"
+          ],
+          "type": "android-emulator"
+        },
+        "steps": [
+          {
+            "step": 1,
+            "tap": "Open record B",
+            "expect": "Report B: South sensor calibration",
+            "selected": true,
+            "cold_start": false
+          }
+        ],
+        "evidence": "reader/基准复现-36"
+      },
+      "control": {
+        "result": "failed",
+        "message": "冷启动后没有恢复所选内容：Report B: South sensor calibration",
+        "failed_step": 1,
+        "installed_sha256": "df460253831f0976353dd4f76475f6a5fe98f98359cc4a63aedd8a0c71958383",
+        "verified_environment": {
+          "sdk": 36,
+          "supported_abis": [
+            "x86_64"
+          ],
+          "type": "android-emulator"
+        },
+        "steps": [
+          {
+            "step": 1,
+            "tap": "Open record B",
+            "expect": "Report B: South sensor calibration",
+            "selected": true,
+            "cold_start": false
+          }
+        ],
+        "evidence": "reader/回编对照-36"
+      },
+      "targets_verified": [
+        {
+          "result": "passed",
+          "message": "所有选中内容均在冷启动后恢复",
+          "installed_sha256": "c8e063e8095710b14564b6e53848f8169c40314a481e8b7b9dec2a78aa3548cc",
+          "verified_environment": {
+            "sdk": 36,
+            "supported_abis": [
+              "x86_64"
+            ],
+            "type": "android-emulator"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "tap": "Open record B",
+              "expect": "Report B: South sensor calibration",
+              "selected": true,
+              "cold_start": true
+            },
+            {
+              "step": 2,
+              "tap": "Open record A",
+              "expect": "Report A: North sensor baseline",
+              "selected": true,
+              "cold_start": true
+            }
+          ],
+          "evidence": "reader/候选复测-36"
+        }
+      ],
+      "change": {
+        "applied": true,
+        "rule": "remember-last-record-v1",
+        "changed_file": "smali/org/ggbond/filereader/FileReaderActivity.smali",
+        "target_method": "openRecord",
+        "default_record": "record-a.txt",
+        "persistence": "SharedPreferences:lazarus.remember.last.record/record",
+        "audit": {
+          "kind": "remember-last-record-v1",
+          "selection_records": [],
+          "selection_call_count": 1,
+          "save_after": "verified-file-or-asset-stream-open"
+        }
+      }
+    },
+    {
+      "name": "备忘录",
+      "kind": "remember-file",
+      "targets": [
+        34,
+        35,
+        36
+      ],
+      "input": "fixtures/file-reader-variant/memo-vault-forgets-selection.apk",
+      "source_sha256": "d26fef9c648374f735a43428927a615884f9d09b177e5752a5df9839d91234d5",
+      "signer_certificates_sha256": [
+        "602cc929993058dacfc4a568909176dc601e45205d5482621d157bb64ac5fe53"
+      ],
+      "artifact": "fixtures/verified/vault-remember-file.apk",
+      "sha256": "b3ba4ea2a413e1734e37d9b6d283eac021cecc457887b3016567c821e1b452a1",
+      "criteria": {
+        "selects": [
+          {
+            "tap": "Review west memo",
+            "expect": "Memo West: harbour maintenance notes"
+          },
+          {
+            "tap": "Review east memo",
+            "expect": "Memo East: greenhouse supply schedule"
+          }
+        ]
+      },
+      "baseline": {
+        "result": "failed",
+        "message": "冷启动后没有恢复所选内容：Memo West: harbour maintenance notes",
+        "failed_step": 1,
+        "installed_sha256": "d26fef9c648374f735a43428927a615884f9d09b177e5752a5df9839d91234d5",
+        "verified_environment": {
+          "sdk": 36,
+          "supported_abis": [
+            "x86_64"
+          ],
+          "type": "android-emulator"
+        },
+        "steps": [
+          {
+            "step": 1,
+            "tap": "Review west memo",
+            "expect": "Memo West: harbour maintenance notes",
+            "selected": true,
+            "cold_start": false
+          }
+        ],
+        "evidence": "vault/基准复现-36"
+      },
+      "control": {
+        "result": "failed",
+        "message": "冷启动后没有恢复所选内容：Memo West: harbour maintenance notes",
+        "failed_step": 1,
+        "installed_sha256": "70c5141887c24db43e4da668aa77e3bb3c86dd052b0c0a817bc167cd76e59557",
+        "verified_environment": {
+          "sdk": 36,
+          "supported_abis": [
+            "x86_64"
+          ],
+          "type": "android-emulator"
+        },
+        "steps": [
+          {
+            "step": 1,
+            "tap": "Review west memo",
+            "expect": "Memo West: harbour maintenance notes",
+            "selected": true,
+            "cold_start": false
+          }
+        ],
+        "evidence": "vault/回编对照-36"
+      },
+      "targets_verified": [
+        {
+          "result": "passed",
+          "message": "所有选中内容均在冷启动后恢复",
+          "installed_sha256": "b3ba4ea2a413e1734e37d9b6d283eac021cecc457887b3016567c821e1b452a1",
+          "verified_environment": {
+            "sdk": 34,
+            "supported_abis": [
+              "x86_64"
+            ],
+            "type": "android-emulator"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "tap": "Review west memo",
+              "expect": "Memo West: harbour maintenance notes",
+              "selected": true,
+              "cold_start": true
+            },
+            {
+              "step": 2,
+              "tap": "Review east memo",
+              "expect": "Memo East: greenhouse supply schedule",
+              "selected": true,
+              "cold_start": true
+            }
+          ],
+          "evidence": "vault/候选复测-34"
+        },
+        {
+          "result": "passed",
+          "message": "所有选中内容均在冷启动后恢复",
+          "installed_sha256": "b3ba4ea2a413e1734e37d9b6d283eac021cecc457887b3016567c821e1b452a1",
+          "verified_environment": {
+            "sdk": 35,
+            "supported_abis": [
+              "x86_64",
+              "arm64-v8a"
+            ],
+            "type": "android-emulator"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "tap": "Review west memo",
+              "expect": "Memo West: harbour maintenance notes",
+              "selected": true,
+              "cold_start": true
+            },
+            {
+              "step": 2,
+              "tap": "Review east memo",
+              "expect": "Memo East: greenhouse supply schedule",
+              "selected": true,
+              "cold_start": true
+            }
+          ],
+          "evidence": "vault/候选复测-35"
+        },
+        {
+          "result": "passed",
+          "message": "所有选中内容均在冷启动后恢复",
+          "installed_sha256": "b3ba4ea2a413e1734e37d9b6d283eac021cecc457887b3016567c821e1b452a1",
+          "verified_environment": {
+            "sdk": 36,
+            "supported_abis": [
+              "x86_64"
+            ],
+            "type": "android-emulator"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "tap": "Review west memo",
+              "expect": "Memo West: harbour maintenance notes",
+              "selected": true,
+              "cold_start": true
+            },
+            {
+              "step": 2,
+              "tap": "Review east memo",
+              "expect": "Memo East: greenhouse supply schedule",
+              "selected": true,
+              "cold_start": true
+            }
+          ],
+          "evidence": "vault/候选复测-36"
+        }
+      ],
+      "change": {
+        "applied": true,
+        "rule": "remember-last-record-v1",
+        "changed_file": "smali/org/ggbond/choicevault/ChoiceVaultActivity.smali",
+        "target_method": "showMemo",
+        "default_record": "memo-east.txt",
+        "persistence": "SharedPreferences:lazarus.remember.last.record/record",
+        "audit": {
+          "kind": "remember-last-record-v1",
+          "selection_records": [],
+          "selection_call_count": 1,
+          "save_after": "verified-file-or-asset-stream-open"
+        }
+      }
+    },
+    {
+      "name": "购物清单",
+      "kind": "localize-zh",
+      "targets": [
+        36
+      ],
+      "input": "fixtures/pocket-list/pocket-list-en.apk",
+      "source_sha256": "1362d89bb4e7f5e842fbc7a1183ec613a1fea501b61af64cc5edb44a54ba6837",
+      "signer_certificates_sha256": [
+        "44d4a804c333bc8d20672f752e279753313b37b400fd53c6b1008f2c71903f89"
+      ],
+      "artifact": "fixtures/verified/pocket-list-localize-zh.apk",
+      "sha256": "0538c3e4072bcd48afb9e8155a2178e3c110291433c9495e4b253a890b42e4c7",
+      "criteria": {
+        "translations": {
+          "Shopping list": "购物清单",
+          "Add eggs": "添加鸡蛋",
+          "Eggs added": "已添加鸡蛋"
+        },
+        "resources": {},
+        "checks": [
+          {
+            "original": "Shopping list",
+            "translated": "购物清单"
+          },
+          {
+            "original": "Add eggs",
+            "translated": "添加鸡蛋"
+          }
+        ],
+        "operation": {
+          "tap": "添加鸡蛋",
+          "expect": "已添加鸡蛋"
+        }
+      },
+      "baseline": {
+        "result": "failed",
+        "message": "zh-CN 下第 1 条文字仍为原文",
+        "failed_step": "zh-CN:1",
+        "failed_locale": "zh-CN",
+        "installed_sha256": "1362d89bb4e7f5e842fbc7a1183ec613a1fea501b61af64cc5edb44a54ba6837",
+        "verified_environment": {
+          "sdk": 36,
+          "supported_abis": [
+            "x86_64"
+          ],
+          "type": "android-emulator"
+        },
+        "steps": [
+          {
+            "phase": "en-US",
+            "foreground": true,
+            "locale_applied": true,
+            "app_nodes": true,
+            "matches": [
+              true,
+              true
+            ]
+          },
+          {
+            "phase": "zh-CN",
+            "foreground": true,
+            "locale_applied": true,
+            "app_nodes": true,
+            "matches": [
+              false,
+              false
+            ]
+          }
+        ],
+        "restored": true,
+        "evidence": "pocket-list/基准复现-36"
+      },
+      "control": {
+        "result": "failed",
+        "message": "zh-CN 下第 1 条文字仍为原文",
+        "failed_step": "zh-CN:1",
+        "failed_locale": "zh-CN",
+        "installed_sha256": "0924b732448a7a43ef52e3523dd6a82f5e82818789fe33725ea9fd0fa045a514",
+        "verified_environment": {
+          "sdk": 36,
+          "supported_abis": [
+            "x86_64"
+          ],
+          "type": "android-emulator"
+        },
+        "steps": [
+          {
+            "phase": "en-US",
+            "foreground": true,
+            "locale_applied": true,
+            "app_nodes": true,
+            "matches": [
+              true,
+              true
+            ]
+          },
+          {
+            "phase": "zh-CN",
+            "foreground": true,
+            "locale_applied": true,
+            "app_nodes": true,
+            "matches": [
+              false,
+              false
+            ]
+          }
+        ],
+        "restored": true,
+        "evidence": "pocket-list/回编对照-36"
+      },
+      "targets_verified": [
+        {
+          "result": "passed",
+          "message": "英语、简体中文及英语回退均已验证",
+          "installed_sha256": "0538c3e4072bcd48afb9e8155a2178e3c110291433c9495e4b253a890b42e4c7",
+          "verified_environment": {
+            "sdk": 36,
+            "supported_abis": [
+              "x86_64"
+            ],
+            "type": "android-emulator"
+          },
+          "steps": [
+            {
+              "phase": "en-US",
+              "foreground": true,
+              "locale_applied": true,
+              "app_nodes": true,
+              "matches": [
+                true,
+                true
+              ]
+            },
+            {
+              "phase": "zh-CN",
+              "foreground": true,
+              "locale_applied": true,
+              "app_nodes": true,
+              "matches": [
+                true,
+                true
+              ]
+            },
+            {
+              "phase": "zh-CN-operation",
+              "tap": "添加鸡蛋",
+              "expect": "已添加鸡蛋",
+              "matched": true
+            },
+            {
+              "phase": "en-US-return",
+              "foreground": true,
+              "locale_applied": true,
+              "app_nodes": true,
+              "matches": [
+                true,
+                true
+              ]
+            }
+          ],
+          "restored": true,
+          "evidence": "pocket-list/候选复测-36"
+        }
+      ],
+      "change": {
+        "applied": true,
+        "rule": "add-zh-cn-resources-v1",
+        "changed_files": [
+          "res/values-zh-rCN/strings.xml"
+        ],
+        "edits": 3,
+        "checks": [
+          {
+            "original": "Shopping list",
+            "translated": "购物清单"
+          },
+          {
+            "original": "Add eggs",
+            "translated": "添加鸡蛋"
+          }
+        ],
+        "audit": {
+          "kind": "add-zh-cn-resources-v1",
+          "target_locale": "zh-CN",
+          "resource_only": true
+        }
+      }
+    },
+    {
+      "name": "泡茶计时",
+      "kind": "localize-zh",
+      "targets": [
+        36
+      ],
+      "input": "fixtures/tea-timer/tea-timer-en.apk",
+      "source_sha256": "1476a30063a68f27a2e3c10d3d99383aeee0afbf5177e09fbc44f36cc6f237da",
+      "signer_certificates_sha256": [
+        "0da59577dcb408525a07d46bd474bd13033caee09717c0efaaabb77f8af644ef"
+      ],
+      "artifact": "fixtures/verified/tea-timer-localize-zh.apk",
+      "sha256": "b1af8270f1cc1d1d81ec5eddc17a056b804ba7c5efc8b2912ef149261863d057",
+      "criteria": {
+        "translations": {
+          "Tea timer": "泡茶计时",
+          "Start timer": "开始计时",
+          "Brew %1$d started": "第 %1$d 泡已开始"
+        },
+        "resources": {},
+        "checks": [
+          {
+            "original": "Tea timer",
+            "translated": "泡茶计时"
+          },
+          {
+            "original": "Start timer",
+            "translated": "开始计时"
+          }
+        ],
+        "operation": {
+          "tap": "开始计时",
+          "expect": "第 1 泡已开始"
+        }
+      },
+      "baseline": {
+        "result": "failed",
+        "message": "zh-CN 下第 1 条文字仍为原文",
+        "failed_step": "zh-CN:1",
+        "failed_locale": "zh-CN",
+        "installed_sha256": "1476a30063a68f27a2e3c10d3d99383aeee0afbf5177e09fbc44f36cc6f237da",
+        "verified_environment": {
+          "sdk": 36,
+          "supported_abis": [
+            "x86_64"
+          ],
+          "type": "android-emulator"
+        },
+        "steps": [
+          {
+            "phase": "en-US",
+            "foreground": true,
+            "locale_applied": true,
+            "app_nodes": true,
+            "matches": [
+              true,
+              true
+            ]
+          },
+          {
+            "phase": "zh-CN",
+            "foreground": true,
+            "locale_applied": true,
+            "app_nodes": true,
+            "matches": [
+              false,
+              false
+            ]
+          }
+        ],
+        "restored": true,
+        "evidence": "tea-timer/基准复现-36"
+      },
+      "control": {
+        "result": "failed",
+        "message": "zh-CN 下第 1 条文字仍为原文",
+        "failed_step": "zh-CN:1",
+        "failed_locale": "zh-CN",
+        "installed_sha256": "bda73764c30a861cc2b41a0f6309fd793b0da9ebd57b0c67010f2509d8c1840f",
+        "verified_environment": {
+          "sdk": 36,
+          "supported_abis": [
+            "x86_64"
+          ],
+          "type": "android-emulator"
+        },
+        "steps": [
+          {
+            "phase": "en-US",
+            "foreground": true,
+            "locale_applied": true,
+            "app_nodes": true,
+            "matches": [
+              true,
+              true
+            ]
+          },
+          {
+            "phase": "zh-CN",
+            "foreground": true,
+            "locale_applied": true,
+            "app_nodes": true,
+            "matches": [
+              false,
+              false
+            ]
+          }
+        ],
+        "restored": true,
+        "evidence": "tea-timer/回编对照-36"
+      },
+      "targets_verified": [
+        {
+          "result": "passed",
+          "message": "英语、简体中文及英语回退均已验证",
+          "installed_sha256": "b1af8270f1cc1d1d81ec5eddc17a056b804ba7c5efc8b2912ef149261863d057",
+          "verified_environment": {
+            "sdk": 36,
+            "supported_abis": [
+              "x86_64"
+            ],
+            "type": "android-emulator"
+          },
+          "steps": [
+            {
+              "phase": "en-US",
+              "foreground": true,
+              "locale_applied": true,
+              "app_nodes": true,
+              "matches": [
+                true,
+                true
+              ]
+            },
+            {
+              "phase": "zh-CN",
+              "foreground": true,
+              "locale_applied": true,
+              "app_nodes": true,
+              "matches": [
+                true,
+                true
+              ]
+            },
+            {
+              "phase": "zh-CN-operation",
+              "tap": "开始计时",
+              "expect": "第 1 泡已开始",
+              "matched": true
+            },
+            {
+              "phase": "en-US-return",
+              "foreground": true,
+              "locale_applied": true,
+              "app_nodes": true,
+              "matches": [
+                true,
+                true
+              ]
+            }
+          ],
+          "restored": true,
+          "evidence": "tea-timer/候选复测-36"
+        }
+      ],
+      "change": {
+        "applied": true,
+        "rule": "add-zh-cn-resources-v1",
+        "changed_files": [
+          "res/values-zh-rCN/strings.xml"
+        ],
+        "edits": 3,
+        "checks": [
+          {
+            "original": "Tea timer",
+            "translated": "泡茶计时"
+          },
+          {
+            "original": "Start timer",
+            "translated": "开始计时"
+          }
+        ],
+        "audit": {
+          "kind": "add-zh-cn-resources-v1",
+          "target_locale": "zh-CN",
+          "resource_only": true
+        }
+      }
+    }
+  ]
+}

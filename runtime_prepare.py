@@ -14,6 +14,27 @@ TARGETS = (34, 35, 36)
 MAX_ACTIVE_EVENTS = 120
 
 
+def desktop_inventory(api: int) -> dict:
+    """Use the same installed toolchain and image search as the desktop worker."""
+    import bench_device
+    from offline_kit import discover_java_home
+    managed = inventory(api)
+    if managed["ready"]:
+        return managed
+    tools = bench_device.TOOLS
+    components = {
+        "platform-tools": bench_device.ADB.is_file(),
+        "emulator": (bench_device.SDK / "emulator/emulator.exe").is_file(),
+        "build-tools": all((tools / name).is_file() for name in ("zipalign.exe", "aapt.exe", "lib/apksigner.jar")),
+        "system-image": bench_device.avd_ready(api),
+        "java": discover_java_home() is not None,
+    }
+    if all(components.values()):
+        return {**managed, "ready": True, "components": components, "missing": [], "networkRequired": False,
+                "source": "installed", "sdk": str(bench_device.SDK)}
+    return managed
+
+
 class RuntimePreparation:
     """Owns one background prepare operation and never starts it without consent.
 
@@ -21,7 +42,7 @@ class RuntimePreparation:
     the whole preparation means a repair cannot use a half-published toolchain.
     """
     def __init__(self, operation_lock: threading.Lock | threading.RLock | None = None,
-                 prepare: Callable = prepare_runtime, inspect: Callable = inventory, state_file: Path | None = None):
+                 prepare: Callable = prepare_runtime, inspect: Callable = desktop_inventory, state_file: Path | None = None):
         self.operation_lock = operation_lock or threading.Lock()
         self.prepare, self.inspect = prepare, inspect
         self.guard = threading.RLock()

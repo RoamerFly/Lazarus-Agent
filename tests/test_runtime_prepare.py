@@ -8,6 +8,24 @@ from runtime_prepare import MAX_ACTIVE_EVENTS, RuntimePreparation
 
 
 class RuntimePreparationTests(unittest.TestCase):
+    def test_desktop_recognizes_complete_existing_sdk_before_managed_download(self):
+        from unittest.mock import patch
+        from runtime_prepare import desktop_inventory
+        import bench_device
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in ("emulator/emulator.exe", "adb.exe", "zipalign.exe", "aapt.exe", "lib/apksigner.jar"):
+                path = root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.touch()
+            with patch("runtime_prepare.inventory", return_value={"ready": False}), \
+                 patch.multiple(bench_device, SDK=root, TOOLS=root, ADB=root / "adb.exe"), \
+                 patch.object(bench_device, "avd_ready", return_value=True), \
+                 patch("offline_kit.discover_java_home", return_value=root):
+                self.assertEqual(desktop_inventory(36)["source"], "installed")
+                (root / "aapt.exe").unlink()
+                self.assertFalse(desktop_inventory(36)["ready"])
+
     def test_consent_is_required_and_existing_runtime_does_not_prepare(self):
         ready=lambda api: {"api":api,"ready":True}
         with tempfile.TemporaryDirectory() as directory:
