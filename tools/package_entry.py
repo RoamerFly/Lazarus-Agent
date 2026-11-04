@@ -30,7 +30,8 @@ def zip_tree(folder,out):
 
 def validated_modification_cases():
     """Return only review artifacts declared and hash-pinned by the v0.4 report."""
-    report=ROOT/"docs/validation/0.4.0-modifications.json"
+    project_root=ROOT.resolve(strict=True)
+    report=project_root/"docs/validation/0.4.0-modifications.json"
     if not report.is_file():
         raise ValueError("缺少 v0.4 功能改造验证记录，不能制作复核包")
     try:
@@ -54,8 +55,10 @@ def validated_modification_cases():
             raise ValueError("v0.4 验证用例缺少输入样本或 artifact")
         paths=[]
         for raw in (raw_input,raw_artifact):
-            path=(ROOT/raw).resolve()
-            if ROOT not in path.parents or not path.is_file():
+            if Path(raw).is_absolute():
+                raise ValueError("验证文件必须使用项目相对路径")
+            path=(project_root/raw).resolve()
+            if project_root not in path.parents or not path.is_file():
                 raise ValueError("v0.4 验证文件不在项目内："+raw)
             paths.append(path)
         expected=item.get("sha256")
@@ -67,8 +70,8 @@ def validated_modification_cases():
         if "report" in item:
             if not isinstance(item["report"],str):
                 raise ValueError("v0.4 验证报告路径无效")
-            proof=(ROOT/item["report"]).resolve()
-            if ROOT not in proof.parents or not proof.is_file():
+            proof=(project_root/item["report"]).resolve()
+            if project_root not in proof.parents or not proof.is_file():
                 raise ValueError("v0.4 验证报告不在项目内："+name)
         verified.append((name,paths[0],paths[1],proof))
     kinds={item.get("kind") for item in cases if isinstance(item,dict)}
