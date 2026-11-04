@@ -19,7 +19,7 @@ Windows 桌面版「遗留软件复活智能体」。导入旧 APK，选择 Andr
 
 ## 启动
 
-从 [Releases](https://github.com/RoamerFly/Lazarus-Agent/releases) 下载 Lazarus-Agent.exe。桌面程序自带 Python 和 Web 服务，用 Microsoft Edge 的独立应用窗口显示界面。首次运行 APK 时，工作台检查 Android SDK、Java 和所选系统镜像，优先复用本机已有资源；需要联网时在你同意发布方条款后，从官方来源仅下载所缺组件。下载可取消，应用更新不会重新打包镜像。启动后点击“修复记录”可恢复历史任务。
+从 [Releases](https://github.com/RoamerFly/Lazarus-Agent/releases) 下载 Lazarus-Agent.exe。桌面程序自带 Python 和 Web 服务，使用内嵌 WebView2 显示独立桌面窗口。重复启动会激活已有窗口。系统需要 Microsoft Edge WebView2 Runtime，缺少时程序会显示官方下载地址。首次运行 APK 时，工作台检查 Android SDK、Java 和所选系统镜像，优先复用本机已有资源；需要联网时在你同意发布方条款后，从官方来源仅下载所缺组件。下载可取消，应用更新不会重新打包镜像。启动后点击“修复记录”可恢复历史任务。
 
 设置 `REVIVER_SDK` 指向 Android SDK 根目录（包括 platform-tools、emulator、build-tools），按需设置 `REVIVER_BUILD_TOOLS`、`REVIVER_LAB`。默认本地端口为 8767，可通过 `REVIVER_PORT` 调整。任务数据位于 `%LOCALAPPDATA%\LegacyApkReviver\jobs`。初次使用前见[运行指南](运行指南.md)。若桌面版与旧网页服务使用同一端口，请先退出旧服务。
 
