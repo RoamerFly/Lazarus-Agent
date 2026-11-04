@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 from modification_tasks import make_plan
 
@@ -20,3 +21,16 @@ class ModificationPlanTests(unittest.TestCase):
                          {"targets":[34]}, {"criteria":{"selects":[{"tap":"A","expect":"x"}]*2}}):
             with self.subTest(override=override), self.assertRaises(ValueError):
                 make_plan(self.state,dict(self.body,**override))
+
+    def test_model_routes_only_with_explicit_opt_in(self):
+        from model_tools import ModelToolError
+        reply={"tool_calls":[{"function":{"name":"choose_modification","arguments":'{"kind":"remember-file"}'}}]}
+        with patch("model_settings.get_config",return_value={"url":"http://localhost","model":"fake","key":""}), \
+             patch("model_tools._request",return_value=reply) as request:
+            self.assertEqual(make_plan(self.state,self.body)["tool_source"],"rules")
+            request.assert_not_called()
+            plan=make_plan(self.state,dict(self.body,use_model=True))
+            self.assertEqual(plan["tool_source"],"model")
+            self.assertNotIn("source_sha256",str(request.call_args))
+            request.side_effect=ModelToolError("unavailable")
+            self.assertEqual(make_plan(self.state,dict(self.body,use_model=True))["tool_source"],"fallback")

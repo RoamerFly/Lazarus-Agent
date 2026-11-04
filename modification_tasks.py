@@ -1,4 +1,5 @@
 """User-defined APK changes, bound to an immutable input and observable checks."""
+import json
 import re
 import uuid
 
@@ -37,14 +38,49 @@ CAPABILITIES = {
 }
 
 
+def choose_capability(request, kind, use_model):
+    if type(use_model) is not bool:
+        raise ValueError("模型选项必须为布尔值")
+    if kind != "auto":
+        return kind, "manual"
+    source = "rules"
+    if use_model:
+        from model_settings import get_config
+        from model_tools import ModelToolError, _request
+        config = get_config()
+        if config["url"] and config["model"]:
+            catalog = {key: spec["description"] for key,spec in CAPABILITIES.items()}
+            name = "choose_modification"
+            tools = [{"type":"function","function":{"name":name,"description":"选择与需求完全匹配的工具",
+                      "parameters":{"type":"object","properties":{"kind":{"type":"string",
+                      "enum":[*catalog,"unsupported"]}},"required":["kind"],"additionalProperties":False}}}]
+            try:
+                reply = _request(config["url"], {"model":config["model"],"tools":tools,
+                    "tool_choice":{"type":"function","function":{"name":name}},
+                    "messages":[{"role":"system","content":"阅读给出的用户需求，从目录中选一个能完整满足的工具。"
+                                "遇到不匹配、否定或需澄清的需求选择 unsupported。仅返回工具调用。"},
+                                {"role":"user","content":json.dumps({"request":request,"catalog":catalog},ensure_ascii=False)}]},
+                                config["key"])
+                calls = reply["tool_calls"]
+                if len(calls)!=1 or calls[0]["function"]["name"]!=name:
+                    raise ValueError("不符合工具协议")
+                args = json.loads(calls[0]["function"]["arguments"])
+                if set(args)!={"kind"} or args["kind"] not in (*catalog,"unsupported"):
+                    raise ValueError("未知工具")
+                return args["kind"], "model"
+            except (ModelToolError,ValueError,KeyError,TypeError,IndexError):
+                source = "fallback"
+        else:
+            source = "fallback"
+    matches = [key for key,spec in CAPABILITIES.items() if re.search(spec["match"],request,re.I)]
+    if len(matches)!=1 or re.search(r"不要|取消记忆|不再|关闭记忆", request):
+        raise ValueError("请说明要实现的行为，或选择一种已支持的改造。当前无法自动确定这项需求。")
+    return matches[0], source
+
+
 def make_plan(state, body):
     request = short_text(body.get("request"), "改造需求", 1600)
-    kind = body.get("kind", "auto")
-    if kind == "auto":
-        matches = [name for name, spec in CAPABILITIES.items() if re.search(spec["match"], request, re.I)]
-        if len(matches) != 1 or re.search(r"不要|取消记忆|不再|关闭记忆", request):
-            raise ValueError("请说明要实现的行为，或选择一种已支持的改造。当前无法自动确定这项需求。")
-        kind = matches[0]
+    kind, source = choose_capability(request, body.get("kind", "auto"), body.get("use_model",False))
     if not isinstance(kind, str) or kind not in CAPABILITIES:
         raise ValueError("尚无对应的改造工具")
     criteria = body.get("criteria")
@@ -66,4 +102,4 @@ def make_plan(state, body):
     spec = CAPABILITIES[kind]
     return {"id": uuid.uuid4().hex, "kind": kind, "request": request,
             "description": spec["description"], "base_version": base, "source_sha256": digest,
-            "targets": targets, "criteria": spec["checks"](criteria)}
+            "targets": targets, "tool_source":source, "criteria": spec["checks"](criteria)}
