@@ -1,0 +1,50 @@
+{
+  "app": "环太平洋",
+  "package": "com.jumpgames.pacificrim",
+  "android_api": 36,
+  "primary_abi": "armeabi-v7a",
+  "environment": "工作台配对 ReDroid ARM32 隔离实例",
+  "physical_phone_tested": false,
+  "original_sha256": "9697bb72668ec713bca647b26878210df30c76d65cc7a927d4a1a844591c8180",
+  "build": {
+    "kind": "pacific-rim-zh-trial",
+    "source_sha256": "055b9441a40c46489e6da66e460003dfc356e1a247465490bf08d0224de1dddb",
+    "sha256": "9a94b82c2fdc11e75d085987e3830cd09bc82a7859b254effbd064612fdb4bf9",
+    "candidate": "环太平洋-Android16-汉化试玩.apk",
+    "api": 36,
+    "apktool": {
+      "version": "2.12.1",
+      "sha256": "66cf4524a4a45a7f56567d08b2c9b6ec237bcdd78cee69fd4a59c8a0243aeafa"
+    },
+    "transform": {
+      "translated_keys": 41,
+      "added_glyphs_per_font": 121
+    }
+  },
+  "installed_sha256": "9a94b82c2fdc11e75d085987e3830cd09bc82a7859b254effbd064612fdb4bf9",
+  "checks": {
+    "unchanged_native_libraries": 15,
+    "language_keys": 41,
+    "expansion_id": "16769de09bfc0c8bb57bbbbe512f3c7c",
+    "expansion_sha256": "1a3176a9ebd78d0efa973d4973736ebb7b852b703142300e5a3935711e150504",
+    "charset_fonts": 5
+  },
+  "on_device_expansion_sha256": "1a3176a9ebd78d0efa973d4973736ebb7b852b703142300e5a3935711e150504",
+  "observed": [
+    "轻触继续",
+    "生涯模式、生存模式、战绩和黑市",
+    "打开生涯后显示中文教官说明，点按出击进入战斗",
+    "按住格挡，格挡可以减少伤害。",
+    "战斗中可以调出暂停菜单，退出和继续按钮均为中文。"
+  ],
+  "screenshots_sha256": {
+    "intro": "d1e370107d55da4a9ea2f6e554a3253eb135a0a185553b2dd75efd27b7570e9e",
+    "career": "eaa219f4c333136aea6d28587f14c9eec08c883c1b259849f249cdf0930ed8e5",
+    "deploy": "d35ac786538398d21c3654200b5df6756295643542ea1a7c616f27f1f859329d",
+    "block": "194e8f7d21d200fef0f44858ddb2898551a705291268d8942e55e6656a6554ab",
+    "after-block": "12e349d41e992a1b05357eea3cf11f2df21aba3e11fdc4dd4c2029c2eba5d0fb",
+    "pause": "49a72c41cf5ecb7c4ccacb23ef1d487af97f5a50cdc49c8591484f2e2dbf084d"
+  },
+  "coverage": "英文语言槽中的 41 条译文，菜单、教程及其他内容仍有英文。",
+  "combat_limit": "长按格挡后本次 ARM 隔离实例只显示战斗 HUD 和黑色背景，暂停菜单可响应，未验收到闪避教学或后续关卡。"
+}
