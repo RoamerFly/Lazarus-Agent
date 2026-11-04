@@ -8,6 +8,7 @@ import re
 import secrets
 import shutil
 import threading
+import time
 import uuid
 from zipfile import ZipFile
 
@@ -38,6 +39,7 @@ app=FastAPI(docs_url=None,redoc_url=None,openapi_url=None)
 device=Device()
 operation=threading.Lock()
 state_lock=threading.RLock()
+STATE_IO_ATTEMPTS=6
 
 
 def now():
@@ -64,16 +66,66 @@ def job_dir(job):
     return STORAGE/job
 
 
+def _transient_state_error(exc):
+    return isinstance(exc,PermissionError) or (isinstance(exc,OSError) and getattr(exc,"winerror",None) in {5,32})
+
+
+def _state_retry_pause(attempt):
+    time.sleep(0.02*(2**attempt))
+
+
+def _read_state_file(path):
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
 def read(folder):
-    with state_lock:
-        return json.loads((folder/"state.json").read_text(encoding="utf-8"))
+    folder=Path(folder)
+    last_error=None
+    for attempt in range(STATE_IO_ATTEMPTS):
+        try:
+            # Keep the original global lock, but only around this one short
+            # filesystem read. The writer uses an atomic replace.
+            with state_lock:
+                state=_read_state_file(folder/"state.json")
+            return state
+        except (OSError,json.JSONDecodeError) as exc:
+            # A concurrent Windows replace can briefly deny the read.
+            # Invalid JSON is also retried because an external legacy
+            # writer may not provide atomic replacement.
+            if not (_transient_state_error(exc) or isinstance(exc,json.JSONDecodeError)):
+                raise
+            last_error=exc
+            if attempt+1<STATE_IO_ATTEMPTS:
+                _state_retry_pause(attempt)
+    raise last_error
 
 
 def save(folder,state):
-    with state_lock:
-        temp=folder/"state.tmp"
-        temp.write_text(json.dumps(state,ensure_ascii=False,indent=2),encoding="utf-8")
-        temp.replace(folder/"state.json")
+    folder=Path(folder)
+    payload=json.dumps(state,ensure_ascii=False,indent=2)
+    target=folder/"state.json"
+    last_error=None
+    for attempt in range(STATE_IO_ATTEMPTS):
+        # Do not reuse state.tmp: another process can otherwise remove or
+        # lock it between write and replacement on Windows.
+        temp=folder/(".state-"+str(os.getpid())+"-"+uuid.uuid4().hex+".tmp")
+        try:
+            with state_lock:
+                temp.write_text(payload,encoding="utf-8")
+                os.replace(temp,target)
+            return
+        except OSError as exc:
+            last_error=exc
+            if not _transient_state_error(exc):
+                raise
+            if attempt+1<STATE_IO_ATTEMPTS:
+                _state_retry_pause(attempt)
+        finally:
+            try:
+                temp.unlink(missing_ok=True)
+            except OSError:
+                pass
+    raise last_error
 
 
 def signing_fingerprints(apk, api=None):
