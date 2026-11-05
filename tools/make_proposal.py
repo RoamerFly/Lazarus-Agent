@@ -1,4 +1,5 @@
 """Render the current F01 proposal from published validation summaries."""
+from argparse import ArgumentParser
 from pathlib import Path
 import json
 
@@ -20,8 +21,9 @@ PAGE_WIDTH, PAGE_HEIGHT = A4
 CONTENT_WIDTH = PAGE_WIDTH - 104
 
 
-def build():
+def build(output=OUT):
     from app_version import APP_VERSION
+    from assistant_chat import ANDROID_NAMES
 
     for name, filename in (("Song", "simsun.ttc"), ("Hei", "simhei.ttf")):
         pdfmetrics.registerFont(TTFont(name, "C:/Windows/Fonts/" + filename, subfontIndex=0))
@@ -61,7 +63,8 @@ def build():
         story.extend((result, Spacer(1, 12)))
 
     windows_proof = validation / f"{APP_VERSION}-windows-proof.json"
-    heading("F01 数智创意 / 工程复核版" if windows_proof.is_file() else "F01 数智创意 / 工程候选稿",
+    publication = validation / f"{APP_VERSION}-release-publication.json"
+    heading("F01 数智创意 / 工程复核版" if windows_proof.is_file() or publication.is_file() else "F01 数智创意 / 工程候选稿",
             "遗留软件复活智能体")
     story.append(para("从一份旧 APK 和一句需求开始，交付能在目标 Android 上复测的应用。", sub))
     story.append(para("面向接手遗留安卓工具的维护人员。用户导入 APK，指定目标系统和需要完成的操作，Agent 自主分析包内代码、资源与界面，修改并回编签名。在独立环境中，用预先提交的步骤验证原包与候选，保留每轮差异、哈希和失败原因。"))
@@ -84,6 +87,14 @@ def build():
         ["6. 交付迭代", "通过所选系统的功能检查后提供已验收 APK。候选、历史版本、报告和差异保留；用户反馈可基于上版继续。"],
     ], [94, CONTENT_WIDTH - 94])
     block("三种完成状态", "构建签名通过证明包已生成；安装启动通过证明本次环境能够启动；指定行为通过证明固定操作在该环境达到预期。未指定步骤时只记录启动验证。一个目标失败时，保留试验候选与逐项原因。")
+    replacement_path = validation / f"{APP_VERSION}-replace-input.json"
+    if replacement_path.is_file():
+        replacement = json.loads(replacement_path.read_text(encoding="utf-8"))
+        cases = replacement["source_matrix"]["cases"]
+        versions = "、".join(ANDROID_NAMES[api] for api in sorted(case["api"] for case in cases))
+        steps = cases[0]["candidate_steps"]
+        block("可回读的替换输入", "点选普通文本框后，可替换已有内容并回读同一字段。"
+              f"旧版 Counter 的上限场景在 Android {versions} 各复跑 {steps} 步。")
     block("成功候选的保存", "后续试验失败时，只在文件集合与内容哈希精确回到某次成功构建时复用该候选。其安装与行为仍由验收器确认。每轮保留原始工具轨迹，限制目录、文件大小、工具调用与构建次数。")
     story.append(PageBreak())
 
@@ -140,7 +151,15 @@ def build():
                           + "。".join(control_rows) + "。第一批一次构建有一轮中断，完整分母保留。", tiny))
     if not any(label == "P1C" for label, _ in batches):
         story.append(para("P1C 已冻结 42 轮并启动，加入仓库温度卡，检查换算与冷启动保留单位。结果待归档。", tiny))
-    story.append(para("已见任务另有全组开发回归和主案例回归。同一候选在 Android 14、15、16 上通过固定步骤。OI Notepad 的两轮修改有独立哈希链。", tiny))
+    regression_path = validation / "f01-release-regression" / APP_VERSION / "results.json"
+    if regression_path.is_file():
+        regression = json.loads(regression_path.read_text(encoding="utf-8"))
+        counts = regression["counts"]
+        story.append(para(f"v{APP_VERSION} 在已见用例上完成 {regression['terminal_trials']}/42 轮开发回归。"
+                          f"正例 {counts['agent_positives']}/18，主案例 {counts['primary']}/3，"
+                          f"反例拒绝 {counts['agent_negative_rejected']}/6，误验收 {counts['agent_false_acceptances']}/6。", tiny))
+    else:
+        story.append(para("已见任务另有全组开发回归和主案例回归。同一候选在 Android 14、15、16 上通过固定步骤。OI Notepad 的两轮修改有独立哈希链。", tiny))
     story.append(PageBreak())
 
     heading("部署与试点", "给复核人员一条可重复的路径")
@@ -175,12 +194,15 @@ def build():
         installer_note = "签名候选安装器已在干净 Windows 通过安装、自检、篡改拒绝和卸载检查。"
     candidate_path = validation / f"{APP_VERSION}-candidate-windows-runtime.json"
     if not replay_path.is_file() and candidate_path.is_file():
-        runtime = json.loads(candidate_path.read_text(encoding="utf-8"))["runtime"]
+        receipt = json.loads(candidate_path.read_text(encoding="utf-8"))
+        runtime = receipt["runtime"]
+        if receipt["installer"]["signature_verified"]:
+            installer_note = "同一构建的安装器通过签名、自检、篡改拒绝和卸载检查。"
         times = sorted(row["runtime_preparation_seconds"] for row in runtime.values())
         replay_note = (f"同一签名候选在两台干净 Windows 上首次准备约 {times[0]:.0f} 至 {times[-1]:.0f} 秒。"
                        f"断网复测通过 {runtime['replay']['behavior_steps']} 步。")
         local_rule_note = "另一轮关闭模型，从原包生成新 APK 并通过指定操作。"
-    outbound_note = "复测限制所列程序的 Internet 出站，保留本机通信。" if replay_path.is_file() else ""
+    outbound_note = "复测限制所列程序的 Internet 出站，保留本机通信。" if replay_path.is_file() or candidate_path.is_file() else ""
     block("当前独立机器证据", installer_note + replay_note + outbound_note + local_rule_note +
           "此前的冷启动观察与中文路径失败另有记录。非开发者试用待补充。")
     block("资源与费用", "系统镜像是主要下载和存储项，默认安装包不随包分发全部镜像。每轮记录耗时、工具与构建请求、模型输入输出和缓存计量；缺少计量时保留空值。模型费用、环境准备耗时与人工复核分别记录，实际现场成本以试点测量为准。")
@@ -222,15 +244,17 @@ def build():
         canvas.drawRightString(PAGE_WIDTH - 52, 29, str(doc.page))
         canvas.restoreState()
 
-    OUT.parent.mkdir(exist_ok=True)
-    doc = SimpleDocTemplate(str(OUT), pagesize=A4, rightMargin=52, leftMargin=52,
+    output.parent.mkdir(parents=True, exist_ok=True)
+    doc = SimpleDocTemplate(str(output), pagesize=A4, rightMargin=52, leftMargin=52,
                             topMargin=66, bottomMargin=60, title="遗留软件复活智能体方案说明",
                             author="重庆邮电大学 · 重邮GGBond")
     doc.build(story, onFirstPage=page, onLaterPages=page)
-    print(OUT)
+    print(output)
 
 
 if __name__ == "__main__":
     import sys
     sys.path.insert(0, str(ROOT))
-    build()
+    parser = ArgumentParser(description=__doc__)
+    parser.add_argument("--output", type=Path, default=OUT)
+    build(parser.parse_args().output)
