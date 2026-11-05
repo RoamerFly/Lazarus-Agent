@@ -139,6 +139,8 @@ def build():
     local_rule_note = ""
     if local_rule_path.is_file():
         local_rule_note = f"v{APP_VERSION} 在干净 Windows 关闭模型，用本地规则生成新 APK 并通过指定操作。"
+    elif (validation / f"{APP_VERSION}-local-rule-observation.json").is_file():
+        local_rule_note = "本地规则已生成、签名和安装候选，指定操作待通过复验。"
     block("当前独立机器证据", "正式安装器通过自检、输入哈希、篡改拒绝和卸载检查。" + replay_note +
           "复测限制所列程序的 Internet 出站，保留本机通信。" + local_rule_note +
           "此前的冷启动观察与中文路径失败另有记录。非开发者试用待补充。")

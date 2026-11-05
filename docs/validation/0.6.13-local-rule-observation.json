@@ -1,0 +1,73 @@
+{
+  "version": "0.6.13",
+  "run_id": 42055739408,
+  "source_commit": "0f5229f5ecf7fcae65270db9108ab2c45081ba33",
+  "mode": "local-rule",
+  "model_enabled": false,
+  "unicode_storage_and_temp": true,
+  "api": 36,
+  "abi": "x86_64",
+  "patch": {
+    "rule": "installation-floor",
+    "rules": [
+      "installation-floor"
+    ],
+    "api": 36,
+    "before": 22,
+    "after": 24,
+    "candidate": "candidate.apk",
+    "sha256": "67ec352503e414f08633a4cf65a96aaf731b47c5bd9325343e8315979ed3d991",
+    "runtime": "not-tested",
+    "source_sha256": "08ed16b9f6a149bd8063bae99dd72aad200dafea7d3a0504af004187bde20deb",
+    "isolation_experiment": false
+  },
+  "tests": [
+    {
+      "api": 36,
+      "abis": [
+        "x86_64"
+      ],
+      "install": {
+        "exit": 1,
+        "output": "Performing Streamed Install\r\nadb.exe: failed to install original.apk: Failure [INSTALL_FAILED_DEPRECATED_SDK_VERSION: App package must target at least SDK version 24, but found 22]"
+      },
+      "file": "原包",
+      "time": "2026-11-05T15:36:15.340500+00:00",
+      "environment": "android-emulator"
+    },
+    {
+      "api": 36,
+      "abis": [
+        "x86_64"
+      ],
+      "install": {
+        "exit": 0,
+        "output": "Performing Streamed Install\r\nSuccess"
+      },
+      "launch": {
+        "exit": 0,
+        "output": "Starting: Intent { cmp=org.ggbond.fieldroute/.RouteActivity }\r\nStatus: ok\r\nLaunchState: COLD\r\nActivity: org.ggbond.fieldroute/.RouteActivity\r\nTotalTime: 4595\r\nWaitTime: 4775\r\nComplete",
+        "focused_package": null
+      },
+      "runtime": {
+        "pids": [
+          1855
+        ],
+        "evidence": "logcat-pid-scoped"
+      },
+      "file": "修复包",
+      "time": "2026-11-05T15:36:40.010256+00:00",
+      "environment": "android-emulator",
+      "functional_test": {
+        "result": "insufficient",
+        "message": "操作后未找到预期内容，详见界面树。",
+        "evidence_folder": "probe-bc9b1ede19"
+      }
+    }
+  ],
+  "export": null,
+  "expected_operation": {
+    "tap": "Open south route",
+    "expect": "Inspect the pump seal"
+  }
+}

@@ -139,6 +139,15 @@ jobs:
                 if ((Invoke-RestMethod "$base/api/config").model) { throw 'Model must be disabled for the local-rule test' }
                 & $clientPython -X utf8 tools/repair_apk.py fixtures/field-route/field-route-legacy.apk --android 16 --workbench $base --output evidence/local-rule --tap 'Open south route' --expect 'Inspect the pump seal'
                 $verificationExit = $LASTEXITCODE
+                $jobs = Join-Path $env:LAZARUS_STORAGE_ROOT 'data/jobs'
+                if (Test-Path -LiteralPath $jobs) {
+                  Get-ChildItem -LiteralPath $jobs -Directory -Recurse -Filter 'probe-*' | ForEach-Object {
+                    $target = New-Item -ItemType Directory -Path (Join-Path evidence $_.Name) -Force
+                    Get-ChildItem -LiteralPath $_.FullName -File | Where-Object {
+                      $_.Extension -in '.xml', '.png' -or $_.Name -eq 'crash.txt'
+                    } | Copy-Item -Destination $target.FullName
+                  }
+                }
                 if ($verificationExit -ne 0) { throw "Local-rule repair failed: $verificationExit" }
                 $result = Get-Content -Raw evidence/local-rule/report.json | ConvertFrom-Json
                 $newHash = (Get-FileHash evidence/local-rule/verified.apk).Hash.ToLowerInvariant()
