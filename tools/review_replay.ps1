@@ -5,7 +5,7 @@ param(
     [switch]$Counterexample
 )
 $ErrorActionPreference = 'Stop'
-Import-Module Microsoft.PowerShell.Utility -ErrorAction Stop
+Import-Module (Join-Path $PSHOME 'Modules/Microsoft.PowerShell.Utility/Microsoft.PowerShell.Utility.psd1') -ErrorAction Stop
 $root = [IO.Path]::GetFullPath($PSScriptRoot)
 if ($Counterexample -and !$PSBoundParameters.ContainsKey('Sample')) { $Sample = 'N03-agent-1' }
 $category = if ($Counterexample) { '反例样本' } else { '可分发样本' }

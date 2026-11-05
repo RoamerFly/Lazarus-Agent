@@ -93,7 +93,7 @@ def add_counterexample(results, output, case):
 
 
 FILE_CHECK_SCRIPT = r'''$ErrorActionPreference = 'Stop'
-Import-Module Microsoft.PowerShell.Utility -ErrorAction Stop
+Import-Module (Join-Path $PSHOME 'Modules/Microsoft.PowerShell.Utility/Microsoft.PowerShell.Utility.psd1') -ErrorAction Stop
 $root = [IO.Path]::GetFullPath($PSScriptRoot)
 $count = 0
 foreach ($line in Get-Content -LiteralPath (Join-Path $root 'SHA256SUMS.txt') -Encoding utf8) {
@@ -121,19 +121,31 @@ def download_script(manifest):
     if asset.url != url:
         raise ValueError("更新清单的发布地址与版本不一致")
     return f'''$ErrorActionPreference = 'Stop'
-Import-Module Microsoft.PowerShell.Utility -ErrorAction Stop
+Import-Module (Join-Path $PSHOME 'Modules/Microsoft.PowerShell.Utility/Microsoft.PowerShell.Utility.psd1') -ErrorAction Stop
 $target = Join-Path $PSScriptRoot 'Lazarus-Agent-windows-x64-setup.exe'
-if (!(Test-Path -LiteralPath $target)) {{
-    $partial = $target + '.partial'
-    if (Test-Path -LiteralPath $partial) {{ throw '发现未完成下载，请先检查 .partial 文件' }}
-    Invoke-WebRequest -Uri '{url}' -OutFile $partial
-    if ((Get-FileHash -LiteralPath $partial -Algorithm SHA256).Hash.ToLowerInvariant() -ne '{asset.sha256}') {{
-        throw '下载文件校验失败，请保留现场文件并重新核对发布版本'
+if (!(Test-Path -LiteralPath $target -PathType Leaf)) {{
+    $partial = $target + '.' + [Guid]::NewGuid().ToString('N') + '.partial'
+    try {{
+        Write-Output '正在下载固定版本的 Windows 安装包。'
+        Invoke-WebRequest -UseBasicParsing -Uri '{url}' -OutFile $partial
+        if ((Get-FileHash -LiteralPath $partial -Algorithm SHA256).Hash.ToLowerInvariant() -ne '{asset.sha256}') {{
+            throw '下载文件的 SHA-256 与发布记录不符'
+        }}
+        try {{
+            [IO.File]::Move($partial, $target)
+        }} catch [IO.IOException] {{
+            if (!(Test-Path -LiteralPath $target -PathType Leaf)) {{ throw }}
+        }}
+    }} catch {{
+        throw "安装包下载或校验失败。可从固定发布地址手动下载到此目录后重跑脚本。{url}`n$($_.Exception.Message)"
+    }} finally {{
+        if (Test-Path -LiteralPath $partial -PathType Leaf) {{
+            Remove-Item -LiteralPath $partial -ErrorAction SilentlyContinue
+        }}
     }}
-    Move-Item -LiteralPath $partial -Destination $target
 }}
 if ((Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash.ToLowerInvariant() -ne '{asset.sha256}') {{
-    throw '本地安装包校验失败'
+    throw '已有安装包的 SHA-256 与固定版本不符。请移出该文件，再重新运行校验脚本。'
 }}
 Write-Output "校验通过。请打开 $target 安装 Lazarus Agent {APP_VERSION}。"
 '''
