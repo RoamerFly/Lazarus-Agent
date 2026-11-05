@@ -96,7 +96,7 @@ def attachment(folder, value):
     return name
 
 
-def record_feedback(folder, state, body):
+def record_feedback(folder, state, body, *, existing_message=None):
     text = body.get("text", "")
     kind = body.get("kind", "issue")
     if kind not in ("issue", "works") or not isinstance(text, str) or not 0 < len(text.strip()) <= 2000:
@@ -118,7 +118,11 @@ def record_feedback(folder, state, body):
             task={"tap":m[1],"expect":m[2]}
     image = attachment(folder, body.get("attachment"))
     feedback_id = uuid.uuid4().hex
-    add_message(state,"user",text.strip(),version=number,kind=kind,attachment=image,id=feedback_id)
+    metadata = {"version": number, "kind": kind, "attachment": image, "id": feedback_id}
+    if existing_message is None:
+        add_message(state, "user", text.strip(), **metadata)
+    else:
+        existing_message.update(metadata)
     if kind=="works":
         version["phone"]="用户确认可运行"
         pending=state.get("pending_feedback")

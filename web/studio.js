@@ -223,9 +223,10 @@ function renderChat(busy){
   for(const m of entries.slice(prefix)){
     const bubble=document.createElement("div");bubble.className="bubble "+m.role;bubble.textContent=(m.kind&&m.version?"V"+m.version+" · ":"")+m.text;
     if(m.attachment){const image=document.createElement("img");image.alt="问题截图";image.src=path("/attachments/"+m.attachment);bubble.append(image);}
-    if(m.localization_id){
+    if(m.localization_id||m.feature_candidate_id){
       const link=document.createElement("a");link.textContent="下载候选 APK";
-      link.href=path("/localized/"+encodeURIComponent(m.localization_id));bubble.append(document.createElement("br"),link);
+      const endpoint=m.feature_candidate_id?"/feature-candidates/":"/localized/";
+      link.href=path(endpoint+encodeURIComponent(m.feature_candidate_id||m.localization_id));bubble.append(link);
     }
     additions.append(bubble);
   }

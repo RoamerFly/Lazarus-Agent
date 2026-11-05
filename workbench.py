@@ -225,8 +225,8 @@ def status(job:str):
             state=read(folder)
             if state["status"]=="running" and state.get("worker")!=INSTANCE:
                 message="上次执行被工作台重启中断，可重新验证。"
-                if state.get("action")=="chat-localize":
-                    add_message(state,"assistant","汉化被工作台重启中断。可重新发送“汉化成中文”。")
+                if state.get("action") in {"chat-localize", "chat-feature"}:
+                    add_message(state,"assistant","工作台重启中断了本轮处理，请重新发送需求。")
                     state["status"]="error"
                 else:
                     state.update(status="error",export=None)
@@ -315,35 +315,105 @@ def chat_model_mode(body):
     return "local" if body.get("local_translate") is True else False
 
 
+def run_chat_feature(folder, state, source, expected_hash, run_id, body, config, user_message):
+    def progress(text):
+        add_message(state, "assistant", text)
+        save(folder, state)
+
+    try:
+        from feature_agent import run as run_feature
+        from model_tools import ModelToolError
+
+        output = folder / "feature-candidates" / run_id / "candidate.apk"
+        try:
+            result = run_feature(source, output, TOOLS, state["api"], expected_hash,
+                                 body["text"], config, progress)
+        except ModelToolError as exc:
+            add_message(state, "assistant", "本轮模型未能完成修改。" + str(exc))
+            result = None
+        if result is None:
+            archive_version(folder, state)
+            record_feedback(folder, state, body, existing_message=user_message)
+        else:
+            state.setdefault("feature_candidates", {})[run_id] = result
+            add_message(state, "assistant", "已生成签名候选 APK。请在目标设备验证修改效果。",
+                        feature_candidate_id=run_id)
+        state["status"] = "ready"
+    except Exception as exc:
+        state["status"] = "error"
+        add_message(state, "assistant", "本轮未生成可下载的候选 APK。" + str(exc)[:600])
+    finally:
+        try:
+            state["updated"] = now()
+            save(folder, state)
+        finally:
+            operation.release()
+
+
+@app.get("/api/jobs/{job}/feature-candidates/{run_id}")
+def feature_candidate(job: str, run_id: str):
+    folder = job_dir(job)
+    state = read(folder)
+    if not re.fullmatch("[a-f0-9]{32}", run_id) or run_id not in state.get("feature_candidates", {}):
+        raise HTTPException(404, "功能修改候选不存在")
+    path = folder / "feature-candidates" / run_id / "candidate.apk"
+    if not path.is_file():
+        raise HTTPException(404, "候选文件缺失")
+    return FileResponse(path, filename=f"{state['package']['package']}-feature-api{state['api']}.apk")
+
+
 @app.post("/api/jobs/{job}/message")
 def chat_message(job: str, body: dict):
     from auto_translation import is_command
-    if body.get("kind") != "issue" or body.get("attachment") or not is_command(body.get("text")):
+
+    if body.get("kind") != "issue" or body.get("attachment"):
         return feedback(job, body)
+    localize = is_command(body.get("text"))
+    model_config = None
+    if not localize:
+        from model_settings import get_config
+
+        text = body.get("text")
+        if (body.get("task") is not None or body.get("use_configured_model") is not True or
+            not isinstance(text, str) or not 0 < len(text.strip()) <= 2000):
+            return feedback(job, body)
+        model_config = get_config()
+        if not model_config["enabled"] or not model_config["url"] or not model_config["model"]:
+            return feedback(job, body)
     folder = job_dir(job)
     if not operation.acquire(blocking=False):
-        raise HTTPException(409, "请等待当前任务结束后再汉化")
+        raise HTTPException(409, "请等待当前任务结束")
     try:
         state = read(folder)
         selected = body.get("version")
         source = folder / "original.apk"
+        expected_hash = None if localize else state["package"]["sha256"]
         if selected is not None:
-            if type(selected) is not int or not any(v["number"] == selected for v in state.get("versions", [])):
+            version = next((v for v in state.get("versions", []) if v["number"] == selected), None)
+            if type(selected) is not int or version is None:
                 raise HTTPException(400, "所选版本不存在")
             source = folder / "versions" / f"{selected}.apk"
+            if not localize:
+                expected_hash = version["sha256"]
         run_id = uuid.uuid4().hex
-        add_message(state, "user", body["text"])
-        add_message(state, "assistant", "开始分析并生成汉化候选。")
-        state.update(status="running", action="chat-localize", worker=INSTANCE, updated=now())
+        add_message(state, "user", body["text"].strip())
+        user_message = state["messages"][-1]
+        if localize:
+            action, worker = "chat-localize", run_chat_localization
+            args = (folder, state, source, run_id, chat_model_mode(body))
+            add_message(state, "assistant", "开始分析并生成汉化候选。")
+        else:
+            action, worker = "chat-feature", run_chat_feature
+            args = (folder, state, source, expected_hash, run_id, body, model_config, user_message)
+            add_message(state, "assistant", "开始分析这条需求。")
+        state.update(status="running", action=action, worker=INSTANCE, updated=now())
         save(folder,state)
         initial = read(folder)
         try:
-            threading.Thread(target=run_chat_localization,
-                             args=(folder,state,source,run_id,chat_model_mode(body)),
-                             daemon=True).start()
+            threading.Thread(target=worker, args=args, daemon=True).start()
         except RuntimeError:
             state["status"] = "error"
-            add_message(state, "assistant", "未能启动汉化任务，请重试。")
+            add_message(state, "assistant", "未能启动本轮任务，请重试。")
             save(folder, state)
             raise
         return initial
