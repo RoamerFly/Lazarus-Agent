@@ -139,7 +139,7 @@ jobs:
                 ConvertTo-Json | Set-Content -Encoding utf8 evidence/offline.json
               if ($env:OFFLINE_REPAIR -eq 'true') {
                 if ((Invoke-RestMethod "$base/api/config").model) { throw 'Model must be disabled for the local-rule test' }
-                & $clientPython tools/repair_apk.py fixtures/field-route/field-route-legacy.apk --android 16 --workbench $base --output evidence/local-rule --tap 'Open south route' --expect 'Inspect the pump seal'
+                & $clientPython -X utf8 tools/repair_apk.py fixtures/field-route/field-route-legacy.apk --android 16 --workbench $base --output evidence/local-rule --tap 'Open south route' --expect 'Inspect the pump seal'
                 if ($LASTEXITCODE -ne 0) { throw "Local-rule repair failed: $LASTEXITCODE" }
                 $result = Get-Content -Raw evidence/local-rule/report.json | ConvertFrom-Json
                 $newHash = (Get-FileHash evidence/local-rule/verified.apk).Hash.ToLowerInvariant()
