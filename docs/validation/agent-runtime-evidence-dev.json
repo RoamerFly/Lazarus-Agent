@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "implementation_commit": "4aa81a5",
+  "scope": "development smoke on private Android 16 emulator",
+  "fixture": "fixtures/archive-reader/archive-reader-broken.apk",
+  "input_sha256": "7b8e200984dee500def40a9684fd2de9ced885ca1d04c63771d1d473b597dcce",
+  "installed_sha256": "7b8e200984dee500def40a9684fd2de9ced885ca1d04c63771d1d473b597dcce",
+  "api": 36,
+  "abis": [
+    "x86_64"
+  ],
+  "test_input": "original",
+  "install": {
+    "exit": 0,
+    "output": "Performing Streamed Install\r\nSuccess"
+  },
+  "launch": {
+    "exit": 0,
+    "output": "Starting: Intent { cmp=org.ggbond.archivereader/.ReaderActivity }\r\nStatus: ok\r\nLaunchState: COLD\r\nActivity: org.ggbond.archivereader/.ReaderActivity\r\nTotalTime: 1165\r\nWaitTime: 1166\r\nComplete",
+    "focused_package": "org.ggbond.archivereader"
+  },
+  "build_requests": 0,
+  "action": "tap_text",
+  "action_text": "Open archived record",
+  "runtime": {
+    "source": "isolated-android-crash-buffer",
+    "process": "org.ggbond.archivereader",
+    "exception_types": [
+      "java.lang.NoClassDefFoundError",
+      "java.lang.ClassNotFoundException"
+    ],
+    "app_frames": [
+      {
+        "symbol": "org.ggbond.archivereader.ReaderActivity.lambda$onCreate$0",
+        "line": 23
+      },
+      {
+        "symbol": "org.ggbond.archivereader.ReaderActivity$$ExternalSyntheticLambda0.onClick",
+        "line": 0
+      }
+    ],
+    "missing_class": "org.apache.http.ProtocolVersion",
+    "platform_library": {
+      "name": "org.apache.http.legacy",
+      "evidence": "listed-by-target-package-manager"
+    }
+  }
+}
