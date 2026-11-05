@@ -1,0 +1,50 @@
+name: Windows Java path probe
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: windows-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Compare native Java launcher and its ASCII directory alias
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $probe = Join-Path $env:RUNNER_TEMP 'lazarus-java-path-probe'
+          $physical = Join-Path $probe '运行环境 中文\java'
+          $alias = Join-Path $probe 'java-ascii'
+          $downloads = Join-Path $probe 'downloads'
+          New-Item -ItemType Directory -Force -Path evidence,$downloads | Out-Null
+          $env:LAZARUS_STORAGE_ROOT = Join-Path $probe 'isolated-app-state'
+          python -X utf8 -c "from pathlib import Path; import sys; from tools.prepare_lab import _install_temurin; _install_temurin(Path(sys.argv[1]), Path(sys.argv[2]), None)" $physical $downloads
+          if ($LASTEXITCODE) { throw 'Publisher runtime download failed' }
+          New-Item -ItemType Junction -Path $alias -Target $physical | Out-Null
+          $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
+          $env:JAVA_HOME = ''
+          $env:REVIVER_JAVA_HOME = ''
+          $env:TEMP = Join-Path $probe '临时 文件'
+          $env:TMP = $env:TEMP
+          New-Item -ItemType Directory -Force -Path $env:TEMP | Out-Null
+          $direct = Start-Process -FilePath (Join-Path $physical 'bin\java.exe') -ArgumentList '-version' -RedirectStandardError evidence/direct.txt -WindowStyle Hidden -Wait -PassThru
+          $mapped = Start-Process -FilePath (Join-Path $alias 'bin\java.exe') -ArgumentList '-version' -RedirectStandardError evidence/alias.txt -WindowStyle Hidden -Wait -PassThru
+          $keyArgs = '-genkeypair -storetype PKCS12 -keystore probe.p12 -storepass throwaway -alias probe -keyalg RSA -validity 1 -dname CN=PathProbe'
+          $key = Start-Process -FilePath (Join-Path $alias 'bin\keytool.exe') -ArgumentList $keyArgs -WorkingDirectory $env:TEMP -RedirectStandardError evidence/keytool.txt -WindowStyle Hidden -Wait -PassThru
+          $testKeyExists = Test-Path -LiteralPath (Join-Path $env:TEMP 'probe.p12')
+          @{ direct_exit=$direct.ExitCode; alias_exit=$mapped.ExitCode; keytool_exit=$key.ExitCode; relative_key_created=$testKeyExists; scope='Official Temurin runtime, English Windows runner, Unicode runtime and TEMP, system-only PATH' } |
+            ConvertTo-Json | Set-Content -Encoding utf8 evidence/probe.json
+          if ($mapped.ExitCode -ne 0 -or $key.ExitCode -ne 0 -or !$testKeyExists) { throw 'ASCII alias or relative key path failed' }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: java-path-probe-evidence
+          path: evidence/*
+          retention-days: 14
