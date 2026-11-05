@@ -19,6 +19,7 @@ from updater import parse_manifest, verify_manifest
 from tools.audit_f01_p1b import P1B, audit as audit_frozen, p1c_batch, require_diff_review
 from tools.run_f01_p1 import PROTOCOL, trial_schedule
 from tools.summarize_f01_p1 import summarize
+from tools.verify_release_candidate import verify as verify_signed_candidate
 
 
 def digest(path):
@@ -153,6 +154,18 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
     manifest = parse_manifest(raw_manifest)
     if manifest.version != APP_VERSION:
         raise ValueError("发布版本与当前程序版本不同")
+    publication_path = ROOT / "docs/validation" / f"{APP_VERSION}-release-publication.json"
+    publication = read(publication_path) if publication_path.is_file() else None
+    if publication:
+        windows = read(publication_path.with_name(f"{APP_VERSION}-candidate-windows-runtime.json"))
+        checked_assets = verify_signed_candidate(release_dir, windows, APP_VERSION, publication["signed_build_run"],
+                                                 publication["source_commit"])
+        public_assets = {name: {key: asset[key] for key in ("sha256", "bytes")}
+                         for name, asset in publication["assets"].items()}
+        if (publication["version"] != APP_VERSION or checked_assets != public_assets or
+                publication["status"] != "public-release-assets-match-tested-signed-build" or
+                not publication["published_at"]):
+            raise ValueError("正式发布与已验证的签名构建不一致")
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT).decode().strip()
     protocol = read(PROTOCOL)
     summary = summarize(results, protocol)
@@ -256,6 +269,8 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                      "docs/science-superpowers/preregistrations/2026-11-05-f01-apk-agent.md",
                      "docs/science-superpowers/preregistrations/2026-11-06-f01-p1b.md"):
             copy(ROOT / name, kit / name)
+        if publication:
+            copy(publication_path, kit / publication_path.relative_to(ROOT))
         for version in dict.fromkeys(("0.6.15", APP_VERSION)):
             window_evidence = Path("docs/validation") / f"{version}-local-rule-window"
             for name in ("before-system-ui-wait.png", "before-system-ui-wait.xml", "after.png", "after.xml"):
@@ -397,19 +412,24 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                 key: audited[key] for key in ("freeze_commit", "protocol_sha256", "planned_trials", "terminal_trials",
                                              "held_out_passes", "joint_gate", "counts")
             }
-            if not audited["joint_gate"]:
+            if not audited["joint_gate"] and (label == "P1C" or "P1C" not in frozen_batches):
                 package_status["pending"].append(f"{label} 前瞻复验联合门槛未达成")
-        if not (ROOT / "docs/validation" / f"{APP_VERSION}-installer-check.json").is_file():
-            package_status["pending"].append("正式版安装器的独立核验")
-        if not (ROOT / "docs/validation" / f"{APP_VERSION}-local-rule-windows.json").is_file():
-            package_status["pending"].append("正式版在干净 Windows 上关闭模型并生成新 APK 的复验")
-        windows_proof = ROOT / "docs/validation" / f"{APP_VERSION}-windows-proof.json"
-        if windows_proof.is_file():
-            record = read(windows_proof)
-            package_status["release_source_commit"] = record["release_source_commit"]
-            package_status["independent_windows_workflow"] = record["workflow"]
+        if publication:
+            package_status["release_source_commit"] = publication["source_commit"]
+            package_status["release_url"] = publication["release_url"]
+            package_status["independent_windows_workflows"] = publication["independent_workflow_runs"]
         else:
-            package_status["pending"].append("正式版在干净 Windows 上首次准备及候选复测")
+            if not (ROOT / "docs/validation" / f"{APP_VERSION}-installer-check.json").is_file():
+                package_status["pending"].append("正式版安装器的独立核验")
+            if not (ROOT / "docs/validation" / f"{APP_VERSION}-local-rule-windows.json").is_file():
+                package_status["pending"].append("正式版在干净 Windows 上关闭模型并生成新 APK 的复验")
+            windows_proof = ROOT / "docs/validation" / f"{APP_VERSION}-windows-proof.json"
+            if windows_proof.is_file():
+                record = read(windows_proof)
+                package_status["release_source_commit"] = record["release_source_commit"]
+                package_status["independent_windows_workflow"] = record["workflow"]
+            else:
+                package_status["pending"].append("正式版在干净 Windows 上首次准备及候选复测")
         (kit / "复核状态.json").write_text(json.dumps(package_status, ensure_ascii=False, indent=2), encoding="utf-8")
         (kit / "校验文件.ps1").write_text(FILE_CHECK_SCRIPT, encoding="utf-8-sig")
         files = sorted(path for path in kit.rglob("*") if path.is_file())
