@@ -318,7 +318,7 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
             subprocess.run(["git", "archive", "--format=zip",
                             "--output=" + str(p1b_folder / f"F01-P1B-冻结源码-{freeze[:7]}.zip"), freeze],
                            cwd=ROOT, check=True)
-            for name in ("results.json", "report.md", "diff-review.json"):
+            for name in ("results.json", "report.md", "diff-review.json", "p01-runtime-observation.json"):
                 path = Path("docs/validation/f01-p1b") / name
                 copy(ROOT / path, kit / path)
             for case in p1b_protocol["cases"]:
