@@ -1,0 +1,70 @@
+{
+  "source_commit": "5fdbc0c40633637508a5d2d461b7811b6561c74e",
+  "scope": "known-fixture-device-rehearsal-and-independent-replay",
+  "target_api": 36,
+  "device_abis": [
+    "x86_64"
+  ],
+  "raw_proof_sha256": "c158b3d7f6faf7f8d4c202e254332a2f0a9a9bf1f321404e6e6fe1b106d2f1fa",
+  "failed_rehearsal": {
+    "build": "hash-matched",
+    "install": "passed",
+    "launch": "passed",
+    "function": "failed",
+    "api": 36,
+    "candidate_sha256": "7b8e200984dee500def40a9684fd2de9ced885ca1d04c63771d1d473b597dcce",
+    "installed_sha256": "7b8e200984dee500def40a9684fd2de9ced885ca1d04c63771d1d473b597dcce",
+    "verification": "candidate-rehearsal",
+    "expected_steps": 6,
+    "passed_steps": 2,
+    "failure": "当前页面未观察到目标应用控件",
+    "runtime_crash": {
+      "source": "isolated-android-crash-buffer",
+      "process": "org.ggbond.archivereader",
+      "exception_types": [
+        "java.lang.NoClassDefFoundError",
+        "java.lang.ClassNotFoundException"
+      ],
+      "app_frames": [
+        {
+          "symbol": "org.ggbond.archivereader.ReaderActivity.lambda$onCreate$0",
+          "line": 23
+        },
+        {
+          "symbol": "org.ggbond.archivereader.ReaderActivity$$ExternalSyntheticLambda0.onClick",
+          "line": 0
+        }
+      ],
+      "missing_class": "org.apache.http.ProtocolVersion",
+      "platform_library": {
+        "name": "org.apache.http.legacy",
+        "evidence": "listed-by-target-package-manager"
+      }
+    },
+    "failed_step": {
+      "action": "expect",
+      "value": "Read OK: HTTP/1.1",
+      "index": 3
+    }
+  },
+  "passed_rehearsal": {
+    "build": "hash-matched",
+    "install": "passed",
+    "launch": "passed",
+    "function": "passed",
+    "api": 36,
+    "candidate_sha256": "98b13e7fb9825d0f5d1acb83296cea06d320e0f8a9ecd7ea46af86b59da2206f",
+    "installed_sha256": "98b13e7fb9825d0f5d1acb83296cea06d320e0f8a9ecd7ea46af86b59da2206f",
+    "verification": "candidate-rehearsal",
+    "expected_steps": 6,
+    "passed_steps": 6
+  },
+  "independent_acceptance": {
+    "status": "behavior-verified",
+    "comparison": "baseline-check-failed",
+    "input_sha256": "7b8e200984dee500def40a9684fd2de9ced885ca1d04c63771d1d473b597dcce",
+    "candidate_sha256": "98b13e7fb9825d0f5d1acb83296cea06d320e0f8a9ecd7ea46af86b59da2206f",
+    "installed_sha256": "98b13e7fb9825d0f5d1acb83296cea06d320e0f8a9ecd7ea46af86b59da2206f",
+    "passed_steps": 6
+  }
+}
