@@ -1,0 +1,150 @@
+{
+  "scope": "exploratory third-party historical Android application",
+  "version": "0.6.16",
+  "exe_sha256": "d13a93650523dfda1299327f4a0f8f9038c964db0492dbdbdb142c2138f054be",
+  "app": "me.tsukanov.counter",
+  "app_version_code": 20,
+  "input_url": "https://mirrors.tuna.tsinghua.edu.cn/fdroid/archive/me.tsukanov.counter_20.apk",
+  "target_api": 36,
+  "abi": "x86_64",
+  "job_id": "86952af5f2eb48c5be6d2c0dd56393d8",
+  "baseline": {
+    "source_sha256": "330b58bf6459f1af3fa60627a129b0c879424158da91cd90ac9123791dd12537",
+    "values": [
+      "0",
+      "1",
+      "0"
+    ]
+  },
+  "chain": [
+    {
+      "input_sha256": "330b58bf6459f1af3fa60627a129b0c879424158da91cd90ac9123791dd12537",
+      "output_sha256": "f0d9ac4154ad8894ea95cfdb006838dbfdc41ed12fc698c9057ce93e571ee859",
+      "model": "deepseek-flash",
+      "duration_seconds": 228.62,
+      "successful_builds": 2,
+      "tool_calls": 27,
+      "ordinary_steps": 13,
+      "baseline_comparison": "baseline-check-failed",
+      "preflight_passed_steps": [
+        8,
+        13
+      ],
+      "changed_files": [
+        "smali/me/tsukanov/counter/ui/CounterFragment.smali"
+      ],
+      "diff_sha256": "2d0c7352653b913dc5143071e0f1e0470995eb04d178c184d6e3d620f0c33c15",
+      "acceptance_sha256": "0d4ec17591adab4a09acf0fcd5e472163b46396c13c108e74d1d99d1cde0b604",
+      "signatures": {
+        "input": [
+          "6c8f89190dcf84efd7d3896564e88aa5241fb775d557d5ad7044c79a1b7c74dd"
+        ],
+        "candidate": [
+          "61008c2911b9ff359ab54df26bf00c5d467d373ecc5d2dda03b66c78afc902f0"
+        ]
+      },
+      "manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        }
+      }
+    },
+    {
+      "input_sha256": "f0d9ac4154ad8894ea95cfdb006838dbfdc41ed12fc698c9057ce93e571ee859",
+      "output_sha256": "cbcd96e4ce350b1ce071b39ccd84c33d32c6eec0033c1459076d0806b03b9cd7",
+      "model": "deepseek-flash",
+      "duration_seconds": 249.51,
+      "successful_builds": 1,
+      "tool_calls": 9,
+      "ordinary_steps": 13,
+      "baseline_comparison": "baseline-already-passed",
+      "preflight_passed_steps": [
+        13
+      ],
+      "changed_files": [
+        "smali/me/tsukanov/counter/ui/CounterFragment.smali"
+      ],
+      "diff_sha256": "8910e87b3b20c24bb844722ddee9bcdfdbd1a9a0a3c41d35bba6c38438ed836e",
+      "acceptance_sha256": "37b0eb2961430d09a1b963f1f689416c754ec4033492e22f0c6cf9ee8e29f59c",
+      "signatures": {
+        "input": [
+          "61008c2911b9ff359ab54df26bf00c5d467d373ecc5d2dda03b66c78afc902f0"
+        ],
+        "candidate": [
+          "61008c2911b9ff359ab54df26bf00c5d467d373ecc5d2dda03b66c78afc902f0"
+        ]
+      },
+      "manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        }
+      }
+    }
+  ],
+  "first_feedback_attempt": {
+    "status": "tool-budget-exhausted",
+    "new_candidate_exported": false
+  },
+  "boundary_before_feedback": {
+    "apk_sha256": "f0d9ac4154ad8894ea95cfdb006838dbfdc41ed12fc698c9057ce93e571ee859",
+    "target": 36,
+    "abis": [
+      "x86_64"
+    ],
+    "before": "2147483646",
+    "after": "-2147483645",
+    "expected": "2147483647",
+    "edit_selector": "me.tsukanov.counter:id/edit_value",
+    "edit_button": "APPLY",
+    "initial_edit_focused": "false",
+    "initial_dialog_fields": [
+      {
+        "id": "me.tsukanov.counter:id/edit_name",
+        "text": "First counter",
+        "focused": "false"
+      },
+      {
+        "id": "me.tsukanov.counter:id/edit_value",
+        "text": "0",
+        "focused": "false"
+      }
+    ]
+  },
+  "boundary_after_feedback": {
+    "apk_sha256": "cbcd96e4ce350b1ce071b39ccd84c33d32c6eec0033c1459076d0806b03b9cd7",
+    "target": 36,
+    "abis": [
+      "x86_64"
+    ],
+    "before": "2147483646",
+    "after": "2147483647",
+    "after_repeated_increment": "2147483647",
+    "after_cold_start": "2147483647",
+    "expected": "2147483647",
+    "edit_selector": "me.tsukanov.counter:id/edit_value",
+    "edit_button": "APPLY",
+    "initial_edit_focused": "false",
+    "initial_dialog_fields": [
+      {
+        "id": "me.tsukanov.counter:id/edit_name",
+        "text": "First counter",
+        "focused": "false"
+      },
+      {
+        "id": "me.tsukanov.counter:id/edit_value",
+        "text": "0",
+        "focused": "false"
+      }
+    ]
+  }
+}
