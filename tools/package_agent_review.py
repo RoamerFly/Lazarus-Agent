@@ -16,7 +16,7 @@ sys.path.insert(0, str(ROOT))
 from agent_acceptance import verified_for
 from app_version import APP_VERSION
 from updater import parse_manifest, verify_manifest
-from tools.audit_f01_p1b import SPEC as P1B_PROTOCOL, audit as audit_p1b
+from tools.audit_f01_p1b import SPEC as P1B_PROTOCOL, audit as audit_p1b, require_diff_review
 from tools.run_f01_p1 import PROTOCOL, trial_schedule
 from tools.summarize_f01_p1 import summarize
 
@@ -163,6 +163,7 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
         p1b = audit_p1b(p1b_checkout)
         if p1b != read(ROOT / "docs/validation/f01-p1b/results.json"):
             raise ValueError("P1B 汇总与冻结记录不一致")
+        require_diff_review(p1b, read(ROOT / "docs/validation/f01-p1b/diff-review.json"))
     primary = None
     primary_version = None
     if primary_results is not None:
@@ -317,7 +318,7 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
             subprocess.run(["git", "archive", "--format=zip",
                             "--output=" + str(p1b_folder / f"F01-P1B-冻结源码-{freeze[:7]}.zip"), freeze],
                            cwd=ROOT, check=True)
-            for name in ("results.json", "report.md"):
+            for name in ("results.json", "report.md", "diff-review.json"):
                 path = Path("docs/validation/f01-p1b") / name
                 copy(ROOT / path, kit / path)
             for case in p1b_protocol["cases"]:

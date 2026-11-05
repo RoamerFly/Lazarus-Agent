@@ -81,6 +81,8 @@ def audit(root, *, partial=False):
         responses.extend(usage or [])
         proof = load(folder / "acceptance.json")
         sha = (result.get("result") or {}).get("sha256")
+        if result.get("behavior_verified") and not (sha and proof):
+            raise ValueError("轮次声称通过但缺少候选及验收报告：" + trial)
         if result and (sha or proof):
             if (not sha or not proof or digest_file(folder / "candidate.apk") != sha
                     or proof.get("candidate_sha256") != sha or proof.get("input_sha256") != source
@@ -121,6 +123,19 @@ def audit(root, *, partial=False):
         "model_fingerprints": sorted({row["fingerprint"] for row in responses if row.get("fingerprint")}),
         **summary,
     }
+
+
+def require_diff_review(audit_result, review):
+    """Require one SHA-bound semantic review for every passing candidate."""
+    expected = {row["trial"]: (row["candidate_sha256"], row["raw_diff_sha256"])
+                for row in audit_result["rows"] if row["state"] == "passed"}
+    reviewed = {}
+    for row in review["rows"]:
+        if row["trial"] in reviewed or not row["review"].strip() or not row["scope"].strip():
+            raise ValueError("P1B 差异复查缺少说明或重复记录")
+        reviewed[row["trial"]] = row["candidate_sha256"], row["raw_diff_sha256"]
+    if reviewed != expected:
+        raise ValueError("P1B 差异复查未对应全部通过候选及其哈希")
 
 
 if __name__ == "__main__":
