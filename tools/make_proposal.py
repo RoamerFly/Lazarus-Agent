@@ -124,8 +124,11 @@ def build():
 
     heading("部署与试点", "给复核人员一条可重复的路径")
     block("Windows 安装", "提供按用户安装器和便携 ZIP。桌面内嵌 WebView2，模型凭据由 Windows DPAPI 加密。程序优先复用工具，首次按所选系统准备缺失的 SDK、Java 与镜像。后续可在已准备环境中断网复测已有候选。")
-    local_rule_path = ROOT / "docs/validation/0.6.10-local-rule-windows.json"
-    local_rule_note = "另一次验证关闭模型，用本地规则生成新 APK 并通过指定操作。" if local_rule_path.is_file() else ""
+    from app_version import APP_VERSION
+    local_rule_path = ROOT / "docs/validation" / f"{APP_VERSION}-local-rule-windows.json"
+    local_rule_note = ""
+    if local_rule_path.is_file():
+        local_rule_note = f"v{APP_VERSION} 在干净 Windows 关闭模型，用本地规则生成新 APK 并通过指定操作。"
     block("当前独立机器证据", "正式安装器通过自检、输入哈希、篡改拒绝和卸载检查。v0.6.10 在含中文和空格的存储与 TEMP 下首次准备五类组件约 76 秒，实际 EXE 通过巡检单 10 步复测。所列程序的 Internet 出站已阻断，保留本机通信。" + local_rule_note + "运行后约占 6.38 GiB。另有一次模拟器界面观察失败，已保留报告。非开发者试用待补充。")
     block("资源与费用", "系统镜像是主要下载和存储项，默认安装包不随包分发全部镜像。每轮记录耗时、工具与构建请求、模型输入输出和缓存计量；缺少计量时保留空值。模型费用、环境准备耗时与人工复核分别记录，实际现场成本以试点测量为准。")
     block("拟定试点", "从授权的离线应用和合成业务记录开始，明确维护员、操作员与独立复核员。先完成关键流程及数据备份，再测设备更新、文件迁移与回滚。比较拿到 APK 到通过关键操作的用时、人工次数和失败恢复用时。当前巡检单是模拟场景，尚无企业试点收益数据。")
@@ -152,7 +155,6 @@ def build():
                       '配套文件　F01-参赛优化与验收计划、固定评测协议、独立验收报告、部署复核说明。', tiny))
 
     def page(canvas, doc):
-        from app_version import APP_VERSION
         canvas.saveState()
         canvas.setFillColor(TEAL)
         canvas.rect(0, PAGE_HEIGHT - 9, PAGE_WIDTH, 9, stroke=0, fill=1)
