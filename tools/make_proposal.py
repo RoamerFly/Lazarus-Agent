@@ -172,6 +172,13 @@ def build():
                       else "本版正式安装器验证待归档。")
     if not installer_path.is_file() and (validation / f"{APP_VERSION}-candidate-installer-check.json").is_file():
         installer_note = "签名候选安装器已在干净 Windows 通过安装、自检、篡改拒绝和卸载检查。"
+    candidate_path = validation / f"{APP_VERSION}-candidate-windows-runtime.json"
+    if not replay_path.is_file() and candidate_path.is_file():
+        runtime = json.loads(candidate_path.read_text(encoding="utf-8"))["runtime"]
+        times = sorted(row["runtime_preparation_seconds"] for row in runtime.values())
+        replay_note = (f"同一签名候选在两台干净 Windows 上首次准备约 {times[0]:.0f} 至 {times[-1]:.0f} 秒。"
+                       f"断网复测通过 {runtime['replay']['behavior_steps']} 步。")
+        local_rule_note = "另一轮关闭模型，从原包生成新 APK 并通过指定操作。"
     outbound_note = "复测限制所列程序的 Internet 出站，保留本机通信。" if replay_path.is_file() else ""
     block("当前独立机器证据", installer_note + replay_note + outbound_note + local_rule_note +
           "此前的冷启动观察与中文路径失败另有记录。非开发者试用待补充。")

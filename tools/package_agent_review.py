@@ -283,6 +283,8 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                      f"{APP_VERSION}-local-rule-windows.md", f"{APP_VERSION}-tool-paths-local.md",
                      f"{APP_VERSION}-local-rule-observation.md", f"{APP_VERSION}-local-rule-observation.json",
                      f"{APP_VERSION}-cold-start-observation.md", f"{APP_VERSION}-cold-start-observation.json",
+                     f"{APP_VERSION}-candidate-installer-check.md", f"{APP_VERSION}-candidate-installer-check.json",
+                     f"{APP_VERSION}-candidate-windows-runtime.md", f"{APP_VERSION}-candidate-windows-runtime.json",
                      f"{APP_VERSION}-source-replay.md", f"{APP_VERSION}-source-replay.json"):
             path = ROOT / "docs/validation" / name
             if path.is_file():
