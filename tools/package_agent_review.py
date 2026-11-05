@@ -138,7 +138,7 @@ Write-Output "校验通过。请打开 $target 安装 Lazarus Agent {APP_VERSION
 
 
 def build(results, release_dir, output, capture_dir, regression_results=None, regression_summary=None,
-          primary_results=None, primary_summary=None):
+          primary_results=None, primary_summary=None, materials_dir=ROOT / "交付"):
     results = results.resolve()
     if not results.is_relative_to(ROOT / "build") or not results.is_dir():
         raise ValueError("请指定 build 目录内的原始评测结果")
@@ -199,8 +199,8 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
             raise ValueError("回归摘要的版本与实施提交不符")
         regression_metadata = {"app_version": recorded["app_version"], "source_commit": implementation,
                                "role": recorded["evaluation_role"]}
-    proposal = ROOT / "交付/遗留软件复活智能体方案说明.pdf"
-    video = ROOT / "交付/遗留软件复活智能体演示.mp4"
+    proposal = materials_dir / "遗留软件复活智能体方案说明.pdf"
+    video = materials_dir / "遗留软件复活智能体演示.mp4"
     metadata = read(video.with_suffix(".json"))
     if metadata["app_version"] != APP_VERSION or metadata["video_sha256"] != digest(video):
         raise ValueError("演示版本或视频哈希与当前材料不符")
@@ -250,11 +250,13 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                      "0.6.11-installer-check.json", "0.6.11-installer-check.md",
                      "0.6.12-live-demo.md", "0.6.12-windows-proof.json", "0.6.12-independent-windows.md",
                      "0.6.12-installer-check.json", "0.6.12-installer-check.md", "0.6.12-tool-paths-local.md",
+                     "0.6.13-local-rule-observation.md", "0.6.13-local-rule-observation.json",
                      f"{APP_VERSION}-live-demo.md", f"{APP_VERSION}-windows-proof.json",
                      f"{APP_VERSION}-independent-windows.md", f"{APP_VERSION}-installer-check.json",
                      f"{APP_VERSION}-installer-check.md", f"{APP_VERSION}-local-rule-windows.json",
                      f"{APP_VERSION}-local-rule-windows.md", f"{APP_VERSION}-tool-paths-local.md",
-                     f"{APP_VERSION}-local-rule-observation.md", f"{APP_VERSION}-local-rule-observation.json"):
+                     f"{APP_VERSION}-local-rule-observation.md", f"{APP_VERSION}-local-rule-observation.json",
+                     f"{APP_VERSION}-cold-start-observation.md", f"{APP_VERSION}-cold-start-observation.json"):
             path = ROOT / "docs/validation" / name
             if path.is_file():
                 copy(path, kit / "docs/validation" / name)
@@ -306,6 +308,12 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                           "primary_regression_version": primary_version,
                           "pending": (["当前版本全组回归与差异审查"] if regression is None else []) +
                                      ["非开发人员试用记录", "负责人提交前核对赛事平台要求"]}
+        counts = summary["counts"]
+        if (counts["agent_positives"] < 15 or counts["primary"] < 3 or
+                counts["agent_negative_rejected"] < 6 or counts["agent_false_acceptances"]):
+            package_status["pending"].append("冻结评测联合门槛未达成，后续工程回归单独报告")
+        if not (ROOT / "docs/validation" / f"{APP_VERSION}-installer-check.json").is_file():
+            package_status["pending"].append("正式版安装器的独立核验")
         if not (ROOT / "docs/validation" / f"{APP_VERSION}-local-rule-windows.json").is_file():
             package_status["pending"].append("正式版在干净 Windows 上关闭模型并生成新 APK 的复验")
         windows_proof = ROOT / "docs/validation" / f"{APP_VERSION}-windows-proof.json"
@@ -313,6 +321,8 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
             record = read(windows_proof)
             package_status["release_source_commit"] = record["release_source_commit"]
             package_status["independent_windows_workflow"] = record["workflow"]
+        else:
+            package_status["pending"].append("正式版在干净 Windows 上首次准备及候选复测")
         (kit / "复核状态.json").write_text(json.dumps(package_status, ensure_ascii=False, indent=2), encoding="utf-8")
         (kit / "校验文件.ps1").write_text(FILE_CHECK_SCRIPT, encoding="utf-8-sig")
         files = sorted(path for path in kit.rglob("*") if path.is_file())
@@ -345,10 +355,11 @@ def main():
     parser.add_argument("--regression-summary", type=Path)
     parser.add_argument("--primary-results", type=Path)
     parser.add_argument("--primary-summary", type=Path)
+    parser.add_argument("--materials-dir", type=Path, default=ROOT / "交付", help="方案 PDF、演示视频和捕获记录的目录")
     parser.add_argument("--output", type=Path, default=ROOT / "交付/重邮GGBond-F01-工程复核包.zip")
     args = parser.parse_args()
     build(args.results, args.release_dir, args.output, args.capture_dir,
-          args.regression_results, args.regression_summary, args.primary_results, args.primary_summary)
+          args.regression_results, args.regression_summary, args.primary_results, args.primary_summary, args.materials_dir)
 
 
 if __name__ == "__main__":

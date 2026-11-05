@@ -127,7 +127,7 @@ def build():
     from app_version import APP_VERSION
     validation = ROOT / "docs/validation"
     replay_path = validation / f"{APP_VERSION}-windows-proof.json"
-    replay_note = "v0.6.10 正式 EXE 在干净 Windows 通过巡检单 10 步复测。"
+    replay_note = f"v{APP_VERSION} 干净 Windows 候选复测待归档。"
     if replay_path.is_file():
         replay = json.loads(replay_path.read_text(encoding="utf-8"))
         preparation = replay["summary"]
@@ -135,14 +135,20 @@ def build():
         replay_note = (f"v{APP_VERSION} 在含中文和空格的存储与 TEMP 下首次准备约 "
                        f"{preparation['duration_seconds']:.0f} 秒，正式 EXE 通过巡检单 {count} 步复测。"
                        f"运行后占用约 {preparation['bytes']/1024**3:.2f} GiB。")
+    if (validation / f"{APP_VERSION}-cold-start-observation.json").is_file():
+        cold_note = "一次固定候选冷启动未观察到目标页面，未执行行为步骤。"
+        replay_note = replay_note + "另有" + cold_note if replay_path.is_file() else cold_note
     local_rule_path = validation / f"{APP_VERSION}-local-rule-windows.json"
-    local_rule_note = ""
+    local_rule_note = "本版关闭模型并从原包生成 APK 的结果待独立核验。"
     if local_rule_path.is_file():
         local_rule_note = f"v{APP_VERSION} 在干净 Windows 关闭模型，用本地规则生成新 APK 并通过指定操作。"
     elif (validation / f"{APP_VERSION}-local-rule-observation.json").is_file():
         local_rule_note = "本地规则已生成、签名和安装候选，指定操作待通过复验。"
-    block("当前独立机器证据", "正式安装器通过自检、输入哈希、篡改拒绝和卸载检查。" + replay_note +
-          "复测限制所列程序的 Internet 出站，保留本机通信。" + local_rule_note +
+    installer_path = validation / f"{APP_VERSION}-installer-check.json"
+    installer_note = ("正式安装器通过自检、输入哈希、篡改拒绝和卸载检查。" if installer_path.is_file()
+                      else "本版正式安装器验证待归档。")
+    outbound_note = "复测限制所列程序的 Internet 出站，保留本机通信。" if replay_path.is_file() else ""
+    block("当前独立机器证据", installer_note + replay_note + outbound_note + local_rule_note +
           "此前的冷启动观察与中文路径失败另有记录。非开发者试用待补充。")
     block("资源与费用", "系统镜像是主要下载和存储项，默认安装包不随包分发全部镜像。每轮记录耗时、工具与构建请求、模型输入输出和缓存计量；缺少计量时保留空值。模型费用、环境准备耗时与人工复核分别记录，实际现场成本以试点测量为准。")
     block("拟定试点", "从授权的离线应用和合成业务记录开始，明确维护员、操作员与独立复核员。先完成关键流程及数据备份，再测设备更新、文件迁移与回滚。比较拿到 APK 到通过关键操作的用时、人工次数和失败恢复用时。当前巡检单是模拟场景，尚无企业试点收益数据。")

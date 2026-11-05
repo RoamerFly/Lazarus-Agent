@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "app_version": "0.6.14",
+  "release_source_commit": "f736f434c9eedbe6a17ebde56dc34026abd631b5",
+  "workflow_source_commit": "f736f434c9eedbe6a17ebde56dc34026abd631b5",
+  "workflow": "https://github.com/RoamerFly/Lazarus-Agent/actions/runs/42060092447",
+  "installer_sha256": "77414a7eca76972068c98184bb99191e8ddc04f3b04927d3b0ddd5f4636be029",
+  "manifest_signature_verified": true,
+  "runtime_preparation": {
+    "check": "local-rule",
+    "verification_exit": 0,
+    "unicode_paths": "true",
+    "temp": "D:\\a\\_temp\\中文临时 目录",
+    "platform": "GitHub-hosted fresh Windows runner",
+    "bytes": 6265589059.0,
+    "duration_seconds": 102.4621314,
+    "storage": "D:\\a\\_temp\\lazarus-first-runtime-中文 验证",
+    "prepare_attempts": 1,
+    "replay_exit": null
+  },
+  "outbound_restriction": {
+    "app": "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Lazarus Agent\\Lazarus-Agent.exe",
+    "programs": [
+      "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Lazarus Agent\\Lazarus-Agent.exe",
+      "D:\\a\\_temp\\lazarus-first-runtime-中文 验证\\runtimes\\android-lab\\java\\bin\\java.exe",
+      "D:\\a\\_temp\\lazarus-first-runtime-中文 验证\\runtimes\\android-lab\\lab-sdk\\platform-tools\\adb.exe",
+      "D:\\a\\_temp\\lazarus-first-runtime-中文 验证\\runtimes\\android-lab\\lab-sdk\\emulator\\emulator.exe"
+    ],
+    "check": "local-rule",
+    "outbound": "Internet blocked per executable, loopback retained"
+  },
+  "local_rule": {
+    "level": "指定操作已验证",
+    "model_enabled": false,
+    "target": 36,
+    "operation": "Open south route",
+    "rule": "installation-floor",
+    "expected": "Inspect the pump seal",
+    "installed_sha256": "91dce2e9237f6ec3537c76b367c365ce0fdbf714be26fe966f85f7cee25cd54b",
+    "downloaded_sha256": "91dce2e9237f6ec3537c76b367c365ce0fdbf714be26fe966f85f7cee25cd54b"
+  },
+  "source_sha256": "08ed16b9f6a149bd8063bae99dd72aad200dafea7d3a0504af004187bde20deb",
+  "patch": {
+    "rule": "installation-floor",
+    "rules": [
+      "installation-floor"
+    ],
+    "api": 36,
+    "before": 22,
+    "after": 24,
+    "candidate": "candidate.apk",
+    "sha256": "91dce2e9237f6ec3537c76b367c365ce0fdbf714be26fe966f85f7cee25cd54b",
+    "runtime": "not-tested",
+    "source_sha256": "08ed16b9f6a149bd8063bae99dd72aad200dafea7d3a0504af004187bde20deb",
+    "isolation_experiment": false
+  },
+  "baseline_install": {
+    "exit": 1,
+    "output": "Performing Streamed Install\r\nadb.exe: failed to install original.apk: Failure [INSTALL_FAILED_DEPRECATED_SDK_VERSION: App package must target at least SDK version 24, but found 22]"
+  },
+  "candidate_install": {
+    "exit": 0,
+    "output": "Performing Streamed Install\r\nSuccess"
+  },
+  "candidate_launch": {
+    "exit": 0,
+    "output": "Starting: Intent { cmp=org.ggbond.fieldroute/.RouteActivity }\r\nStatus: ok\r\nLaunchState: COLD\r\nActivity: org.ggbond.fieldroute/.RouteActivity\r\nTotalTime: 1867\r\nWaitTime: 1871\r\nComplete",
+    "focused_package": null
+  },
+  "acceptance": {
+    "result": "passed",
+    "system_ui_waited": false,
+    "message": "操作后在目标应用内找到预期内容：Inspect the pump seal",
+    "evidence_folder": "probe-c30c646c9a"
+  },
+  "functional_test": {
+    "result": "passed",
+    "system_ui_waited": false,
+    "message": "操作后在目标应用内找到预期内容：Inspect the pump seal",
+    "evidence_folder": "probe-c30c646c9a"
+  },
+  "export": {
+    "file": "candidate.apk",
+    "level": "指定操作已验证",
+    "sha256": "91dce2e9237f6ec3537c76b367c365ce0fdbf714be26fe966f85f7cee25cd54b",
+    "installed_sha256": "91dce2e9237f6ec3537c76b367c365ce0fdbf714be26fe966f85f7cee25cd54b",
+    "verified_environment": {
+      "sdk": 36,
+      "supported_abis": [
+        "x86_64"
+      ],
+      "primary_cpu_abi": null,
+      "type": "android-emulator"
+    },
+    "signer_certificates_sha256": [
+      "86dc2b5942a0d31cfb9d81954ffd7d20547bc769b72e0037a2adc79ee9f375cb"
+    ]
+  },
+  "raw_report_sha256": "39cbb664f90065795c2000ecf31fe48d50ec6fdc7fba3a9f0e6f7b434296f524"
+}
