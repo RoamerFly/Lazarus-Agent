@@ -1,0 +1,395 @@
+{
+  "purpose": "development-diagnostic-on-seen-cases",
+  "source_protocol_freeze_commit": "a28bea979d0b9d8ae6f5074028e8c64d1547ac60",
+  "protocol_sha256": "aa7f164a5247d363a792d59e47c5fee88400e88da94fcf2c37100d11303368f9",
+  "app_version": "0.6.18",
+  "implementation_commit": "96fd175f304d84762160f90faf178de0aba47a47",
+  "cases": [
+    "P02",
+    "P06",
+    "N02"
+  ],
+  "planned_trials": 14,
+  "started_at": "2026-11-05T22:40:44.6944050Z",
+  "terminal_trials": 14,
+  "counts": {
+    "agent_positives": 6,
+    "primary": 0,
+    "agent_negative_rejected": 2,
+    "agent_false_acceptances": 0,
+    "unobserved": 0,
+    "majority_agent_cases": 2,
+    "roundtrip_positive_cases": 0,
+    "rules_positive_cases": 1,
+    "one-build_positive_cases": 0
+  },
+  "rows": [
+    {
+      "case": "P02",
+      "class": "positive",
+      "mode": "roundtrip",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 103.313,
+      "build_attempts": 1,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null,
+      "trial": "P02-roundtrip-1",
+      "candidate_sha256": "c11ff640113781f60e504d8f312e4386b9845b993b6dd7765efa212b4849a79b",
+      "tool_error": null
+    },
+    {
+      "case": "P02",
+      "class": "positive",
+      "mode": "rules",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 40.36,
+      "build_attempts": 1,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null,
+      "trial": "P02-rules-1",
+      "candidate_sha256": "55c1501bdd83a387a277b443b3dde5e66ac65be55d1b1894cf1c5e9d7439a39e",
+      "tool_error": null
+    },
+    {
+      "case": "P02",
+      "class": "positive",
+      "mode": "one-build",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 83.209,
+      "build_attempts": 1,
+      "model_requests_with_usage": 10,
+      "model_price_usd_range": [
+        0.00743197,
+        0.01486394
+      ],
+      "trial": "P02-one-build-1",
+      "candidate_sha256": "9f7378267efc1d7d00f20dc32ce2b1499acfe5ca6cc29527a01ae205700530d7",
+      "tool_error": null
+    },
+    {
+      "case": "P02",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 101.945,
+      "build_attempts": 1,
+      "model_requests_with_usage": 11,
+      "model_price_usd_range": [
+        0.00289497,
+        0.00578994
+      ],
+      "trial": "P02-agent-1",
+      "candidate_sha256": "5c6ce01a36ec5052f6195f8b7b2e5e6da89d5ba9a12aa52f836ac60f20362f75",
+      "tool_error": null,
+      "distributable": true,
+      "raw_diff_sha256": "9db27fe54e42e4f4b9d3a90f30a575f6638b4af2981f2bb89deb33ff4882b0dc",
+      "compiled_summary": {
+        "target_sdk": [
+          28,
+          28
+        ],
+        "assets_modified": [],
+        "decoded_files_changed": [
+          "AndroidManifest.xml",
+          "original/AndroidManifest.xml"
+        ],
+        "manifest_declarations": {
+          "added": [],
+          "removed": []
+        },
+        "compatible_library": true
+      }
+    },
+    {
+      "case": "P02",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 2,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 93.482,
+      "build_attempts": 1,
+      "model_requests_with_usage": 10,
+      "model_price_usd_range": [
+        0.00286798,
+        0.00573596
+      ],
+      "trial": "P02-agent-2",
+      "candidate_sha256": "7760bd25ed9685176008eb61653a1d9bb6d80ca9889f289e73345b27c248d688",
+      "tool_error": null,
+      "distributable": true,
+      "raw_diff_sha256": "9db27fe54e42e4f4b9d3a90f30a575f6638b4af2981f2bb89deb33ff4882b0dc",
+      "compiled_summary": {
+        "target_sdk": [
+          28,
+          28
+        ],
+        "assets_modified": [],
+        "decoded_files_changed": [
+          "AndroidManifest.xml",
+          "original/AndroidManifest.xml"
+        ],
+        "manifest_declarations": {
+          "added": [],
+          "removed": []
+        },
+        "compatible_library": true
+      }
+    },
+    {
+      "case": "P02",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 3,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 95.521,
+      "build_attempts": 1,
+      "model_requests_with_usage": 9,
+      "model_price_usd_range": [
+        0.00298338,
+        0.00596676
+      ],
+      "trial": "P02-agent-3",
+      "candidate_sha256": "02152ee2a62ea8726be720cc5444d58f8fc5d102ddcd84e9eb941c9d6da2c687",
+      "tool_error": null,
+      "distributable": true,
+      "raw_diff_sha256": "9db27fe54e42e4f4b9d3a90f30a575f6638b4af2981f2bb89deb33ff4882b0dc",
+      "compiled_summary": {
+        "target_sdk": [
+          28,
+          28
+        ],
+        "assets_modified": [],
+        "decoded_files_changed": [
+          "AndroidManifest.xml",
+          "original/AndroidManifest.xml"
+        ],
+        "manifest_declarations": {
+          "added": [],
+          "removed": []
+        },
+        "compatible_library": true
+      }
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "roundtrip",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 4.262,
+      "build_attempts": 1,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null,
+      "trial": "P06-roundtrip-1",
+      "candidate_sha256": "c9d6b5fe2ec75c189644e5faef664fbe822fa429dc721ad80747ebc3ecac2714",
+      "tool_error": null
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "rules",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 0.001,
+      "build_attempts": 0,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null,
+      "trial": "P06-rules-1",
+      "candidate_sha256": null,
+      "tool_error": null
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "one-build",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 22.334,
+      "build_attempts": 1,
+      "model_requests_with_usage": 6,
+      "model_price_usd_range": [
+        0.00237556,
+        0.00475112
+      ],
+      "trial": "P06-one-build-1",
+      "candidate_sha256": null,
+      "tool_error": null
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 84.695,
+      "build_attempts": 1,
+      "model_requests_with_usage": 11,
+      "model_price_usd_range": [
+        0.00590626,
+        0.01181252
+      ],
+      "trial": "P06-agent-1",
+      "candidate_sha256": "c45668391edfc1fe9f70c1bb11919fc51a1e2ad1187985896ba29ca75e211cf9",
+      "tool_error": null,
+      "distributable": true,
+      "raw_diff_sha256": "fd0614c3bda5a2a94a19fb9339b1d22263ce4d2d94802c3c9cf9e4bb9cafef32",
+      "compiled_summary": {
+        "target_sdk": [
+          22,
+          36
+        ],
+        "assets_modified": [],
+        "decoded_files_changed": [
+          "AndroidManifest.xml",
+          "apktool.yml",
+          "original/AndroidManifest.xml",
+          "smali/org/ggbond/archivereader/RecordProvider.smali",
+          "smali/org/ggbond/archivereader/ShareActivity.smali"
+        ],
+        "manifest_declarations": {
+          "added": [
+            "[\"provider\", {\"{http://schemas.android.com/apk/res/android}authorities\": \"org.ggbond.archivereader.records\", \"{http://schemas.android.com/apk/res/android}exported\": \"false\", \"{http://schemas.android.com/apk/res/android}grantUriPermissions\": \"true\", \"{http://schemas.android.com/apk/res/android}name\": \".RecordProvider\"}]"
+          ],
+          "removed": []
+        },
+        "compatible_library": false
+      }
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 2,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 216.876,
+      "build_attempts": 2,
+      "model_requests_with_usage": 25,
+      "model_price_usd_range": [
+        0.01612367,
+        0.03224734
+      ],
+      "trial": "P06-agent-2",
+      "candidate_sha256": "49aa9883ee13189c5b45ebd02a8be2ff6707ee82dd1f332188b88ed01fc97e2a",
+      "tool_error": null,
+      "distributable": false,
+      "raw_diff_sha256": "fb2bd17440b7dee198be85b77a50ab65548b066ba4a42c29c290f68681c58a60",
+      "compiled_summary": {
+        "target_sdk": [
+          22,
+          24
+        ],
+        "assets_modified": [],
+        "decoded_files_changed": [
+          "AndroidManifest.xml",
+          "apktool.yml",
+          "original/AndroidManifest.xml",
+          "smali/org/ggbond/archivereader/RecordFileProvider.smali",
+          "smali/org/ggbond/archivereader/ShareActivity.smali"
+        ],
+        "manifest_declarations": {
+          "added": [
+            "[\"provider\", {\"{http://schemas.android.com/apk/res/android}authorities\": \"org.ggbond.archivereader.fileprovider\", \"{http://schemas.android.com/apk/res/android}exported\": \"false\", \"{http://schemas.android.com/apk/res/android}grantUriPermissions\": \"true\", \"{http://schemas.android.com/apk/res/android}name\": \".RecordFileProvider\"}]"
+          ],
+          "removed": []
+        },
+        "compatible_library": false
+      }
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 3,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 119.945,
+      "build_attempts": 1,
+      "model_requests_with_usage": 14,
+      "model_price_usd_range": [
+        0.00969722,
+        0.01939445
+      ],
+      "trial": "P06-agent-3",
+      "candidate_sha256": "3c171dcea6c260f56ce5c7e825782c589779ca775367bf6a0d67569fa9712b4b",
+      "tool_error": null,
+      "distributable": false,
+      "raw_diff_sha256": "69f03c92bb5da12c48fb12a78a45c4ce5a277827d64df7ed1e766ded61f9d892",
+      "compiled_summary": {
+        "target_sdk": [
+          22,
+          24
+        ],
+        "assets_modified": [],
+        "decoded_files_changed": [
+          "AndroidManifest.xml",
+          "apktool.yml",
+          "original/AndroidManifest.xml",
+          "smali/org/ggbond/archivereader/RecordProvider.smali",
+          "smali/org/ggbond/archivereader/ShareActivity.smali"
+        ],
+        "manifest_declarations": {
+          "added": [
+            "[\"provider\", {\"{http://schemas.android.com/apk/res/android}authorities\": \"org.ggbond.archivereader.records\", \"{http://schemas.android.com/apk/res/android}exported\": \"false\", \"{http://schemas.android.com/apk/res/android}grantUriPermissions\": \"true\", \"{http://schemas.android.com/apk/res/android}name\": \".RecordProvider\"}]"
+          ],
+          "removed": []
+        },
+        "compatible_library": false
+      }
+    },
+    {
+      "case": "N02",
+      "class": "negative",
+      "mode": "agent",
+      "repeat": 1,
+      "state": "rejected",
+      "started": true,
+      "duration_seconds": 18.996,
+      "build_attempts": 0,
+      "model_requests_with_usage": 5,
+      "model_price_usd_range": [
+        0.00127795,
+        0.00255589
+      ],
+      "trial": "N02-agent-1",
+      "candidate_sha256": null,
+      "tool_error": null
+    },
+    {
+      "case": "N02",
+      "class": "negative",
+      "mode": "agent",
+      "repeat": 2,
+      "state": "rejected",
+      "started": true,
+      "duration_seconds": 31.132,
+      "build_attempts": 0,
+      "model_requests_with_usage": 7,
+      "model_price_usd_range": [
+        0.00196267,
+        0.00392533
+      ],
+      "trial": "N02-agent-2",
+      "candidate_sha256": null,
+      "tool_error": null
+    }
+  ],
+  "semantic_counts": {
+    "agent_positives": 4,
+    "planned_agent_positives": 6
+  }
+}
