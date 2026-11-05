@@ -114,10 +114,14 @@ def main():
         from feature_agent import run as run_feature
         from feature_agent import tool_definitions
         acceptance = [{"action": "expect", "value": "Ready"}]
-        agent_tools = [tool["function"]["name"] for tool in tool_definitions(True, acceptance)]
-        required = {"test_original", "rehearse_acceptance", "declare_platform_library"}
+        definitions = {tool["function"]["name"]: tool["function"] for tool in tool_definitions(True, acceptance)}
+        agent_tools = list(definitions)
+        required = {"test_original", "rehearse_acceptance", "declare_platform_library", "device_action"}
         if not callable(run_feature) or not required.issubset(agent_tools):
             raise RuntimeError("对话功能修改工具未完整打包")
+        actions = definitions["device_action"]["parameters"]["properties"]["action"]["enum"]
+        if "replace_input" not in actions:
+            raise RuntimeError("设备文本替换工具未完整打包")
         payload["agent_tools"] = agent_tools
         from agent_acceptance import verify, verified_for
         from tools.replay_agent_acceptance import read_inputs

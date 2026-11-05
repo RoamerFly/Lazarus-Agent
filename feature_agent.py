@@ -60,8 +60,8 @@ def tool_definitions(device_available, acceptance_steps=()):
         tools.extend([
             _tool("test_original", "安装启动本轮导入的原 APK，读取安装、界面和崩溃证据，不占用构建次数", {}),
             _tool("test_apk", "安装启动最新候选，返回安装哈希、界面和可观测的新发应用崩溃摘要", {}),
-            _tool("device_action", "操作最近安装成功的原 APK 或当前候选，返回界面与新发崩溃摘要",
-                  {"action": {"type": "string", "enum": ["read", "tap_text", "input_text", "back", "cold_start"]},
+            _tool("device_action", "操作最近安装成功的原 APK 或当前候选。先点击文本框，再用 replace_input 替换旧值；input_text 继续输入。",
+                  {"action": {"type": "string", "enum": ["read", "tap_text", "input_text", "replace_input", "back", "cold_start"]},
                    "text": STRING}, ["action"]),
             _tool("declare_platform_library", "将诊断中经目标系统确认的共享库添加到清单。"
                   "仅写入可选 uses-library 声明，保留原代码；随后构建并验证", {"name": STRING}),

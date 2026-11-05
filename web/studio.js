@@ -273,7 +273,7 @@ function renderChat(busy){
 function acceptanceTask(){
   const lines=el("acceptanceSteps").value.split(/\r?\n/).map(line=>line.trim()).filter(Boolean);
   if(lines.length){
-    const actions={"点击":"tap","出现":"expect","未出现":"absent","输入":"input","返回":"back","冷启动":"cold_start"};
+    const actions={"点击":"tap","出现":"expect","未出现":"absent","输入":"input","替换输入":"replace_input","返回":"back","冷启动":"cold_start"};
     if(lines.length>16)throw Error("独立验收最多 16 步。");
     return {steps:lines.map((line,index)=>{
       const [label,...rest]=line.split(/[|｜]/);

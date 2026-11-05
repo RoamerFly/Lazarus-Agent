@@ -6,7 +6,8 @@ import unittest
 from unittest.mock import Mock, patch
 import xml.etree.ElementTree as ET
 
-from agent_acceptance import _step, _wait_for_launch_ui, parse_steps, rehearse_candidate, verify, verified_for
+from agent_acceptance import _step, _verified_step, _wait_for_launch_ui, parse_steps, rehearse_candidate, verify, verified_for
+from agent_device import AgentDevice
 
 
 def screen(package, text):
@@ -21,6 +22,14 @@ def dialog_screen(package="android", title="System UI isn't responding"):
     ET.SubElement(root, "node", {"package": package, "text": title, "resource-id": "android:id/alertTitle"})
     ET.SubElement(root, "node", {"package": package, "text": "Wait", "resource-id": "android:id/aerr_wait",
                                  "bounds": "[0,40][40,60]"})
+    return root
+
+
+def focused_editor(text="0", **attributes):
+    root = ET.Element("hierarchy")
+    field = {"package": "example.app", "class": "android.widget.EditText", "resource-id": "example.app:id/value",
+             "focused": "true", "enabled": "true", "password": "false", "text": text}
+    ET.SubElement(root, "node", field | attributes)
     return root
 
 
@@ -88,6 +97,45 @@ class AcceptanceTests(unittest.TestCase):
             parse_steps({"steps": [{"action": "cold_start"}, {"action": "absent", "value": "Error"}]})
         with self.assertRaises(ValueError):
             parse_steps({"steps": [{"action": "input", "value": "a; reboot"}, {"action": "expect", "value": "OK"}]})
+
+    def test_replace_step_checks_focused_field_and_records_exact_result(self):
+        value = "2147483646"
+        step = {"action": "replace_input", "value": value}
+        self.assertEqual(parse_steps({"steps": [step, {"action": "expect", "value": value}]})[0], step)
+        tester = AgentDevice(Mock(), "job", 36, None, None)
+        tester.facts = {"package": "example.app"}
+        tester.serial = "test"
+        tester.tree = Mock(side_effect=[focused_editor()] * 3 + [focused_editor(value)])
+        result = {}
+        with patch("agent_device.bench_device.shell") as shell:
+            _step(tester, step, result, set())
+        self.assertEqual([c.args[1:] for c in shell.call_args_list],
+                         [("input", "keycombination", "KEYCODE_CTRL_LEFT", "KEYCODE_A"), ("input", "text", value)])
+        self.assertEqual(result["field"], {"resource-id": "example.app:id/value", "text": value})
+        evidence = {**step, **result, "status": "passed"}
+        self.assertTrue(_verified_step(evidence, step))
+        del evidence["field"]
+        self.assertFalse(_verified_step(evidence, step))
+
+    def test_replace_input_rejects_password_or_foreign_focus(self):
+        tester = AgentDevice(Mock(), "job", 36, None, None)
+        tester.facts = {"package": "example.app"}
+        for tree in (focused_editor(password="true"), focused_editor(package="other.app")):
+            tester.tree = Mock(return_value=tree)
+            with patch("agent_device.bench_device.shell") as shell, self.assertRaises(ValueError):
+                tester.replace_input("123")
+            shell.assert_not_called()
+
+    def test_replace_input_stops_after_focus_change_and_rejects_truncation(self):
+        tester = AgentDevice(Mock(), "job", 36, None, None)
+        tester.facts = {"package": "example.app"}
+        tester.tree = Mock(side_effect=[focused_editor(), focused_editor(**{"resource-id": "example.app:id/other"})])
+        with patch("agent_device.bench_device.shell") as shell, self.assertRaisesRegex(ValueError, "焦点"):
+            tester.replace_input("123")
+        self.assertEqual(shell.call_count, 1)
+        tester.tree = Mock(side_effect=[focused_editor(), focused_editor(), focused_editor("12")])
+        with patch("agent_device.bench_device.shell"), self.assertRaisesRegex(ValueError, "未显示完整"):
+            tester.replace_input("123")
 
     def test_rehearsal_returns_first_failed_step_and_target_app_evidence(self):
         steps = parse_steps({"steps": [{"action": "tap", "value": "Open"},

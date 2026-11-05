@@ -106,15 +106,43 @@ class AgentDevice:
     def observe(self):
         tree = self.tree()
         nodes = [{key: node.get(key, "")[:300] for key in
-                  ("text", "content-desc", "resource-id", "class", "bounds", "clickable", "checked", "package")}
+                  ("text", "content-desc", "resource-id", "class", "bounds", "clickable", "checked", "focused", "package")}
                  for node in tree.iter("node") if node.get("text") or node.get("resource-id") or node.get("clickable")=="true"]
         return {"nodes": nodes[:60], "truncated": len(nodes)>60}
+
+    def _focused_field(self, expected_id=None):
+        nodes = list(self.tree().iter("node"))
+        focused = [node for node in nodes if node.get("focused") == "true"]
+        if len(focused) != 1:
+            raise ValueError("请先点击目标应用的一个可编辑文本框")
+        field = focused[0]
+        package = self.facts["package"]
+        field_id = field.get("resource-id")
+        if (field.get("package") != package or field.get("class") != "android.widget.EditText" or
+                field.get("enabled") != "true" or field.get("password") != "false" or not field_id or
+                (expected_id is not None and field_id != expected_id) or
+                sum(node.get("package") == package and node.get("resource-id") == field_id for node in nodes) != 1):
+            raise ValueError("焦点需要位于目标应用的唯一非密码文本框")
+        return field
+
+    def replace_input(self, text):
+        if not isinstance(text, str) or not re.fullmatch(r"[A-Za-z0-9_ .-]{1,100}", text):
+            raise ValueError("替换输入仅支持英文、数字、空格和 _ . -")
+        field_id = self._focused_field().get("resource-id")
+        bench_device.shell(self.serial, "input", "keycombination", "KEYCODE_CTRL_LEFT", "KEYCODE_A")
+        self._focused_field(field_id)
+        bench_device.shell(self.serial, "input", "text", text.replace(" ", "%s"))
+        actual = self._focused_field(field_id).get("text")
+        if actual != text:
+            raise ValueError("设备文本框未显示完整替换结果")
+        return {"resource-id": field_id, "text": actual}
 
     def action(self, action, text=""):
         if len(self.steps) >= 20:
             raise ValueError("本轮设备操作次数已达上限")
         self.device.check(self.owner)
         before = self.crash_snapshot() if action != "read" else None
+        replaced = None
         if action == "read":
             pass
         elif action == "cold_start":
@@ -125,6 +153,8 @@ class AgentDevice:
             bench_device.shell(self.serial, "input", "keyevent", "4")
         elif action == "input_text" and isinstance(text, str) and re.fullmatch(r"[A-Za-z0-9_ .-]{1,100}", text):
             bench_device.shell(self.serial, "input", "text", text.replace(" ", "%s"))
+        elif action == "replace_input":
+            replaced = self.replace_input(text)
         elif action == "tap_text" and isinstance(text, str) and 0<len(text)<=200:
             tree = self.tree()
             matches = [node for node in tree.iter("node") if text in
@@ -141,5 +171,7 @@ class AgentDevice:
         time.sleep(.6)
         ui, runtime = self._observe_after(before)
         result = {"action": action, "text": text, **runtime, "ui": ui}
+        if replaced is not None:
+            result["field"] = replaced
         self.steps.append(result)
         return result

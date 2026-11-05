@@ -10,7 +10,7 @@ from android_dialog import system_dialog
 
 
 OPERANDS = {"tap": "value", "expect": "value", "absent": "value", "input": "value",
-            "back": None, "cold_start": None}
+            "replace_input": "value", "back": None, "cold_start": None}
 DEVICE_ERRORS = (ValueError, OSError, RuntimeError, subprocess.SubprocessError)
 
 
@@ -37,7 +37,7 @@ def parse_steps(task):
             value = step[operand]
             if not isinstance(value, str) or not 0 < len(value.strip()) <= 200 or "\0" in value:
                 raise ValueError("验收内容需要 1 至 200 字")
-            if action == "input" and not re.fullmatch(r"[A-Za-z0-9_ .-]{1,100}", value):
+            if action in {"input", "replace_input"} and not re.fullmatch(r"[A-Za-z0-9_ .-]{1,100}", value):
                 raise ValueError("验收输入仅支持英文、数字、空格和 _ . -")
         result.append(dict(step))
     if not any(step["action"] == "expect" for step in result):
@@ -117,7 +117,7 @@ def _wait_for_launch_ui(tester, row, handled):
 def _step(tester, step, row, handled):
     action, value = step["action"], step.get("value")
     tester.device.check(tester.owner)
-    if action in {"tap", "expect", "absent", "input", "back"}:
+    if action in {"tap", "expect", "absent", "input", "replace_input", "back"}:
         frames = []
         try:
             nodes = _read(tester, handled, frames)
@@ -137,6 +137,8 @@ def _step(tester, step, row, handled):
             raise ValueError("未观察到预期界面状态")
     elif action == "input":
         bench_device.shell(tester.serial, "input", "text", value.replace(" ", "%s"))
+    elif action == "replace_input":
+        row["field"] = tester.replace_input(value)
     elif action == "back":
         bench_device.shell(tester.serial, "input", "keyevent", "4")
     else:
@@ -249,6 +251,15 @@ def verify(source, source_hash, candidate, candidate_hash, targets, steps, make_
     return report
 
 
+def _verified_step(entry, step):
+    if entry["status"] != "passed" or any(entry.get(key) != value for key, value in step.items()):
+        return False
+    if step["action"] != "replace_input":
+        return True
+    field = entry.get("field")
+    return isinstance(field, dict) and bool(field.get("resource-id")) and field.get("text") == step["value"]
+
+
 def verified_for(report, sha256):
     if not report or report.get("status") != "behavior-verified" or report.get("candidate_sha256") != sha256:
         return False
@@ -258,6 +269,5 @@ def verified_for(report, sha256):
         row["candidate"]["device"]["installed_sha256"] == sha256 and
         row["candidate"]["install"] == row["candidate"]["launch"] == row["candidate"]["function"] == "passed" and
         len(row["candidate"]["steps"]) == len(steps) and
-        all(entry["status"] == "passed" and all(entry.get(key) == value for key, value in step.items())
-            for entry, step in zip(row["candidate"]["steps"], steps))
+        all(_verified_step(entry, step) for entry, step in zip(row["candidate"]["steps"], steps))
         for api, row in zip(targets, rows))
