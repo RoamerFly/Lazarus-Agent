@@ -11,6 +11,10 @@ on:
         description: Test storage and TEMP paths containing Chinese and spaces
         type: boolean
         default: true
+      offline_repair:
+        description: Also generate and verify a new APK with the local compatibility rule
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -39,7 +43,9 @@ jobs:
         shell: pwsh
         env:
           UNICODE_PATHS: ${{ inputs.unicode_paths }}
+          OFFLINE_REPAIR: ${{ inputs.offline_repair }}
         run: |
+          if ($env:OFFLINE_REPAIR -eq 'true') { $clientPython = (Get-Command python -CommandType Application).Source }
           $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
           $env:JAVA_HOME = ''
           $env:ANDROID_HOME = ''
@@ -47,6 +53,9 @@ jobs:
           $env:REVIVER_SDK = ''
           $env:REVIVER_JAVA_HOME = ''
           $env:REVIVER_LAB = ''
+          $env:REVIVER_MODEL_URL = ''
+          $env:REVIVER_MODEL = ''
+          $env:REVIVER_MODEL_KEY = ''
           $env:REVIVER_PORT = '18786'
           $env:LAZARUS_STORAGE_ROOT = Join-Path $env:RUNNER_TEMP 'lazarus-first-runtime'
           if ($env:UNICODE_PATHS -eq 'true') {
@@ -124,6 +133,19 @@ jobs:
               if ($proof.status -ne 'behavior-verified' -or $proof.rows[0].candidate.device.installed_sha256 -ne '3cb6ce313e96d3bc997b4431cb891f293398f3f875dea8d8dce7336214a87261') { throw 'Independent replay proof did not match the frozen candidate' }
               @{ app=$app; programs=$programs; outbound='Internet blocked per executable, loopback retained'; replay_exit=$replay.ExitCode } |
                 ConvertTo-Json | Set-Content -Encoding utf8 evidence/offline.json
+              if ($env:OFFLINE_REPAIR -eq 'true') {
+                if ((Invoke-RestMethod "$base/api/config").model) { throw 'Model must be disabled for the local-rule test' }
+                & $clientPython tools/repair_apk.py fixtures/field-route/field-route-legacy.apk --android 16 --workbench $base --output evidence/local-rule --tap 'Open south route' --expect 'Inspect the pump seal'
+                if ($LASTEXITCODE -ne 0) { throw "Local-rule repair failed: $LASTEXITCODE" }
+                $result = Get-Content -Raw evidence/local-rule/report.json | ConvertFrom-Json
+                $newHash = (Get-FileHash evidence/local-rule/verified.apk).Hash.ToLowerInvariant()
+                if ($result.tests[0].install.output -notmatch 'INSTALL_FAILED_DEPRECATED_SDK_VERSION' -or
+                    $result.patch.rule -ne 'installation-floor' -or $result.export.sha256 -ne $newHash -or
+                    $result.export.installed_sha256 -ne $newHash -or $result.export.verified_environment.sdk -ne 36 -or
+                    $result.export.level -ne '指定操作已验证') { throw 'Local rule did not prove the expected install failure, new output identity and operation' }
+                @{ rule=$result.patch.rule; downloaded_sha256=$newHash; installed_sha256=$result.export.installed_sha256; target=36; model_enabled=$false; operation='Open south route'; expected='Inspect the pump seal'; level=$result.export.level } |
+                  ConvertTo-Json | Set-Content -Encoding utf8 evidence/local-rule-summary.json
+              }
             } finally {
               foreach ($name in $offlineRules) { Remove-NetFirewallRule -DisplayName $name }
             }
