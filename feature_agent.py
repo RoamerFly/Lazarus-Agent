@@ -190,7 +190,8 @@ class Session:
         return {"finished": True}
 
 
-def run(source, output, tools, api, expected_hash, request, config, progress, *, history=(), tester=None):
+def run(source, output, tools, api, expected_hash, request, config, progress, *, history=(), tester=None,
+        acceptance_steps=()):
     source, output = Path(source), Path(output)
     facts = inspect_package(source, tools)
     if facts["sha256"] != expected_hash:
@@ -198,7 +199,8 @@ def run(source, output, tools, api, expected_hash, request, config, progress, *,
     output.parent.mkdir(parents=True, exist_ok=True)
     messages = [{"role": "system", "content": PROMPT}, {"role": "user", "content": json.dumps({
         "request": request, "target_api": api, "package": facts,
-        "history": list(history)[-12:], "tools_scope": "current-apk-and-private-test-device",
+        "history": list(history)[-12:], "acceptance_steps": list(acceptance_steps),
+        "tools_scope": "current-apk-and-private-test-device",
     }, ensure_ascii=False)}]
     definitions = tool_definitions(tester is not None)
     allowed = {tool["function"]["name"] for tool in definitions}

@@ -47,6 +47,43 @@ def inspect_package(apk, tools):
             "textrel_libraries":sorted(textrel),"sha256":digest}
 
 
+def manifest_surface(apk, tools):
+    """Record explicit permission/component declarations from the compiled manifest."""
+    with tempfile.TemporaryDirectory() as temp:
+        shutil.copyfile(apk, Path(temp) / "input.apk")
+        text = run([(tools / "aapt.exe").resolve(), "dump", "xmltree", "input.apk", "AndroidManifest.xml"], cwd=temp)
+    permissions, components = [], []
+    stack = []
+    for line in text.splitlines():
+        indent = len(line) - len(line.lstrip())
+        element = re.match(r"\s*E: ([\w-]+)", line)
+        if element:
+            while stack and stack[-1][0] >= indent:
+                stack.pop()
+            tag = element[1]
+            parent = stack[-1][1] if stack else None
+            record = None
+            if parent == "manifest" and tag in {"uses-permission", "uses-permission-sdk-23", "uses-permission-sdk-m"}:
+                record = {"type": tag}
+                permissions.append(record)
+            elif parent == "application" and tag in {"activity", "activity-alias", "service", "receiver", "provider"}:
+                record = {"type": tag}
+                components.append(record)
+            stack.append((indent, tag, record))
+        elif stack and stack[-1][2] is not None:
+            attr = re.match(r"\s*A: [\w.-]+:(name|exported|enabled|permission|readPermission|writePermission|authorities|targetActivity|maxSdkVersion)\(0x[\da-f]+\)=(.+)", line)
+            if attr:
+                stack[-1][2][attr[1]] = attr[2].split(" (Raw:", 1)[0].strip('"')
+    return {"permissions": permissions, "components": components}
+
+
+def manifest_changes(source, candidate, tools):
+    before, after = [manifest_surface(apk, tools) for apk in (source, candidate)]
+    return {name: {"removed": [row for row in before[name] if row not in after[name]],
+                   "added": [row for row in after[name] if row not in before[name]]}
+            for name in before}
+
+
 def abi_pruning_plan(facts, device_abis, missing_library):
     """Plan removal of ABI directories only when an exact safe fallback exists.
 

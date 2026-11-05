@@ -7,6 +7,7 @@ from pathlib import Path
 import re
 import secrets
 import shutil
+import subprocess
 import threading
 import time
 import uuid
@@ -315,7 +316,7 @@ def chat_model_mode(body):
     return "local" if body.get("local_translate") is True else False
 
 
-def run_chat_feature(folder, state, source, expected_hash, run_id, body, config, user_message):
+def run_chat_feature(folder, state, source, expected_hash, run_id, body, config, user_message, steps, targets):
     def progress(text):
         add_message(state, "assistant", text, agent_progress=True)
         save(folder, state)
@@ -324,31 +325,49 @@ def run_chat_feature(folder, state, source, expected_hash, run_id, body, config,
         from feature_agent import run as run_feature
         from model_tools import ModelToolError
         from agent_device import AgentDevice
+        from agent_acceptance import verify
 
         output = folder / "feature-candidates" / run_id / "candidate.apk"
         history = [{"role": m["role"], "text": m.get("text", "")[:1800]}
                    for m in state.get("messages", [])[:-2] if not m.get("agent_progress")][-12:]
-        tester = AgentDevice(device, folder.name, state["api"], TOOLS, progress) if ready(state["api"]) else None
+        def make_tester(api):
+            return AgentDevice(device, folder.name, api, TOOLS, progress)
+
+        primary = max(targets)
+        tester = make_tester(primary) if ready(primary) else None
         try:
-            result = run_feature(source, output, TOOLS, state["api"], expected_hash,
-                                 body["text"], config, progress, history=history, tester=tester)
+            result = run_feature(source, output, TOOLS, primary, expected_hash,
+                                 body["text"], config, progress, history=history, tester=tester,
+                                 acceptance_steps=steps)
         except ModelToolError as exc:
             add_message(state, "assistant", "本轮模型未能完成修改。" + str(exc))
             result = None
         if result is None:
             archive_version(folder, state)
-            record_feedback(folder, state, body, existing_message=user_message)
+            legacy_body = {**body, "task": None} if "steps" in (body.get("task") or {}) else body
+            record_feedback(folder, state, legacy_body, existing_message=user_message)
         elif result["outcome"] == "candidate":
+            from diagnose import manifest_changes
+
+            acceptance = verify(source, expected_hash, output, result["sha256"], targets, steps,
+                                make_tester, ready, progress)
+            try:
+                acceptance["manifest_changes"] = manifest_changes(source, output, TOOLS)
+                acceptance["signatures"] = {"input": signing_fingerprints(source),
+                                            "candidate": signing_fingerprints(output)}
+            except (OSError, RuntimeError, ValueError, subprocess.SubprocessError) as exc:
+                acceptance["inspection_error"] = str(exc)[-600:]
+            result["acceptance"] = acceptance
             state.setdefault("feature_candidates", {})[run_id] = result
             state["latest_feature_candidate"] = run_id
-            proof = result.get("verification") or {}
-            if proof.get("verification") == "install-and-launch":
-                level = "已通过安装和启动检查，功能效果请继续复测。"
-            elif proof:
-                level = "候选的设备检查未通过，请查看工具结果。"
+            level = "已回编并校验签名。"
+            if acceptance["status"] == "behavior-verified":
+                level += "全部所选系统的指定操作已通过独立验收。"
+            elif acceptance["status"] == "launch-verified":
+                level += "全部所选系统已安装启动，尚未指定功能验收步骤。"
             else:
-                level = "已回编并校验签名，待目标设备复测。"
-            add_message(state, "assistant", result["summary"] + "\n" + level,
+                level += "独立验收未全部通过，请查看逐系统报告。"
+            add_message(state, "assistant", level + "\n\nAgent 说明：\n" + result["summary"],
                         feature_candidate_id=run_id)
         else:
             add_message(state, "assistant", result["summary"])
@@ -374,14 +393,48 @@ def feature_candidate(job: str, run_id: str):
     path = folder / "feature-candidates" / run_id / "candidate.apk"
     if not path.is_file():
         raise HTTPException(404, "候选文件缺失")
-    return FileResponse(path, filename=f"{state['package']['package']}-feature-api{state['api']}.apk")
+    api = state["feature_candidates"][run_id].get("api", state["api"])
+    return FileResponse(path, filename=f"{state['package']['package']}-feature-api{api}.apk")
+
+
+@app.get("/api/jobs/{job}/feature-candidates/{run_id}/acceptance")
+def feature_acceptance(job: str, run_id: str):
+    state = read(job_dir(job))
+    candidate = state.get("feature_candidates", {}).get(run_id)
+    if not re.fullmatch("[a-f0-9]{32}", run_id) or not candidate or "acceptance" not in candidate:
+        raise HTTPException(404, "该候选暂无独立验收报告")
+    return Response(json.dumps(candidate["acceptance"], ensure_ascii=False, indent=2),
+                    media_type="application/json",
+                    headers={"Content-Disposition": 'attachment; filename="agent-acceptance.json"'})
+
+
+@app.get("/api/jobs/{job}/feature-candidates/{run_id}/verified")
+def verified_feature_candidate(job: str, run_id: str):
+    from agent_acceptance import verified_for
+    from agent_workspace import digest_file
+
+    folder = job_dir(job)
+    state = read(folder)
+    candidate = state.get("feature_candidates", {}).get(run_id)
+    if not re.fullmatch("[a-f0-9]{32}", run_id) or not candidate:
+        raise HTTPException(404, "功能修改候选不存在")
+    if not verified_for(candidate.get("acceptance"), candidate["sha256"]):
+        raise HTTPException(409, "该候选尚未通过全部目标的功能验收")
+    path = folder / "feature-candidates" / run_id / "candidate.apk"
+    if not path.is_file() or digest_file(path) != candidate["sha256"]:
+        raise HTTPException(409, "候选文件缺失或哈希不匹配")
+    return FileResponse(path, filename=f"{state['package']['package']}-verified.apk")
 
 
 @app.post("/api/jobs/{job}/message")
 def chat_message(job: str, body: dict):
     from auto_translation import is_command
 
+    task = body.get("task")
+    sequence = isinstance(task, dict) and "steps" in task
     if body.get("kind") != "issue" or body.get("attachment"):
+        if sequence:
+            raise HTTPException(400, "请单独发送多步验收，不附带截图")
         return feedback(job, body)
     localize = is_command(body.get("text"))
     model_config = None
@@ -392,6 +445,8 @@ def chat_message(job: str, body: dict):
         if configured["enabled"] and configured["url"] and configured["model"]:
             model_config = configured
             localize = False
+    if sequence and model_config is None:
+        raise HTTPException(400, "请先配置并启用模型，再从对话发送多步验收")
     if not localize:
         text = body.get("text")
         if not isinstance(text, str) or not 0 < len(text.strip()) <= 2000 or model_config is None:
@@ -401,6 +456,13 @@ def chat_message(job: str, body: dict):
         raise HTTPException(409, "请等待当前任务结束")
     try:
         state = read(folder)
+        if not localize:
+            from agent_acceptance import parse_steps
+            try:
+                steps = parse_steps(task)
+                targets = normalize_targets(body.get("targets"), INSTALL_FLOOR, state["api"])
+            except ValueError as exc:
+                raise HTTPException(400, str(exc)) from exc
         selected = body.get("version")
         source = folder / "original.apk"
         expected_hash = None if localize else state["package"]["sha256"]
@@ -422,13 +484,15 @@ def chat_message(job: str, body: dict):
         user_message = state["messages"][-1]
         if not localize:
             user_message["base_sha256"] = expected_hash
+            user_message["acceptance_steps"] = steps
+            user_message["acceptance_targets"] = targets
         if localize:
             action, worker = "chat-localize", run_chat_localization
             args = (folder, state, source, run_id, chat_model_mode(body))
             add_message(state, "assistant", "开始分析并生成汉化候选。")
         else:
             action, worker = "chat-feature", run_chat_feature
-            args = (folder, state, source, expected_hash, run_id, body, model_config, user_message)
+            args = (folder, state, source, expected_hash, run_id, body, model_config, user_message, steps, targets)
             add_message(state, "assistant", "开始分析这条需求。", agent_progress=True)
         state.update(status="running", action=action, worker=INSTANCE, updated=now())
         save(folder,state)

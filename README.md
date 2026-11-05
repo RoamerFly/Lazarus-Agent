@@ -25,6 +25,10 @@ Windows 桌面版「遗留软件复活智能体」。导入旧 APK，选择 Andr
 
 对话默认基于最新候选继续，选择历史版本后可从对应版本修改。上一轮对话摘要会进入上下文。每轮保留工具结果、文件差异和输入输出哈希。工作台已有目标环境时，模型还能自行安装候选、读取界面、点击控件、输入测试文本和冷启动。构建通过、安装启动和功能验收分别记录，下载的候选请继续在目标手机复测。
 
+在「复现步骤」填写点击控件和预期结果后发送需求，工作台会独立安装基准包与候选包，按提交时的步骤逐系统复测。多步验收可逐行填写 `点击 | 控件`、`出现 | 预期文字` 或 `冷启动` 等操作。全部目标通过时提供「下载已验收 APK」。未通过时仍可下载试验候选和报告。报告保留两份文件的哈希、安装及操作结果，并列出清单声明和签名的变化。基准也通过时会单独标明。
+
+下载验收报告后，可在有专用 Android 运行环境的电脑上执行 `python tools/replay_agent_acceptance.py agent-acceptance.json base.apk candidate.apk --output replay.json`。复测使用报告内的固定步骤和相同 APK 文件。若该轮基于上一版候选继续，`base.apk` 应使用对应的上一版候选。运行前结束其他占用工作台专用模拟器的任务。
+
 从 [Releases](https://github.com/RoamerFly/Lazarus-Agent/releases) 下载 Lazarus-Agent.exe。桌面程序自带 Python 和 Web 服务，使用内嵌 WebView2 显示独立桌面窗口。重复启动会激活已有窗口。系统需要 Microsoft Edge WebView2 Runtime，缺少时程序会显示官方下载地址。首次运行 APK 时，工作台检查 Android SDK、Java 和所选系统镜像，优先复用本机已有资源；需要联网时在你同意发布方条款后，从官方来源仅下载所缺组件。下载可取消，应用更新不会重新打包镜像。启动后点击“修复记录”可恢复历史任务。
 
 设置 `REVIVER_SDK` 指向 Android SDK 根目录（包括 platform-tools、emulator、build-tools），按需设置 `REVIVER_BUILD_TOOLS`、`REVIVER_LAB`。默认本地端口为 8767，可通过 `REVIVER_PORT` 调整。任务数据位于 `%LOCALAPPDATA%\LegacyApkReviver\jobs`。初次使用前见[运行指南](运行指南.md)。若桌面版与旧网页服务使用同一端口，请先退出旧服务。

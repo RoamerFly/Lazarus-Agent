@@ -97,7 +97,7 @@ async function loadJob(file,demo){
     if(!config.editing_ready && !await ensureRuntime(targets,()=>loadJob(file,demo)))return;
     job=await api("/api/import/"+Math.max(...targets)+(demo?"?demo=true":""),"POST",file);
     el("message").value="";el("attachment").value="";el("attachmentName").textContent="";
-    el("taskTap").value="";el("taskExpect").value="";lastFile=file;isDemo=demo;localStorage.setItem("reviverJob",job.id);el("screen").hidden=true;el("standby").hidden=false;notice("已导入 · Android "+(job.api-20));
+    el("taskTap").value="";el("taskExpect").value="";el("acceptanceSteps").value="";lastFile=file;isDemo=demo;localStorage.setItem("reviverJob",job.id);el("screen").hidden=true;el("standby").hidden=false;notice("已导入 · Android "+(job.api-20));
   }catch(e){notice(e.message);if(job)el("target").value=job.api;}finally{sending=false;render();}
 }
 el("file").onchange=e=>{if(e.target.files[0])loadJob(e.target.files[0],false);};
@@ -230,9 +230,31 @@ function renderChat(busy){
     const bubble=document.createElement("div");bubble.className="bubble "+m.role;bubble.textContent=(m.kind&&m.version?"V"+m.version+" · ":"")+m.text;
     if(m.attachment){const image=document.createElement("img");image.alt="问题截图";image.src=path("/attachments/"+m.attachment);bubble.append(image);}
     if(m.localization_id||m.feature_candidate_id){
-      const link=document.createElement("a");link.textContent="下载候选 APK";
+      const link=document.createElement("a");
       const endpoint=m.feature_candidate_id?"/feature-candidates/":"/localized/";
-      link.href=path(endpoint+encodeURIComponent(m.feature_candidate_id||m.localization_id));bubble.append(link);
+      const filePath=path(endpoint+encodeURIComponent(m.feature_candidate_id||m.localization_id));
+      const acceptance=job.feature_candidates?.[m.feature_candidate_id]?.acceptance;
+      link.textContent=acceptance?.status==="behavior-verified"?"下载已验收 APK":"下载候选 APK";
+      link.href=filePath+(acceptance?.status==="behavior-verified"?"/verified":"");
+      if(acceptance){
+        const scope=document.createElement("div");
+        scope.textContent=acceptance.rows.map(row=>{
+          const c=row.candidate;
+          if(!c)return androidName(row.api)+"：环境不可用";
+          if(row.status==="behavior-verified")return androidName(row.api)+"：功能通过"+(row.comparison==="baseline-already-passed"?"（基线也通过）":"");
+          if(row.status==="launch-verified")return androidName(row.api)+"：安装启动通过";
+          if(c.launch==="passed")return androidName(row.api)+"：功能未通过";
+          if(c.install==="passed")return androidName(row.api)+"：启动未通过";
+          return androidName(row.api)+"：未通过安装校验";
+        }).join(" · ");
+        bubble.append(scope);
+      }
+      bubble.append(link);
+      if(acceptance){
+        const evidence=document.createElement("a");
+        evidence.textContent="下载验收报告";evidence.href=filePath+"/acceptance";
+        bubble.append(evidence);
+      }
     }
     additions.append(bubble);
   }
@@ -240,6 +262,25 @@ function renderChat(busy){
   chatJobId=job.id;chatRows=rows;
   chat.scrollTop=followEnd?chat.scrollHeight:previousOffset;
 }
+function acceptanceTask(){
+  const lines=el("acceptanceSteps").value.split(/\r?\n/).map(line=>line.trim()).filter(Boolean);
+  if(lines.length){
+    const actions={"点击":"tap","出现":"expect","未出现":"absent","输入":"input","返回":"back","冷启动":"cold_start"};
+    if(lines.length>16)throw Error("独立验收最多 16 步。");
+    return {steps:lines.map((line,index)=>{
+      const [label,...rest]=line.split(/[|｜]/);
+      const action=Object.hasOwn(actions,label.trim())?actions[label.trim()]:null;
+      const value=rest.join("|").trim();
+      const needsValue=action!=="back"&&action!=="cold_start";
+      if(!action||Boolean(value)!==needsValue)throw Error("第 "+(index+1)+" 步格式无效。");
+      return needsValue?{action,value}:{action};
+    })};
+  }
+  const tap=el("taskTap").value.trim(),expect=el("taskExpect").value.trim();
+  if(Boolean(tap)!==Boolean(expect))throw Error("请完整填写复现步骤。");
+  return tap?{tap,expect}:null;
+}
+
 async function feedback(kind){
   if(!job||sending||job.status==="running")return;
   const text=el("message").value.trim()||(kind==="works"?"我在真机上试了，这个版本可以运行。":"");
@@ -248,8 +289,12 @@ async function feedback(kind){
   if(kind==="works"&&(!num||num==="original")){notice("请选择已验证版本，或直接发送试用反馈。");return;}
   const body={kind,text,version:num&&num!=="original"?Number(num):null};
   if(num==="original")body.base_original=true;
-  const tap=el("taskTap").value.trim(),expect=el("taskExpect").value.trim();
-  if(kind==="issue" && (tap||expect)){if(!tap||!expect){notice("请完整填写复现步骤");return;}body.task={tap,expect};}
+  if(kind==="issue"){
+    try{
+      const task=acceptanceTask();
+      if(task)body.task=task;
+    }catch(error){notice(error.message);return;}
+  }
   sending=true;render();
   try{
     const f=el("attachment").files[0];
@@ -259,6 +304,7 @@ async function feedback(kind){
     }
     body.use_configured_model=true;
     body.local_translate=true;
+    if(kind==="issue"&&!body.attachment)body.targets=selectedTargets();
     job=await api(path("/message"),"POST",JSON.stringify(body));
     el("message").value="";el("attachment").value="";el("attachmentName").textContent="";
     notice(job.status==="running"?"正在处理，进度和结果会显示在对话中。":kind==="issue"?"反馈已保存，可继续修复。":"真机复测结果已保存。");
@@ -281,7 +327,7 @@ el("history").onclick=async()=>{
     for(const j of jobs){const b=document.createElement("button");b.textContent=j.label+" · Android "+(j.api-20)+" · "+new Date(j.updated||j.created).toLocaleString()+(j.phone?" · "+j.phone:"");
       b.onclick=async()=>{try{job=await api("/api/jobs/"+j.id);localStorage.setItem("reviverJob",job.id);restoreScope(job);
         el("screen").hidden=true;el("standby").hidden=false;el("message").value="";el("attachment").value="";el("attachmentName").textContent="";
-        el("taskTap").value=job.task?.tap||"";el("taskExpect").value=job.task?.expect||"";el("historyDialog").close();render();
+        el("taskTap").value=job.task?.tap||"";el("taskExpect").value=job.task?.expect||"";el("acceptanceSteps").value="";el("historyDialog").close();render();
       }catch(e){notice(e.message);}};list.append(b);}
     if(!jobs.length)list.textContent="还没有修复记录";el("historyDialog").showModal();
   }catch(e){notice(e.message);}

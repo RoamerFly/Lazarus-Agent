@@ -15,7 +15,7 @@ class AgentDevice:
         self.serial = None
         self.steps = []
 
-    def test(self, artifact, expected_hash):
+    def test(self, artifact, expected_hash, *, capture_ui=True):
         self.facts = inspect_package(artifact, self.tools)
         if self.facts["sha256"] != expected_hash:
             raise ValueError("设备测试前候选哈希不符")
@@ -33,7 +33,8 @@ class AgentDevice:
         launched = (result.get("launch") or {}).get("exit") == 0
         return {"api": self.api, "environment": "private-workbench-device",
                 "install": result["install"], "launch": result.get("launch"),
-                "installed_sha256": installed, "ui": self.observe() if installed else None,
+                "installed_sha256": installed, "abis": result["abis"],
+                "ui": self.observe() if installed and capture_ui else None,
                 "verification": "install-and-launch" if installed and launched else "device-check-failed",
                 "steps": self.steps}
 
