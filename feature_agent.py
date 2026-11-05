@@ -57,8 +57,8 @@ def tool_definitions(device_available):
     ]
     if device_available:
         tools.extend([
-            _tool("test_apk", "将最新候选安装启动到工作台专用目标环境，返回安装哈希和界面", {}),
-            _tool("device_action", "操作本任务专用设备，按界面文本点击、输入英文数字、返回或冷启动，并读取结果",
+            _tool("test_apk", "安装启动最新候选，返回安装哈希、界面和可观测的新发应用崩溃摘要", {}),
+            _tool("device_action", "操作本任务专用设备，返回界面和本次操作的新发应用崩溃摘要",
                   {"action": {"type": "string", "enum": ["read", "tap_text", "input_text", "back", "cold_start"]},
                    "text": STRING}, ["action"]),
         ])

@@ -1,10 +1,15 @@
 """Model-visible operations on the workbench's existing disposable device."""
 import re
+import subprocess
 import time
 import xml.etree.ElementTree as ET
 
 import bench_device
+from agent_runtime import java_crashes
 from diagnose import inspect_package
+
+
+OBSERVATION_ERRORS = (OSError, ValueError, RuntimeError, subprocess.SubprocessError)
 
 
 class AgentDevice:
@@ -20,6 +25,7 @@ class AgentDevice:
         if self.facts["sha256"] != expected_hash:
             raise ValueError("设备测试前候选哈希不符")
         self.serial = self.device.ensure(self.owner, self.api, self.progress, self.facts["native_abis"])
+        before = self._crashes() if capture_ui else None
         result = self.device.install_run(artifact, self.facts)
         installed = None
         if result["install"]["exit"] == 0:
@@ -31,12 +37,42 @@ class AgentDevice:
                 raise ValueError("设备安装包与当前候选哈希不符")
         self.steps = []
         launched = (result.get("launch") or {}).get("exit") == 0
+        ui, runtime = self._observe_after(before) if installed and capture_ui else (None, {})
         return {"api": self.api, "environment": "private-workbench-device",
                 "install": result["install"], "launch": result.get("launch"),
                 "installed_sha256": installed, "abis": result["abis"],
-                "ui": self.observe() if installed and capture_ui else None,
-                "verification": "install-and-launch" if installed and launched else "device-check-failed",
+                **runtime, "ui": ui,
+                "verification": "install-and-launch" if installed and launched and not runtime else "device-check-failed",
                 "steps": self.steps}
+
+    def _crashes(self):
+        try:
+            self.device.check(self.owner)
+            proc = bench_device.invoke([bench_device.ADB, "-s", self.serial, "logcat", "-b", "crash",
+                                        "-d", "-v", "threadtime", "-t", "160"], 6)
+        except OBSERVATION_ERRORS:
+            return None
+        if proc.returncode:
+            return None
+        return java_crashes(proc.stdout.decode("utf-8", "replace"), self.facts["package"])
+
+    def _new_crash(self, before):
+        if before is not None:
+            after = self._crashes() or {}
+            recent = [event for marker, event in after.items() if marker not in before]
+            if recent:
+                return {"runtime_crash": {"source": "isolated-android-crash-buffer", **recent[-1]}}
+        return {}
+
+    def _observe_after(self, before):
+        try:
+            ui = self.observe()
+        except OBSERVATION_ERRORS:
+            runtime = self._new_crash(before)
+            if not runtime:
+                raise
+            return None, runtime
+        return ui, self._new_crash(before)
 
     def tree(self):
         self.device.check(self.owner)
@@ -69,6 +105,7 @@ class AgentDevice:
         if len(self.steps) >= 20:
             raise ValueError("本轮设备操作次数已达上限")
         self.device.check(self.owner)
+        before = self._crashes() if action != "read" else None
         if action == "read":
             pass
         elif action == "cold_start":
@@ -93,6 +130,7 @@ class AgentDevice:
         else:
             raise ValueError("设备操作或输入格式不受支持")
         time.sleep(.6)
-        result = {"action": action, "text": text, "ui": self.observe()}
+        ui, runtime = self._observe_after(before)
+        result = {"action": action, "text": text, **runtime, "ui": ui}
         self.steps.append(result)
         return result
