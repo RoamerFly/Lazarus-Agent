@@ -170,6 +170,8 @@ def build():
     installer_path = validation / f"{APP_VERSION}-installer-check.json"
     installer_note = ("正式安装器通过自检、输入哈希、篡改拒绝和卸载检查。" if installer_path.is_file()
                       else "本版正式安装器验证待归档。")
+    if not installer_path.is_file() and (validation / f"{APP_VERSION}-candidate-installer-check.json").is_file():
+        installer_note = "签名候选安装器已在干净 Windows 通过安装、自检、篡改拒绝和卸载检查。"
     outbound_note = "复测限制所列程序的 Internet 出站，保留本机通信。" if replay_path.is_file() else ""
     block("当前独立机器证据", installer_note + replay_note + outbound_note + local_rule_note +
           "此前的冷启动观察与中文路径失败另有记录。非开发者试用待补充。")

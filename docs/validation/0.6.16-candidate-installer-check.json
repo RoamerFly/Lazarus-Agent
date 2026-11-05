@@ -1,0 +1,16 @@
+{
+  "tampered_exit": 2,
+  "self_test_exit": 0,
+  "input_check_exit": 0,
+  "uninstall_exit": 0,
+  "version": "0.6.16",
+  "installed_exe_sha256": "d13a93650523dfda1299327f4a0f8f9038c964db0492dbdbdb142c2138f054be",
+  "source_commit": "41fe5b1af3f047dbee730d672e4a5639fe61aa59",
+  "source_build_run": "42083688058",
+  "signature_verified": true,
+  "user_output_preserved": true,
+  "install_exit": 0,
+  "installer_sha256": "6fdfbefdf3702c31084e6151a3220057712d1516a9c1fc41bba534495a9b1214",
+  "scope": "Signed build artifact, fresh Windows, input checks only",
+  "verification_run": "42084445912"
+}
