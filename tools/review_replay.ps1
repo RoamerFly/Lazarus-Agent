@@ -1,15 +1,18 @@
 param(
     [string]$Sample = '工作台演示',
     [string]$App = (Join-Path $env:LOCALAPPDATA 'Programs\Lazarus Agent\Lazarus-Agent.exe'),
-    [switch]$CheckOnly
+    [switch]$CheckOnly,
+    [switch]$Counterexample
 )
 $ErrorActionPreference = 'Stop'
 Import-Module Microsoft.PowerShell.Utility -ErrorAction Stop
 $root = [IO.Path]::GetFullPath($PSScriptRoot)
-$samples = Join-Path $root '可分发样本'
+if ($Counterexample -and !$PSBoundParameters.ContainsKey('Sample')) { $Sample = 'N03-agent-1' }
+$category = if ($Counterexample) { '反例样本' } else { '可分发样本' }
+$samples = Join-Path $root $category
 $folder = [IO.Path]::GetFullPath((Join-Path $samples $Sample))
 if (!$folder.StartsWith($samples + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
-    throw '请选择可分发样本目录内的样本'
+    throw '请选择样本目录内的样本'
 }
 $report = Join-Path $folder 'agent-acceptance.json'
 $base = Join-Path $folder 'base.apk'
@@ -44,11 +47,33 @@ while (!$process.HasExited) {
     Start-Sleep -Seconds 2
     $process.Refresh()
 }
-if ($process.ExitCode -ne 0) { throw "复测未通过（退出码 $($process.ExitCode)），请查看 $log" }
+$expectedExit = if ($Counterexample -and !$CheckOnly) { 1 } else { 0 }
+if ($process.ExitCode -ne $expectedExit) { throw "复测退出码 $($process.ExitCode) 与预期 $expectedExit 不符，请查看 $log" }
 $actual = Get-Content -LiteralPath $result -Raw -Encoding utf8 | ConvertFrom-Json
 if ($CheckOnly) {
     if ($actual.status -ne 'inputs-verified') { throw '输入校验没有完成' }
     Write-Output '输入校验通过；尚未运行设备。'
+} elseif ($Counterexample) {
+    $expected = Get-Content -LiteralPath (Join-Path $folder 'expected-outcome.json') -Raw -Encoding utf8 | ConvertFrom-Json
+    if ($expected.exit_code -ne 1 -or $actual.status -ne 'incomplete' -or
+        $actual.candidate_sha256 -ne $proof.candidate_sha256 -or
+        (@($actual.targets) -join ',') -ne (@($proof.targets) -join ',') -or
+        @($actual.rows).Count -ne @($proof.targets).Count) { throw '反例报告的身份、范围或状态不符合预期' }
+    foreach ($row in $actual.rows) {
+        $candidateResult = $row.candidate
+        if ($row.status -ne 'failed' -or $candidateResult.install -ne 'passed' -or
+            $candidateResult.launch -ne 'passed' -or $candidateResult.function -ne 'failed' -or
+            $candidateResult.device.installed_sha256 -ne $proof.candidate_sha256 -or
+            @($candidateResult.steps).Count -ne @($expected.steps).Count) { throw '反例没有在指定的行为检查处失败' }
+        for ($index = 0; $index -lt @($expected.steps).Count; $index++) {
+            $observed = $candidateResult.steps[$index]
+            $wanted = $expected.steps[$index]
+            foreach ($field in @('action','value','status','match_count')) {
+                if ($observed.$field -ne $wanted.$field) { throw "反例步骤 $index 的 $field 与预期不符" }
+            }
+        }
+    }
+    Write-Output '反例复核符合预期：APK 已安装并启动，矛盾行为断言失败，候选未获功能验收。'
 } else {
     if ($actual.status -ne 'behavior-verified') { throw "未完成行为验收：$($actual.status)" }
     Write-Output '本次固定步骤的行为验收通过，适用系统和 ABI 见新报告。'

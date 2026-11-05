@@ -1,0 +1,15 @@
+{
+  "input_check_exit": 0,
+  "self_test_exit": 0,
+  "uninstall_exit": 0,
+  "install_exit": 0,
+  "scope": "Official published installer, fresh Windows, input checks only; device behavior is separate",
+  "version": "0.6.10",
+  "tampered_exit": 2,
+  "user_output_preserved": true,
+  "installer_sha256": "45f7b6ccd51e0b5c9975438dc8aee3d137b6ef9b2e682a1bd11fe4584be8ee33",
+  "signature_verified": true,
+  "installed_exe_sha256": "a83e3bbc0aa288ea5915a78ce8bd3bf16957e0f2027df1a019765a347812b592",
+  "workflow": "https://github.com/RoamerFly/Lazarus-Agent/actions/runs/42039624969",
+  "workflow_source_commit": "fe423b8f27e77507f69b29320afcfb6dcebcb744"
+}

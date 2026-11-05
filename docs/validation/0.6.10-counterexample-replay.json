@@ -1,0 +1,281 @@
+{
+  "schema": 1,
+  "targets": [
+    36
+  ],
+  "steps": [
+    {
+      "action": "expect",
+      "value": "Field batch card"
+    },
+    {
+      "action": "absent",
+      "value": "Field batch card"
+    }
+  ],
+  "input_sha256": "1476a30063a68f27a2e3c10d3d99383aeee0afbf5177e09fbc44f36cc6f237da",
+  "candidate_sha256": "4a9f89bfa7497fd7703f5bda63c9d5e6f96c50cf8c47d900715e3c0041bc892f",
+  "rows": [
+    {
+      "api": 36,
+      "status": "failed",
+      "baseline": {
+        "sha256": "1476a30063a68f27a2e3c10d3d99383aeee0afbf5177e09fbc44f36cc6f237da",
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "failed",
+        "steps": [
+          {
+            "action": "expect",
+            "value": "Field batch card",
+            "status": "failed",
+            "matches": [],
+            "match_count": 0,
+            "observed": [
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1280]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/content",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "Tea timer",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,36][720,65]"
+              },
+              {
+                "text": "Start timer",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,65][720,137]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/statusBarBackground",
+                "bounds": "[0,0][720,36]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/navigationBarBackground",
+                "bounds": "[0,1208][720,1280]"
+              }
+            ]
+          }
+        ],
+        "device": {
+          "api": 36,
+          "environment": "private-workbench-device",
+          "install": {
+            "exit": 0,
+            "output": "Performing Streamed Install\r\nSuccess"
+          },
+          "launch": {
+            "exit": 0,
+            "output": "Starting: Intent { cmp=org.ggbond.teatimer/.MainActivity }\r\nStatus: ok\r\nLaunchState: COLD\r\nActivity: org.ggbond.teatimer/.MainActivity\r\nTotalTime: 1197\r\nWaitTime: 1236\r\nComplete",
+            "focused_package": "org.ggbond.teatimer"
+          },
+          "installed_sha256": "1476a30063a68f27a2e3c10d3d99383aeee0afbf5177e09fbc44f36cc6f237da",
+          "abis": [
+            "x86_64"
+          ],
+          "ui": null,
+          "verification": "install-and-launch",
+          "steps": []
+        },
+        "launch_observations": [
+          {
+            "target_nodes": 8
+          }
+        ],
+        "failure": "未观察到预期界面状态"
+      },
+      "candidate": {
+        "sha256": "4a9f89bfa7497fd7703f5bda63c9d5e6f96c50cf8c47d900715e3c0041bc892f",
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "failed",
+        "steps": [
+          {
+            "action": "expect",
+            "value": "Field batch card",
+            "status": "passed",
+            "matches": [
+              {
+                "text": "Field batch card",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,36][720,65]"
+              }
+            ],
+            "match_count": 1,
+            "observed": [
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1280]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/content",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "Field batch card",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,36][720,65]"
+              },
+              {
+                "text": "Start timer",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,65][720,137]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/statusBarBackground",
+                "bounds": "[0,0][720,36]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/navigationBarBackground",
+                "bounds": "[0,1208][720,1280]"
+              }
+            ]
+          },
+          {
+            "action": "absent",
+            "value": "Field batch card",
+            "status": "failed",
+            "matches": [
+              {
+                "text": "Field batch card",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,36][720,65]"
+              }
+            ],
+            "match_count": 1,
+            "observed": [
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1280]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/content",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "Field batch card",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,36][720,65]"
+              },
+              {
+                "text": "Start timer",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,65][720,137]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/statusBarBackground",
+                "bounds": "[0,0][720,36]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/navigationBarBackground",
+                "bounds": "[0,1208][720,1280]"
+              }
+            ]
+          }
+        ],
+        "device": {
+          "api": 36,
+          "environment": "private-workbench-device",
+          "install": {
+            "exit": 0,
+            "output": "Performing Streamed Install\r\nSuccess"
+          },
+          "launch": {
+            "exit": 0,
+            "output": "Starting: Intent { cmp=org.ggbond.teatimer/.MainActivity }\r\nStatus: ok\r\nLaunchState: COLD\r\nActivity: org.ggbond.teatimer/.MainActivity\r\nTotalTime: 556\r\nWaitTime: 560\r\nComplete",
+            "focused_package": "org.ggbond.teatimer"
+          },
+          "installed_sha256": "4a9f89bfa7497fd7703f5bda63c9d5e6f96c50cf8c47d900715e3c0041bc892f",
+          "abis": [
+            "x86_64"
+          ],
+          "ui": null,
+          "verification": "install-and-launch",
+          "steps": []
+        },
+        "launch_observations": [
+          {
+            "target_nodes": 8
+          }
+        ],
+        "failure": "未观察到预期界面状态"
+      },
+      "comparison": "baseline-check-failed"
+    }
+  ],
+  "status": "incomplete"
+}

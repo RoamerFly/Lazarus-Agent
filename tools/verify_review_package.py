@@ -43,8 +43,38 @@ def verify(path):
                 samples.append({"sample": folder, "candidate_sha256": candidate, "targets": report["targets"]})
         if not samples:
             raise ValueError("复核包缺少带完整验收报告的样本")
+        counterexamples = []
+        for name in names:
+            if "反例样本" not in PurePosixPath(name).parts or not name.endswith("/agent-acceptance.json"):
+                continue
+            folder = name.rsplit("/", 1)[0]
+            report = json.loads(archive.read(name))
+            expected = json.loads(archive.read(folder + "/expected-outcome.json"))
+            source = hashlib.sha256(archive.read(folder + "/base.apk")).hexdigest()
+            candidate = hashlib.sha256(archive.read(folder + "/candidate.apk")).hexdigest()
+            plan = expected["steps"]
+            if (len(plan) != 2 or [s["action"] for s in plan] != ["expect", "absent"] or
+                    plan[0]["value"] != plan[1]["value"] or
+                    [s["status"] for s in plan] != ["passed", "failed"] or
+                    any(s["match_count"] < 1 for s in plan) or
+                    report["steps"] != [{k: s[k] for k in ("action", "value")} for s in plan]):
+                raise ValueError("反例没有声明可复核的矛盾断言：" + folder)
+            if (source != report["input_sha256"] or candidate != report["candidate_sha256"] or
+                    report["status"] != "incomplete" or expected["exit_code"] != 1 or
+                    len(report["rows"]) != len(report["targets"]) or not report["targets"]):
+                raise ValueError("反例身份、目标或未通过状态无效：" + folder)
+            for row in report["rows"]:
+                proof = row["candidate"]
+                observed = [{k: step[k] for k in ("action", "value", "status", "match_count")}
+                            for step in proof["steps"]]
+                if (row["status"] != "failed" or proof["install"] != "passed" or proof["launch"] != "passed" or
+                        proof["function"] != "failed" or proof["device"]["installed_sha256"] != candidate or
+                        observed != expected["steps"]):
+                    raise ValueError("反例没有对应到指定的行为失败：" + folder)
+            counterexamples.append({"sample": folder, "candidate_sha256": candidate, "status": "incomplete"})
         return {"status": "archive-and-proofs-verified", "file_count": len(names),
-                "samples": samples, "package_status": json.loads(archive.read("复核状态.json")),
+                "samples": samples, "counterexamples": counterexamples,
+                "package_status": json.loads(archive.read("复核状态.json")),
                 "scope": "Files, checksums and stored proofs. Device replay is a separate operation."}
 
 

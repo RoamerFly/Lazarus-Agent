@@ -61,6 +61,35 @@ def add_case(root, output, case, mode, repeat):
             copy(proof, sample / "agent-acceptance.json")
 
 
+def add_counterexample(results, output, case):
+    """Export a fully observed contradictory-plan rejection, separately from passes."""
+    if case["class"] != "negative":
+        return
+    trial = results / (case["id"] + "-agent-1")
+    proof, candidate = trial / "acceptance.json", trial / "candidate.apk"
+    if not proof.is_file() or not candidate.is_file():
+        return
+    report = read(proof)
+    steps = report.get("steps", [])
+    if not (len(steps) == 2 and steps[0]["action"] == "expect" and steps[1]["action"] == "absent"
+            and steps[0]["value"] == steps[1]["value"] and report["status"] == "incomplete"):
+        return
+    observed = report["rows"][0]["candidate"]
+    checks = observed.get("steps", [])
+    if not (observed["install"] == observed["launch"] == "passed" and observed["function"] == "failed"
+            and len(checks) == 2 and [s["status"] for s in checks] == ["passed", "failed"]):
+        raise ValueError("矛盾断言反例缺少预期的安装、启动或行为失败证据")
+    source = ROOT / case["apk"]
+    if digest(source) != report["input_sha256"] or digest(candidate) != report["candidate_sha256"]:
+        raise ValueError("反例 APK 与报告哈希不符")
+    sample = output / "反例样本" / trial.name
+    for original, name in ((source, "base.apk"), (candidate, "candidate.apk"), (proof, "agent-acceptance.json")):
+        copy(original, sample / name)
+    expectation = {"exit_code": 1, "steps": [
+        {key: check[key] for key in ("action", "value", "status", "match_count")} for check in checks]}
+    (sample / "expected-outcome.json").write_text(json.dumps(expectation, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
 FILE_CHECK_SCRIPT = r'''$ErrorActionPreference = 'Stop'
 Import-Module Microsoft.PowerShell.Utility -ErrorAction Stop
 $root = [IO.Path]::GetFullPath($PSScriptRoot)
@@ -183,7 +212,9 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                      "0.6.9-independent-windows.md", "0.6.9-live-demo.md",
                      "0.6.9-first-use-failure.md", "0.6.9-first-use-failure.json",
                      "0.6.10-windows-proof.json", "0.6.10-independent-windows.md",
-                     "0.6.10-live-demo.md"):
+                     "0.6.10-live-demo.md", "0.6.10-installer-check.md", "0.6.10-installer-check.json",
+                     "0.6.10-counterexample-replay.md", "0.6.10-counterexample-replay.json",
+                     "0.6.10-package-replay.json"):
             path = ROOT / "docs/validation" / name
             if path.is_file():
                 copy(path, kit / "docs/validation" / name)
@@ -204,6 +235,7 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
         for case in protocol["cases"]:
             source = ROOT / case["apk"]
             copy(source, kit / "自有输入样本" / source.name)
+            add_counterexample(results, kit, case)
             modes = [("agent", n) for n in range(1, protocol[case["class"] + "_repetitions"] + 1)]
             if case["class"] == "positive":
                 modes.extend((mode, 1) for mode in ("roundtrip", "rules", "one-build"))
