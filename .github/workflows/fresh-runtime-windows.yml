@@ -105,7 +105,7 @@ jobs:
               } while ((Get-Date) -lt $deadline)
               Copy-Item evidence/latest.json "evidence/prepare-attempt-$prepareAttempt.json"
               if ($state.targets.'36'.ready) { break }
-              if ($state.active.status -ne 'error' -or $state.active.message -notmatch 'HTTP Error 50[234]:' -or
+              if ($state.active.status -ne 'error' -or $state.active.message -notmatch 'HTTP Error 50[234]:|\[WinError 10060\]|\btimed out\b' -or
                   $prepareAttempt -eq 3 -or (Get-Date) -ge $deadline) {
                 throw "Preparation failed ($($state.active.status)): $($state.active.message)"
               }
