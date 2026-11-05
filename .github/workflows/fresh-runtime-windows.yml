@@ -29,6 +29,8 @@ jobs:
           $manifest = Get-Content -Raw inputs/latest.json | ConvertFrom-Json
           $asset = $manifest.assets.'windows-x64-installer'
           if ((Get-FileHash inputs/Lazarus-Agent-windows-x64-setup.exe).Hash.ToLowerInvariant() -ne $asset.sha256) { throw 'Installer SHA mismatch' }
+          Copy-Item inputs/latest.json evidence/release-manifest.json
+          Copy-Item inputs/latest.json.sig evidence/release-manifest.sig
       - name: First use through the installed desktop program
         shell: pwsh
         run: |
@@ -95,7 +97,16 @@ jobs:
                 $index++
               }
               $arguments = '--replay-acceptance docs/validation/0.6.7-field-route-acceptance.json fixtures/field-route/field-route-legacy.apk fixtures/verified/field-route-remember-route.apk --output evidence/replay.json --log evidence/replay.log'
-              $replay = Start-Process -FilePath $app -WorkingDirectory $PWD.Path -ArgumentList $arguments -WindowStyle Hidden -Wait -PassThru
+              $replay = Start-Process -FilePath $app -WorkingDirectory $PWD.Path -ArgumentList $arguments -WindowStyle Hidden -PassThru
+              $lastProgress = ''
+              while (!$replay.HasExited) {
+                if (Test-Path evidence/replay.log) {
+                  $progress = Get-Content evidence/replay.log -Tail 1
+                  if ($progress -ne $lastProgress) { Write-Output $progress; $lastProgress = $progress }
+                }
+                Start-Sleep -Seconds 3
+                $replay.Refresh()
+              }
               if ($replay.ExitCode -ne 0) { throw "Independent replay failed: $($replay.ExitCode)" }
               $proof = Get-Content -Raw evidence/replay.json | ConvertFrom-Json
               if ($proof.status -ne 'behavior-verified' -or $proof.rows[0].candidate.device.installed_sha256 -ne '3cb6ce313e96d3bc997b4431cb891f293398f3f875dea8d8dce7336214a87261') { throw 'Independent replay proof did not match the frozen candidate' }
@@ -109,6 +120,16 @@ jobs:
           } finally {
             Get-ChildItem -LiteralPath $env:LAZARUS_STORAGE_ROOT -Filter desktop.log -Recurse -ErrorAction SilentlyContinue | ForEach-Object { Copy-Item -LiteralPath $_.FullName evidence/desktop.log }
             if (!$desktop.HasExited) { Stop-Process -Id $desktop.Id }
+          }
+      - name: Preserve emulator diagnostics
+        if: always()
+        shell: pwsh
+        run: |
+          $runtime = Join-Path $env:RUNNER_TEMP 'lazarus-first-runtime\runtimes\android-lab'
+          if (Test-Path -LiteralPath $runtime) {
+            Get-ChildItem -LiteralPath $runtime -File | Where-Object { $_.Name -match '\.(stdout|stderr)$' } | ForEach-Object {
+              Copy-Item -LiteralPath $_.FullName (Join-Path evidence $_.Name)
+            }
           }
       - uses: actions/upload-artifact@v4
         if: always()
