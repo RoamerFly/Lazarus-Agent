@@ -98,6 +98,36 @@ class WorkspaceTests(unittest.TestCase):
             session.dispatch("device_action", {"action": "read"})
         tester.action.assert_not_called()
 
+    def test_platform_library_declaration_requires_device_evidence_and_preserves_manifest(self):
+        manifest = self.root / "AndroidManifest.xml"
+        original = (b'<manifest xmlns:android="http://schemas.android.com/apk/res/android">\r\n'
+                    b'    <application><activity android:name=".Main"/>\r\n'
+                    b'    </application>\r\n'
+                    b'</manifest>\r\n')
+        manifest.write_bytes(original)
+        tester = Mock()
+        tester.test.return_value = {"installed_sha256": "a" * 64}
+        library = {"name": "android.test.mock", "evidence": "listed-by-target-package-manager"}
+        tester.action.return_value = {"runtime_crash": {"platform_library": library}}
+        session = Session(self.root, Path("original.apk"), self.root / "out.apk",
+                          Path("tools"), 36, {"sha256": "a" * 64}, lambda _: None, tester)
+        name = "declare_platform_library"
+        args = {"name": library["name"]}
+        with self.assertRaisesRegex(ValueError, "设备证据"):
+            session.dispatch(name, args)
+        session.dispatch("test_original", {})
+        session.dispatch("device_action", {"action": "tap_text", "text": "Open"})
+        with self.assertRaisesRegex(ValueError, "设备证据"):
+            session.dispatch(name, {"name": "org.apache.http.legacy"})
+        self.assertTrue(session.dispatch(name, args)["changed"])
+        self.assertFalse(session.dispatch(name, args)["changed"])
+        declaration = b'        <uses-library android:name="android.test.mock" android:required="false"/>\r\n'
+        self.assertEqual(manifest.read_bytes().replace(declaration, b""), original)
+        self.assertEqual([change["path"] for change in session.changes()], [manifest.name])
+        self.assertEqual(session.build_count, 0)
+        session.dispatch("restore_file", {"path": manifest.name})
+        self.assertEqual(manifest.read_bytes(), original)
+
     def test_rehearsal_is_bound_to_the_current_build_and_kept_separate_from_final_verification(self):
         tester = Mock()
         steps = [{"action": "expect", "value": "Ready"}]

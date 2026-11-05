@@ -3,6 +3,7 @@ import fnmatch
 import hashlib
 from pathlib import PurePosixPath
 import re
+from xml.etree import ElementTree as ET
 
 
 MAX_TEXT_BYTES = 512 * 1024
@@ -174,6 +175,40 @@ class Workspace:
         if updated and lines[end_line-1].endswith("\n"):
             updated += newline
         return self._write(path, raw, "".join(lines[:start_line-1]) + updated + "".join(lines[end_line:]))
+
+    def declare_platform_library(self, name):
+        if not isinstance(name, str) or not re.fullmatch(r"[A-Za-z][A-Za-z0-9_.-]{0,99}", name):
+            raise ValueError("系统共享库名称无效")
+        path = "AndroidManifest.xml"
+        raw, text = self._text(path)
+        android_name = "{http://schemas.android.com/apk/res/android}name"
+        try:
+            application = ET.fromstring(text).find("application")
+        except ET.ParseError as exc:
+            raise ValueError("AndroidManifest.xml 不是有效的 XML") from exc
+        if application is None:
+            raise ValueError("清单缺少 application 元素")
+        if any(node.get(android_name) == name for node in application.findall("uses-library")):
+            return {"path": path, "library": name, "changed": False, "revision": self.revision}
+        endings = list(re.finditer(r"</application\s*>", text))
+        if len(endings) != 1:
+            raise ValueError("无法唯一定位 application 结束位置")
+        closing = endings[0].start()
+        line_start = text.rfind("\n", 0, closing) + 1
+        indent = text[line_start:closing]
+        declaration = f'<uses-library android:name="{name}" android:required="false"/>'
+        if not indent.strip():
+            newline = "\r\n" if "\r\n" in text else "\n"
+            closing = line_start
+            declaration = indent + "    " + declaration + newline
+        updated = text[:closing] + declaration + text[closing:]
+        try:
+            parsed = ET.fromstring(updated).findall("./application/uses-library")
+        except ET.ParseError as exc:
+            raise ValueError("无法安全添加系统库声明") from exc
+        if sum(node.get(android_name) == name for node in parsed) != 1:
+            raise ValueError("新增库声明未出现在 application 内")
+        return {**self._write(path, raw, updated), "library": name, "changed": True}
 
     def _write(self, path, raw, text):
         updated = text.encode("utf-8")

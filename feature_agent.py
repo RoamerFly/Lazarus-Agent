@@ -63,6 +63,8 @@ def tool_definitions(device_available, acceptance_steps=()):
             _tool("device_action", "操作最近安装成功的原 APK 或当前候选，返回界面与新发崩溃摘要",
                   {"action": {"type": "string", "enum": ["read", "tap_text", "input_text", "back", "cold_start"]},
                    "text": STRING}, ["action"]),
+            _tool("declare_platform_library", "将诊断中经目标系统确认的共享库添加到清单。"
+                  "仅写入可选 uses-library 声明，保留原代码；随后构建并验证", {"name": STRING}),
         ])
         if acceptance_steps:
             tools.append(_tool("rehearse_acceptance", "重新安装当前候选并重放用户给出的验收步骤。"
@@ -83,6 +85,8 @@ replace_text 的 old 必须来自 read_text 返回的原文件内容，去掉显
 构建工具会处理目标系统安装门槛，最多构建四次。只有目标行为需要时才修改目标 SDK。首次启动的系统提示不属于应用功能故障。
 目标操作验证通过后结束本轮，避免无关改动。如果实验失败，可还原为已成功构建的文件内容；哈希完全一致时可使用已有候选。
 诊断兼容或崩溃问题时，可先测试原 APK 并执行用户描述的动作。根据复现证据优先考虑保留原功能的最小修复。
+如果运行证据列出 platform_library，可先用 declare_platform_library 恢复系统库可见性，再回编复验。
+若声明后仍失败或需求本身需要改写功能，继续按实际证据分析。
 有设备工具时应测试最新候选，基于界面执行与需求有关的操作。安装启动成功只能证明安装启动。
 有 rehearse_acceptance 时，构建后优先重放用户给出的固定验收步骤。根据首个失败步骤继续诊断或修改；
 一旦通过就保留该候选。这是当前目标系统的预检，正式交付还要重新做独立验收。
@@ -100,6 +104,7 @@ class Session:
         self.facts, self.progress, self.tester = facts, progress, tester
         self.acceptance_steps = acceptance_steps
         self.rehearsals = {}
+        self.platform_libraries = set()
         self.build_count = 0
         self.built_revision = None
         self.successful_builds = {}
@@ -119,6 +124,14 @@ class Session:
     def changes(self):
         return self._workspace.changes() if self._workspace is not None else []
 
+    def observe_device_result(self, result):
+        crash = result.get("runtime_crash") or {}
+        library = crash.get("platform_library") or {}
+        name = library.get("name")
+        if library.get("evidence") == "listed-by-target-package-manager" and isinstance(name, str):
+            self.platform_libraries.add(name)
+        return result
+
     def dispatch(self, name, args):
         if name in {"list_files", "search_text", "read_text", "read_method", "replace_text", "replace_lines",
                     "create_text_file", "restore_file"}:
@@ -127,6 +140,11 @@ class Session:
             return self.build()
         if name == "localize_resources" and not args:
             return self.localize()
+        if name == "declare_platform_library" and set(args) == {"name"} and self.tester:
+            library = args["name"]
+            if not isinstance(library, str) or library not in self.platform_libraries:
+                raise ValueError("请先复现故障并取得该目标系统库的设备证据")
+            return self.workspace.declare_platform_library(library)
         if name == "rehearse_acceptance" and not args and self.tester and self.acceptance_steps:
             self.require_current_build()
             sha256 = self.build_report["sha256"]
@@ -134,7 +152,7 @@ class Session:
                 self.device_report = None
                 self.rehearsals[sha256] = rehearse_candidate(self.tester, self.artifact, sha256,
                                                             self.acceptance_steps)
-            return self.rehearsals[sha256]
+            return self.observe_device_result(self.rehearsals[sha256])
         if name in {"test_original", "test_apk"} and not args and self.tester:
             if name == "test_original":
                 artifact, expected_hash, role = self.source, self.facts["sha256"], "original"
@@ -143,7 +161,7 @@ class Session:
                 artifact, expected_hash, role = self.artifact, self.build_report["sha256"], "candidate"
             self.device_report = None
             self.device_report = {**self.tester.test(artifact, expected_hash), "tested_input": role}
-            return self.device_report
+            return self.observe_device_result(self.device_report)
         if name == "device_action" and self.tester:
             role = (self.device_report or {}).get("tested_input")
             if role == "original":
@@ -153,7 +171,7 @@ class Session:
                 expected_hash = self.build_report["sha256"]
             if (self.device_report or {}).get("installed_sha256") != expected_hash:
                 raise ValueError("请先成功安装要操作的原 APK 或最新候选")
-            return {**self.tester.action(**args), "tested_input": role}
+            return self.observe_device_result({**self.tester.action(**args), "tested_input": role})
         if name == "finish" and set(args) == {"outcome", "summary"}:
             return self.finish(**args)
         raise ValueError("未知工具或参数格式无效")
