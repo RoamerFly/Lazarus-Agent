@@ -1,0 +1,31 @@
+{
+  "scope": "one-known-case-live-development-run",
+  "source_commit": "1a7bbbeed8e2b75386f7d8b79f61bed091458440",
+  "model": "deepseek-flash",
+  "api": 36,
+  "abi": [
+    "x86_64"
+  ],
+  "input_sha256": "7b8e200984dee500def40a9684fd2de9ced885ca1d04c63771d1d473b597dcce",
+  "candidate_sha256": "ad65c30a1b0203f342b798d48e9f3ad968a328841902506f321b366aa1e0da2a",
+  "installed_sha256": "ad65c30a1b0203f342b798d48e9f3ad968a328841902506f321b366aa1e0da2a",
+  "build_attempts": 1,
+  "tool_order": [
+    "test_original",
+    "declare_platform_library",
+    "build_apk",
+    "rehearse_acceptance"
+  ],
+  "only_changed_file": "AndroidManifest.xml",
+  "platform_library": "org.apache.http.legacy",
+  "rehearsal_steps_passed": 6,
+  "independent_steps_passed": 6,
+  "duration_seconds": 177.632,
+  "recorded_model_responses": 12,
+  "raw_sha256": {
+    "result.json": "9f0644579b6a27981c5e24da11bae22a795a090cc4a67046e49b5d429a099540",
+    "agent-trace.json": "316420bf9df30f3833004b2680ecd3758d10e9dfd0f465d00a08c653428f8b60",
+    "acceptance.json": "f370f36c2d81f9af6b1b56389376e1215267a9603ff8c7407ea14d4ea2e02603",
+    "changes.diff": "9db27fe54e42e4f4b9d3a90f30a575f6638b4af2981f2bb89deb33ff4882b0dc"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "scope": "known-fixture-scripted-device-verification",
+  "source_commit": "1a7bbbeed8e2b75386f7d8b79f61bed091458440",
+  "api": 36,
+  "abi": [
+    "x86_64"
+  ],
+  "raw_proof_sha256": "04c44454b401863aa95b8b517331417172da295249ac7f06fd9e15400ba3ee47",
+  "input_sha256": "7b8e200984dee500def40a9684fd2de9ced885ca1d04c63771d1d473b597dcce",
+  "candidate_sha256": "e7f1cdc9e7c0fdd95787b63e49d247bab9961475cf96977bef59f0303ff70125",
+  "installed_sha256": "e7f1cdc9e7c0fdd95787b63e49d247bab9961475cf96977bef59f0303ff70125",
+  "missing_class": "org.apache.http.ProtocolVersion",
+  "platform_library": "org.apache.http.legacy",
+  "compiled_optional_library": true,
+  "new_permissions": [],
+  "new_components": [],
+  "unchanged_decoded_smali_files": 2,
+  "dex_byte_identical": false,
+  "rehearsal_steps_passed": 6,
+  "independent_steps_passed": 6
+}
