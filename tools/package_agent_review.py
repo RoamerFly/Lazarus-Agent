@@ -328,6 +328,12 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
             names = ["results.json", "report.md", "diff-review.json"]
             if label == "P1B":
                 names.append("p01-runtime-observation.json")
+            if label == "P1C":
+                for name in ("agent-rehearsal-device.md", "agent-rehearsal-device.json",
+                             "agent-platform-library.md", "agent-platform-library-device.json",
+                             "agent-platform-library-model.json", "f01-p1c-input-feasibility.json"):
+                    path = Path("docs/validation") / name
+                    copy(ROOT / path, kit / path)
             for name in names:
                 path = reports / name
                 copy(ROOT / path, kit / path)

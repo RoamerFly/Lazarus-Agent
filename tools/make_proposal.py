@@ -21,6 +21,8 @@ CONTENT_WIDTH = PAGE_WIDTH - 104
 
 
 def build():
+    from app_version import APP_VERSION
+
     for name, filename in (("Song", "simsun.ttc"), ("Hei", "simhei.ttf")):
         pdfmetrics.registerFont(TTFont(name, "C:/Windows/Fonts/" + filename, subfontIndex=0))
     body = ParagraphStyle("body", fontName="Song", fontSize=11.4, leading=19,
@@ -31,7 +33,8 @@ def build():
     tiny = ParagraphStyle("tiny", parent=body, fontSize=9.2, leading=14, spaceAfter=5)
     tag = ParagraphStyle("tag", parent=tiny, fontName="Hei", textColor=TEAL, spaceAfter=18)
     story = []
-    evidence_path = ROOT / "docs/validation/f01-p1-results.json"
+    validation = ROOT / "docs/validation"
+    evidence_path = validation / "f01-p1-results.json"
     evidence = json.loads(evidence_path.read_text(encoding="utf-8")) if evidence_path.is_file() else None
 
     def para(text, style=body):
@@ -57,7 +60,9 @@ def build():
         ]))
         story.extend((result, Spacer(1, 12)))
 
-    heading("F01 数智创意 / 工程复核版", "遗留软件复活智能体")
+    windows_proof = validation / f"{APP_VERSION}-windows-proof.json"
+    heading("F01 数智创意 / 工程复核版" if windows_proof.is_file() else "F01 数智创意 / 工程候选稿",
+            "遗留软件复活智能体")
     story.append(para("从一份旧 APK 和一句需求开始，交付能在目标 Android 上复测的应用。", sub))
     story.append(para("面向接手遗留安卓工具的维护人员。用户导入 APK，指定目标系统和需要完成的操作，Agent 自主分析包内代码、资源与界面，修改并回编签名。在独立环境中，用预先提交的步骤验证原包与候选，保留每轮差异、哈希和失败原因。"))
     block("拟解决的问题", "换新终端后，旧应用可能无法安装，也可能在某个业务操作后崩溃。原工程暂不可用时，维护人员仍有安装包、业务经验和操作规程。兼容调整之后，班组还可能需要记住上次工作位置、调整流程或修改显示。仅交付一个可打开的包，无法覆盖这些操作。")
@@ -74,7 +79,7 @@ def build():
         ["1. 固定输入", "记录 APK 哈希、包名、SDK 与 ABI。提交需求时固定目标系统和独立验收步骤。"],
         ["2. 模型分析", "提供受限文件列表、文本搜索、分段读取和 smali 方法读取。模型选择需要的证据，文件内容与历史反馈作为数据处理。"],
         ["3. 修改与回编", "精确修改代码和资源，也可新增 smali、资源或 assets。Apktool 回编、zipalign 对齐、apksigner 签名并校验。"],
-        ["4. 自主试验", "模型可安装最新候选，读取界面、点击、输入及冷启动。工具错误返回模型，允许在预算内修订。"],
+        ["4. 设备诊断与预检", "模型可先运行原包复现故障，按设备证据声明可选系统库。构建后可重放固定步骤，依据首个失败点继续修订。"],
         ["5. 独立验收", "另行安装原包与候选，核对设备回读 SHA-256，按提交时的固定步骤执行。只匹配目标应用自身控件。"],
         ["6. 交付迭代", "通过所选系统的功能检查后提供已验收 APK。候选、历史版本、报告和差异保留；用户反馈可基于上版继续。"],
     ], [94, CONTENT_WIDTH - 94])
@@ -85,6 +90,11 @@ def build():
     heading("工程创新与范围", "开放需求、受限执行、独立验收")
     block("项目自研部分", "需求对话与 APK 工作区的通用编排；有哈希前置校验的精确编辑；构建、试验、回滚与多轮版本关系；模型说明之外的行为断言执行；下载状态与实际安装字节绑定；按需准备环境及桌面交付。")
     block("采用的基础工具", "外部模型承担分析和代码生成，Apktool、Android SDK 工具与隔离运行环境承担解包、回编、签名和运行。模型可以按需调用已有资源工具。外部模型输出本身不能确定候选是否通过功能验收。")
+    library_path = validation / "agent-platform-library-model.json"
+    if library_path.is_file():
+        trial = json.loads(library_path.read_text(encoding="utf-8"))
+        block("已见应用的设备证据", f"归档阅读器点击后因缺少旧 HTTP 类而崩溃。Agent 自主复现后只添加可选库声明，构建 {trial['build_attempts']} 次，"
+              f"预检和独立验收各通过 {trial['independent_steps_passed']} 步。原包无真实归档文件，验证范围为恢复样本原有操作。")
     table(["对标", "对应能力与本项目侧重"], [
         ["APKLab", "提供 APK 编辑工具链集成。本项目侧重自然语言驱动的自主修改，以及候选版本和独立行为证据的关联。"],
         ["Apktool", "提供资源和代码的解包回编。本项目复用其构建能力，在其上实现任务、试验与交付流程。"],
@@ -104,39 +114,36 @@ def build():
         ["本地分享", "修复文件 URI 交接，接收页面真实读取记录。"],
         ["反例", "MIPS-only JNI、从未存在于输入的校验码、前后矛盾的界面断言。"],
     ], [114, CONTENT_WIDTH - 114])
-    if evidence:
-        c = evidence["counts"]
-        story.append(para(f"第一批正例 {c['agent_positives']}/18，主案例 {c['primary']}/3，反例明确拒绝 {c['agent_negative_rejected']}/6，错误验收 {c['agent_false_acceptances']}/6。缺少完整观测的轮次 {c['unobserved']}/42。主案例未达到预设 3/3，本批次联合门槛未通过。通过候选的开发差异复查未扣减自动计数，非开发者试用仍待补充。"))
-        story.append(para("无修改回编为 0/6，旧规则为 2/6。同模型单次构建的五个已观测用例均通过，第六项在暂停时中断，因此无法据此确认多轮迭代更优。补丁后的工程回归另列。"))
-        regression_path = ROOT / "docs/validation/0.6.8-regression-results.json"
-        if regression_path.is_file():
-            rc = json.loads(regression_path.read_text(encoding="utf-8"))["counts"]
-            story.append(para(f"v0.6.8 全组开发回归正例 {rc['agent_positives']}/18、主案例 {rc['primary']}/3、反例错误验收 {rc['agent_false_acceptances']}/6，全部 42 轮有终态。两个未交付正例保留在分母，通过候选的差异及安装哈希已复查。此批属于已观测任务的工程回归，未改称留出评测；两批正例总数相同，不宣称总体成功率提升。"))
-    else:
-        story.append(para("完整评测尚在执行。当前已完成巡检主案例 3 轮，2 轮通过独立 10 步检查；一次因追加试验后构建限额耗尽而未交付。该批次未达到预设的主案例 3/3 门槛，失败保留在分母内。新版针对候选回滚的补丁需另列验证。"))
-    primary_path = ROOT / "docs/validation/0.6.10-primary-regression.json"
-    primary_note = ""
-    if primary_path.is_file():
-        primary = json.loads(primary_path.read_text(encoding="utf-8"))
-        primary_note = f"v0.6.10 对既有巡检主案例复跑 {primary['agent_passes']}/{primary['planned_agent']} 轮通过，按开发回归归档。"
-    block("已完成的其他核验", primary_note + "工作台同一候选在 Android 14、15、16 上通过固定步骤，下载与设备安装哈希一致。真实历史应用 OI Notepad 完成两轮行为修改，设备记录和哈希链可复核。")
-    p1b_path = ROOT / "docs/validation/f01-p1b/results.json"
-    if p1b_path.is_file():
-        p1b = json.loads(p1b_path.read_text(encoding="utf-8"))
-        counts = p1b["counts"]
-        gate = "达到" if p1b["joint_gate"] else "未达到"
-        story.append(para(f"P1B 正例 {counts['agent_positives']}/18，主案例 {counts['primary']}/3，"
-                          f"反例拒绝 {counts['agent_negative_rejected']}/6，错误验收 {counts['agent_false_acceptances']}/6，"
-                          f"独立留出任务 {p1b['held_out_passes']}/3。{gate}该批联合门槛。"
-                          f"42 轮均有终态，单次构建对照 {counts['one-build_positive_cases']}/6。"))
-    elif (ROOT / "docs/science-superpowers/preregistrations/2026-11-06-f01-p1b.md").is_file():
-        story.append(para("第二批前瞻复验已冻结 42 轮，加入一项独立留出任务。结果单独归档。"))
+    batches = [("第一批", evidence)]
+    for label in ("P1B", "P1C"):
+        path = validation / f"f01-{label.lower()}/results.json"
+        if path.is_file():
+            batches.append((label, json.loads(path.read_text(encoding="utf-8"))))
+    score_rows, control_rows = [], []
+    for label, result in batches:
+        if not result:
+            continue
+        counts = result["counts"]
+        gate = result.get("joint_gate", counts["agent_positives"] >= 15 and counts["primary"] == 3
+                          and counts["agent_negative_rejected"] == 6 and counts["agent_false_acceptances"] == 0)
+        held_out = f"{result['held_out_passes']}/3" if "held_out_passes" in result else "无"
+        score_rows.append([label, f"{counts['agent_positives']}/18", f"{counts['primary']}/3",
+                           f"{counts['agent_negative_rejected']}/6 · {counts['agent_false_acceptances']}/6",
+                           held_out, "达到" if gate else "未达到"])
+        control_rows.append(f"{label} {counts['roundtrip_positive_cases']}/6、{counts['rules_positive_cases']}/6、"
+                            f"{counts['one-build_positive_cases']}/6")
+    if score_rows:
+        table(["批次", "正例", "主案例", "反例拒绝 / 误验收", "留出", "联合门槛"], score_rows,
+              [48, 47, 48, 128, 44, CONTENT_WIDTH-315])
+        story.append(para("对照按无语义改动回编、原规则、同模型一次构建排序。"
+                          + "。".join(control_rows) + "。第一批一次构建有一轮中断，完整分母保留。", tiny))
+    if not any(label == "P1C" for label, _ in batches):
+        story.append(para("P1C 已冻结 42 轮并启动，加入仓库温度卡，检查换算与冷启动保留单位。结果待归档。", tiny))
+    story.append(para("已见任务另有全组开发回归和主案例回归。同一候选在 Android 14、15、16 上通过固定步骤。OI Notepad 的两轮修改有独立哈希链。", tiny))
     story.append(PageBreak())
 
     heading("部署与试点", "给复核人员一条可重复的路径")
     block("Windows 安装", "提供按用户安装器和便携 ZIP。桌面内嵌 WebView2，模型凭据由 Windows DPAPI 加密。程序优先复用工具，首次按所选系统准备缺失的 SDK、Java 与镜像。后续可在已准备环境中断网复测已有候选。")
-    from app_version import APP_VERSION
-    validation = ROOT / "docs/validation"
     replay_path = validation / f"{APP_VERSION}-windows-proof.json"
     replay_note = f"v{APP_VERSION} 干净 Windows 候选复测待归档。"
     if replay_path.is_file():
