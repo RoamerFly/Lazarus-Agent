@@ -62,6 +62,7 @@ def add_case(root, output, case, mode, repeat):
 
 
 FILE_CHECK_SCRIPT = r'''$ErrorActionPreference = 'Stop'
+Import-Module Microsoft.PowerShell.Utility -ErrorAction Stop
 $root = [IO.Path]::GetFullPath($PSScriptRoot)
 $count = 0
 foreach ($line in Get-Content -LiteralPath (Join-Path $root 'SHA256SUMS.txt') -Encoding utf8) {
@@ -89,6 +90,7 @@ def download_script(manifest):
     if asset.url != url:
         raise ValueError("更新清单的发布地址与版本不一致")
     return f'''$ErrorActionPreference = 'Stop'
+Import-Module Microsoft.PowerShell.Utility -ErrorAction Stop
 $target = Join-Path $PSScriptRoot 'Lazarus-Agent-windows-x64-setup.exe'
 if (!(Test-Path -LiteralPath $target)) {{
     $partial = $target + '.partial'
@@ -163,7 +165,10 @@ def build(results, release_dir, output, capture_dir, regression_results=None):
                      "0.6.8-windows-proof.json", "0.6.8-live-demo.md", "0.6.8-primary-regression.json",
                      "0.6.8-regression-results.json", "0.6.8-regression-review.md",
                      "f01-package-replay.md", "0.6.9-windows-proof.json",
-                     "0.6.9-independent-windows.md", "0.6.9-live-demo.md"):
+                     "0.6.9-independent-windows.md", "0.6.9-live-demo.md",
+                     "0.6.9-first-use-failure.md", "0.6.9-first-use-failure.json",
+                     "0.6.10-windows-proof.json", "0.6.10-independent-windows.md",
+                     "0.6.10-live-demo.md"):
             path = ROOT / "docs/validation" / name
             if path.is_file():
                 copy(path, kit / "验证摘要" / name)

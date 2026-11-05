@@ -4,6 +4,7 @@ param(
     [switch]$CheckOnly
 )
 $ErrorActionPreference = 'Stop'
+Import-Module Microsoft.PowerShell.Utility -ErrorAction Stop
 $root = [IO.Path]::GetFullPath($PSScriptRoot)
 $samples = Join-Path $root '可分发样本'
 $folder = [IO.Path]::GetFullPath((Join-Path $samples $Sample))
