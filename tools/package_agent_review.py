@@ -251,6 +251,8 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                      "0.6.12-live-demo.md", "0.6.12-windows-proof.json", "0.6.12-independent-windows.md",
                      "0.6.12-installer-check.json", "0.6.12-installer-check.md", "0.6.12-tool-paths-local.md",
                      "0.6.13-local-rule-observation.md", "0.6.13-local-rule-observation.json",
+                     "0.6.13-independent-windows.md", "0.6.13-windows-proof.json",
+                     "0.6.13-installer-check.md", "0.6.13-installer-check.json", "0.6.13-package-replay.md",
                      f"{APP_VERSION}-live-demo.md", f"{APP_VERSION}-windows-proof.json",
                      f"{APP_VERSION}-independent-windows.md", f"{APP_VERSION}-installer-check.json",
                      f"{APP_VERSION}-installer-check.md", f"{APP_VERSION}-local-rule-windows.json",
