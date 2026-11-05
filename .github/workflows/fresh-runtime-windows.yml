@@ -6,7 +6,11 @@ on:
       version:
         description: Published Windows release version
         required: true
-        default: '0.6.8'
+        default: '0.6.9'
+      unicode_paths:
+        description: Test storage and TEMP paths containing Chinese and spaces
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -33,6 +37,8 @@ jobs:
           Copy-Item inputs/latest.json.sig evidence/release-manifest.sig
       - name: First use through the installed desktop program
         shell: pwsh
+        env:
+          UNICODE_PATHS: ${{ inputs.unicode_paths }}
         run: |
           $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
           $env:JAVA_HOME = ''
@@ -43,6 +49,12 @@ jobs:
           $env:REVIVER_LAB = ''
           $env:REVIVER_PORT = '18786'
           $env:LAZARUS_STORAGE_ROOT = Join-Path $env:RUNNER_TEMP 'lazarus-first-runtime'
+          if ($env:UNICODE_PATHS -eq 'true') {
+            $env:LAZARUS_STORAGE_ROOT = Join-Path $env:RUNNER_TEMP 'lazarus-first-runtime-中文 验证'
+            $env:TEMP = Join-Path $env:RUNNER_TEMP '中文临时 目录'
+            $env:TMP = $env:TEMP
+            New-Item -ItemType Directory -Path $env:TEMP | Out-Null
+          }
           if (Test-Path -LiteralPath $env:LAZARUS_STORAGE_ROOT) { throw 'Storage root was not clean' }
           $setup = Start-Process -FilePath .\inputs\Lazarus-Agent-windows-x64-setup.exe -ArgumentList '/S' -WindowStyle Hidden -Wait -PassThru
           if ($setup.ExitCode -ne 0) { throw 'Installer failed' }
@@ -115,7 +127,7 @@ jobs:
             } finally {
               foreach ($name in $offlineRules) { Remove-NetFirewallRule -DisplayName $name }
             }
-            @{ duration_seconds=$clock.Elapsed.TotalSeconds; bytes=(Get-ChildItem -LiteralPath $runtime -Recurse -File | Measure-Object Length -Sum).Sum; platform='GitHub-hosted fresh Windows runner'; replay_exit=$replay.ExitCode } |
+            @{ duration_seconds=$clock.Elapsed.TotalSeconds; bytes=(Get-ChildItem -LiteralPath $runtime -Recurse -File | Measure-Object Length -Sum).Sum; platform='GitHub-hosted fresh Windows runner'; replay_exit=$replay.ExitCode; unicode_paths=$env:UNICODE_PATHS; storage=$env:LAZARUS_STORAGE_ROOT; temp=$env:TEMP } |
               ConvertTo-Json | Set-Content -Encoding utf8 evidence/summary.json
           } finally {
             Get-ChildItem -LiteralPath $env:LAZARUS_STORAGE_ROOT -Filter desktop.log -Recurse -ErrorAction SilentlyContinue | ForEach-Object { Copy-Item -LiteralPath $_.FullName evidence/desktop.log }

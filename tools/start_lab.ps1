@@ -17,7 +17,21 @@ function Use-AsciiPath([string]$OriginalPath, [switch]$CreateTarget) {
     if ($CreateTarget) { New-Item -ItemType Directory -Force -Path $OriginalPath | Out-Null }
     if ($OriginalPath -cmatch '^[\x00-\x7F]+$') { return $OriginalPath }
     $temp=[IO.Path]::GetTempPath()
-    if ($temp -cnotmatch '^[\x00-\x7F]+$') { throw 'Android emulator needs an ASCII temporary directory; set TEMP/TMP to an ASCII path before starting verification.' }
+    if ($temp -cnotmatch '^[\x00-\x7F]+$') {
+        $temp=$null
+        foreach ($candidate in @($env:REVIVER_TOOL_TEMP,'C:\Temp')) {
+            if (-not $candidate -or $candidate -cnotmatch '^[\x00-\x7F]+$') { continue }
+            try {
+                New-Item -ItemType Directory -Force -Path $candidate -ErrorAction Stop | Out-Null
+                $temp=[IO.Path]::GetFullPath($candidate)
+                break
+            } catch {}
+        }
+        if (-not $temp) { throw 'Choose a writable ASCII directory in REVIVER_TOOL_TEMP before starting verification.' }
+        # Only this helper and its emulator child use the tool-safe directory.
+        $env:TEMP=$temp
+        $env:TMP=$temp
+    }
     $bytes=[Text.Encoding]::UTF8.GetBytes($OriginalPath)
     $hash=([Security.Cryptography.SHA256]::Create().ComputeHash($bytes) | ForEach-Object { $_.ToString('x2') }) -join ''
     $bridgeRoot=Join-Path $temp 'Lazarus-Agent-sdk-links'
