@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "app_version": "0.6.15",
+  "release_source_commit": "781fb4bc035fff44f7c20d250636424c04c2a4ed",
+  "workflow": "https://github.com/RoamerFly/Lazarus-Agent/actions/runs/42064760984",
+  "workflow_source_commit": "37f543af17923ab0f59523bce349f34501659bd3",
+  "installer_sha256": "904e57c0af12a8b7bfb730dfd73defe4ad60388b1b14a4fa8b13406024186e05",
+  "runtime_preparation": {
+    "unicode_paths": "true",
+    "prepare_attempts": 1,
+    "bytes": 6265589783.0,
+    "temp": "D:\\a\\_temp\\中文临时 目录",
+    "check": "local-rule",
+    "replay_exit": null,
+    "duration_seconds": 56.0052692,
+    "verification_exit": 0,
+    "platform": "GitHub-hosted fresh Windows runner",
+    "storage": "D:\\a\\_temp\\lazarus-first-runtime-中文 验证"
+  },
+  "outbound_restriction": {
+    "outbound": "Internet blocked per executable, loopback retained",
+    "app": "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Lazarus Agent\\Lazarus-Agent.exe",
+    "check": "local-rule",
+    "programs": [
+      "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Lazarus Agent\\Lazarus-Agent.exe",
+      "D:\\a\\_temp\\lazarus-first-runtime-中文 验证\\runtimes\\android-lab\\java\\bin\\java.exe",
+      "D:\\a\\_temp\\lazarus-first-runtime-中文 验证\\runtimes\\android-lab\\lab-sdk\\platform-tools\\adb.exe",
+      "D:\\a\\_temp\\lazarus-first-runtime-中文 验证\\runtimes\\android-lab\\lab-sdk\\emulator\\emulator.exe"
+    ]
+  },
+  "local_rule": {
+    "rule": "installation-floor",
+    "level": "指定操作已验证",
+    "target": 36,
+    "installed_sha256": "c54122ef83b305f49d2c6ee4d1efb27bb922bf50fcc320a55c1ef16a61e17147",
+    "model_enabled": false,
+    "operation": "Open south route",
+    "downloaded_sha256": "c54122ef83b305f49d2c6ee4d1efb27bb922bf50fcc320a55c1ef16a61e17147",
+    "expected": "Inspect the pump seal"
+  },
+  "acceptance": {
+    "result": "passed",
+    "system_ui_waited": true,
+    "message": "操作后在目标应用内找到预期内容：Inspect the pump seal",
+    "evidence_folder": "probe-0598bdf9ce"
+  },
+  "patch": {
+    "rule": "installation-floor",
+    "rules": [
+      "installation-floor"
+    ],
+    "api": 36,
+    "before": 22,
+    "after": 24,
+    "candidate": "candidate.apk",
+    "sha256": "c54122ef83b305f49d2c6ee4d1efb27bb922bf50fcc320a55c1ef16a61e17147",
+    "runtime": "not-tested",
+    "source_sha256": "08ed16b9f6a149bd8063bae99dd72aad200dafea7d3a0504af004187bde20deb",
+    "isolation_experiment": false
+  },
+  "baseline": {
+    "api": 36,
+    "abis": [
+      "x86_64"
+    ],
+    "install": {
+      "exit": 1,
+      "output": "Performing Streamed Install\r\nadb.exe: failed to install original.apk: Failure [INSTALL_FAILED_DEPRECATED_SDK_VERSION: App package must target at least SDK version 24, but found 22]"
+    },
+    "file": "原包",
+    "time": "2026-11-05T16:33:19.690983+00:00",
+    "environment": "android-emulator"
+  },
+  "candidate": {
+    "api": 36,
+    "abis": [
+      "x86_64"
+    ],
+    "install": {
+      "exit": 0,
+      "output": "Performing Streamed Install\r\nSuccess"
+    },
+    "launch": {
+      "exit": 0,
+      "output": "Starting: Intent { cmp=org.ggbond.fieldroute/.RouteActivity }\r\nStatus: ok\r\nLaunchState: COLD\r\nActivity: org.ggbond.fieldroute/.RouteActivity\r\nTotalTime: 2429\r\nWaitTime: 2439\r\nComplete",
+      "focused_package": "org.ggbond.fieldroute"
+    },
+    "runtime": {
+      "pids": [
+        2005
+      ],
+      "evidence": "logcat-pid-scoped"
+    },
+    "file": "修复包",
+    "time": "2026-11-05T16:33:45.324548+00:00",
+    "environment": "android-emulator",
+    "functional_test": {
+      "result": "passed",
+      "system_ui_waited": true,
+      "message": "操作后在目标应用内找到预期内容：Inspect the pump seal",
+      "evidence_folder": "probe-0598bdf9ce"
+    }
+  },
+  "export": {
+    "file": "candidate.apk",
+    "level": "指定操作已验证",
+    "sha256": "c54122ef83b305f49d2c6ee4d1efb27bb922bf50fcc320a55c1ef16a61e17147",
+    "installed_sha256": "c54122ef83b305f49d2c6ee4d1efb27bb922bf50fcc320a55c1ef16a61e17147",
+    "verified_environment": {
+      "sdk": 36,
+      "supported_abis": [
+        "x86_64"
+      ],
+      "primary_cpu_abi": null,
+      "type": "android-emulator"
+    },
+    "signer_certificates_sha256": [
+      "6f19caebc6297cb8f741c8a8fce57219532b42b76aabf4b091f945afc93d40ee"
+    ]
+  },
+  "raw_report_sha256": "6ac04341e6974a91e4fa9f4101a68094ebdcb5533ad82ca936d97d11da77ccdb",
+  "window_evidence": {
+    "before-system-ui-wait.png": "1d4084cfef9608e88578176713382bbbdcee593dd846e98a604d38ee3a397a94",
+    "before-system-ui-wait.xml": "6e12dc5b9d827a3830ab22407f2f37290e3076ef8809073775efac44d16d763c",
+    "after.png": "2c770f43fd98e8649ea30f14d23b4bcb88bdf7d27c6e9e0a8d1780cf251ec207",
+    "after.xml": "9c308462b1d40ecd40e2bf718fd52a15a034f0731d5130384915c9e4686d7410"
+  }
+}

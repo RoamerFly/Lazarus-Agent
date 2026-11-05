@@ -229,8 +229,14 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
         for name in ("初赛复核说明.md", "fixtures/评审样本使用说明.md",
                      "docs/F01-参赛优化与验收计划.md", "docs/F01-试点与部署验收.md",
                      "docs/F01-答辩提纲.md", "docs/F01-交付验收清单.md",
-                     "docs/science-superpowers/preregistrations/2026-11-05-f01-apk-agent.md"):
+                     "docs/science-superpowers/preregistrations/2026-11-05-f01-apk-agent.md",
+                     "docs/science-superpowers/preregistrations/2026-11-06-f01-p1b.md"):
             copy(ROOT / name, kit / name)
+        window_evidence = Path("docs/validation") / f"{APP_VERSION}-local-rule-window"
+        for name in ("before-system-ui-wait.png", "before-system-ui-wait.xml", "after.png", "after.xml"):
+            path = window_evidence / name
+            if (ROOT / path).is_file():
+                copy(ROOT / path, kit / path)
         for name in ("f01-independent-acceptance.md", "f01-p1-results.json", "f01-p1-review.md",
                      "0.6.6-general-agent.md",
                      "0.6.7-independent-windows.md", "0.6.8-independent-windows.md",
@@ -253,12 +259,15 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                      "0.6.13-local-rule-observation.md", "0.6.13-local-rule-observation.json",
                      "0.6.13-independent-windows.md", "0.6.13-windows-proof.json",
                      "0.6.13-installer-check.md", "0.6.13-installer-check.json", "0.6.13-package-replay.md",
+                     "0.6.14-cold-start-observation.md", "0.6.14-cold-start-observation.json",
+                     "0.6.14-local-rule-windows.md", "0.6.14-local-rule-windows.json", "0.6.14-tool-paths-local.md",
                      f"{APP_VERSION}-live-demo.md", f"{APP_VERSION}-windows-proof.json",
                      f"{APP_VERSION}-independent-windows.md", f"{APP_VERSION}-installer-check.json",
                      f"{APP_VERSION}-installer-check.md", f"{APP_VERSION}-local-rule-windows.json",
                      f"{APP_VERSION}-local-rule-windows.md", f"{APP_VERSION}-tool-paths-local.md",
                      f"{APP_VERSION}-local-rule-observation.md", f"{APP_VERSION}-local-rule-observation.json",
-                     f"{APP_VERSION}-cold-start-observation.md", f"{APP_VERSION}-cold-start-observation.json"):
+                     f"{APP_VERSION}-cold-start-observation.md", f"{APP_VERSION}-cold-start-observation.json",
+                     f"{APP_VERSION}-source-replay.md", f"{APP_VERSION}-source-replay.json"):
             path = ROOT / "docs/validation" / name
             if path.is_file():
                 copy(path, kit / "docs/validation" / name)

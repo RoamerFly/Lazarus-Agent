@@ -120,6 +120,8 @@ def build():
         primary = json.loads(primary_path.read_text(encoding="utf-8"))
         primary_note = f"v0.6.10 对既有巡检主案例复跑 {primary['agent_passes']}/{primary['planned_agent']} 轮通过，按开发回归归档。"
     block("已完成的其他核验", primary_note + "工作台同一候选在 Android 14、15、16 上通过固定步骤，下载与设备安装哈希一致。真实历史应用 OI Notepad 完成两轮行为修改，设备记录和哈希链可复核。")
+    if (ROOT / "docs/science-superpowers/preregistrations/2026-11-06-f01-p1b.md").is_file():
+        story.append(para("第二批前瞻复验已冻结 42 轮，加入一项独立留出任务。结果单独归档。"))
     story.append(PageBreak())
 
     heading("部署与试点", "给复核人员一条可重复的路径")
@@ -132,9 +134,11 @@ def build():
         replay = json.loads(replay_path.read_text(encoding="utf-8"))
         preparation = replay["summary"]
         count = len(replay["acceptance"]["steps"])
-        replay_note = (f"v{APP_VERSION} 在含中文和空格的存储与 TEMP 下首次准备约 "
-                       f"{preparation['duration_seconds']:.0f} 秒，正式 EXE 通过巡检单 {count} 步复测。"
-                       f"运行后占用约 {preparation['bytes']/1024**3:.2f} GiB。")
+        runs = [replay, *(run for run in replay.get("repeat_runs", []) if run.get("pass"))]
+        durations = [run["summary"]["duration_seconds"] for run in runs]
+        times = f"{min(durations):.0f}" if len(runs) == 1 else f"{min(durations):.0f} 至 {max(durations):.0f}"
+        replay_note = (f"v{APP_VERSION} 干净 Windows 首次准备约 {times} 秒。"
+                       f"正式 EXE 的巡检单 {count} 步复测通过 {len(runs)} 轮，占用约 {preparation['bytes']/1024**3:.2f} GiB。")
     cold_path = validation / f"{APP_VERSION}-cold-start-observation.json"
     if cold_path.is_file():
         cold = json.loads(cold_path.read_text(encoding="utf-8"))

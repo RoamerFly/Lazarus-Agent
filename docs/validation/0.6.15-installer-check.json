@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "app_version": "0.6.15",
+  "release_source_commit": "781fb4bc035fff44f7c20d250636424c04c2a4ed",
+  "workflow": "https://github.com/RoamerFly/Lazarus-Agent/actions/runs/42064758605",
+  "workflow_source_commit": "37f543af17923ab0f59523bce349f34501659bd3",
+  "installed_exe_sha256": "c335fee7f79e294f01a15e578b21207360f590eebb5c4256aeea689c6faf8ba4",
+  "signature_verified": true,
+  "scope": "Official published installer, fresh Windows, input checks only; device behavior is separate",
+  "version": "0.6.15",
+  "input_check_exit": 0,
+  "self_test_exit": 0,
+  "installer_sha256": "904e57c0af12a8b7bfb730dfd73defe4ad60388b1b14a4fa8b13406024186e05",
+  "install_exit": 0,
+  "user_output_preserved": true,
+  "tampered_exit": 2,
+  "uninstall_exit": 0
+}
