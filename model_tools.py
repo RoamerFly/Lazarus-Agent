@@ -117,7 +117,7 @@ def _validate_config(config):
     return url, model
 
 
-def _request(url, payload, key, *, timeout=20):
+def _request(url, payload, key, *, timeout=20, observe_usage=None):
     headers = {"Content-Type": "application/json"}
     if key:
         headers["Authorization"] = "Bearer " + str(key)
@@ -128,6 +128,8 @@ def _request(url, payload, key, *, timeout=20):
         if len(body) > MAX_RESPONSE_BYTES:
             raise ModelToolError("模型响应超过大小限制")
         decoded = json.loads(body)
+        if observe_usage is not None:
+            observe_usage(decoded.get("usage"), decoded.get("model"), decoded.get("system_fingerprint"))
         choice = decoded["choices"][0]["message"]
         if not isinstance(choice, dict):
             raise ValueError("message")

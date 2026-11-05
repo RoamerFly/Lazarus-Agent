@@ -26,6 +26,7 @@ VARIANTS = {
     "pocket-list": ("pocket-list", "MainActivity.java", "pocket-list-en.apk"),
     "tea-timer": ("tea-timer", "MainActivity.java", "tea-timer-en.apk"),
     "reader": ("file-reader", "FileReaderActivity.java", "file-reader-forgets-selection.apk"),
+    "field-route": ("field-route", "RouteActivity.java", "field-route-legacy.apk"),
     "vault": ("file-reader-variant", "ChoiceVaultActivity.java", "memo-vault-forgets-selection.apk"),
 }
 

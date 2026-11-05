@@ -5,6 +5,7 @@ same-name, symbol-compatible payload at ``assets/libs/<abi>``.  It does not use
 any game code or third-party assets.  Its crash happens only after pressing the
 button; the control/patched APK reaches the ordinary success UI instead.
 """
+import argparse
 import os
 from pathlib import Path
 import shutil
@@ -100,4 +101,33 @@ def build():
         if mapped != expected: raise RuntimeError("fixture did not meet audited replacement-map contract: "+repr(mapped))
     print(broken); print(control)
 
-if __name__=="__main__": build()
+
+def build_unsupported_abi():
+    """Build the historical MIPS-only negative sample, with no replacement ABI."""
+    env = os.environ.copy()
+    jar = android_jar()
+    with tempfile.TemporaryDirectory() as work:
+        tmp = Path(work)
+        classes = tmp / "classes"
+        classes.mkdir()
+        run(["javac", "-encoding", "UTF-8", "-source", "8", "-target", "8", "-classpath", jar,
+             "-d", classes, SRC / "NativeProxyActivity.java"], env)
+        run([TOOLS / "d8.bat", "--min-api", "21", "--lib", jar, "--output", tmp,
+             *classes.rglob("*.class")], env)
+        base = tmp / "base.apk"
+        run([TOOLS / "aapt2.exe", "link", "-I", jar, "--manifest", SRC / "AndroidManifest.xml",
+             "-o", base], env)
+        library = tmp / "libnativeproxy.so"
+        native(PAYLOAD, library, "mipsel-linux-android21", library.name, tmp, env)
+        artifact = SRC / "native-proxy-mips-only.apk"
+        assemble(base, tmp / "classes.dex", {"mips": library}, {}, artifact, tmp, env)
+        print(artifact)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--unsupported-abi", action="store_true")
+    if parser.parse_args().unsupported_abi:
+        build_unsupported_abi()
+    else:
+        build()
