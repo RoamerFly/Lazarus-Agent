@@ -120,7 +120,15 @@ def build():
         primary = json.loads(primary_path.read_text(encoding="utf-8"))
         primary_note = f"v0.6.10 对既有巡检主案例复跑 {primary['agent_passes']}/{primary['planned_agent']} 轮通过，按开发回归归档。"
     block("已完成的其他核验", primary_note + "工作台同一候选在 Android 14、15、16 上通过固定步骤，下载与设备安装哈希一致。真实历史应用 OI Notepad 完成两轮行为修改，设备记录和哈希链可复核。")
-    if (ROOT / "docs/science-superpowers/preregistrations/2026-11-06-f01-p1b.md").is_file():
+    p1b_path = ROOT / "docs/validation/f01-p1b/results.json"
+    if p1b_path.is_file():
+        p1b = json.loads(p1b_path.read_text(encoding="utf-8"))
+        counts = p1b["counts"]
+        gate = "达到" if p1b["joint_gate"] else "未达到"
+        story.append(para(f"P1B 正例 {counts['agent_positives']}/18，主案例 {counts['primary']}/3，"
+                          f"反例拒绝 {counts['agent_negative_rejected']}/6，错误验收 {counts['agent_false_acceptances']}/6，"
+                          f"独立留出任务 {p1b['held_out_passes']}/3。{gate}该批联合门槛。"))
+    elif (ROOT / "docs/science-superpowers/preregistrations/2026-11-06-f01-p1b.md").is_file():
         story.append(para("第二批前瞻复验已冻结 42 轮，加入一项独立留出任务。结果单独归档。"))
     story.append(PageBreak())
 
