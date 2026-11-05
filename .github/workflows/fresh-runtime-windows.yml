@@ -136,8 +136,11 @@ jobs:
       - name: Preserve emulator diagnostics
         if: always()
         shell: pwsh
+        env:
+          UNICODE_PATHS: ${{ inputs.unicode_paths }}
         run: |
           $runtime = Join-Path $env:RUNNER_TEMP 'lazarus-first-runtime\runtimes\android-lab'
+          if ($env:UNICODE_PATHS -eq 'true') { $runtime = Join-Path $env:RUNNER_TEMP 'lazarus-first-runtime-中文 验证\runtimes\android-lab' }
           if (Test-Path -LiteralPath $runtime) {
             Get-ChildItem -LiteralPath $runtime -File | Where-Object { $_.Name -match '\.(stdout|stderr)$' } | ForEach-Object {
               Copy-Item -LiteralPath $_.FullName (Join-Path evidence $_.Name)

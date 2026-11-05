@@ -1,0 +1,634 @@
+{
+  "counts": {
+    "agent_positives": 16,
+    "primary": 3,
+    "agent_negative_rejected": 6,
+    "agent_false_acceptances": 0,
+    "unobserved": 1,
+    "majority_agent_cases": 6,
+    "roundtrip_positive_cases": 0,
+    "rules_positive_cases": 2,
+    "one-build_positive_cases": 5
+  },
+  "rows": [
+    {
+      "case": "P01",
+      "class": "positive",
+      "mode": "roundtrip",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 70.176,
+      "build_attempts": 1,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null
+    },
+    {
+      "case": "P01",
+      "class": "positive",
+      "mode": "rules",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 24.011,
+      "build_attempts": 1,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null
+    },
+    {
+      "case": "P01",
+      "class": "positive",
+      "mode": "one-build",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 28.927,
+      "build_attempts": 1,
+      "model_requests_with_usage": 11,
+      "model_price_usd_range": [
+        0.00362426,
+        0.00724853
+      ]
+    },
+    {
+      "case": "P01",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 103.419,
+      "build_attempts": 1,
+      "model_requests_with_usage": 17,
+      "model_price_usd_range": [
+        0.00475678,
+        0.00951356
+      ]
+    },
+    {
+      "case": "P01",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 2,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 102.777,
+      "build_attempts": 1,
+      "model_requests_with_usage": 18,
+      "model_price_usd_range": [
+        0.00497181,
+        0.00994362
+      ]
+    },
+    {
+      "case": "P01",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 3,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 86.488,
+      "build_attempts": 1,
+      "model_requests_with_usage": 14,
+      "model_price_usd_range": [
+        0.00399053,
+        0.00798106
+      ]
+    },
+    {
+      "case": "P02",
+      "class": "positive",
+      "mode": "roundtrip",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 96.216,
+      "build_attempts": 1,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null
+    },
+    {
+      "case": "P02",
+      "class": "positive",
+      "mode": "rules",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 39.222,
+      "build_attempts": 1,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null
+    },
+    {
+      "case": "P02",
+      "class": "positive",
+      "mode": "one-build",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 87.477,
+      "build_attempts": 1,
+      "model_requests_with_usage": 12,
+      "model_price_usd_range": [
+        0.00667416,
+        0.01334832
+      ]
+    },
+    {
+      "case": "P02",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 140.675,
+      "build_attempts": 5,
+      "model_requests_with_usage": 31,
+      "model_price_usd_range": [
+        0.01184207,
+        0.02368414
+      ]
+    },
+    {
+      "case": "P02",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 2,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 87.99,
+      "build_attempts": 1,
+      "model_requests_with_usage": 15,
+      "model_price_usd_range": [
+        0.00467009,
+        0.00934018
+      ]
+    },
+    {
+      "case": "P02",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 3,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 115.292,
+      "build_attempts": 1,
+      "model_requests_with_usage": 18,
+      "model_price_usd_range": [
+        0.0081937,
+        0.0163874
+      ]
+    },
+    {
+      "case": "P03",
+      "class": "positive",
+      "mode": "roundtrip",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 16.681,
+      "build_attempts": 1,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null
+    },
+    {
+      "case": "P03",
+      "class": "positive",
+      "mode": "rules",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 0.007,
+      "build_attempts": 0,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null
+    },
+    {
+      "case": "P03",
+      "class": "positive",
+      "mode": "one-build",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 35.33,
+      "build_attempts": 1,
+      "model_requests_with_usage": 5,
+      "model_price_usd_range": [
+        0.00132935,
+        0.00265871
+      ]
+    },
+    {
+      "case": "P03",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 59.088,
+      "build_attempts": 1,
+      "model_requests_with_usage": 11,
+      "model_price_usd_range": [
+        0.00207492,
+        0.00414984
+      ]
+    },
+    {
+      "case": "P03",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 2,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 56.438,
+      "build_attempts": 1,
+      "model_requests_with_usage": 9,
+      "model_price_usd_range": [
+        0.00184481,
+        0.00368962
+      ]
+    },
+    {
+      "case": "P03",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 3,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 58.282,
+      "build_attempts": 1,
+      "model_requests_with_usage": 9,
+      "model_price_usd_range": [
+        0.00197545,
+        0.0039509
+      ]
+    },
+    {
+      "case": "P04",
+      "class": "positive",
+      "mode": "roundtrip",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 16.617,
+      "build_attempts": 1,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null
+    },
+    {
+      "case": "P04",
+      "class": "positive",
+      "mode": "rules",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 0.001,
+      "build_attempts": 0,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null
+    },
+    {
+      "case": "P04",
+      "class": "positive",
+      "mode": "one-build",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 35.781,
+      "build_attempts": 1,
+      "model_requests_with_usage": 5,
+      "model_price_usd_range": [
+        0.00118173,
+        0.00236346
+      ]
+    },
+    {
+      "case": "P04",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 55.886,
+      "build_attempts": 1,
+      "model_requests_with_usage": 10,
+      "model_price_usd_range": [
+        0.00160307,
+        0.00320615
+      ]
+    },
+    {
+      "case": "P04",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 2,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 51.153,
+      "build_attempts": 1,
+      "model_requests_with_usage": 8,
+      "model_price_usd_range": [
+        0.00132994,
+        0.00265987
+      ]
+    },
+    {
+      "case": "P04",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 3,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 52.76,
+      "build_attempts": 1,
+      "model_requests_with_usage": 8,
+      "model_price_usd_range": [
+        0.00127151,
+        0.00254303
+      ]
+    },
+    {
+      "case": "P05",
+      "class": "positive",
+      "mode": "roundtrip",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 29.053,
+      "build_attempts": 1,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null
+    },
+    {
+      "case": "P05",
+      "class": "positive",
+      "mode": "rules",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 38.177,
+      "build_attempts": 1,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null
+    },
+    {
+      "case": "P05",
+      "class": "positive",
+      "mode": "one-build",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 55.645,
+      "build_attempts": 1,
+      "model_requests_with_usage": 7,
+      "model_price_usd_range": [
+        0.00197582,
+        0.00395165
+      ]
+    },
+    {
+      "case": "P05",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 92.437,
+      "build_attempts": 1,
+      "model_requests_with_usage": 14,
+      "model_price_usd_range": [
+        0.00352529,
+        0.00705059
+      ]
+    },
+    {
+      "case": "P05",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 2,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 90.877,
+      "build_attempts": 1,
+      "model_requests_with_usage": 13,
+      "model_price_usd_range": [
+        0.00351361,
+        0.00702721
+      ]
+    },
+    {
+      "case": "P05",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 3,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 89.155,
+      "build_attempts": 1,
+      "model_requests_with_usage": 14,
+      "model_price_usd_range": [
+        0.00328354,
+        0.00656707
+      ]
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "roundtrip",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 3.656,
+      "build_attempts": 1,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "rules",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 0.001,
+      "build_attempts": 0,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "one-build",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 79.315,
+      "build_attempts": 1,
+      "model_requests_with_usage": 10,
+      "model_price_usd_range": [
+        0.00598309,
+        0.01196617
+      ]
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 149.038,
+      "build_attempts": 1,
+      "model_requests_with_usage": 22,
+      "model_price_usd_range": [
+        0.01128713,
+        0.02257427
+      ]
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 2,
+      "state": "unobserved",
+      "started": true,
+      "duration_seconds": 287.834,
+      "build_attempts": 2,
+      "model_requests_with_usage": 40,
+      "model_price_usd_range": [
+        0.02614276,
+        0.05228551
+      ]
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 3,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 106.773,
+      "build_attempts": 1,
+      "model_requests_with_usage": 16,
+      "model_price_usd_range": [
+        0.00770626,
+        0.01541252
+      ]
+    },
+    {
+      "case": "N01",
+      "class": "negative",
+      "mode": "agent",
+      "repeat": 1,
+      "state": "rejected",
+      "started": true,
+      "duration_seconds": 43.259,
+      "build_attempts": 2,
+      "model_requests_with_usage": 10,
+      "model_price_usd_range": [
+        0.00378947,
+        0.00757895
+      ]
+    },
+    {
+      "case": "N01",
+      "class": "negative",
+      "mode": "agent",
+      "repeat": 2,
+      "state": "rejected",
+      "started": true,
+      "duration_seconds": 79.713,
+      "build_attempts": 4,
+      "model_requests_with_usage": 21,
+      "model_price_usd_range": [
+        0.00625607,
+        0.01251215
+      ]
+    },
+    {
+      "case": "N02",
+      "class": "negative",
+      "mode": "agent",
+      "repeat": 1,
+      "state": "rejected",
+      "started": true,
+      "duration_seconds": 22.279,
+      "build_attempts": 0,
+      "model_requests_with_usage": 5,
+      "model_price_usd_range": [
+        0.00138547,
+        0.00277093
+      ]
+    },
+    {
+      "case": "N02",
+      "class": "negative",
+      "mode": "agent",
+      "repeat": 2,
+      "state": "rejected",
+      "started": true,
+      "duration_seconds": 22.797,
+      "build_attempts": 0,
+      "model_requests_with_usage": 5,
+      "model_price_usd_range": [
+        0.00143323,
+        0.00286646
+      ]
+    },
+    {
+      "case": "N03",
+      "class": "negative",
+      "mode": "agent",
+      "repeat": 1,
+      "state": "rejected",
+      "started": true,
+      "duration_seconds": 51.684,
+      "build_attempts": 1,
+      "model_requests_with_usage": 10,
+      "model_price_usd_range": [
+        0.00165992,
+        0.00331984
+      ]
+    },
+    {
+      "case": "N03",
+      "class": "negative",
+      "mode": "agent",
+      "repeat": 2,
+      "state": "rejected",
+      "started": true,
+      "duration_seconds": 62.003,
+      "build_attempts": 1,
+      "model_requests_with_usage": 9,
+      "model_price_usd_range": [
+        0.00271041,
+        0.00542083
+      ]
+    }
+  ],
+  "schema": 1,
+  "app_version": "0.6.8",
+  "implementation_commit": "eb1be7c",
+  "evaluation_role": "Development regression on the previously observed fixed cases",
+  "terminal_trials": 42,
+  "planned_trials": 42,
+  "missing_terminal_trials": 0,
+  "model_budget_failure": "P06-agent-2 reached 40 model rounds with 52 recorded tool calls and no final candidate",
+  "automatic_unobserved_explanation": "One terminal model-budget failure lacks an independently published candidate. It remains in the planned denominator.",
+  "developer_diff_review": {
+    "reviewer": "AI-assisted development review",
+    "reviewed_passed_agent_trials": 16,
+    "deductions": 0,
+    "scope": "Fixed steps, source changes and manifest deltas. No external-intent security certification."
+  },
+  "core_engineering_gate_passed": true,
+  "recorded_model_responses": 397,
+  "system_fingerprints": [
+    "bc19ba97cbe016479903222bb1578db6"
+  ],
+  "estimated_recorded_model_cost_usd_range": [
+    0.14198626,
+    0.28397253
+  ],
+  "scope": "API 36 private x86_64 AVD. The original frozen batch is retained separately."
+}
