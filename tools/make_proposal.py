@@ -155,9 +155,15 @@ def build(output=OUT):
     if regression_path.is_file():
         regression = json.loads(regression_path.read_text(encoding="utf-8"))
         counts = regression["counts"]
+        review_path = regression_path.with_name("diff-review.json")
+        decisions = json.loads(review_path.read_text(encoding="utf-8"))["rows"]
+        approved = {row["trial"] for row in decisions if row["distributable"]}
+        accepted = sum(row["mode"] == "agent" and row["trial"] in approved for row in regression["rows"])
         story.append(para(f"v{APP_VERSION} 在已见用例上完成 {regression['terminal_trials']}/42 轮开发回归。"
-                          f"正例 {counts['agent_positives']}/18，主案例 {counts['primary']}/3，"
+                          f"设备断言通过 {counts['agent_positives']}/18 个正例，语义复核通过 {accepted}/18。"
                           f"反例拒绝 {counts['agent_negative_rejected']}/6，误验收 {counts['agent_false_acceptances']}/6。", tiny))
+        if accepted < 15:
+            story.append(para("正例语义复核未达到 15/18 的内部门槛，本版保留为工程候选。", tiny))
     else:
         story.append(para("已见任务另有全组开发回归和主案例回归。同一候选在 Android 14、15、16 上通过固定步骤。OI Notepad 的两轮修改有独立哈希链。", tiny))
     story.append(PageBreak())
