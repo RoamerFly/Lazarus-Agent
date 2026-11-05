@@ -251,7 +251,7 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                      f"{APP_VERSION}-live-demo.md", f"{APP_VERSION}-windows-proof.json",
                      f"{APP_VERSION}-independent-windows.md", f"{APP_VERSION}-installer-check.json",
                      f"{APP_VERSION}-installer-check.md", f"{APP_VERSION}-local-rule-windows.json",
-                     f"{APP_VERSION}-local-rule-windows.md"):
+                     f"{APP_VERSION}-local-rule-windows.md", f"{APP_VERSION}-tool-paths-local.md"):
             path = ROOT / "docs/validation" / name
             if path.is_file():
                 copy(path, kit / "docs/validation" / name)
