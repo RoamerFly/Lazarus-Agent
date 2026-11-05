@@ -51,6 +51,13 @@ class AgentDevice:
         except ET.ParseError as exc:
             raise ValueError("设备返回的界面树无效") from exc
 
+    def window_context(self):
+        self.device.check(self.owner)
+        windows = bench_device.shell(self.serial, "dumpsys", "window", "displays", timeout=12)
+        markers = ("mCurrentFocus=", "mFocusedApp=", "mShowingLockscreen=", "mObscuringWindow=")
+        return {"display_fields": [line.strip()[:280] for line in windows.splitlines()
+                                  if line.strip().startswith(markers)][:12]}
+
     def observe(self):
         tree = self.tree()
         nodes = [{key: node.get(key, "")[:300] for key in

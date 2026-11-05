@@ -8,7 +8,7 @@ on:
       version:
         description: SemVer without v (must equal app_version.py)
         required: true
-        default: '0.6.14'
+        default: '0.6.15'
       publish:
         description: Create/update GitHub Release
         required: true
@@ -103,6 +103,9 @@ jobs:
           }
           if ($tag -eq 'v0.6.14') {
             $notes = "本地规则验收在专用模拟器遇到 Android System UI 无响应提示时等待一次，再重新读取界面。指定操作仍须由目标应用的新界面树证明。报告保留系统提示及复测结果。" + [Environment]::NewLine + [Environment]::NewLine + $notes
+          }
+          if ($tag -eq 'v0.6.15') {
+            $notes = "独立验收记录阻挡应用的系统窗口和恢复动作。冷启动须重新读到目标应用页面才通过。对话任务进入终态后清除上一轮处理提示。" + [Environment]::NewLine + [Environment]::NewLine + $notes
           }
           if ($tag -eq 'v0.6.5') {
             $notes = "修复对话新增页面方向改造。启用模型后，可用一句话指定横屏、竖屏或跟随系统，模型会读取页面清单并调用本地工具生成签名候选。" + [Environment]::NewLine + [Environment]::NewLine + $notes

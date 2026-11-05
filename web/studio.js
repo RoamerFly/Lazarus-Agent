@@ -1,6 +1,7 @@
 const el=id=>document.getElementById(id);
 let config, job=null, sending=false, screenBusy=false, polling=false;
 let askUi, runtimeUi, modificationUi;
+const PROCESSING_NOTICE="正在处理，进度和结果会显示在对话中。";
 function notice(s){el("notice").textContent=s;}
 async function api(url,method="GET",body=null){
   const headers={};
@@ -171,8 +172,15 @@ el("send").onclick=()=>sendInput({event:"text",value:el("text").value});
   const old=localStorage.getItem("reviverJob");if(old){try{job=await api("/api/jobs/"+old);restoreScope(job);}catch{localStorage.removeItem("reviverJob");}}
   render();
 }catch(e){notice(e.message);}})();
-setInterval(async()=>{if(!job||sending||polling)return;polling=true;const id=job.id;
-  try{const next=await api(path(""));if(job?.id===id){job=next;render();}}catch(e){notice(e.message);}finally{polling=false;}
+setInterval(async()=>{if(!job||sending||polling)return;polling=true;const current=job;
+  try{
+    const next=await api(path(""));
+    if(job===current&&!sending){
+      job=next;
+      if(job.status!=="running"&&el("notice").textContent===PROCESSING_NOTICE)notice("");
+      render();
+    }
+  }catch(e){if(job===current&&!sending)notice(e.message);}finally{polling=false;}
 },1400);
 let lastPreview=0;
 setInterval(()=>{
@@ -307,7 +315,7 @@ async function feedback(kind){
     if(kind==="issue"&&!body.attachment)body.targets=selectedTargets();
     job=await api(path("/message"),"POST",JSON.stringify(body));
     el("message").value="";el("attachment").value="";el("attachmentName").textContent="";
-    notice(job.status==="running"?"正在处理，进度和结果会显示在对话中。":kind==="issue"?"反馈已保存，可继续修复。":"真机复测结果已保存。");
+    notice(job.status==="running"?PROCESSING_NOTICE:kind==="issue"?"反馈已保存，可继续修复。":"真机复测结果已保存。");
   }catch(e){notice(e.message);}finally{sending=false;render();}
 }
 el("toModification").onclick=()=>{

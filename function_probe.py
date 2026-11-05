@@ -8,6 +8,7 @@ import struct
 from zipfile import BadZipFile, ZipFile
 
 from bench_device import ADB, invoke, output, shell
+from android_dialog import system_dialog
 
 
 # These names are platform libraries.  A repair is offered only for the exact
@@ -225,14 +226,11 @@ def probe(serial,pkg,task,dest):
         return ET.fromstring(xml)
     def is_match(node,value):
         return value in (node.get("text"),node.get("content-desc"),node.get("resource-id"))
-    def tap(node):
-        bounds=list(map(int,re.findall(r"\d+",node.get("bounds",""))))
+    def tap(bounds_text):
+        bounds=list(map(int,re.findall(r"\d+",bounds_text)))
         if len(bounds)!=4 or bounds[0]>=bounds[2] or bounds[1]>=bounds[3]:
             raise ValueError("控件位置无效")
         shell(serial,"input","tap",str((bounds[0]+bounds[2])//2),str((bounds[1]+bounds[3])//2),timeout=10)
-    compatibility_notices=("This app was built for an older version of Android",
-                           "This app isn't compatible with the latest version of Android.")
-
     def observe(label, value):
         nonlocal waited_for_system_ui
         deadline = time.monotonic() + 25
@@ -243,26 +241,21 @@ def probe(serial,pkg,task,dest):
             except (ET.ParseError, RuntimeError, subprocess.TimeoutExpired) as exc:
                 (dest/(label+"-observation.txt")).write_text(str(exc)[-500:],encoding="utf-8")
             else:
-                system = {n.get("resource-id"): n for n in tree.iter("node") if n.get("package")=="android"}
-                title = system.get("android:id/alertTitle")
-                wait = system.get("android:id/aerr_wait")
-                message = system.get("android:id/message")
-                ok = system.get("android:id/button1")
-                if wait is not None:
-                    if (waited_for_system_ui or title is None or
-                            title.get("text") != "System UI isn't responding" or wait.get("text") != "Wait"):
+                dialog, button, _ = system_dialog(tree)
+                if dialog in ("system-ui-anr", "other-anr"):
+                    if waited_for_system_ui or dialog != "system-ui-anr":
                         return None
                     # This probe runs on a disposable lab device. Leave other ANRs for diagnosis.
                     for suffix in (".xml", ".png"):
                         evidence = dest/(next_label+suffix)
                         if evidence.is_file():
                             evidence.replace(dest/(label+"-system-ui-wait"+suffix))
-                    tap(wait)
+                    tap(button["bounds"])
                     waited_for_system_ui = True
-                elif (label == "before" and next_label == "before" and message is not None
-                      and message.get("text","").startswith(compatibility_notices)
-                      and ok is not None and ok.get("text") == "OK"):
-                    tap(ok)
+                elif dialog == "legacy-target-notice":
+                    if label != "before" or next_label != "before":
+                        return None
+                    tap(button["bounds"])
                     next_label = "after-legacy-notice"
                 else:
                     matches = [n for n in tree.iter("node") if n.get("package")==pkg and is_match(n,value)]
@@ -281,7 +274,7 @@ def probe(serial,pkg,task,dest):
     owner=re.findall(r"(?m)^\s*ACTIVITY "+re.escape(pkg)+r"/\S+ [^\r\n]*?\bpid=(\d+)",activities)
     # Only clear the crash buffer on our private lab AVD before this individual action.
     invoke([ADB,"-s",serial,"logcat","-b","crash","-c"])
-    tap(node)
+    tap(node.get("bounds",""))
     time.sleep(1)
     after=observe("after",task["expect"])
     pid_filter=["--pid",owner[-1]] if owner else []

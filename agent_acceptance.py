@@ -2,9 +2,11 @@
 import re
 import subprocess
 import time
+from collections import Counter
 
 import bench_device
 from agent_workspace import digest_file
+from android_dialog import system_dialog
 
 
 OPERANDS = {"tap": "value", "expect": "value", "absent": "value", "input": "value",
@@ -64,25 +66,31 @@ def _tap(tester, bounds):
     time.sleep(.6)
 
 
-def _read(tester):
-    tree = tester.tree()
-    nodes = _snapshot(tree, tester.facts["package"])
-    if nodes:
-        return nodes
-    # Only dismiss the Android system's legacy-target notice. An app's
-    # onboarding or consent stays part of the explicitly supplied replay.
-    system = _snapshot(tree, "android")
-    notice = next((n for n in system if n["resource-id"] == "android:id/message"), None)
-    ok = [n for n in system if n["resource-id"] == "android:id/button1" and n["text"] == "OK"]
-    if notice and len(ok) == 1 and notice["text"].startswith((
-            "This app was built for an older version of Android",
-            "This app isn't compatible with the latest version of Android.")):
-        _tap(tester, ok[0]["bounds"])
-        return _snapshot(tester.tree(), tester.facts["package"])
-    return nodes
+def _read(tester, handled, observations):
+    # The two recognized system dialogs can each be handled once per install.
+    for _ in range(3):
+        tree = tester.tree()
+        nodes = _snapshot(tree, tester.facts["package"])
+        dialog, button, title = system_dialog(tree)
+        frame = {"target_nodes": len(nodes)}
+        if not nodes or dialog:
+            owners = Counter(n.get("package")[:160] for n in tree.iter("node") if n.get("package"))
+            frame["window_owners"] = dict(owners.most_common(8))
+        observations.append(frame)
+        if not dialog:
+            return nodes
+        frame["system_dialog"] = dialog
+        if title:
+            frame["dialog_title"] = title
+        if not button or dialog in handled:
+            return []
+        handled.add(dialog)
+        _tap(tester, button["bounds"])
+        frame["dialog_action"] = "wait" if dialog == "system-ui-anr" else "acknowledge"
+    return []
 
 
-def _wait_for_launch_ui(tester, row):
+def _wait_for_launch_ui(tester, row, handled):
     # am start -W can finish before the first accessibility frame appears on
     # a newly booted, busy emulator. Observe again without relaunching the app
     # or accepting a successful command as proof that its UI was displayed.
@@ -90,25 +98,35 @@ def _wait_for_launch_ui(tester, row):
     observations = row["launch_observations"] = []
     for attempt in range(8):
         try:
-            nodes = _read(tester)
-            observations.append({"target_nodes": len(nodes)})
-            if nodes:
+            if _read(tester, handled, observations):
                 return True
+            if observations[-1].get("system_dialog") == "other-anr":
+                break
         except DEVICE_ERRORS as exc:
             observations.append({"error": str(exc)[-500:]})
         if attempt == 7 or time.monotonic() >= deadline:
             break
         time.sleep(1.5)
+    try:
+        row["launch_window"] = tester.window_context()
+    except DEVICE_ERRORS as exc:
+        row["launch_window"] = {"error": str(exc)[-500:]}
     return False
 
 
-def _step(tester, step, row):
+def _step(tester, step, row, handled):
     action, value = step["action"], step.get("value")
     tester.device.check(tester.owner)
-    if action in {"tap", "expect", "absent"}:
-        nodes = _read(tester)
+    if action in {"tap", "expect", "absent", "input", "back"}:
+        frames = []
+        try:
+            nodes = _read(tester, handled, frames)
+        finally:
+            if len(frames) != 1 or any(not f["target_nodes"] or "system_dialog" in f for f in frames):
+                row["window_observations"] = frames
         if not nodes:
             raise ValueError("当前页面未观察到目标应用控件")
+    if action in {"tap", "expect", "absent"}:
         matches = _matches(nodes, value)
         row.update(matches=matches[:8], match_count=len(matches), observed=nodes[:24])
         if action == "tap":
@@ -118,12 +136,8 @@ def _step(tester, step, row):
         elif bool(matches) != (action == "expect"):
             raise ValueError("未观察到预期界面状态")
     elif action == "input":
-        if not _read(tester):
-            raise ValueError("当前页面未观察到目标应用控件")
         bench_device.shell(tester.serial, "input", "text", value.replace(" ", "%s"))
     elif action == "back":
-        if not _read(tester):
-            raise ValueError("当前页面未观察到目标应用控件")
         bench_device.shell(tester.serial, "input", "keyevent", "4")
     else:
         package, launcher = tester.facts["package"], tester.facts["launcher"]
@@ -131,6 +145,8 @@ def _step(tester, step, row):
         launch = bench_device.shell(tester.serial, "am", "start", "-W", "-n", f"{package}/{launcher}")
         if not re.search(r"(?m)^Status: ok\s*$", launch):
             raise ValueError("冷启动未成功")
+        if not _wait_for_launch_ui(tester, row, handled):
+            raise ValueError("冷启动返回成功，但未观察到目标应用页面")
 
 
 def _observe(tester, apk, expected_hash, steps):
@@ -150,14 +166,15 @@ def _observe(tester, apk, expected_hash, steps):
         if launch.get("exit") != 0 or not re.search(r"(?m)^Status: ok\s*$", launch.get("output", "")):
             row["launch"] = "failed"
             return row
-        if not _wait_for_launch_ui(tester, row):
+        handled = set()
+        if not _wait_for_launch_ui(tester, row, handled):
             row["launch"] = "failed"
             raise ValueError("启动返回成功，但未观察到目标应用页面")
         row["launch"] = "passed"
         for step in steps:
             entry = {**step, "status": "failed"}
             row["steps"].append(entry)
-            _step(tester, step, entry)
+            _step(tester, step, entry, handled)
             entry["status"] = "passed"
         row["function"] = "passed" if steps else "not-requested"
     except DEVICE_ERRORS as exc:

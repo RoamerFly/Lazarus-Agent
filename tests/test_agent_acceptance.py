@@ -6,7 +6,7 @@ import unittest
 from unittest.mock import Mock, patch
 import xml.etree.ElementTree as ET
 
-from agent_acceptance import _wait_for_launch_ui, parse_steps, verify, verified_for
+from agent_acceptance import _step, _wait_for_launch_ui, parse_steps, verify, verified_for
 
 
 def screen(package, text):
@@ -16,27 +16,72 @@ def screen(package, text):
     return root
 
 
+def dialog_screen(package="android", title="System UI isn't responding"):
+    root = screen("example.app", "Background target")
+    ET.SubElement(root, "node", {"package": package, "text": title, "resource-id": "android:id/alertTitle"})
+    ET.SubElement(root, "node", {"package": package, "text": "Wait", "resource-id": "android:id/aerr_wait",
+                                 "bounds": "[0,40][40,60]"})
+    return root
+
+
 class AcceptanceTests(unittest.TestCase):
     def test_launch_wait_requires_observed_target_ui(self):
         tester = SimpleNamespace(facts={"package": "example.app"},
                                  tree=Mock(side_effect=[screen("other.app", "Loading"),
-                                                        screen("example.app", "Ready")]))
+                                                        screen("example.app", "Ready")]),
+                                 window_context=Mock(return_value={"display_fields": ["mCurrentFocus=null"]}))
         row = {}
         with patch("agent_acceptance.time.sleep"):
-            self.assertTrue(_wait_for_launch_ui(tester, row))
+            self.assertTrue(_wait_for_launch_ui(tester, row, set()))
         self.assertEqual([r["target_nodes"] for r in row["launch_observations"]], [0, 2])
+        self.assertEqual(row["launch_observations"][0]["window_owners"], {"other.app": 2})
         tester.tree = Mock(return_value=screen("other.app", "Ready"))
         with patch("agent_acceptance.time.sleep"):
-            self.assertFalse(_wait_for_launch_ui(tester, {}))
+            self.assertFalse(_wait_for_launch_ui(tester, row, set()))
         self.assertEqual(tester.tree.call_count, 8)
+        self.assertEqual(row["launch_window"], {"display_fields": ["mCurrentFocus=null"]})
 
     def test_launch_wait_records_transient_tree_failure(self):
         tester = SimpleNamespace(facts={"package": "example.app"},
                                  tree=Mock(side_effect=[ValueError("界面树无效"), screen("example.app", "Ready")]))
         row = {}
         with patch("agent_acceptance.time.sleep"):
-            self.assertTrue(_wait_for_launch_ui(tester, row))
+            self.assertTrue(_wait_for_launch_ui(tester, row, set()))
         self.assertIn("error", row["launch_observations"][0])
+
+    def test_system_wait_records_blocker_then_requires_new_target_frame(self):
+        tester = SimpleNamespace(facts={"package": "example.app"}, serial="test",
+                                 tree=Mock(side_effect=[dialog_screen(), screen("example.app", "Ready")]))
+        row = {}
+        with patch("agent_acceptance.bench_device.shell") as shell, patch("agent_acceptance.time.sleep"):
+            self.assertTrue(_wait_for_launch_ui(tester, row, set()))
+        shell.assert_called_once_with("test", "input", "tap", "20", "50")
+        blocked, ready = row["launch_observations"]
+        self.assertEqual(blocked["system_dialog"], "system-ui-anr")
+        self.assertEqual(blocked["dialog_title"], "System UI isn't responding")
+        self.assertEqual(blocked["dialog_action"], "wait")
+        self.assertNotIn("system_dialog", ready)
+
+    def test_anr_in_front_of_app_never_counts_as_launch(self):
+        tester = SimpleNamespace(facts={"package": "example.app"}, serial="test",
+                                 tree=Mock(return_value=dialog_screen(title="Example isn't responding")),
+                                 window_context=Mock(return_value={"display_fields": []}))
+        row = {}
+        with patch("agent_acceptance.bench_device.shell") as shell:
+            self.assertFalse(_wait_for_launch_ui(tester, row, set()))
+        shell.assert_not_called()
+        self.assertEqual(row["launch_observations"][0]["system_dialog"], "other-anr")
+
+    def test_cold_start_step_preserves_evidence_when_system_prompt_persists(self):
+        tester = SimpleNamespace(facts={"package": "example.app", "launcher": ".Main"}, serial="test",
+                                 device=Mock(), owner="job", tree=Mock(return_value=dialog_screen()),
+                                 window_context=Mock(return_value={"display_fields": []}))
+        row = {}
+        with patch("agent_acceptance.bench_device.shell", return_value="Status: ok") as shell, patch("agent_acceptance.time.sleep"):
+            with self.assertRaisesRegex(ValueError, "未观察到目标应用页面"):
+                _step(tester, {"action": "cold_start"}, row, {"system-ui-anr"})
+        self.assertEqual([call.args[1] for call in shell.call_args_list], ["am", "am"])
+        self.assertTrue(all(frame["system_dialog"] == "system-ui-anr" for frame in row["launch_observations"]))
 
     def test_replay_rejects_plan_without_positive_assertion(self):
         with self.assertRaisesRegex(ValueError, "预期"):
