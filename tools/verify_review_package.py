@@ -33,7 +33,7 @@ def verify(path):
                     raise ValueError("文件哈希不一致：" + name)
         samples = []
         for name in names:
-            if name.startswith("可分发样本/") and name.endswith("/agent-acceptance.json"):
+            if "可分发样本" in PurePosixPath(name).parts and name.endswith("/agent-acceptance.json"):
                 folder = name.rsplit("/", 1)[0]
                 report = json.loads(archive.read(name))
                 source = hashlib.sha256(archive.read(folder + "/base.apk")).hexdigest()

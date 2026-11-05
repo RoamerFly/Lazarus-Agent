@@ -106,7 +106,7 @@ Write-Output "校验通过。请打开 $target 安装 Lazarus Agent {APP_VERSION
 '''
 
 
-def build(results, release_dir, output, capture_dir):
+def build(results, release_dir, output, capture_dir, regression_results=None):
     results = results.resolve()
     if not results.is_relative_to(ROOT / "build") or not results.is_dir():
         raise ValueError("请指定 build 目录内的原始评测结果")
@@ -122,6 +122,12 @@ def build(results, release_dir, output, capture_dir):
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT).decode().strip()
     protocol = read(PROTOCOL)
     summary = summarize(results, protocol)
+    regression = None
+    if regression_results is not None:
+        regression_results = regression_results.resolve()
+        if not regression_results.is_relative_to(ROOT / "build") or not regression_results.is_dir():
+            raise ValueError("请指定 build 目录内的当前版本回归结果")
+        regression = summarize(regression_results, protocol)
     proposal = ROOT / "交付/遗留软件复活智能体方案说明.pdf"
     video = ROOT / "交付/遗留软件复活智能体演示.mp4"
     metadata = read(video.with_suffix(".json"))
@@ -154,7 +160,8 @@ def build(results, release_dir, output, capture_dir):
             copy(ROOT / name, kit / Path(name).name)
         for name in ("f01-independent-acceptance.md", "f01-p1-results.json", "f01-p1-review.md",
                      "0.6.7-independent-windows.md", "0.6.8-independent-windows.md",
-                     "0.6.8-windows-proof.json", "0.6.8-live-demo.md", "0.6.8-primary-regression.json"):
+                     "0.6.8-windows-proof.json", "0.6.8-live-demo.md", "0.6.8-primary-regression.json",
+                     "0.6.8-regression-results.json", "0.6.8-regression-review.md"):
             path = ROOT / "docs/validation" / name
             if path.is_file():
                 copy(path, kit / "验证摘要" / name)
@@ -178,8 +185,12 @@ def build(results, release_dir, output, capture_dir):
                 modes.extend((mode, 1) for mode in ("roundtrip", "rules", "one-build"))
             for mode, repeat in modes:
                 add_case(results, kit, case, mode, repeat)
+                if regression is not None:
+                    add_case(regression_results, kit / "当前版本工程回归", case, mode, repeat)
         # Only synthetic fixture evidence enters this package. Remove local workstation roots in text.
-        for path in (kit / "评测记录").rglob("*"):
+        for path in kit.rglob("*"):
+            if "评测记录" not in path.parts:
+                continue
             if path.is_file() and path.suffix in {".json", ".diff"}:
                 text = path.read_text(encoding="utf-8")
                 for original in (str(results), str(ROOT), str(Path.home())):
@@ -188,7 +199,8 @@ def build(results, release_dir, output, capture_dir):
                 path.write_text(text, encoding="utf-8")
         package_status = {"app_version": APP_VERSION, "source_commit": commit,
                           "purpose": "engineering-review", "ready_for_submission": False,
-                          "benchmark": summary["counts"],
+                          "frozen_benchmark_source": "17388e9", "benchmark": summary["counts"],
+                          "current_regression": regression["counts"] if regression else None,
                           "pending": ["当前版本全组回归与差异审查", "非开发人员试用记录",
                                       "提交前最终独立复核"]}
         (kit / "复核状态.json").write_text(json.dumps(package_status, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -219,9 +231,10 @@ def main():
     parser.add_argument("--results", type=Path, required=True)
     parser.add_argument("--release-dir", type=Path, required=True)
     parser.add_argument("--capture-dir", type=Path, required=True)
+    parser.add_argument("--regression-results", type=Path)
     parser.add_argument("--output", type=Path, default=ROOT / "交付/重邮GGBond-F01-工程复核包.zip")
     args = parser.parse_args()
-    build(args.results, args.release_dir, args.output, args.capture_dir)
+    build(args.results, args.release_dir, args.output, args.capture_dir, args.regression_results)
 
 
 if __name__ == "__main__":
