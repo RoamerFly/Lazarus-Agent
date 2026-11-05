@@ -1,0 +1,191 @@
+{
+  "scope": "compiled-candidate semantic review",
+  "rows": [
+    {
+      "trial": "P01-agent-1",
+      "candidate_sha256": "924607cdb6e1456421f4088ed04ad250a36accd1a108089a3207498327d5a75c",
+      "raw_diff_sha256": "575b54e8e712ea3e407fe1af8fbb29ee91617f98f24ccff1e0ae4f47eeae0256",
+      "review": "使用 SharedPreferences 保存路线并在启动时加载。targetSdk 从 22 提升至 36。",
+      "scope": "Android 16 API 36 x86_64 上的两条固定路线、原有说明和冷启动流程。",
+      "source_target_sdk": 22,
+      "candidate_target_sdk": 36
+    },
+    {
+      "trial": "P01-agent-2",
+      "candidate_sha256": "8a446d51c5aa7c45a88741c38aafbcd176acb89f06f8a9f0b8d6dc1973e05e3c",
+      "raw_diff_sha256": "ffa6f32f8ac0cab7d12818c1ad9550ae765eaa2a3f689e7df29f5747ed9baa7d",
+      "review": "使用 SharedPreferences 保存路线并在启动时加载。targetSdk 从 22 提升至 36。",
+      "scope": "Android 16 API 36 x86_64 上的两条固定路线、原有说明和冷启动流程。",
+      "source_target_sdk": 22,
+      "candidate_target_sdk": 36
+    },
+    {
+      "trial": "P01-agent-3",
+      "candidate_sha256": "45cb9bd7239401d812ff267f9d173b49cde3e2f84f17a4ed51beef715c4335f4",
+      "raw_diff_sha256": "7b8ae31ab1ef368eb2c88081281cdbf47ccc50b33bbbfedd2bc7132e9f80df2b",
+      "review": "代码通过应用私有文件回退保留路线。保留了引用错误 Editor 类型的两条尝试路径并宽泛捕获异常。",
+      "scope": "Android 16 API 36 x86_64 上的两条固定路线、原有说明和冷启动流程。",
+      "source_target_sdk": 22,
+      "candidate_target_sdk": 34
+    },
+    {
+      "trial": "P02-agent-1",
+      "candidate_sha256": "d8bac69d3cb925465876f65614123d065a25b76ee8bd3643e9f6c589bdf8d565",
+      "raw_diff_sha256": "9db27fe54e42e4f4b9d3a90f30a575f6638b4af2981f2bb89deb33ff4882b0dc",
+      "review": "仅增加可选系统 HTTP 共享库。解包后的 smali 与原包一致。",
+      "scope": "Android 16 API 36 x86_64 的旧系统库兼容。原输入为固定参数的协议版本对象。",
+      "source_target_sdk": 28,
+      "candidate_target_sdk": 28
+    },
+    {
+      "trial": "P02-agent-2",
+      "candidate_sha256": "6f74ded6def394c629ba608b5f0778988bb8c4d6db029ff45c662c895e5ddb83",
+      "raw_diff_sha256": "9db27fe54e42e4f4b9d3a90f30a575f6638b4af2981f2bb89deb33ff4882b0dc",
+      "review": "仅增加可选系统 HTTP 共享库。解包后的 smali 与原包一致。",
+      "scope": "Android 16 API 36 x86_64 的旧系统库兼容。原输入为固定参数的协议版本对象。",
+      "source_target_sdk": 28,
+      "candidate_target_sdk": 28
+    },
+    {
+      "trial": "P02-agent-3",
+      "candidate_sha256": "c600efcf2fb5813df1444040690da47ed6cd1d49144b82c4f1815cb609648e94",
+      "raw_diff_sha256": "9db27fe54e42e4f4b9d3a90f30a575f6638b4af2981f2bb89deb33ff4882b0dc",
+      "review": "仅增加可选系统 HTTP 共享库。解包后的 smali 与原包一致。",
+      "scope": "Android 16 API 36 x86_64 的旧系统库兼容。原输入为固定参数的协议版本对象。",
+      "source_target_sdk": 28,
+      "candidate_target_sdk": 28
+    },
+    {
+      "trial": "P03-agent-1",
+      "candidate_sha256": "e6ed4433f0e1f3e8968e107cf934d5692ca1a7c6a23591d5c867d2443902a341",
+      "raw_diff_sha256": "81aeeb4301cac579d0235f2b30fddd8900f94a20a9dfd249b33bdbdbed125057",
+      "review": "仅改标题、按钮和计数模板资源，保留动态格式占位符和原 smali。",
+      "scope": "Android 16 API 36 x86_64 上的中文界面和两次计数。",
+      "source_target_sdk": 28,
+      "candidate_target_sdk": 28
+    },
+    {
+      "trial": "P03-agent-2",
+      "candidate_sha256": "20f9b685528169fa70ecf2d18a56276da595914c8b3afc0ac80f06a57b5dfe28",
+      "raw_diff_sha256": "81aeeb4301cac579d0235f2b30fddd8900f94a20a9dfd249b33bdbdbed125057",
+      "review": "仅改标题、按钮和计数模板资源，保留动态格式占位符和原 smali。",
+      "scope": "Android 16 API 36 x86_64 上的中文界面和两次计数。",
+      "source_target_sdk": 28,
+      "candidate_target_sdk": 28
+    },
+    {
+      "trial": "P03-agent-3",
+      "candidate_sha256": "b61d31edb16ab8663ed42c9cdacf73847371021f8f55392f93e0ded63ab43b87",
+      "raw_diff_sha256": "81aeeb4301cac579d0235f2b30fddd8900f94a20a9dfd249b33bdbdbed125057",
+      "review": "仅改标题、按钮和计数模板资源，保留动态格式占位符和原 smali。",
+      "scope": "Android 16 API 36 x86_64 上的中文界面和两次计数。",
+      "source_target_sdk": 28,
+      "candidate_target_sdk": 28
+    },
+    {
+      "trial": "P04-agent-1",
+      "candidate_sha256": "0262229d68c7e5567d86370774c8b9e42cd51fd473f9e20efe60a066226a78c7",
+      "raw_diff_sha256": "78e4d5d6049ccc73678222bfc17a16647e60df463b25d306e8c435af1e25c5ad",
+      "review": "候选从实际输入读取整数，按当前单位输出。华氏分支使用浮点乘 9 除 5 加 32 后取整，单位保存为布尔首选项。未增权限或组件。",
+      "scope": "Android 16 API 36 x86_64 的固定 16 步。极端整数和其他设备未纳入该固定测试。"
+    },
+    {
+      "trial": "P04-agent-2",
+      "candidate_sha256": "ba795b0664901150667fbabc37235f4507adb46062b44373a81ed1c6a4e1a46a",
+      "raw_diff_sha256": "61a5bc02122d504fca98358685c67300dca1896a9574408fe875c187a1809f71",
+      "review": "候选从实际输入读取整数，按当前单位输出。华氏分支使用浮点乘 9 除 5 加 32 后取整，单位保存为布尔首选项。未增权限或组件。",
+      "scope": "Android 16 API 36 x86_64 的固定 16 步。极端整数和其他设备未纳入该固定测试。"
+    },
+    {
+      "trial": "P04-agent-3",
+      "candidate_sha256": "4c0a3c864ba991c95e5bbfc40cc6f9265fd360adbad02c1f69659981e8ed4e58",
+      "raw_diff_sha256": "e158238dc69b96443d10ea9abcba675bb4ce95feb3c2672d00bc1c3c78795d6a",
+      "review": "候选从实际输入读取整数，按当前单位输出。华氏分支使用浮点乘 9 除 5 加 32 后取整，单位保存为布尔首选项。未增权限或组件。",
+      "scope": "Android 16 API 36 x86_64 的固定 16 步。极端整数和其他设备未纳入该固定测试。"
+    },
+    {
+      "trial": "P04-one-build-1",
+      "candidate_sha256": "d40ab8ef31e3bdcde84337144e7553641f29774b361134bb1b996bf68d3554b7",
+      "raw_diff_sha256": "6356f54d8df64b7fcc408d35dcbc751adbd16922cea8a6845fcbc453cf4f7589",
+      "review": "候选从实际输入读取整数，按当前单位输出。华氏分支使用双精度乘 1.8 加 32 后取整，单位保存为布尔首选项。未增权限或组件。",
+      "scope": "Android 16 API 36 x86_64 的固定 16 步。极端整数和其他设备未纳入该固定测试。"
+    },
+    {
+      "trial": "P02-rules-1",
+      "candidate_sha256": "8cbcbd4b895098a68fea4b851a3b04a9593091b1ebfacc4c81b9ab6e62ee4f33",
+      "raw_diff_sha256": null,
+      "review": "二进制清单逐字节等于原包仅声明 HTTP 兼容库后的结果。DEX 字节保持一致。",
+      "scope": "Android 16 上恢复样本原有协议对象调用。原包没有真实归档文件。"
+    },
+    {
+      "trial": "P03-one-build-1",
+      "candidate_sha256": "4a956d64a69c8eb0594867d546dd2f85fb0e3ea030ad5c08648e17b0a630ee34",
+      "raw_diff_sha256": "81aeeb4301cac579d0235f2b30fddd8900f94a20a9dfd249b33bdbdbed125057",
+      "review": "单次构建只改资源文本和格式化模板，原有计数代码保持一致。",
+      "scope": "Android 16 上的中文界面和两次计数。"
+    },
+    {
+      "trial": "P05-rules-1",
+      "candidate_sha256": "adf6b5bb58551ea0d090be97b9c7d4ccd4e8986f0aee4141db3748ae8f6a994b",
+      "raw_diff_sha256": null,
+      "review": "规则在资源流成功打开后保存记录标识，启动时读回原记录资源。",
+      "scope": "自有文件阅读器的 A、B 两份记录与固定冷启动流程。"
+    },
+    {
+      "trial": "P05-one-build-1",
+      "candidate_sha256": "4e8079b3c7cb1ed7c9849e805b708e75af1cb1a2fa91bc66d9929724ab3b3476",
+      "raw_diff_sha256": "bbf7bdd416244e4ffdd1c9f10e906ca2ab8313771c4a5a6d9a1749c0cd094014",
+      "review": "首选项保存并恢复记录标识，阅读器仍读取 APK 中的原始记录资源。",
+      "scope": "自有文件阅读器的 A、B 两份记录与固定冷启动流程。"
+    },
+    {
+      "trial": "P05-agent-1",
+      "candidate_sha256": "129ac620a9b26edb3a1c972380c5b7df519cc0b4b7fa8bbecf863f6386af113b",
+      "raw_diff_sha256": "efac1f852e7ebc847fbf10d6d6e7fd3f5a54f9cbf8f4991b30b6015329a81be5",
+      "review": "首选项保存并恢复记录标识，阅读器仍读取 APK 中的原始记录资源。",
+      "scope": "自有文件阅读器的 A、B 两份记录与固定冷启动流程。"
+    },
+    {
+      "trial": "P05-agent-2",
+      "candidate_sha256": "907c1536f034310ff199d4e23dfd0f1245b7ae1fb0fee7da55ab93df71a3005c",
+      "raw_diff_sha256": "bbcb7b1fba873f68a7969d237564e3db36b1f17eb59e1dbbc5174289b33baf3c",
+      "review": "私有 last_record.txt 保存并恢复记录标识，阅读器仍读取 APK 中的原始记录资源。",
+      "scope": "自有文件阅读器的 A、B 两份记录与固定冷启动流程。"
+    },
+    {
+      "trial": "P05-agent-3",
+      "candidate_sha256": "fc79f2a201cdb83ccf4a26563a70c1c601edfe9ec1fb467e4799f0470b8b621a",
+      "raw_diff_sha256": "ea1aa34b46d727cb8508d211c439abf275416d31f77970c24c6709e0f8603fea",
+      "review": "私有 last_record.txt 保存并恢复记录标识，阅读器仍读取 APK 中的原始记录资源。",
+      "scope": "自有文件阅读器的 A、B 两份记录与固定冷启动流程。"
+    },
+    {
+      "trial": "P06-one-build-1",
+      "candidate_sha256": "5cd365b99f1724c8905d22827b592e12faf8835491e76946cdaac34ddc8b07a9",
+      "raw_diff_sha256": "88cf235d3366561dbad307ffcda7a669694ed8856fbd930e5362161f77cd0f70",
+      "review": "通过非导出 ContentProvider 以只读方式提供固定的私有记录。接收分支继续读取输入流并检查首字节。targetSdk 从 22 调整为 24。",
+      "scope": "Android 16 API 36 x86_64 的同包接收页面和固定记录。不涵盖任意第三方收件应用。"
+    },
+    {
+      "trial": "P06-agent-1",
+      "candidate_sha256": "ad208571164b58a42facf9b59fa1abc4ce0937b24fd30236ba7dfa8d5693a0b9",
+      "raw_diff_sha256": "c8a51f86b8772b40c812032d96c596b2e5d182861e507217b153dfbc1b443252",
+      "review": "通过非导出 ContentProvider 以只读方式提供固定的私有记录。接收分支继续读取输入流并检查首字节。targetSdk 从 22 调整为 24。",
+      "scope": "Android 16 API 36 x86_64 的同包接收页面和固定记录。不涵盖任意第三方收件应用。"
+    },
+    {
+      "trial": "P06-agent-2",
+      "candidate_sha256": "c708ab9f28b77becd06b09b980490b0756408429279d938eedd6e9f79525fd49",
+      "raw_diff_sha256": "de6333f34e67d9f356e5afdd140f0af5e562160dd46e9df5154744cc663a4872",
+      "review": "非导出 ContentProvider 按 URI 选择私有文件并只读打开。规范化路径以字符串前缀检查，没有明确加入目录分隔符。实际交接只用固定记录 URI。接收分支继续读取输入流并检查首字节。targetSdk 从 22 调整为 24。",
+      "scope": "Android 16 API 36 x86_64 的同包接收页面和固定记录。不涵盖任意第三方收件应用。"
+    },
+    {
+      "trial": "P06-agent-3",
+      "candidate_sha256": "1f08bbedddb05c5ce1635d68af74e9f037cbc2228c3d0374381ae9b2a95482f2",
+      "raw_diff_sha256": "e1909ad01cecb2d84560cd6afdd52d2140f462cd9fffe9301743887f9d4edd6c",
+      "review": "保留原 file URI，但把 Intent 的目标显式限制为本包的 ShareActivity。接收分支继续读取输入流并检查首字节。targetSdk 从 22 调整为 24。",
+      "scope": "Android 16 API 36 x86_64 的同包接收页面和固定记录。不涵盖任意第三方收件应用。"
+    }
+  ]
+}

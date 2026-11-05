@@ -332,9 +332,11 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
             if label == "P1B":
                 names.append("p01-runtime-observation.json")
             if label == "P1C":
+                names.append("selected-signatures.json")
                 for name in ("agent-rehearsal-device.md", "agent-rehearsal-device.json",
                              "agent-platform-library.md", "agent-platform-library-device.json",
-                             "agent-platform-library-model.json", "f01-p1c-input-feasibility.json"):
+                             "agent-platform-library-model.json", "f01-p1c-input-feasibility.json",
+                             "f01-p1c-supplemental-plan.json"):
                     path = Path("docs/validation") / name
                     copy(ROOT / path, kit / path)
             for name in names:

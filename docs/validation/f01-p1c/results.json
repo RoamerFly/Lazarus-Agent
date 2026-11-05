@@ -1,0 +1,1262 @@
+{
+  "schema": 1,
+  "app_version": "0.6.15-dev",
+  "freeze_commit": "a28bea979d0b9d8ae6f5074028e8c64d1547ac60",
+  "implementation_commit": "1a7bbbeed8e2b75386f7d8b79f61bed091458440",
+  "evaluation_role": "prospective-replication",
+  "protocol_sha256": "aa7f164a5247d363a792d59e47c5fee88400e88da94fcf2c37100d11303368f9",
+  "model": "deepseek-flash",
+  "target_api": 36,
+  "source_apk_sha256": {
+    "P01": "08ed16b9f6a149bd8063bae99dd72aad200dafea7d3a0504af004187bde20deb",
+    "P02": "7b8e200984dee500def40a9684fd2de9ced885ca1d04c63771d1d473b597dcce",
+    "P03": "1476a30063a68f27a2e3c10d3d99383aeee0afbf5177e09fbc44f36cc6f237da",
+    "P04": "ffce5821e6eeb1c0b9faaa5d0c79fadaa17dcdcc1a77d5b3062d4d947189a85b",
+    "P05": "4049359b01c7c7348d7d2bc4c4efdb27a7844975f3dc147a1cef0996632de9ac",
+    "P06": "55ca244e70ab959fbb179a04c757c1974821ff790578e8811a345f31e024d8da",
+    "N01": "ae4958b8ffaff5ac22a9d396ac70ceb6861cdd4b99ae8e439d386a1bc544cb66",
+    "N02": "1362d89bb4e7f5e842fbc7a1183ec613a1fea501b61af64cc5edb44a54ba6837",
+    "N03": "1476a30063a68f27a2e3c10d3d99383aeee0afbf5177e09fbc44f36cc6f237da"
+  },
+  "planned_trials": 42,
+  "terminal_trials": 42,
+  "held_out_passes": 3,
+  "joint_gate": true,
+  "gate_checks": {
+    "positives": true,
+    "primary": true,
+    "negatives": true,
+    "held_out": true
+  },
+  "model_responses_recorded": 432,
+  "recorded_chat_cost_usd_range": [
+    0.17983154,
+    0.35966309
+  ],
+  "model_fingerprints": [
+    "bc19ba97cbe016479903222bb1578db6"
+  ],
+  "counts": {
+    "agent_positives": 18,
+    "primary": 3,
+    "agent_negative_rejected": 6,
+    "agent_false_acceptances": 0,
+    "unobserved": 0,
+    "majority_agent_cases": 6,
+    "roundtrip_positive_cases": 0,
+    "rules_positive_cases": 2,
+    "one-build_positive_cases": 4
+  },
+  "rows": [
+    {
+      "case": "P01",
+      "class": "positive",
+      "mode": "roundtrip",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 57.782,
+      "build_attempts": 1,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null,
+      "trial": "P01-roundtrip-1",
+      "terminal": true,
+      "candidate_sha256": "359d3b6115f682e1b3fa7321f06467781d8553aebe2aec2227bcc5268f3d0cbe",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "failed",
+        "launch": "not-run",
+        "function": "not-run"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "b9221406433094d0c296998f8b18827ed091d0bcd730876c16d74502dc37bda6",
+      "raw_acceptance_sha256": "b1f0ee19b696f6fffba523d592da2d12e8e576dabf6b7afdf3b488bb976e9122",
+      "raw_diff_sha256": null
+    },
+    {
+      "case": "P01",
+      "class": "positive",
+      "mode": "rules",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 23.194,
+      "build_attempts": 1,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null,
+      "trial": "P01-rules-1",
+      "terminal": true,
+      "candidate_sha256": "f0c07b1b05560803113bf650a7cb9b27f7ee2344dba8891a41b74f359b0ea536",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "failed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "46033e2f7eb14c5aa6f168e158839fe884e5deb65ef27a781da23a2336790a8b",
+      "raw_acceptance_sha256": "7143bfd1060d1940f237929bdef8468c8544980cdc731daa0969c71c0efed55a",
+      "raw_diff_sha256": null
+    },
+    {
+      "case": "P01",
+      "class": "positive",
+      "mode": "one-build",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 41.904,
+      "build_attempts": 1,
+      "model_requests_with_usage": 14,
+      "model_price_usd_range": [
+        0.00512272,
+        0.01024543
+      ],
+      "trial": "P01-one-build-1",
+      "terminal": true,
+      "candidate_sha256": null,
+      "candidate_status": null,
+      "abi": null,
+      "tool_error": null,
+      "raw_result_sha256": "4d76d5819be18be99e034cb64f05244deb58970d19b507180a4cdccbbdd0b8d5",
+      "raw_acceptance_sha256": null,
+      "raw_diff_sha256": "1706de3bea3ea650df992606c9ee1e179d8488fa5ca487fe44b5c3aef07f6e0f"
+    },
+    {
+      "case": "P01",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 92.254,
+      "build_attempts": 1,
+      "model_requests_with_usage": 10,
+      "model_price_usd_range": [
+        0.00350873,
+        0.00701747
+      ],
+      "trial": "P01-agent-1",
+      "terminal": true,
+      "candidate_sha256": "924607cdb6e1456421f4088ed04ad250a36accd1a108089a3207498327d5a75c",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "6281b5630e4084a034f1a925f04ea408ec8f899624f593dd4b4a7cdcb6c8d340",
+      "raw_acceptance_sha256": "326b9d21ffa60b04d4996109d47c1c4da5773950a852b6cf9bb47c17d7ea7403",
+      "raw_diff_sha256": "575b54e8e712ea3e407fe1af8fbb29ee91617f98f24ccff1e0ae4f47eeae0256"
+    },
+    {
+      "case": "P01",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 2,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 99.554,
+      "build_attempts": 1,
+      "model_requests_with_usage": 12,
+      "model_price_usd_range": [
+        0.00376887,
+        0.00753774
+      ],
+      "trial": "P01-agent-2",
+      "terminal": true,
+      "candidate_sha256": "8a446d51c5aa7c45a88741c38aafbcd176acb89f06f8a9f0b8d6dc1973e05e3c",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "8ed0d220f3f3edd6469a8ada6e18681e152f28c1f549e8d6222b811f4f858cff",
+      "raw_acceptance_sha256": "60dba1a69a3dcd5a1822829f53a556f786726be1a65b9ba649d88045090c77ab",
+      "raw_diff_sha256": "ffa6f32f8ac0cab7d12818c1ad9550ae765eaa2a3f689e7df29f5747ed9baa7d"
+    },
+    {
+      "case": "P01",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 3,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 261.645,
+      "build_attempts": 3,
+      "model_requests_with_usage": 27,
+      "model_price_usd_range": [
+        0.01943601,
+        0.03887202
+      ],
+      "trial": "P01-agent-3",
+      "terminal": true,
+      "candidate_sha256": "45cb9bd7239401d812ff267f9d173b49cde3e2f84f17a4ed51beef715c4335f4",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "22ee72380123b243291c52c500a3f50866827fe6420e566c9a59d31d8272d9b6",
+      "raw_acceptance_sha256": "7ac72c19779729e5361a1926abd65155916c9d9413463075b150c05bcfb5eee1",
+      "raw_diff_sha256": "7b8ae31ab1ef368eb2c88081281cdbf47ccc50b33bbbfedd2bc7132e9f80df2b"
+    },
+    {
+      "case": "P02",
+      "class": "positive",
+      "mode": "roundtrip",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 31.126,
+      "build_attempts": 1,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null,
+      "trial": "P02-roundtrip-1",
+      "terminal": true,
+      "candidate_sha256": "2eca253ff7d38cbe48d1d036acacae74f250dc7d614474919b6c467a3f896f45",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "failed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "ca371cea88ef9b6d5ad7226be3ea2e0e79f8d05a7a6790f681ece645df6a41e6",
+      "raw_acceptance_sha256": "4ee2e6edb356c4dd351685f6695b81cfc04cc122ff5f60138a06069513108171",
+      "raw_diff_sha256": null
+    },
+    {
+      "case": "P02",
+      "class": "positive",
+      "mode": "rules",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 39.439,
+      "build_attempts": 1,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null,
+      "trial": "P02-rules-1",
+      "terminal": true,
+      "candidate_sha256": "8cbcbd4b895098a68fea4b851a3b04a9593091b1ebfacc4c81b9ab6e62ee4f33",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "265980fa8eaeb1f5deb156b23bd632b90c9c1e92961a546888e0c76dcd90be84",
+      "raw_acceptance_sha256": "39e7f9554c45880fa8b45200f08e56bdb6abb984b9668d454bfd3dd012888ba1",
+      "raw_diff_sha256": null
+    },
+    {
+      "case": "P02",
+      "class": "positive",
+      "mode": "one-build",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 83.369,
+      "build_attempts": 1,
+      "model_requests_with_usage": 10,
+      "model_price_usd_range": [
+        0.00705664,
+        0.01411328
+      ],
+      "trial": "P02-one-build-1",
+      "terminal": true,
+      "candidate_sha256": "6ea78afae16378cff3ed8fe727df973fe2b1a0a99384031f52a9cc4041ffa0b6",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "failed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "b5928ee2accb619812765930a898fd10500b000e6d9d809196cac09c5e3f683b",
+      "raw_acceptance_sha256": "89f8f311099de659b917e0a1bad2123c94729268f329a1fb5838eb876f0e4297",
+      "raw_diff_sha256": "ab5fb61c33ca6f3fb4adc2ffb26a08d7ffdcfe824cd3dee90387b6b89e7cddeb"
+    },
+    {
+      "case": "P02",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 105.174,
+      "build_attempts": 1,
+      "model_requests_with_usage": 11,
+      "model_price_usd_range": [
+        0.00253873,
+        0.00507745
+      ],
+      "trial": "P02-agent-1",
+      "terminal": true,
+      "candidate_sha256": "d8bac69d3cb925465876f65614123d065a25b76ee8bd3643e9f6c589bdf8d565",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "326d19777c87821d6385261a75f55f92c87f369ff5adcca9008ef794e300ba5f",
+      "raw_acceptance_sha256": "9af7a060d8b6d9ad766f5806af353ffc790c4437a6ae0e9ffc933da3d9488abe",
+      "raw_diff_sha256": "9db27fe54e42e4f4b9d3a90f30a575f6638b4af2981f2bb89deb33ff4882b0dc"
+    },
+    {
+      "case": "P02",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 2,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 83.901,
+      "build_attempts": 1,
+      "model_requests_with_usage": 8,
+      "model_price_usd_range": [
+        0.00167161,
+        0.00334321
+      ],
+      "trial": "P02-agent-2",
+      "terminal": true,
+      "candidate_sha256": "6f74ded6def394c629ba608b5f0778988bb8c4d6db029ff45c662c895e5ddb83",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "264d36878fdca27905879d37ee6e49e95ce2afbf290a1ea55baa0d2793e285d2",
+      "raw_acceptance_sha256": "48b7119d4e118a4f9d36a4b8e61b477333f35af54c9f1f05721fcd635754ae79",
+      "raw_diff_sha256": "9db27fe54e42e4f4b9d3a90f30a575f6638b4af2981f2bb89deb33ff4882b0dc"
+    },
+    {
+      "case": "P02",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 3,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 110.133,
+      "build_attempts": 1,
+      "model_requests_with_usage": 11,
+      "model_price_usd_range": [
+        0.00261742,
+        0.00523484
+      ],
+      "trial": "P02-agent-3",
+      "terminal": true,
+      "candidate_sha256": "c600efcf2fb5813df1444040690da47ed6cd1d49144b82c4f1815cb609648e94",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "8a8dd7c280fa4b4debd22a48a50760c74ddcdd2a029f241d1b356dbba1e94782",
+      "raw_acceptance_sha256": "7a34ef3a209961cc29305ccd916126e9c48bf02ddf0db989219bc553523c99fc",
+      "raw_diff_sha256": "9db27fe54e42e4f4b9d3a90f30a575f6638b4af2981f2bb89deb33ff4882b0dc"
+    },
+    {
+      "case": "P03",
+      "class": "positive",
+      "mode": "roundtrip",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 17.31,
+      "build_attempts": 1,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null,
+      "trial": "P03-roundtrip-1",
+      "terminal": true,
+      "candidate_sha256": "9b802e7ab24975870030c69b06fa66e43762709be8119fda99114dd11734a27f",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "failed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "bd7aafa88444e664102c8a0bf4e51acc80f5320829775d5665d6483247344fe8",
+      "raw_acceptance_sha256": "7e10314d66722338fa8b82712a3b32a214a955ba38e7abde3b855df3485b67db",
+      "raw_diff_sha256": null
+    },
+    {
+      "case": "P03",
+      "class": "positive",
+      "mode": "rules",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 0.001,
+      "build_attempts": 0,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null,
+      "trial": "P03-rules-1",
+      "terminal": true,
+      "candidate_sha256": null,
+      "candidate_status": null,
+      "abi": null,
+      "tool_error": null,
+      "raw_result_sha256": "fa71277bde66480cff533c7fe218abf39f2e42b349c6b41fdea9c915df17ab79",
+      "raw_acceptance_sha256": null,
+      "raw_diff_sha256": null
+    },
+    {
+      "case": "P03",
+      "class": "positive",
+      "mode": "one-build",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 33.851,
+      "build_attempts": 1,
+      "model_requests_with_usage": 6,
+      "model_price_usd_range": [
+        0.00097696,
+        0.00195391
+      ],
+      "trial": "P03-one-build-1",
+      "terminal": true,
+      "candidate_sha256": "4a956d64a69c8eb0594867d546dd2f85fb0e3ea030ad5c08648e17b0a630ee34",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "e585a1c369d04dcd1a35cb9bb18041f57f0fb6700c408d78ae54da5990287d43",
+      "raw_acceptance_sha256": "0c4c206a3483f784160d8017a5581688ef504d21125b9261e6ef90a5c6fc3bad",
+      "raw_diff_sha256": "81aeeb4301cac579d0235f2b30fddd8900f94a20a9dfd249b33bdbdbed125057"
+    },
+    {
+      "case": "P03",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 56.209,
+      "build_attempts": 1,
+      "model_requests_with_usage": 11,
+      "model_price_usd_range": [
+        0.00176502,
+        0.00353004
+      ],
+      "trial": "P03-agent-1",
+      "terminal": true,
+      "candidate_sha256": "e6ed4433f0e1f3e8968e107cf934d5692ca1a7c6a23591d5c867d2443902a341",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "78ae579a549dc5552480fccd6a3b13679aa6ea7a66be58d4b51f1e077f4b7866",
+      "raw_acceptance_sha256": "70902fa708d7868c79d088fc0c9d10014a8452076c48af92cba91e0b4cb64443",
+      "raw_diff_sha256": "81aeeb4301cac579d0235f2b30fddd8900f94a20a9dfd249b33bdbdbed125057"
+    },
+    {
+      "case": "P03",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 2,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 72.513,
+      "build_attempts": 1,
+      "model_requests_with_usage": 9,
+      "model_price_usd_range": [
+        0.00160903,
+        0.00321806
+      ],
+      "trial": "P03-agent-2",
+      "terminal": true,
+      "candidate_sha256": "20f9b685528169fa70ecf2d18a56276da595914c8b3afc0ac80f06a57b5dfe28",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "e324e424417d2b70087d7192f1ca47680ba2640dce6d4f4a34c9d0ebb0d811e9",
+      "raw_acceptance_sha256": "5da102d6eda719766d98f6a70de0c364cff9bcb33edfa4960f44eedac7efbc57",
+      "raw_diff_sha256": "81aeeb4301cac579d0235f2b30fddd8900f94a20a9dfd249b33bdbdbed125057"
+    },
+    {
+      "case": "P03",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 3,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 78.512,
+      "build_attempts": 1,
+      "model_requests_with_usage": 12,
+      "model_price_usd_range": [
+        0.00230549,
+        0.00461099
+      ],
+      "trial": "P03-agent-3",
+      "terminal": true,
+      "candidate_sha256": "b61d31edb16ab8663ed42c9cdacf73847371021f8f55392f93e0ded63ab43b87",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "34b8032cb438f36f09607e3065bff6d5f4a5e1a76d5367d200fbb77216f9e97a",
+      "raw_acceptance_sha256": "a093c432255341868e3353100be1bf33cd0a979efacf21c4088018fd385eddf8",
+      "raw_diff_sha256": "81aeeb4301cac579d0235f2b30fddd8900f94a20a9dfd249b33bdbdbed125057"
+    },
+    {
+      "case": "P04",
+      "class": "positive",
+      "mode": "roundtrip",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 43.109,
+      "build_attempts": 1,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null,
+      "trial": "P04-roundtrip-1",
+      "terminal": true,
+      "candidate_sha256": "97613d39c6a320b84d7d557e388824e4b28c953d0d9ee3457f1a42afb36b2454",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "failed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "7ef1d9e675d4ad061423cd3a7d2849accd90e9a92d05d593003ce5c05f399e18",
+      "raw_acceptance_sha256": "3e186b194144e422e3c3d0f91e92f6707ed919d699bb2343f6cb82903d3ac8c9",
+      "raw_diff_sha256": null
+    },
+    {
+      "case": "P04",
+      "class": "positive",
+      "mode": "rules",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 0.001,
+      "build_attempts": 0,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null,
+      "trial": "P04-rules-1",
+      "terminal": true,
+      "candidate_sha256": null,
+      "candidate_status": null,
+      "abi": null,
+      "tool_error": null,
+      "raw_result_sha256": "fdf8e1b5ff539daf6c0f07a28b6c9b388bb06005f573a3cea70a2f93de6c436e",
+      "raw_acceptance_sha256": null,
+      "raw_diff_sha256": null
+    },
+    {
+      "case": "P04",
+      "class": "positive",
+      "mode": "one-build",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 116.69,
+      "build_attempts": 1,
+      "model_requests_with_usage": 11,
+      "model_price_usd_range": [
+        0.00756228,
+        0.01512456
+      ],
+      "trial": "P04-one-build-1",
+      "terminal": true,
+      "candidate_sha256": "d40ab8ef31e3bdcde84337144e7553641f29774b361134bb1b996bf68d3554b7",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "092a0a1b7757bbb83257a911c3b63a38e8fa42230e13c9111344d63b67913f34",
+      "raw_acceptance_sha256": "56cb637c3dbaaa2b6d72e33f7a36cb5b71fc0cee4b498eb337662a251b8a1823",
+      "raw_diff_sha256": "6356f54d8df64b7fcc408d35dcbc751adbd16922cea8a6845fcbc453cf4f7589"
+    },
+    {
+      "case": "P04",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 208.941,
+      "build_attempts": 2,
+      "model_requests_with_usage": 25,
+      "model_price_usd_range": [
+        0.01220813,
+        0.02441626
+      ],
+      "trial": "P04-agent-1",
+      "terminal": true,
+      "candidate_sha256": "0262229d68c7e5567d86370774c8b9e42cd51fd473f9e20efe60a066226a78c7",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "0b738ad88a218ec34a8d2ac1008087543f91321c922b58f9880c514d630d990d",
+      "raw_acceptance_sha256": "6b1ca4bab468082d834ecaea250ad4dca23b3fa9ff8f89fb64295044f4027cdf",
+      "raw_diff_sha256": "78e4d5d6049ccc73678222bfc17a16647e60df463b25d306e8c435af1e25c5ad"
+    },
+    {
+      "case": "P04",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 2,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 200.86,
+      "build_attempts": 1,
+      "model_requests_with_usage": 19,
+      "model_price_usd_range": [
+        0.01208422,
+        0.02416843
+      ],
+      "trial": "P04-agent-2",
+      "terminal": true,
+      "candidate_sha256": "ba795b0664901150667fbabc37235f4507adb46062b44373a81ed1c6a4e1a46a",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "9e622625603c43eac8e3bfc1670e5d759de4e144074763e25803fa29f24c1459",
+      "raw_acceptance_sha256": "6b508e5c19aaed389b43b81b5244e0172b298b4fc4e88d1e1569d8f4eeb54780",
+      "raw_diff_sha256": "61a5bc02122d504fca98358685c67300dca1896a9574408fe875c187a1809f71"
+    },
+    {
+      "case": "P04",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 3,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 198.42,
+      "build_attempts": 1,
+      "model_requests_with_usage": 25,
+      "model_price_usd_range": [
+        0.01169186,
+        0.02338372
+      ],
+      "trial": "P04-agent-3",
+      "terminal": true,
+      "candidate_sha256": "4c0a3c864ba991c95e5bbfc40cc6f9265fd360adbad02c1f69659981e8ed4e58",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "b16552295798644cc1e0b454c5970ecae0a7d4d9ee9d104d716bc5516e473cf2",
+      "raw_acceptance_sha256": "bd50eeb8258a75ed44a4823e4a07849ebc1c5e2dd6db20a18a31c129757d5a28",
+      "raw_diff_sha256": "e158238dc69b96443d10ea9abcba675bb4ce95feb3c2672d00bc1c3c78795d6a"
+    },
+    {
+      "case": "P05",
+      "class": "positive",
+      "mode": "roundtrip",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 35.722,
+      "build_attempts": 1,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null,
+      "trial": "P05-roundtrip-1",
+      "terminal": true,
+      "candidate_sha256": "29cc69b47ad792b2da07af603daf182345768538eae103c17d52c35265f37f9d",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "failed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "da33de5511571e638099dd148d2a68dbf7faabfe3aebc8cb3ac55631b9b321c2",
+      "raw_acceptance_sha256": "ec88c9cfdc7325a6696c020e5b2045e279a12bfb24306ece3877882dcc7bfe32",
+      "raw_diff_sha256": null
+    },
+    {
+      "case": "P05",
+      "class": "positive",
+      "mode": "rules",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 44.733,
+      "build_attempts": 1,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null,
+      "trial": "P05-rules-1",
+      "terminal": true,
+      "candidate_sha256": "adf6b5bb58551ea0d090be97b9c7d4ccd4e8986f0aee4141db3748ae8f6a994b",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "6ebd1f671ddb7b9057950a340773558e5bc35e557c17936e81919671cedeb705",
+      "raw_acceptance_sha256": "1740d6e78d59798f119aaf4259b424a836b5c8a5d84e29e53849f14663d9eef6",
+      "raw_diff_sha256": null
+    },
+    {
+      "case": "P05",
+      "class": "positive",
+      "mode": "one-build",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 64.704,
+      "build_attempts": 1,
+      "model_requests_with_usage": 9,
+      "model_price_usd_range": [
+        0.00237598,
+        0.00475196
+      ],
+      "trial": "P05-one-build-1",
+      "terminal": true,
+      "candidate_sha256": "4e8079b3c7cb1ed7c9849e805b708e75af1cb1a2fa91bc66d9929724ab3b3476",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "16819e425eab3938831eea57e7aa179e4b413393c16e3a794d48783260e3a408",
+      "raw_acceptance_sha256": "36d77c352defe25c6b8e0335e0c0e173474ba27d6780a2909f42a26f6c705956",
+      "raw_diff_sha256": "bbf7bdd416244e4ffdd1c9f10e906ca2ab8313771c4a5a6d9a1749c0cd094014"
+    },
+    {
+      "case": "P05",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 93.47,
+      "build_attempts": 1,
+      "model_requests_with_usage": 11,
+      "model_price_usd_range": [
+        0.00264383,
+        0.00528767
+      ],
+      "trial": "P05-agent-1",
+      "terminal": true,
+      "candidate_sha256": "129ac620a9b26edb3a1c972380c5b7df519cc0b4b7fa8bbecf863f6386af113b",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "961aecd24e0e1bdf6c38b8d025f81ba37c7a4ca968076bb257de116dd93728a0",
+      "raw_acceptance_sha256": "632d5889b05b6c15044ef1564399134ec4b3af943dd32906ef4eda77cf064965",
+      "raw_diff_sha256": "efac1f852e7ebc847fbf10d6d6e7fd3f5a54f9cbf8f4991b30b6015329a81be5"
+    },
+    {
+      "case": "P05",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 2,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 145.695,
+      "build_attempts": 2,
+      "model_requests_with_usage": 20,
+      "model_price_usd_range": [
+        0.00596381,
+        0.01192763
+      ],
+      "trial": "P05-agent-2",
+      "terminal": true,
+      "candidate_sha256": "907c1536f034310ff199d4e23dfd0f1245b7ae1fb0fee7da55ab93df71a3005c",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "31ea2ae62bc20b9399d28b74c4531289dd3bcb7120c79318d291388fa184e97b",
+      "raw_acceptance_sha256": "03f3d3afe6078757e89ce6dfb2599eb640f0f77424c775744170dc53fb56f044",
+      "raw_diff_sha256": "bbcb7b1fba873f68a7969d237564e3db36b1f17eb59e1dbbc5174289b33baf3c"
+    },
+    {
+      "case": "P05",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 3,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 117.524,
+      "build_attempts": 2,
+      "model_requests_with_usage": 14,
+      "model_price_usd_range": [
+        0.00481353,
+        0.00962706
+      ],
+      "trial": "P05-agent-3",
+      "terminal": true,
+      "candidate_sha256": "fc79f2a201cdb83ccf4a26563a70c1c601edfe9ec1fb467e4799f0470b8b621a",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "e08df3b2211754a22c57b5020b48828d63d9747513f556080ca07ae5f206bf4b",
+      "raw_acceptance_sha256": "50841bea277db157c5e997b78328d2b69076904ca66c742c86f38c8daf4f2ec4",
+      "raw_diff_sha256": "ea1aa34b46d727cb8508d211c439abf275416d31f77970c24c6709e0f8603fea"
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "roundtrip",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 3.85,
+      "build_attempts": 1,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null,
+      "trial": "P06-roundtrip-1",
+      "terminal": true,
+      "candidate_sha256": "a7824bf485ea6cd0f87b93ccbecda25f72dbb4990fb286ca92a7b6cc6918ac6f",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "failed",
+        "launch": "not-run",
+        "function": "not-run"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "fe226a9d06cf51bdd93c5ef8eb48b7d4f24687440564321eee72c4ef1465ed1a",
+      "raw_acceptance_sha256": "3df48bca4d3a591710ccd54e203a384878470c93e67bcd3e5dd237cd1d6b27b4",
+      "raw_diff_sha256": null
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "rules",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 0.001,
+      "build_attempts": 0,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null,
+      "trial": "P06-rules-1",
+      "terminal": true,
+      "candidate_sha256": null,
+      "candidate_status": null,
+      "abi": null,
+      "tool_error": null,
+      "raw_result_sha256": "da74bc2b6b7217766d297f4cc5f19bbb435e15e219b1ae5777a4860f7d5fb4cb",
+      "raw_acceptance_sha256": null,
+      "raw_diff_sha256": null
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "one-build",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 85.034,
+      "build_attempts": 1,
+      "model_requests_with_usage": 14,
+      "model_price_usd_range": [
+        0.00736585,
+        0.01473169
+      ],
+      "trial": "P06-one-build-1",
+      "terminal": true,
+      "candidate_sha256": "5cd365b99f1724c8905d22827b592e12faf8835491e76946cdaac34ddc8b07a9",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "39fad9b7412fb5d2fc69c1e44289b3e472e23796b9f9eabaf408cb993d1b59df",
+      "raw_acceptance_sha256": "ebeee9ba5f353c2d484c2eee3206ba19b1250f3721343415b1c261132b094057",
+      "raw_diff_sha256": "88cf235d3366561dbad307ffcda7a669694ed8856fbd930e5362161f77cd0f70"
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 114.158,
+      "build_attempts": 1,
+      "model_requests_with_usage": 12,
+      "model_price_usd_range": [
+        0.00608086,
+        0.01216171
+      ],
+      "trial": "P06-agent-1",
+      "terminal": true,
+      "candidate_sha256": "ad208571164b58a42facf9b59fa1abc4ce0937b24fd30236ba7dfa8d5693a0b9",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "c2808405ba48dbdca7ab5418b5accbf5c8f281f2d85562b014f1fff20f9c06c7",
+      "raw_acceptance_sha256": "13eea04b49103216fa8dd313eef5cef5a9b7a54d2da27140b4758c43549152b1",
+      "raw_diff_sha256": "c8a51f86b8772b40c812032d96c596b2e5d182861e507217b153dfbc1b443252"
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 2,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 220.203,
+      "build_attempts": 3,
+      "model_requests_with_usage": 32,
+      "model_price_usd_range": [
+        0.01562947,
+        0.03125893
+      ],
+      "trial": "P06-agent-2",
+      "terminal": true,
+      "candidate_sha256": "c708ab9f28b77becd06b09b980490b0756408429279d938eedd6e9f79525fd49",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "26c98a26903a56bdc8e5ad3a6fb8893ef9eb0b66fafe7932942bb7b3431f3558",
+      "raw_acceptance_sha256": "afb929ed4f5f46a732b2bc5435782416c2b63bcb3730644f6c47e43d514849bf",
+      "raw_diff_sha256": "de6333f34e67d9f356e5afdd140f0af5e562160dd46e9df5154744cc663a4872"
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 3,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 98.602,
+      "build_attempts": 1,
+      "model_requests_with_usage": 11,
+      "model_price_usd_range": [
+        0.00412044,
+        0.00824088
+      ],
+      "trial": "P06-agent-3",
+      "terminal": true,
+      "candidate_sha256": "1f08bbedddb05c5ce1635d68af74e9f037cbc2228c3d0374381ae9b2a95482f2",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "6ffdceffa350ded2d7b7ed7d60e4264a34ee1ee2ff7aeea3dd7e57dc8a92d5a9",
+      "raw_acceptance_sha256": "935e0f58716239d6940561cc25344e272d20451f0f438023eb137f75271c92a0",
+      "raw_diff_sha256": "e1909ad01cecb2d84560cd6afdd52d2140f462cd9fffe9301743887f9d4edd6c"
+    },
+    {
+      "case": "N01",
+      "class": "negative",
+      "mode": "agent",
+      "repeat": 1,
+      "state": "rejected",
+      "started": true,
+      "duration_seconds": 54.089,
+      "build_attempts": 1,
+      "model_requests_with_usage": 11,
+      "model_price_usd_range": [
+        0.00537567,
+        0.01075134
+      ],
+      "trial": "N01-agent-1",
+      "terminal": true,
+      "candidate_sha256": null,
+      "candidate_status": null,
+      "abi": null,
+      "tool_error": null,
+      "raw_result_sha256": "967873bd82c0489171f30b3c51aea5702ce9339913cda43bc0ae7d31e6849f65",
+      "raw_acceptance_sha256": null,
+      "raw_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "case": "N01",
+      "class": "negative",
+      "mode": "agent",
+      "repeat": 2,
+      "state": "rejected",
+      "started": true,
+      "duration_seconds": 155.498,
+      "build_attempts": 2,
+      "model_requests_with_usage": 31,
+      "model_price_usd_range": [
+        0.01675042,
+        0.03350084
+      ],
+      "trial": "N01-agent-2",
+      "terminal": true,
+      "candidate_sha256": null,
+      "candidate_status": null,
+      "abi": null,
+      "tool_error": null,
+      "raw_result_sha256": "efd699c27ac486479852d6b14bc84c4e07f19177ef3866c307daa65109066cd6",
+      "raw_acceptance_sha256": null,
+      "raw_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "case": "N02",
+      "class": "negative",
+      "mode": "agent",
+      "repeat": 1,
+      "state": "rejected",
+      "started": true,
+      "duration_seconds": 21.255,
+      "build_attempts": 0,
+      "model_requests_with_usage": 5,
+      "model_price_usd_range": [
+        0.00128116,
+        0.00256231
+      ],
+      "trial": "N02-agent-1",
+      "terminal": true,
+      "candidate_sha256": null,
+      "candidate_status": null,
+      "abi": null,
+      "tool_error": null,
+      "raw_result_sha256": "bfcf708ebd43dd7800be91af8ebc2b984dd15ac197ca68ce279e05dbfe2f095a",
+      "raw_acceptance_sha256": null,
+      "raw_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "case": "N02",
+      "class": "negative",
+      "mode": "agent",
+      "repeat": 2,
+      "state": "rejected",
+      "started": true,
+      "duration_seconds": 26.788,
+      "build_attempts": 0,
+      "model_requests_with_usage": 6,
+      "model_price_usd_range": [
+        0.00165415,
+        0.00330829
+      ],
+      "trial": "N02-agent-2",
+      "terminal": true,
+      "candidate_sha256": null,
+      "candidate_status": null,
+      "abi": null,
+      "tool_error": null,
+      "raw_result_sha256": "f22280872aa7fd4c2678e0116b06ce6d150ca8ddad23a51aa77f7c3a55a82a74",
+      "raw_acceptance_sha256": null,
+      "raw_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "case": "N03",
+      "class": "negative",
+      "mode": "agent",
+      "repeat": 1,
+      "state": "rejected",
+      "started": true,
+      "duration_seconds": 163.293,
+      "build_attempts": 3,
+      "model_requests_with_usage": 24,
+      "model_price_usd_range": [
+        0.00797434,
+        0.01594868
+      ],
+      "trial": "N03-agent-1",
+      "terminal": true,
+      "candidate_sha256": "b3c59c8bfc6cf2a953013faa615b3fc74e60ecbf3fadfbfe0285ad1a49c2d1df",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "failed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "82fc62aef6c6b6d7ab874a347f0b471345ee18fd2f11c244d39cb46c58997a82",
+      "raw_acceptance_sha256": "2d199c1ec23b09c805b8b7c2d53e8ed41bc59a2b2973f46f698821d570a4725b",
+      "raw_diff_sha256": "ce87e605411a987640e56baf50ded87800843b0b25710e2adc05a661f79398bd"
+    },
+    {
+      "case": "N03",
+      "class": "negative",
+      "mode": "agent",
+      "repeat": 2,
+      "state": "rejected",
+      "started": true,
+      "duration_seconds": 62.836,
+      "build_attempts": 1,
+      "model_requests_with_usage": 11,
+      "model_price_usd_range": [
+        0.00187833,
+        0.00375666
+      ],
+      "trial": "N03-agent-2",
+      "terminal": true,
+      "candidate_sha256": "4d23ff3d432a5e81c251d6237722b026742b86dc1b55c52d66d2c83ec20872a6",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "failed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "4b74ff25dd9b5b3c65f7f73c31494101c320038d8153eadb2a6953b2953063ca",
+      "raw_acceptance_sha256": "1572e39c76b683bc0288ed0323b77379d7f3069bfa3a9418c479a6ca3563d2f1",
+      "raw_diff_sha256": "c6f6359f74be7bad8da5bd976232b1b5e5aaa2e9411cb772de37bb74dcff2ddd"
+    }
+  ]
+}
