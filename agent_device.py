@@ -7,6 +7,7 @@ import xml.etree.ElementTree as ET
 import bench_device
 from agent_runtime import java_crashes
 from diagnose import inspect_package
+from function_probe import resolve_platform_library
 
 
 OBSERVATION_ERRORS = (OSError, ValueError, RuntimeError, subprocess.SubprocessError)
@@ -61,7 +62,15 @@ class AgentDevice:
             after = self._crashes() or {}
             recent = [event for marker, event in after.items() if marker not in before]
             if recent:
-                return {"runtime_crash": {"source": "isolated-android-crash-buffer", **recent[-1]}}
+                crash = {"source": "isolated-android-crash-buffer", **recent[-1]}
+                if crash.get("missing_class"):
+                    try:
+                        listings = bench_device.shell(self.serial, "pm", "list", "libraries", timeout=6)
+                    except OBSERVATION_ERRORS:
+                        listings = ""
+                    if library := resolve_platform_library(crash["missing_class"], listings):
+                        crash["platform_library"] = {"name": library, "evidence": "listed-by-target-package-manager"}
+                return {"runtime_crash": crash}
         return {}
 
     def _observe_after(self, before):

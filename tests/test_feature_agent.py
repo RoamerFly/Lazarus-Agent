@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from agent_workspace import Workspace, digest
 from feature_agent import Session, run
@@ -66,6 +66,37 @@ class WorkspaceTests(unittest.TestCase):
         self.ws.replace_text("AndroidManifest.xml", row["sha256"], "<manifest/>", "<manifest />")
         with self.assertRaises(ValueError):
             session.finish("candidate", "Done")
+
+    def test_original_can_be_reproduced_without_building_and_cannot_verify_a_candidate(self):
+        source, candidate = self.root / "original.apk", self.root / "built.apk"
+        source_sha, candidate_sha = "a" * 64, "b" * 64
+        tester = Mock()
+        tester.test.side_effect = lambda artifact, sha: {"installed_sha256": sha}
+        tester.action.return_value = {"ui": {}}
+        session = Session(self.root, source, self.root / "out.apk",
+                          Path("tools"), 36, {"sha256": source_sha}, lambda _: None, tester)
+        self.assertEqual(session.dispatch("test_original", {})["tested_input"], "original")
+        tester.test.assert_called_once_with(source, source_sha)
+        self.assertEqual(session.dispatch("device_action", {"action": "read"})["tested_input"], "original")
+        self.assertEqual(session.build_count, 0)
+        with self.assertRaises(ValueError):
+            session.finish("candidate", "The original was observed")
+        session.built(candidate, {"sha256": candidate_sha})
+        self.assertIsNone(session.candidate_verification())
+        self.assertEqual(session.dispatch("test_apk", {})["tested_input"], "candidate")
+        self.assertEqual(session.candidate_verification()["installed_sha256"], candidate_sha)
+        session.dispatch("test_original", {})
+        self.assertIsNone(session.candidate_verification())
+
+    def test_rejected_original_install_cannot_receive_device_actions(self):
+        tester = Mock()
+        tester.test.return_value = {"installed_sha256": None, "install": {"exit": 1}}
+        session = Session(self.root, Path("source.apk"), self.root / "out.apk",
+                          Path("tools"), 36, {"sha256": "a" * 64}, lambda _: None, tester)
+        session.dispatch("test_original", {})
+        with self.assertRaises(ValueError):
+            session.dispatch("device_action", {"action": "read"})
+        tester.action.assert_not_called()
 
     def test_rollback_reuses_the_exact_previous_build_after_a_failed_attempt(self):
         session = Session(self.root, Path("source.apk"), self.root/"candidate.apk",
