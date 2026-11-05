@@ -1,0 +1,92 @@
+name: Fresh Windows runtime
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prepare-runtime:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Download the published Windows installer
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          New-Item -ItemType Directory inputs,evidence | Out-Null
+          gh release download v0.6.7 --repo RoamerFly/Lazarus-Agent --dir inputs --pattern Lazarus-Agent-windows-x64-setup.exe --pattern latest.json --pattern latest.json.sig
+          if ($LASTEXITCODE) { throw 'Release download failed' }
+          $manifest = Get-Content -Raw inputs/latest.json | ConvertFrom-Json
+          $asset = $manifest.assets.'windows-x64-installer'
+          if ((Get-FileHash inputs/Lazarus-Agent-windows-x64-setup.exe).Hash.ToLowerInvariant() -ne $asset.sha256) { throw 'Installer SHA mismatch' }
+      - name: First use through the installed desktop program
+        shell: pwsh
+        run: |
+          $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
+          $env:JAVA_HOME = ''
+          $env:ANDROID_HOME = ''
+          $env:ANDROID_SDK_ROOT = ''
+          $env:REVIVER_SDK = ''
+          $env:REVIVER_JAVA_HOME = ''
+          $env:REVIVER_LAB = ''
+          $env:REVIVER_PORT = '18786'
+          $env:LAZARUS_STORAGE_ROOT = Join-Path $env:RUNNER_TEMP 'lazarus-first-runtime'
+          if (Test-Path -LiteralPath $env:LAZARUS_STORAGE_ROOT) { throw 'Storage root was not clean' }
+          $setup = Start-Process -FilePath .\inputs\Lazarus-Agent-windows-x64-setup.exe -ArgumentList '/S' -WindowStyle Hidden -Wait -PassThru
+          if ($setup.ExitCode -ne 0) { throw 'Installer failed' }
+          $app = Join-Path $env:LOCALAPPDATA 'Programs\Lazarus Agent\Lazarus-Agent.exe'
+          $desktop = Start-Process -FilePath $app -WindowStyle Hidden -PassThru
+          try {
+            $base = 'http://127.0.0.1:18786'
+            $deadline = (Get-Date).AddMinutes(3)
+            $config = $null
+            while ((Get-Date) -lt $deadline) {
+              try { $config = Invoke-RestMethod "$base/api/config"; break } catch {}
+              if ($desktop.HasExited) { throw 'Desktop exited before starting its local service' }
+              Start-Sleep -Seconds 2
+            }
+            if (!$config) { throw 'Desktop local service did not start' }
+            $headers = @{'x-reviver-token'=$config.token; Origin=$base}
+            $before = Invoke-RestMethod "$base/api/runtime"
+            $before | ConvertTo-Json -Depth 14 | Set-Content -Encoding utf8 evidence/before.json
+            if ($before.targets.'36'.ready) { throw 'Target was unexpectedly prepared before the test' }
+            $clock = [Diagnostics.Stopwatch]::StartNew()
+            $started = Invoke-RestMethod "$base/api/runtime/prepare" -Method Post -Headers $headers -ContentType 'application/json' -Body '{"targets":[36],"accept_terms":true}'
+            if (!$started.started) { throw 'Preparation did not start' }
+            $deadline = (Get-Date).AddMinutes(20)
+            $events = [Collections.Generic.HashSet[string]]::new()
+            while ((Get-Date) -lt $deadline) {
+              $state = Invoke-RestMethod "$base/api/runtime"
+              foreach ($event in $state.active.events) {
+                $row = $event | ConvertTo-Json -Compress
+                if ($events.Add($row)) { Add-Content -Encoding utf8 evidence/events.jsonl $row }
+              }
+              $state | ConvertTo-Json -Depth 16 | Set-Content -Encoding utf8 evidence/latest.json
+              if ($state.active.status -ne 'running') { break }
+              Start-Sleep -Seconds 5
+            }
+            $clock.Stop()
+            if ($state.active.status -ne 'ready' -or !$state.targets.'36'.ready) { throw ('Preparation failed: ' + ($state.active | ConvertTo-Json -Depth 6)) }
+            $cached = Invoke-RestMethod "$base/api/runtime/prepare" -Method Post -Headers $headers -ContentType 'application/json' -Body '{"targets":[36],"accept_terms":true}'
+            if ($cached.started -or !$cached.ready) { throw 'Prepared runtime was not reused' }
+            $cached | ConvertTo-Json -Depth 8 | Set-Content -Encoding utf8 evidence/reuse.json
+            $runtime = Join-Path $env:LAZARUS_STORAGE_ROOT 'runtimes\android-lab'
+            $emulator = Join-Path $runtime 'lab-sdk\emulator\emulator.exe'
+            $accel = & $emulator -accel-check 2>&1
+            $accel | Set-Content -Encoding utf8 evidence/acceleration.txt
+            @{ duration_seconds=$clock.Elapsed.TotalSeconds; bytes=(Get-ChildItem -LiteralPath $runtime -Recurse -File | Measure-Object Length -Sum).Sum; platform='GitHub-hosted fresh Windows runner'; workflow_head='This test checks fresh download and preparation. Android replay is recorded separately.' } |
+              ConvertTo-Json | Set-Content -Encoding utf8 evidence/summary.json
+          } finally {
+            Get-ChildItem -LiteralPath $env:LAZARUS_STORAGE_ROOT -Filter desktop.log -Recurse -ErrorAction SilentlyContinue | ForEach-Object { Copy-Item -LiteralPath $_.FullName evidence/desktop.log }
+            if (!$desktop.HasExited) { Stop-Process -Id $desktop.Id }
+          }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Lazarus-Agent-fresh-runtime-evidence
+          path: evidence/*
+          if-no-files-found: error
+          retention-days: 30
