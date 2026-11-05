@@ -61,6 +61,26 @@ def add_case(root, output, case, mode, repeat):
             copy(proof, sample / "agent-acceptance.json")
 
 
+FILE_CHECK_SCRIPT = r'''$ErrorActionPreference = 'Stop'
+$root = [IO.Path]::GetFullPath($PSScriptRoot)
+$count = 0
+foreach ($line in Get-Content -LiteralPath (Join-Path $root 'SHA256SUMS.txt') -Encoding utf8) {
+    if ($line -notmatch '^([a-f0-9]{64})  (.+)$') { throw '文件校验清单格式无效' }
+    $expected = $Matches[1]
+    $relative = $Matches[2]
+    $path = [IO.Path]::GetFullPath((Join-Path $root $relative))
+    if (!$path.StartsWith($root + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
+        throw '文件校验路径超出复核包目录'
+    }
+    if ((Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expected) {
+        throw "文件校验失败：$relative"
+    }
+    $count++
+}
+Write-Output "已核对 $count 个登记文件的 SHA-256。应用功能请继续按指南复测。"
+'''
+
+
 def download_script(manifest):
     asset = manifest.assets["windows-x64-installer"]
     if not re.fullmatch(r"[a-f0-9]{64}", asset.sha256):
@@ -172,6 +192,7 @@ def build(results, release_dir, output, capture_dir):
                           "pending": ["当前版本全组回归与差异审查", "非开发人员试用记录",
                                       "提交前最终独立复核"]}
         (kit / "复核状态.json").write_text(json.dumps(package_status, ensure_ascii=False, indent=2), encoding="utf-8")
+        (kit / "校验文件.ps1").write_text(FILE_CHECK_SCRIPT, encoding="utf-8-sig")
         files = sorted(path for path in kit.rglob("*") if path.is_file())
         (kit / "SHA256SUMS.txt").write_text(
             "".join(f"{digest(path)}  {path.relative_to(kit).as_posix()}\n" for path in files),
