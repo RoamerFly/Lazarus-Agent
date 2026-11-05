@@ -7,9 +7,14 @@ on:
         description: Published version to install and remove on a fresh runner
         required: true
         default: '0.6.15'
+      build_run:
+        description: Optional signed candidate build run for this exact commit
+        required: false
+        default: ''
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   check-published-installer:
@@ -25,12 +30,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_VERSION: ${{ inputs.version }}
+          CANDIDATE_BUILD_RUN: ${{ inputs.build_run }}
         run: |
           python -m pip install cryptography
           if ($LASTEXITCODE) { throw 'Signature verifier dependency failed' }
           New-Item -ItemType Directory inputs,evidence | Out-Null
-          gh release download "v$env:RELEASE_VERSION" --repo RoamerFly/Lazarus-Agent --dir inputs --pattern Lazarus-Agent-windows-x64-setup.exe --pattern latest.json --pattern latest.json.sig
-          if ($LASTEXITCODE) { throw 'Release download failed' }
+          .\tools\fetch_windows_review_input.ps1 -Version $env:RELEASE_VERSION -BuildRun $env:CANDIDATE_BUILD_RUN -Commit $env:GITHUB_SHA
           python -c "from pathlib import Path; from updater import verify_manifest,parse_manifest; p=Path('inputs'); raw=(p/'latest.json').read_bytes(); verify_manifest(raw,(p/'latest.json.sig').read_bytes()); import os; assert parse_manifest(raw).version==os.environ['RELEASE_VERSION']"
           if ($LASTEXITCODE) { throw 'Release signature or version failed' }
           $manifest = Get-Content -Raw inputs/latest.json | ConvertFrom-Json
@@ -41,6 +46,8 @@ jobs:
           Copy-Item inputs/latest.json,inputs/latest.json.sig evidence
       - name: Install, reject tampering and uninstall the actual release
         shell: pwsh
+        env:
+          CANDIDATE_BUILD_RUN: ${{ inputs.build_run }}
         run: |
           $ErrorActionPreference = 'Stop'
           $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
@@ -70,7 +77,8 @@ jobs:
           $removal = Start-Process -FilePath $uninstaller -ArgumentList '/S' -WindowStyle Hidden -Wait -PassThru
           if ($removal.ExitCode -ne 0 -or (Test-Path -LiteralPath $installed)) { throw 'Uninstall failed' }
           if ((Get-Content -LiteralPath $sentinel -Raw).Trim() -ne 'preserve-user-output') { throw 'Default uninstall removed output' }
-          @{ version=$manifest.version; installer_sha256=$manifest.assets.'windows-x64-installer'.sha256; installed_exe_sha256=$exeHash; signature_verified=$true; install_exit=$setup.ExitCode; self_test_exit=$self.ExitCode; input_check_exit=$check.ExitCode; tampered_exit=$tampered.ExitCode; uninstall_exit=$removal.ExitCode; user_output_preserved=$true; scope='Official published installer, fresh Windows, input checks only; device behavior is separate' } |
+          $source = if ($env:CANDIDATE_BUILD_RUN) { 'Signed build artifact' } else { 'Official published installer' }
+          @{ version=$manifest.version; installer_sha256=$manifest.assets.'windows-x64-installer'.sha256; installed_exe_sha256=$exeHash; signature_verified=$true; install_exit=$setup.ExitCode; self_test_exit=$self.ExitCode; input_check_exit=$check.ExitCode; tampered_exit=$tampered.ExitCode; uninstall_exit=$removal.ExitCode; user_output_preserved=$true; source_build_run=$env:CANDIDATE_BUILD_RUN; source_commit=$env:GITHUB_SHA; scope="$source, fresh Windows, input checks only" } |
             ConvertTo-Json | Set-Content -Encoding utf8 evidence/installer-check.json
       - uses: actions/upload-artifact@v4
         if: always()

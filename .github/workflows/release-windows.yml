@@ -72,6 +72,16 @@ jobs:
           path: release/*
           if-no-files-found: error
           retention-days: 30
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'workflow_dispatch' && !inputs.publish
+        with:
+          name: Lazarus-Agent-review-inputs-${{ steps.release.outputs.version }}
+          path: |
+            release/Lazarus-Agent-windows-x64-setup.exe
+            release/latest.json
+            release/latest.json.sig
+          if-no-files-found: error
+          retention-days: 14
       - name: Publish GitHub Release
         if: github.ref_type == 'tag' || inputs.publish
         shell: pwsh

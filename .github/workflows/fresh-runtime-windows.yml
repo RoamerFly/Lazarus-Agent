@@ -7,6 +7,10 @@ on:
         description: Published Windows release version
         required: true
         default: '0.6.15'
+      build_run:
+        description: Optional signed candidate build run for this exact commit
+        required: false
+        default: ''
       unicode_paths:
         description: Test storage and TEMP paths containing Chinese and spaces
         type: boolean
@@ -18,6 +22,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   prepare-runtime:
@@ -30,15 +35,20 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_VERSION: ${{ inputs.version }}
+          CANDIDATE_BUILD_RUN: ${{ inputs.build_run }}
         run: |
           New-Item -ItemType Directory inputs,evidence | Out-Null
-          gh release download "v$env:RELEASE_VERSION" --repo RoamerFly/Lazarus-Agent --dir inputs --pattern Lazarus-Agent-windows-x64-setup.exe --pattern latest.json --pattern latest.json.sig
-          if ($LASTEXITCODE) { throw 'Release download failed' }
+          .\tools\fetch_windows_review_input.ps1 -Version $env:RELEASE_VERSION -BuildRun $env:CANDIDATE_BUILD_RUN -Commit $env:GITHUB_SHA
           $manifest = Get-Content -Raw inputs/latest.json | ConvertFrom-Json
           $asset = $manifest.assets.'windows-x64-installer'
-          if ((Get-FileHash inputs/Lazarus-Agent-windows-x64-setup.exe).Hash.ToLowerInvariant() -ne $asset.sha256) { throw 'Installer SHA mismatch' }
+          if ($manifest.version -ne $env:RELEASE_VERSION -or
+              (Get-FileHash inputs/Lazarus-Agent-windows-x64-setup.exe).Hash.ToLowerInvariant() -ne $asset.sha256) {
+            throw 'Installer version or SHA mismatch'
+          }
           Copy-Item inputs/latest.json evidence/release-manifest.json
           Copy-Item inputs/latest.json.sig evidence/release-manifest.sig
+          @{ source_build_run=$env:CANDIDATE_BUILD_RUN; source_commit=$env:GITHUB_SHA } |
+            ConvertTo-Json | Set-Content -Encoding utf8 evidence/build-source.json
       - name: First use through the installed desktop program
         shell: pwsh
         env:
