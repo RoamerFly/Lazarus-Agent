@@ -45,7 +45,11 @@ jobs:
           UNICODE_PATHS: ${{ inputs.unicode_paths }}
           OFFLINE_REPAIR: ${{ inputs.offline_repair }}
         run: |
-          if ($env:OFFLINE_REPAIR -eq 'true') { $clientPython = (Get-Command python -CommandType Application).Source }
+          if ($env:OFFLINE_REPAIR -eq 'true') {
+            $clientPython = (Get-Command python -CommandType Application | Select-Object -First 1).Source
+            & $clientPython --version
+            if ($LASTEXITCODE -ne 0) { throw 'Offline repair client interpreter could not start' }
+          }
           $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
           $env:JAVA_HOME = ''
           $env:ANDROID_HOME = ''
