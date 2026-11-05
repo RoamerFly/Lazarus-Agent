@@ -113,9 +113,12 @@ def main():
         payload["modifications"] = sorted(CAPABILITIES)
         from feature_agent import run as run_feature
         from feature_agent import tool_definitions
-        if not callable(run_feature) or not tool_definitions(True):
+        acceptance = [{"action": "expect", "value": "Ready"}]
+        agent_tools = [tool["function"]["name"] for tool in tool_definitions(True, acceptance)]
+        required = {"test_original", "rehearse_acceptance", "declare_platform_library"}
+        if not callable(run_feature) or not required.issubset(agent_tools):
             raise RuntimeError("对话功能修改工具未完整打包")
-        payload["agent_tools"] = [t["function"]["name"] for t in tool_definitions(True)]
+        payload["agent_tools"] = agent_tools
         from agent_acceptance import verify, verified_for
         from tools.replay_agent_acceptance import read_inputs
         if not all(callable(entry) for entry in (verify, verified_for, read_inputs)):
