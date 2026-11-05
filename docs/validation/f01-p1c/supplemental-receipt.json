@@ -1,0 +1,12 @@
+{
+  "scope": "additional device replay after P1C",
+  "freeze_commit": "a28bea979d0b9d8ae6f5074028e8c64d1547ac60",
+  "trial": "P04-agent-1",
+  "plan_sha256": "b0db3bc3693c7769194da6d4ab756360cd7bafae9db08f08888a79bcd63a5c3e",
+  "apk_sha256": "0262229d68c7e5567d86370774c8b9e42cd51fd473f9e20efe60a066226a78c7",
+  "exe_sha256": "d13a93650523dfda1299327f4a0f8f9038c964db0492dbdbdb142c2138f054be",
+  "exit_code": 0,
+  "status": "behavior-verified",
+  "verified": true,
+  "report_sha256": "807b1c3abd49802855a4b412bab0b50746775f084e4de3b585c5f8bff3475e56"
+}

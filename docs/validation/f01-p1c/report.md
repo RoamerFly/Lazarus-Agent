@@ -45,4 +45,8 @@
 Agent 已记录轮次用时中位数为 102.4 秒，包含设备和构建等待。计量日志收录 432 条模型响应。
 按冻结单价估算为 0.1798 至 0.3597 美元。真实账单与测试环境成本分别核对。
 
+## 留出样本的追加复测
+
+评测结束后，按事先提交的追加计划选用首个通过的温度卡候选 `P04-agent-1`。v0.6.16 签名 EXE 在 Android 16 x86_64 模拟器核对安装哈希后完成 16 步。新输入 13°C 和 37°C 分别显示 55°F 和 99°F，切回摄氏后冷启动仍保留摄氏设置。此次复测单独归档，冻结计分保持原样。[追加计划](../f01-p1c-supplemental-plan.json) · [16 步验收](supplemental-acceptance.json) · [哈希回执](supplemental-receipt.json)
+
 [逐轮记录](results.json) · [候选差异复查](diff-review.json) · [代表样本的 APK 签名](selected-signatures.json) · [上一批 P1B](../f01-p1b/report.md)

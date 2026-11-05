@@ -232,6 +232,14 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
         copy(proposal, kit / proposal.name)
         copy(video, kit / video.name)
         copy(video.with_suffix(".json"), kit / "演示记录.json")
+        device_screen = metadata["capture"].get("device_screen")
+        if device_screen:
+            screenshot = capture_dir / "device-final.png"
+            if (device_screen["file"] != screenshot.name or device_screen["api"] != 36 or
+                    device_screen["apk_sha256"] != demo_proof["candidate_sha256"] or
+                    device_screen["sha256"] != digest(screenshot)):
+                raise ValueError("演示设备画面没有对应到验收候选")
+            copy(screenshot, kit / "演示Android画面.png")
         demo_sample = kit / "可分发样本/工作台演示"
         copy(demo_source, demo_sample / "base.apk")
         copy(demo_candidate, demo_sample / "candidate.apk")
@@ -332,7 +340,7 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
             if label == "P1B":
                 names.append("p01-runtime-observation.json")
             if label == "P1C":
-                names.append("selected-signatures.json")
+                names.extend(("selected-signatures.json", "supplemental-acceptance.json", "supplemental-receipt.json"))
                 for name in ("agent-rehearsal-device.md", "agent-rehearsal-device.json",
                              "agent-platform-library.md", "agent-platform-library-device.json",
                              "agent-platform-library-model.json", "f01-p1c-input-feasibility.json",

@@ -1,0 +1,1305 @@
+{
+  "schema": 1,
+  "targets": [
+    36
+  ],
+  "steps": [
+    {
+      "action": "tap",
+      "value": "Use Fahrenheit"
+    },
+    {
+      "action": "tap",
+      "value": "Temperature input"
+    },
+    {
+      "action": "input",
+      "value": "13"
+    },
+    {
+      "action": "tap",
+      "value": "Calculate"
+    },
+    {
+      "action": "expect",
+      "value": "Result: 55 °F"
+    },
+    {
+      "action": "tap",
+      "value": "Temperature input"
+    },
+    {
+      "action": "input",
+      "value": "37"
+    },
+    {
+      "action": "tap",
+      "value": "Calculate"
+    },
+    {
+      "action": "expect",
+      "value": "Result: 99 °F"
+    },
+    {
+      "action": "tap",
+      "value": "Use Celsius"
+    },
+    {
+      "action": "cold_start"
+    },
+    {
+      "action": "expect",
+      "value": "Units: Celsius"
+    },
+    {
+      "action": "tap",
+      "value": "Temperature input"
+    },
+    {
+      "action": "input",
+      "value": "13"
+    },
+    {
+      "action": "tap",
+      "value": "Calculate"
+    },
+    {
+      "action": "expect",
+      "value": "Result: 13 °C"
+    }
+  ],
+  "input_sha256": "ffce5821e6eeb1c0b9faaa5d0c79fadaa17dcdcc1a77d5b3062d4d947189a85b",
+  "candidate_sha256": "0262229d68c7e5567d86370774c8b9e42cd51fd473f9e20efe60a066226a78c7",
+  "rows": [
+    {
+      "api": 36,
+      "status": "behavior-verified",
+      "baseline": {
+        "sha256": "ffce5821e6eeb1c0b9faaa5d0c79fadaa17dcdcc1a77d5b3062d4d947189a85b",
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "failed",
+        "steps": [
+          {
+            "action": "tap",
+            "value": "Use Fahrenheit",
+            "status": "failed",
+            "matches": [],
+            "match_count": 0,
+            "observed": [
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1280]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/content",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "Warehouse temperature",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,60][696,104]"
+              },
+              {
+                "text": "Units: Celsius",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,104][696,133]"
+              },
+              {
+                "text": "Enter degrees Celsius",
+                "content-desc": "Temperature input",
+                "resource-id": "",
+                "bounds": "[24,133][696,201]"
+              },
+              {
+                "text": "Calculate",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,201][696,273]"
+              },
+              {
+                "text": "No result",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,273][696,302]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/statusBarBackground",
+                "bounds": "[0,0][720,36]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/navigationBarBackground",
+                "bounds": "[0,1208][720,1280]"
+              }
+            ]
+          }
+        ],
+        "device": {
+          "api": 36,
+          "environment": "private-workbench-device",
+          "install": {
+            "exit": 0,
+            "output": "Performing Streamed Install\r\nSuccess"
+          },
+          "launch": {
+            "exit": 0,
+            "output": "Starting: Intent { cmp=org.ggbond.temperaturecard/.TemperatureActivity }\r\nStatus: ok\r\nLaunchState: COLD\r\nActivity: org.ggbond.temperaturecard/.TemperatureActivity\r\nTotalTime: 1289\r\nWaitTime: 1414\r\nComplete",
+            "focused_package": "org.ggbond.temperaturecard"
+          },
+          "installed_sha256": "ffce5821e6eeb1c0b9faaa5d0c79fadaa17dcdcc1a77d5b3062d4d947189a85b",
+          "abis": [
+            "x86_64"
+          ],
+          "ui": null,
+          "verification": "install-and-launch",
+          "steps": []
+        },
+        "launch_observations": [
+          {
+            "target_nodes": 11
+          }
+        ],
+        "failure": "点击控件必须在目标应用页面唯一匹配"
+      },
+      "candidate": {
+        "sha256": "0262229d68c7e5567d86370774c8b9e42cd51fd473f9e20efe60a066226a78c7",
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed",
+        "steps": [
+          {
+            "action": "tap",
+            "value": "Use Fahrenheit",
+            "status": "passed",
+            "matches": [
+              {
+                "text": "Use Fahrenheit",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,133][696,205]"
+              }
+            ],
+            "match_count": 1,
+            "observed": [
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1280]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/content",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "Warehouse temperature",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,60][696,104]"
+              },
+              {
+                "text": "Units: Celsius",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,104][696,133]"
+              },
+              {
+                "text": "Use Fahrenheit",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,133][696,205]"
+              },
+              {
+                "text": "Enter degrees Celsius",
+                "content-desc": "Temperature input",
+                "resource-id": "",
+                "bounds": "[24,205][696,273]"
+              },
+              {
+                "text": "Calculate",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,273][696,345]"
+              },
+              {
+                "text": "No result",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,345][696,374]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/statusBarBackground",
+                "bounds": "[0,0][720,36]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/navigationBarBackground",
+                "bounds": "[0,1208][720,1280]"
+              }
+            ]
+          },
+          {
+            "action": "tap",
+            "value": "Temperature input",
+            "status": "passed",
+            "matches": [
+              {
+                "text": "Enter degrees Celsius",
+                "content-desc": "Temperature input",
+                "resource-id": "",
+                "bounds": "[24,205][696,273]"
+              }
+            ],
+            "match_count": 1,
+            "observed": [
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1280]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/content",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "Warehouse temperature",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,60][696,104]"
+              },
+              {
+                "text": "Units: Fahrenheit",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,104][696,133]"
+              },
+              {
+                "text": "Use Celsius",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,133][696,205]"
+              },
+              {
+                "text": "Enter degrees Celsius",
+                "content-desc": "Temperature input",
+                "resource-id": "",
+                "bounds": "[24,205][696,273]"
+              },
+              {
+                "text": "Calculate",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,273][696,345]"
+              },
+              {
+                "text": "No result",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,345][696,374]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/statusBarBackground",
+                "bounds": "[0,0][720,36]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/navigationBarBackground",
+                "bounds": "[0,1208][720,1280]"
+              }
+            ]
+          },
+          {
+            "action": "input",
+            "value": "13",
+            "status": "passed"
+          },
+          {
+            "action": "tap",
+            "value": "Calculate",
+            "status": "passed",
+            "matches": [
+              {
+                "text": "Calculate",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,273][696,345]"
+              }
+            ],
+            "match_count": 1,
+            "observed": [
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1280]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/content",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "Warehouse temperature",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,60][696,104]"
+              },
+              {
+                "text": "Units: Fahrenheit",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,104][696,133]"
+              },
+              {
+                "text": "Use Celsius",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,133][696,205]"
+              },
+              {
+                "text": "13",
+                "content-desc": "Temperature input",
+                "resource-id": "",
+                "bounds": "[24,205][696,273]"
+              },
+              {
+                "text": "Calculate",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,273][696,345]"
+              },
+              {
+                "text": "No result",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,345][696,374]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/statusBarBackground",
+                "bounds": "[0,0][720,36]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/navigationBarBackground",
+                "bounds": "[0,1208][720,1280]"
+              }
+            ]
+          },
+          {
+            "action": "expect",
+            "value": "Result: 55 °F",
+            "status": "passed",
+            "matches": [
+              {
+                "text": "Result: 55 °F",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,345][696,374]"
+              }
+            ],
+            "match_count": 1,
+            "observed": [
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1280]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/content",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "Warehouse temperature",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,60][696,104]"
+              },
+              {
+                "text": "Units: Fahrenheit",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,104][696,133]"
+              },
+              {
+                "text": "Use Celsius",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,133][696,205]"
+              },
+              {
+                "text": "Enter degrees Celsius",
+                "content-desc": "Temperature input",
+                "resource-id": "",
+                "bounds": "[24,205][696,273]"
+              },
+              {
+                "text": "Calculate",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,273][696,345]"
+              },
+              {
+                "text": "Result: 55 °F",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,345][696,374]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/statusBarBackground",
+                "bounds": "[0,0][720,36]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/navigationBarBackground",
+                "bounds": "[0,1208][720,1280]"
+              }
+            ]
+          },
+          {
+            "action": "tap",
+            "value": "Temperature input",
+            "status": "passed",
+            "matches": [
+              {
+                "text": "Enter degrees Celsius",
+                "content-desc": "Temperature input",
+                "resource-id": "",
+                "bounds": "[24,205][696,273]"
+              }
+            ],
+            "match_count": 1,
+            "observed": [
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1280]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/content",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "Warehouse temperature",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,60][696,104]"
+              },
+              {
+                "text": "Units: Fahrenheit",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,104][696,133]"
+              },
+              {
+                "text": "Use Celsius",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,133][696,205]"
+              },
+              {
+                "text": "Enter degrees Celsius",
+                "content-desc": "Temperature input",
+                "resource-id": "",
+                "bounds": "[24,205][696,273]"
+              },
+              {
+                "text": "Calculate",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,273][696,345]"
+              },
+              {
+                "text": "Result: 55 °F",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,345][696,374]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/statusBarBackground",
+                "bounds": "[0,0][720,36]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/navigationBarBackground",
+                "bounds": "[0,1208][720,1280]"
+              }
+            ]
+          },
+          {
+            "action": "input",
+            "value": "37",
+            "status": "passed"
+          },
+          {
+            "action": "tap",
+            "value": "Calculate",
+            "status": "passed",
+            "matches": [
+              {
+                "text": "Calculate",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,273][696,345]"
+              }
+            ],
+            "match_count": 1,
+            "observed": [
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1280]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/content",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "Warehouse temperature",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,60][696,104]"
+              },
+              {
+                "text": "Units: Fahrenheit",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,104][696,133]"
+              },
+              {
+                "text": "Use Celsius",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,133][696,205]"
+              },
+              {
+                "text": "37",
+                "content-desc": "Temperature input",
+                "resource-id": "",
+                "bounds": "[24,205][696,273]"
+              },
+              {
+                "text": "Calculate",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,273][696,345]"
+              },
+              {
+                "text": "Result: 55 °F",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,345][696,374]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/statusBarBackground",
+                "bounds": "[0,0][720,36]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/navigationBarBackground",
+                "bounds": "[0,1208][720,1280]"
+              }
+            ]
+          },
+          {
+            "action": "expect",
+            "value": "Result: 99 °F",
+            "status": "passed",
+            "matches": [
+              {
+                "text": "Result: 99 °F",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,345][696,374]"
+              }
+            ],
+            "match_count": 1,
+            "observed": [
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1280]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/content",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "Warehouse temperature",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,60][696,104]"
+              },
+              {
+                "text": "Units: Fahrenheit",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,104][696,133]"
+              },
+              {
+                "text": "Use Celsius",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,133][696,205]"
+              },
+              {
+                "text": "Enter degrees Celsius",
+                "content-desc": "Temperature input",
+                "resource-id": "",
+                "bounds": "[24,205][696,273]"
+              },
+              {
+                "text": "Calculate",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,273][696,345]"
+              },
+              {
+                "text": "Result: 99 °F",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,345][696,374]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/statusBarBackground",
+                "bounds": "[0,0][720,36]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/navigationBarBackground",
+                "bounds": "[0,1208][720,1280]"
+              }
+            ]
+          },
+          {
+            "action": "tap",
+            "value": "Use Celsius",
+            "status": "passed",
+            "matches": [
+              {
+                "text": "Use Celsius",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,133][696,205]"
+              }
+            ],
+            "match_count": 1,
+            "observed": [
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1280]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/content",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "Warehouse temperature",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,60][696,104]"
+              },
+              {
+                "text": "Units: Fahrenheit",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,104][696,133]"
+              },
+              {
+                "text": "Use Celsius",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,133][696,205]"
+              },
+              {
+                "text": "Enter degrees Celsius",
+                "content-desc": "Temperature input",
+                "resource-id": "",
+                "bounds": "[24,205][696,273]"
+              },
+              {
+                "text": "Calculate",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,273][696,345]"
+              },
+              {
+                "text": "Result: 99 °F",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,345][696,374]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/statusBarBackground",
+                "bounds": "[0,0][720,36]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/navigationBarBackground",
+                "bounds": "[0,1208][720,1280]"
+              }
+            ]
+          },
+          {
+            "action": "cold_start",
+            "status": "passed",
+            "launch_observations": [
+              {
+                "target_nodes": 12
+              }
+            ]
+          },
+          {
+            "action": "expect",
+            "value": "Units: Celsius",
+            "status": "passed",
+            "matches": [
+              {
+                "text": "Units: Celsius",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,104][696,133]"
+              }
+            ],
+            "match_count": 1,
+            "observed": [
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1280]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/content",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "Warehouse temperature",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,60][696,104]"
+              },
+              {
+                "text": "Units: Celsius",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,104][696,133]"
+              },
+              {
+                "text": "Use Fahrenheit",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,133][696,205]"
+              },
+              {
+                "text": "Enter degrees Celsius",
+                "content-desc": "Temperature input",
+                "resource-id": "",
+                "bounds": "[24,205][696,273]"
+              },
+              {
+                "text": "Calculate",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,273][696,345]"
+              },
+              {
+                "text": "No result",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,345][696,374]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/statusBarBackground",
+                "bounds": "[0,0][720,36]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/navigationBarBackground",
+                "bounds": "[0,1208][720,1280]"
+              }
+            ]
+          },
+          {
+            "action": "tap",
+            "value": "Temperature input",
+            "status": "passed",
+            "matches": [
+              {
+                "text": "Enter degrees Celsius",
+                "content-desc": "Temperature input",
+                "resource-id": "",
+                "bounds": "[24,205][696,273]"
+              }
+            ],
+            "match_count": 1,
+            "observed": [
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1280]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/content",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "Warehouse temperature",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,60][696,104]"
+              },
+              {
+                "text": "Units: Celsius",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,104][696,133]"
+              },
+              {
+                "text": "Use Fahrenheit",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,133][696,205]"
+              },
+              {
+                "text": "Enter degrees Celsius",
+                "content-desc": "Temperature input",
+                "resource-id": "",
+                "bounds": "[24,205][696,273]"
+              },
+              {
+                "text": "Calculate",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,273][696,345]"
+              },
+              {
+                "text": "No result",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,345][696,374]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/statusBarBackground",
+                "bounds": "[0,0][720,36]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/navigationBarBackground",
+                "bounds": "[0,1208][720,1280]"
+              }
+            ]
+          },
+          {
+            "action": "input",
+            "value": "13",
+            "status": "passed"
+          },
+          {
+            "action": "tap",
+            "value": "Calculate",
+            "status": "passed",
+            "matches": [
+              {
+                "text": "Calculate",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,273][696,345]"
+              }
+            ],
+            "match_count": 1,
+            "observed": [
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1280]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/content",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "Warehouse temperature",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,60][696,104]"
+              },
+              {
+                "text": "Units: Celsius",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,104][696,133]"
+              },
+              {
+                "text": "Use Fahrenheit",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,133][696,205]"
+              },
+              {
+                "text": "13",
+                "content-desc": "Temperature input",
+                "resource-id": "",
+                "bounds": "[24,205][696,273]"
+              },
+              {
+                "text": "Calculate",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,273][696,345]"
+              },
+              {
+                "text": "No result",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,345][696,374]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/statusBarBackground",
+                "bounds": "[0,0][720,36]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/navigationBarBackground",
+                "bounds": "[0,1208][720,1280]"
+              }
+            ]
+          },
+          {
+            "action": "expect",
+            "value": "Result: 13 °C",
+            "status": "passed",
+            "matches": [
+              {
+                "text": "Result: 13 °C",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,345][696,374]"
+              }
+            ],
+            "match_count": 1,
+            "observed": [
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1280]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,0][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/content",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[0,36][720,1208]"
+              },
+              {
+                "text": "Warehouse temperature",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,60][696,104]"
+              },
+              {
+                "text": "Units: Celsius",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,104][696,133]"
+              },
+              {
+                "text": "Use Fahrenheit",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,133][696,205]"
+              },
+              {
+                "text": "Enter degrees Celsius",
+                "content-desc": "Temperature input",
+                "resource-id": "",
+                "bounds": "[24,205][696,273]"
+              },
+              {
+                "text": "Calculate",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,273][696,345]"
+              },
+              {
+                "text": "Result: 13 °C",
+                "content-desc": "",
+                "resource-id": "",
+                "bounds": "[24,345][696,374]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/statusBarBackground",
+                "bounds": "[0,0][720,36]"
+              },
+              {
+                "text": "",
+                "content-desc": "",
+                "resource-id": "android:id/navigationBarBackground",
+                "bounds": "[0,1208][720,1280]"
+              }
+            ]
+          }
+        ],
+        "device": {
+          "api": 36,
+          "environment": "private-workbench-device",
+          "install": {
+            "exit": 0,
+            "output": "Performing Streamed Install\r\nSuccess"
+          },
+          "launch": {
+            "exit": 0,
+            "output": "Starting: Intent { cmp=org.ggbond.temperaturecard/.TemperatureActivity }\r\nStatus: ok\r\nLaunchState: COLD\r\nActivity: org.ggbond.temperaturecard/.TemperatureActivity\r\nTotalTime: 1264\r\nWaitTime: 1294\r\nComplete",
+            "focused_package": "org.ggbond.temperaturecard"
+          },
+          "installed_sha256": "0262229d68c7e5567d86370774c8b9e42cd51fd473f9e20efe60a066226a78c7",
+          "abis": [
+            "x86_64"
+          ],
+          "ui": null,
+          "verification": "install-and-launch",
+          "steps": []
+        },
+        "launch_observations": [
+          {
+            "target_nodes": 12
+          }
+        ]
+      },
+      "comparison": "baseline-check-failed"
+    }
+  ],
+  "status": "behavior-verified"
+}

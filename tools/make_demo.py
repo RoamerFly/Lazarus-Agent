@@ -35,7 +35,7 @@ def build(capture):
         raise ValueError("缺少实际操作画面")
     out = ROOT / "交付/遗留软件复活智能体演示.mp4"
     out.parent.mkdir(exist_ok=True)
-    keyframes = [(0, "Windows 工作台。导入老 APK，选择 Android 16。", 5),
+    keyframes = [(0, "导入老 APK，选择 Android 16。", 5),
                  (1, "自有巡检单原包 targetSdk 22，Android 16 默认安装被拒绝。", 6),
                  (2, "在发送需求之前，固定路线切换和冷启动的验收步骤。", 7),
                  (3, "用一句需求要求恢复安装，并记住最后打开的路线。", 7)]
@@ -43,7 +43,12 @@ def build(capture):
     selected = middle[::max(1, len(middle)//8)][:8]
     for index in selected:
         keyframes.append((index, "DeepSeek Flash 实际执行节选。模型自主读取、修改、构建和测试。", 3))
-    keyframes.append((len(frames)-1, "Android 16 专用模拟器独立复测，核对安装包哈希并执行固定的 10 步操作。", 9))
+    result_caption = "Android 16 专用模拟器独立复测，核对安装包哈希并执行固定的 10 步操作。"
+    if frames[-1].get("capture_kind") == "reopened-saved-job":
+        if frames[-1]["job_id"] != metadata["job_id"]:
+            raise ValueError("结果画面来自不同任务")
+        result_caption = "重开同一任务查看结果。Android 16 独立验收核对安装哈希并通过 10 步。"
+    keyframes.append((len(frames)-1, result_caption, 9))
     device_screen = metadata.get("device_screen")
     if device_screen:
         if (device_screen["file"] != "device-final.png" or device_screen["api"] != 36
@@ -54,6 +59,7 @@ def build(capture):
                 raise ValueError("Android 画面哈希不符")
         keyframes.append((len(frames), "验收后在专用模拟器上看到的应用界面，设备安装哈希与导出 APK 一致。", 7))
         frames.append(device_screen)
+    duration_seconds = sum(row[2] for row in keyframes)
     with tempfile.TemporaryDirectory(dir=ROOT / "build", prefix="demo-") as directory:
         temporary = Path(directory)
         timeline = ["ffconcat version 1.0"]
@@ -78,13 +84,14 @@ def build(capture):
         (temporary / "timeline.txt").write_text("\n".join(timeline), encoding="ascii")
         subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0",
                         "-i", "timeline.txt", "-vf", "fps=20,format=yuv420p", "-c:v", "libx264",
-                        "-preset", "veryfast", "-crf", "19", "-movflags", "+faststart", str(out)],
+                        "-preset", "veryfast", "-crf", "19", "-t", str(duration_seconds),
+                        "-movflags", "+faststart", str(out)],
                        cwd=temporary, check=True)
     with out.open("rb") as stream:
         checksum = hashlib.file_digest(stream, "sha256").hexdigest()
     provenance = {"app_version": APP_VERSION, "video_sha256": checksum, "capture": metadata,
                   "edit": {"method": "real-screenshot-excerpts", "keyframes": keyframes,
-                           "voiceover": False}, "duration_planned_seconds": sum(row[2] for row in keyframes)}
+                           "voiceover": False}, "duration_planned_seconds": duration_seconds}
     out.with_suffix(".json").write_text(json.dumps(provenance, ensure_ascii=False, indent=2), encoding="utf-8")
     print(out)
 
