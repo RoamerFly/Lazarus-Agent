@@ -7,7 +7,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 from agent_workspace import Workspace, digest
-from feature_agent import Session, run
+from feature_agent import Session, run, tool_definitions
 
 
 class WorkspaceTests(unittest.TestCase):
@@ -97,6 +97,38 @@ class WorkspaceTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             session.dispatch("device_action", {"action": "read"})
         tester.action.assert_not_called()
+
+    def test_rehearsal_is_bound_to_the_current_build_and_kept_separate_from_final_verification(self):
+        tester = Mock()
+        steps = [{"action": "expect", "value": "Ready"}]
+        session = Session(self.root, Path("original.apk"), self.root / "out.apk",
+                          Path("tools"), 36, {}, lambda _: None, tester, steps)
+        name = "rehearse_acceptance"
+        for device_available, configured_steps, advertised in (
+                (True, steps, True), (True, (), False), (False, steps, False)):
+            names = {tool["function"]["name"] for tool in tool_definitions(device_available, configured_steps)}
+            self.assertEqual(name in names, advertised)
+        with self.assertRaises(ValueError):
+            session.dispatch(name, {})
+
+        first, second = self.root / "built1.apk", self.root / "built2.apk"
+        failed = {"function": "failed", "failed_step": {"index": 1, "value": "Ready"}}
+        passed = {"function": "passed"}
+        with patch("feature_agent.rehearse_candidate", side_effect=[failed, passed]) as rehearse:
+            session.built(first, {"sha256": "a" * 64})
+            self.assertEqual(session.dispatch(name, {}), failed)
+            self.assertEqual(session.dispatch(name, {}), failed)
+            path = "AndroidManifest.xml"
+            read = session.workspace.read_text(path)
+            session.workspace.replace_text(path, read["sha256"], "<manifest/>", "<manifest />")
+            with self.assertRaises(ValueError):
+                session.dispatch(name, {})
+            session.built(second, {"sha256": "b" * 64})
+            self.assertEqual(session.dispatch(name, {}), passed)
+            self.assertEqual([call.args for call in rehearse.call_args_list],
+                             [(tester, first, "a" * 64, steps), (tester, second, "b" * 64, steps)])
+        self.assertIsNone(session.candidate_verification())
+        self.assertEqual(session.build_count, 0)
 
     def test_rollback_reuses_the_exact_previous_build_after_a_failed_attempt(self):
         session = Session(self.root, Path("source.apk"), self.root/"candidate.apk",

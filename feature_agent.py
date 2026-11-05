@@ -7,6 +7,7 @@ import shutil
 import tempfile
 from urllib.parse import urlsplit
 
+from agent_acceptance import rehearse_candidate
 from agent_workspace import Workspace, digest_file
 from apk_edit_build import build_modified, decoded_apk
 from diagnose import inspect_package
@@ -32,7 +33,7 @@ STRING = {"type": "string"}
 INTEGER = {"type": "integer"}
 
 
-def tool_definitions(device_available):
+def tool_definitions(device_available, acceptance_steps=()):
     tools = [
         _tool("list_files", "按 glob 列出 APK 工作区文件，每页 80 个", {"pattern": STRING, "offset": INTEGER}, []),
         _tool("search_text", "在代码和资源中搜索字面文本，每页 30 个结果",
@@ -63,6 +64,9 @@ def tool_definitions(device_available):
                   {"action": {"type": "string", "enum": ["read", "tap_text", "input_text", "back", "cold_start"]},
                    "text": STRING}, ["action"]),
         ])
+        if acceptance_steps:
+            tools.append(_tool("rehearse_acceptance", "重新安装当前候选并重放用户给出的验收步骤。"
+                               "返回通过数量、首个失败步骤和观察证据；交付前仍会另行独立验收", {}))
     return tools
 
 
@@ -80,6 +84,8 @@ replace_text 的 old 必须来自 read_text 返回的原文件内容，去掉显
 目标操作验证通过后结束本轮，避免无关改动。如果实验失败，可还原为已成功构建的文件内容；哈希完全一致时可使用已有候选。
 诊断兼容或崩溃问题时，可先测试原 APK 并执行用户描述的动作。根据复现证据优先考虑保留原功能的最小修复。
 有设备工具时应测试最新候选，基于界面执行与需求有关的操作。安装启动成功只能证明安装启动。
+有 rehearse_acceptance 时，构建后优先重放用户给出的固定验收步骤。根据首个失败步骤继续诊断或修改；
+一旦通过就保留该候选。这是当前目标系统的预检，正式交付还要重新做独立验收。
 没有工具能完成、缺少服务/原生库/重要信息或达到限额时，说明已查证的阻碍，finish blocked/needs_input。
 用户也可能只问问题或描述上一轮问题，结合历史分析并回答。无需生成 APK 时 finish analysis。
 支持同一 APK 内文本代码与资源修改。文件系统和工具作用域仅限当前工作区及专用测试环境。
@@ -87,11 +93,13 @@ replace_text 的 old 必须来自 read_text 返回的原文件内容，去掉显
 
 
 class Session:
-    def __init__(self, decoded, source, output, tools, api, facts, progress, tester):
+    def __init__(self, decoded, source, output, tools, api, facts, progress, tester, acceptance_steps=()):
         self._workspace = Workspace(decoded) if decoded is not None else None
         self.stack = ExitStack()
         self.source, self.output, self.tools, self.api = source, output, tools, api
         self.facts, self.progress, self.tester = facts, progress, tester
+        self.acceptance_steps = acceptance_steps
+        self.rehearsals = {}
         self.build_count = 0
         self.built_revision = None
         self.successful_builds = {}
@@ -119,6 +127,14 @@ class Session:
             return self.build()
         if name == "localize_resources" and not args:
             return self.localize()
+        if name == "rehearse_acceptance" and not args and self.tester and self.acceptance_steps:
+            self.require_current_build()
+            sha256 = self.build_report["sha256"]
+            if sha256 not in self.rehearsals:
+                self.device_report = None
+                self.rehearsals[sha256] = rehearse_candidate(self.tester, self.artifact, sha256,
+                                                            self.acceptance_steps)
+            return self.rehearsals[sha256]
         if name in {"test_original", "test_apk"} and not args and self.tester:
             if name == "test_original":
                 artifact, expected_hash, role = self.source, self.facts["sha256"], "original"
@@ -235,9 +251,9 @@ def run(source, output, tools, api, expected_hash, request, config, progress, *,
         "history": list(history)[-12:], "acceptance_steps": list(acceptance_steps),
         "tools_scope": "current-apk-and-private-test-device",
     }, ensure_ascii=False)}]
-    definitions = tool_definitions(tester is not None)
+    definitions = tool_definitions(tester is not None, acceptance_steps)
     allowed = {tool["function"]["name"] for tool in definitions}
-    session = Session(None, source, output, tools, api, facts, progress, tester)
+    session = Session(None, source, output, tools, api, facts, progress, tester, acceptance_steps)
     with session.stack:
         try:
             _loop(session, messages, definitions, allowed, config, progress)

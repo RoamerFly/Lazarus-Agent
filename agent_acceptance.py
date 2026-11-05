@@ -149,9 +149,10 @@ def _step(tester, step, row, handled):
             raise ValueError("冷启动返回成功，但未观察到目标应用页面")
 
 
-def _observe(tester, apk, expected_hash, steps):
+def _observe(tester, apk, expected_hash, steps, *, capture_runtime=False):
     row = {"sha256": expected_hash, "build": "not-checked", "install": "not-run",
            "launch": "not-run", "function": "not-run", "steps": []}
+    crash_baseline = None
     try:
         if digest_file(apk) != expected_hash:
             raise ValueError("APK 文件哈希与本轮记录不一致")
@@ -166,6 +167,8 @@ def _observe(tester, apk, expected_hash, steps):
         if launch.get("exit") != 0 or not re.search(r"(?m)^Status: ok\s*$", launch.get("output", "")):
             row["launch"] = "failed"
             return row
+        if capture_runtime:
+            crash_baseline = tester.crash_snapshot()
         handled = set()
         if not _wait_for_launch_ui(tester, row, handled):
             row["launch"] = "failed"
@@ -181,7 +184,38 @@ def _observe(tester, apk, expected_hash, steps):
         row["failure"] = str(exc)[-1500:]
         if row["steps"]:
             row["function"] = "failed"
+    finally:
+        if crash_baseline is not None and row["function"] != "passed":
+            row.update(tester.new_crash(crash_baseline))
     return row
+
+
+def rehearse_candidate(tester, apk, expected_hash, steps):
+    """Summarize a candidate-only replay for the model's current editing round."""
+    row = _observe(tester, apk, expected_hash, steps, capture_runtime=True)
+    device = row.get("device") or {}
+    result = {key: row[key] for key in ("build", "install", "launch", "function")}
+    result.update(api=tester.api, candidate_sha256=expected_hash, installed_sha256=device.get("installed_sha256"),
+                  verification="candidate-rehearsal", expected_steps=len(steps),
+                  passed_steps=sum(step["status"] == "passed" for step in row["steps"]))
+    if row.get("failure"):
+        result["failure"] = row["failure"]
+    if row.get("runtime_crash"):
+        result["runtime_crash"] = row["runtime_crash"]
+    if result["install"] == "failed":
+        result["install_output"] = (device.get("install") or {}).get("output", "")[-800:]
+    if result["launch"] == "failed":
+        result["launch_output"] = (device.get("launch") or {}).get("output", "")[-800:]
+    if row["steps"] and row["steps"][-1]["status"] == "failed":
+        failed = row["steps"][-1]
+        result["failed_step"] = {key: failed[key] for key in ("action", "value", "match_count") if key in failed}
+        result["failed_step"]["index"] = len(row["steps"])
+        if failed.get("observed"):
+            result["failed_step"]["observed"] = [
+                {key: node[key][:160] for key in ("text", "content-desc", "resource-id") if node[key]}
+                for node in failed["observed"][:12]
+            ]
+    return result
 
 
 def verify(source, source_hash, candidate, candidate_hash, targets, steps, make_tester, available, progress):

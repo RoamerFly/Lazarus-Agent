@@ -6,7 +6,7 @@ import unittest
 from unittest.mock import Mock, patch
 import xml.etree.ElementTree as ET
 
-from agent_acceptance import _step, _wait_for_launch_ui, parse_steps, verify, verified_for
+from agent_acceptance import _step, _wait_for_launch_ui, parse_steps, rehearse_candidate, verify, verified_for
 
 
 def screen(package, text):
@@ -88,6 +88,37 @@ class AcceptanceTests(unittest.TestCase):
             parse_steps({"steps": [{"action": "cold_start"}, {"action": "absent", "value": "Error"}]})
         with self.assertRaises(ValueError):
             parse_steps({"steps": [{"action": "input", "value": "a; reboot"}, {"action": "expect", "value": "OK"}]})
+
+    def test_rehearsal_returns_first_failed_step_and_target_app_evidence(self):
+        steps = parse_steps({"steps": [{"action": "tap", "value": "Open"},
+                                       {"action": "expect", "value": "Expected"},
+                                       {"action": "expect", "value": "Later"}]})
+        sha256 = hashlib.sha256(b"candidate").hexdigest()
+        tree = screen("example.app", "Old")
+        ET.SubElement(tree, "node", package="other.app", text="Expected")
+        runtime = {"runtime_crash": {"exception_types": ["java.lang.NoSuchMethodError"]}}
+        tester = SimpleNamespace(
+            api=36,
+            facts={"package": "example.app"}, device=Mock(), serial="test", owner="job",
+            test=Mock(return_value={"install": {"exit": 0}, "launch": {"exit": 0, "output": "Status: ok"},
+                                    "installed_sha256": sha256}),
+            tree=Mock(return_value=tree),
+            crash_snapshot=Mock(return_value={}),
+            new_crash=Mock(return_value=runtime),
+        )
+        with TemporaryDirectory() as temporary, patch("agent_acceptance.bench_device.shell"), patch("agent_acceptance.time.sleep"):
+            apk = Path(temporary) / "candidate.apk"
+            apk.write_bytes(b"candidate")
+            report = rehearse_candidate(tester, apk, sha256, steps)
+        self.assertEqual(report["verification"], "candidate-rehearsal")
+        self.assertEqual(report["api"], 36)
+        self.assertEqual(report["installed_sha256"], sha256)
+        self.assertEqual(report["runtime_crash"], runtime["runtime_crash"])
+        tester.new_crash.assert_called_once_with({})
+        self.assertEqual((report["function"], report["passed_steps"], report["expected_steps"]), ("failed", 1, 3))
+        self.assertEqual(report["failed_step"], {"index": 2, "action": "expect", "value": "Expected",
+                                                 "match_count": 0, "observed": [{"text": "Open"}, {"text": "Old"}]})
+        self.assertFalse(verified_for(report, sha256))
 
     def test_same_candidate_partial_scope_and_wrong_owner_cannot_pass(self):
         steps = parse_steps({"tap": "Open", "expect": "Expected"})

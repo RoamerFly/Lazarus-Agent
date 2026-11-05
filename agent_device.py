@@ -26,7 +26,7 @@ class AgentDevice:
         if self.facts["sha256"] != expected_hash:
             raise ValueError("设备测试前候选哈希不符")
         self.serial = self.device.ensure(self.owner, self.api, self.progress, self.facts["native_abis"])
-        before = self._crashes() if capture_ui else None
+        before = self.crash_snapshot() if capture_ui else None
         result = self.device.install_run(artifact, self.facts)
         installed = None
         if result["install"]["exit"] == 0:
@@ -46,7 +46,7 @@ class AgentDevice:
                 "verification": "install-and-launch" if installed and launched and not runtime else "device-check-failed",
                 "steps": self.steps}
 
-    def _crashes(self):
+    def crash_snapshot(self):
         try:
             self.device.check(self.owner)
             proc = bench_device.invoke([bench_device.ADB, "-s", self.serial, "logcat", "-b", "crash",
@@ -57,9 +57,9 @@ class AgentDevice:
             return None
         return java_crashes(proc.stdout.decode("utf-8", "replace"), self.facts["package"])
 
-    def _new_crash(self, before):
+    def new_crash(self, before):
         if before is not None:
-            after = self._crashes() or {}
+            after = self.crash_snapshot() or {}
             recent = [event for marker, event in after.items() if marker not in before]
             if recent:
                 crash = {"source": "isolated-android-crash-buffer", **recent[-1]}
@@ -77,11 +77,11 @@ class AgentDevice:
         try:
             ui = self.observe()
         except OBSERVATION_ERRORS:
-            runtime = self._new_crash(before)
+            runtime = self.new_crash(before)
             if not runtime:
                 raise
             return None, runtime
-        return ui, self._new_crash(before)
+        return ui, self.new_crash(before)
 
     def tree(self):
         self.device.check(self.owner)
@@ -114,7 +114,7 @@ class AgentDevice:
         if len(self.steps) >= 20:
             raise ValueError("本轮设备操作次数已达上限")
         self.device.check(self.owner)
-        before = self._crashes() if action != "read" else None
+        before = self.crash_snapshot() if action != "read" else None
         if action == "read":
             pass
         elif action == "cold_start":

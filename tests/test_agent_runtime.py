@@ -55,19 +55,19 @@ class AgentRuntimeTests(TestCase):
     def test_same_previous_crash_and_unavailable_baseline_are_ignored(self):
         tester = AgentDevice(Mock(), "task", 36, None, lambda _: None)
         previous = java_crashes(log("16:50:23.713", 5188), PACKAGE)
-        with patch.object(tester, "_crashes", return_value=previous) as crash_buffer:
-            self.assertEqual(tester._new_crash(previous), {})
-            self.assertEqual(tester._new_crash(None), {})
+        with patch.object(tester, "crash_snapshot", return_value=previous) as crash_buffer:
+            self.assertEqual(tester.new_crash(previous), {})
+            self.assertEqual(tester.new_crash(None), {})
         crash_buffer.assert_called_once()
 
     def test_missing_class_only_recommends_libraries_listed_by_target(self):
         tester = AgentDevice(Mock(), "task", 36, None, lambda _: None)
         missing = {"process": PACKAGE, "missing_class": "org.apache.http.ProtocolVersion"}
-        with patch.object(tester, "_crashes", return_value={("stamp", "12"): missing}), \
+        with patch.object(tester, "crash_snapshot", return_value={("stamp", "12"): missing}), \
                 patch("agent_device.bench_device.shell", side_effect=["library:org.apache.http.legacy", "library:other"]):
-            runtime = tester._new_crash({})["runtime_crash"]
+            runtime = tester.new_crash({})["runtime_crash"]
             self.assertEqual(runtime["platform_library"]["name"], "org.apache.http.legacy")
-            self.assertNotIn("platform_library", tester._new_crash({})["runtime_crash"])
+            self.assertNotIn("platform_library", tester.new_crash({})["runtime_crash"])
 
     def test_independent_replay_does_not_collect_model_diagnostics(self):
         device = Mock()
@@ -78,7 +78,7 @@ class AgentRuntimeTests(TestCase):
         facts = {"sha256": sha, "package": PACKAGE, "native_abis": []}
         with patch("agent_device.inspect_package", return_value=facts), \
                 patch("agent_device.bench_device.shell", side_effect=["package:/data/app/app/base.apk", sha]), \
-                patch.object(tester, "_crashes") as crash_buffer:
+                patch.object(tester, "crash_snapshot") as crash_buffer:
             result = tester.test(Path("test.apk"), sha, capture_ui=False)
         crash_buffer.assert_not_called()
         self.assertEqual(result["verification"], "install-and-launch")
