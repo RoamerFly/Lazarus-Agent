@@ -108,7 +108,7 @@ Write-Output "校验通过。请打开 $target 安装 Lazarus Agent {APP_VERSION
 '''
 
 
-def build(results, release_dir, output, capture_dir, regression_results=None):
+def build(results, release_dir, output, capture_dir, regression_results=None, regression_summary=None):
     results = results.resolve()
     if not results.is_relative_to(ROOT / "build") or not results.is_dir():
         raise ValueError("请指定 build 目录内的原始评测结果")
@@ -130,6 +130,18 @@ def build(results, release_dir, output, capture_dir, regression_results=None):
         if not regression_results.is_relative_to(ROOT / "build") or not regression_results.is_dir():
             raise ValueError("请指定 build 目录内的当前版本回归结果")
         regression = summarize(regression_results, protocol)
+    regression_metadata = None
+    if regression_summary is not None:
+        recorded = read(regression_summary)
+        if regression is None or any(recorded[key] != regression[key] for key in ("counts", "rows")):
+            raise ValueError("回归摘要与本次原始记录不符")
+        implementation = recorded["implementation_commit"]
+        version_source = subprocess.check_output(
+            ["git", "show", implementation + ":app_version.py"], cwd=ROOT).decode("utf-8")
+        if f'APP_VERSION = "{recorded["app_version"]}"' not in version_source:
+            raise ValueError("回归摘要的版本与实施提交不符")
+        regression_metadata = {"app_version": recorded["app_version"], "source_commit": implementation,
+                               "role": recorded["evaluation_role"]}
     proposal = ROOT / "交付/遗留软件复活智能体方案说明.pdf"
     video = ROOT / "交付/遗留软件复活智能体演示.mp4"
     metadata = read(video.with_suffix(".json"))
@@ -213,8 +225,14 @@ def build(results, release_dir, output, capture_dir, regression_results=None):
                           "purpose": "engineering-review", "ready_for_submission": False,
                           "frozen_benchmark_source": "17388e9", "benchmark": summary["counts"],
                           "current_regression": regression["counts"] if regression else None,
+                          "regression_implementation": regression_metadata,
                           "pending": (["当前版本全组回归与差异审查"] if regression is None else []) +
-                                     ["非开发人员试用记录", "提交前最终独立复核"]}
+                                     ["非开发人员试用记录", "负责人提交前核对赛事平台要求"]}
+        windows_proof = ROOT / "docs/validation" / f"{APP_VERSION}-windows-proof.json"
+        if windows_proof.is_file():
+            record = read(windows_proof)
+            package_status["release_source_commit"] = record["release_source_commit"]
+            package_status["independent_windows_workflow"] = record["workflow"]
         (kit / "复核状态.json").write_text(json.dumps(package_status, ensure_ascii=False, indent=2), encoding="utf-8")
         (kit / "校验文件.ps1").write_text(FILE_CHECK_SCRIPT, encoding="utf-8-sig")
         files = sorted(path for path in kit.rglob("*") if path.is_file())
@@ -244,9 +262,11 @@ def main():
     parser.add_argument("--release-dir", type=Path, required=True)
     parser.add_argument("--capture-dir", type=Path, required=True)
     parser.add_argument("--regression-results", type=Path)
+    parser.add_argument("--regression-summary", type=Path)
     parser.add_argument("--output", type=Path, default=ROOT / "交付/重邮GGBond-F01-工程复核包.zip")
     args = parser.parse_args()
-    build(args.results, args.release_dir, args.output, args.capture_dir, args.regression_results)
+    build(args.results, args.release_dir, args.output, args.capture_dir,
+          args.regression_results, args.regression_summary)
 
 
 if __name__ == "__main__":
