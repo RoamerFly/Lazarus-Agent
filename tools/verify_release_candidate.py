@@ -77,19 +77,29 @@ def require_audited_batch(validation, label):
             or any(not row["candidate_sha256"] or (row["mode"] == "agent" and not row["raw_diff_sha256"])
                    for row in result["rows"] if row["state"] == "passed")):
         raise ValueError(f"{label} 通过候选的差异审查尚未完成")
-    return result
+    return result, reviewed
 
 
 def require_p1c(version, build_run, commit):
     validation = ROOT / "docs/validation"
-    historical = require_audited_batch(validation / "f01-p1c", "P1C")
+    historical, _ = require_audited_batch(validation / "f01-p1c", "P1C")
     if tuple(map(int, version.split("."))) >= (0, 6, 17):
-        current = require_audited_batch(validation / "f01-release-regression" / version, f"v{version} 发布回归")
+        current, reviewed = require_audited_batch(
+            validation / "f01-release-regression" / version, f"v{version} 发布回归")
         if (current["app_version"] != version or current["implementation_commit"] != commit
                 or current["source_build_run"] != build_run or current["evaluation_role"] != REGRESSION_ROLE
                 or any(current[key] != historical[key] for key in
                        ("freeze_commit", "protocol_sha256", "source_apk_sha256", "target_api", "model"))):
             raise ValueError("发布回归与候选签名构建或历史方案不符")
+        if any(type(row.get("distributable")) is not bool for row in reviewed):
+            raise ValueError("发布回归缺少候选语义复核结论")
+        distributable = {row["trial"] for row in reviewed if row["distributable"]}
+        agent = [row for row in current["rows"] if row["mode"] == "agent" and row["trial"] in distributable]
+        protocol = read(ROOT / "tools/f01-p1c-cases.json")
+        original_holdout = set(protocol["held_out"])
+        if (len(agent) < 15 or sum(row["case"] == protocol["primary"] for row in agent) != 3
+                or sum(row["case"] in original_holdout for row in agent) < 2):
+            raise ValueError("通过语义复核的 Agent 候选未达到发布门槛")
 
 
 def main():

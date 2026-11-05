@@ -223,7 +223,9 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
         current = audit_release_regression(regression_checkout, raw_results, read(run_plan))
         if current["app_version"] != APP_VERSION or current != read(current_reports / "results.json"):
             raise ValueError("发布回归与当前版本的归档结果不一致")
-        require_diff_review(current, read(current_reports / "diff-review.json"))
+        current_review = read(current_reports / "diff-review.json")
+        require_diff_review(current, current_review)
+        distributable = {row["trial"] for row in current_review["rows"] if row.get("distributable") is True}
     if publication and tuple(map(int, APP_VERSION.split("."))) >= (0, 6, 17):
         require_p1c(APP_VERSION, publication["signed_build_run"], publication["source_commit"])
         if current is None:
@@ -433,7 +435,7 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                 sample = regression_checkout / case["apk"]
                 copy(sample, current_folder / "自有输入样本" / sample.name)
             for (case, mode, repeat), row in zip(trial_schedule(current_protocol), current["rows"]):
-                add_case(raw_results, current_folder, case, mode, repeat, distribute=row["state"] == "passed")
+                add_case(raw_results, current_folder, case, mode, repeat, distribute=row["trial"] in distributable)
         # Only synthetic fixture evidence enters this package. Remove local workstation roots in text.
         common_git = Path(subprocess.check_output(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"],
                                                   cwd=ROOT, encoding="utf-8").strip())
@@ -467,6 +469,9 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                                              "evaluation_role", "freeze_commit", "protocol_sha256",
                                              "planned_trials", "terminal_trials", "joint_gate", "counts")
             }
+            package_status["release_regression"]["excluded_from_distribution"] = sorted(
+                row["trial"] for row in current_review["rows"] if row["trial"] not in distributable
+            )
             if not current["joint_gate"]:
                 package_status["pending"].append("当前版本发布回归联合门槛未达成")
         counts = summary["counts"]

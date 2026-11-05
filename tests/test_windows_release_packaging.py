@@ -40,6 +40,8 @@ class WindowsReleasePackagingTests(unittest.TestCase):
             temporary = Path(directory)
             validation = temporary / "docs/validation"
             shutil.copytree(archived, validation / "f01-p1c")
+            (temporary / "tools").mkdir()
+            shutil.copyfile(ROOT / "tools/f01-p1c-cases.json", temporary / "tools/f01-p1c-cases.json")
             with patch.object(verify_release_candidate, "ROOT", temporary):
                 verify_release_candidate.require_p1c("0.6.16", "unused", "unused")
                 with self.assertRaisesRegex(ValueError, "发布回归"):
@@ -51,9 +53,22 @@ class WindowsReleasePackagingTests(unittest.TestCase):
                 result.update(app_version=version, implementation_commit=commit, source_build_run=build,
                               evaluation_role=verify_release_candidate.REGRESSION_ROLE)
                 (current / "results.json").write_text(json.dumps(result), encoding="utf-8")
+                with self.assertRaisesRegex(ValueError, "缺少候选语义"):
+                    verify_release_candidate.require_p1c(version, build, commit)
+                review_path = current / "diff-review.json"
+                review = json.loads(review_path.read_bytes())
+                for row in review["rows"]:
+                    row["distributable"] = row["trial"] != "P02-agent-1"
+                review_path.write_text(json.dumps(review), encoding="utf-8")
                 verify_release_candidate.require_p1c(version, build, commit)
                 with self.assertRaisesRegex(ValueError, "候选签名构建"):
                     verify_release_candidate.require_p1c(version, "5678", commit)
+                for row in review["rows"]:
+                    if row["trial"].startswith("P01-agent-"):
+                        row["distributable"] = False
+                review_path.write_text(json.dumps(review), encoding="utf-8")
+                with self.assertRaisesRegex(ValueError, "未达到发布门槛"):
+                    verify_release_candidate.require_p1c(version, build, commit)
 
 
 if __name__ == "__main__":
