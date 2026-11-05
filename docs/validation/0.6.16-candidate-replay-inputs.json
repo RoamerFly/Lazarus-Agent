@@ -1,0 +1,14 @@
+{
+  "scope": "replay-entry-input-only",
+  "app_version": "0.6.16",
+  "exe_sha256": "d13a93650523dfda1299327f4a0f8f9038c964db0492dbdbdb142c2138f054be",
+  "checked_steps": [
+    2,
+    15
+  ],
+  "device_runs": 0,
+  "report_sha256": [
+    "f826a2242bdceb1a9238d7c4388feb01442bcc893ae3d2a92a7f357afb8648ef",
+    "97543bf9cc59a3323831efcf4a13c457b9af1a029067f03b6abff2a2724dccde"
+  ]
+}
