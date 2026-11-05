@@ -35,7 +35,7 @@ def copy(source, destination):
     shutil.copyfile(source, destination)
 
 
-def add_case(root, output, case, mode, repeat, *, distribute=True):
+def add_case(root, output, case, mode, repeat, *, distribute=True, sample_root=None):
     trial = root / f"{case['id']}-{mode}-{repeat}"
     if not trial.is_dir():
         return
@@ -53,7 +53,7 @@ def add_case(root, output, case, mode, repeat, *, distribute=True):
         # Trial candidates retain their independent report, including failures.
         copy(candidate, target / "candidate.apk")
         if distribute and mode == "agent" and verified_for(report, digest(candidate)):
-            sample = output / "可分发样本" / trial.name
+            sample = (sample_root or output / "可分发样本") / trial.name
             source = ROOT / case["apk"]
             if digest(source) != report["input_sha256"]:
                 raise ValueError("输入样本与验收报告哈希不符：" + trial.name)
@@ -326,7 +326,7 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                 copy(source, p1b_folder / "自有输入样本" / source.name)
             for (case, mode, repeat), row in zip(trial_schedule(p1b_protocol), p1b["rows"]):
                 add_case(p1b_checkout / "build/p1b", p1b_folder, case, mode, repeat,
-                         distribute=row["state"] == "passed")
+                         distribute=row["state"] == "passed", sample_root=kit / "可分发样本/P1B")
         # Only synthetic fixture evidence enters this package. Remove local workstation roots in text.
         for path in kit.rglob("*"):
             if "评测记录" not in path.parts:
