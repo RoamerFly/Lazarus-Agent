@@ -108,10 +108,10 @@ def main():
         payload["chat_localization"] = ["android-resources", "unity4-ngui", "local-mt", "texture-ocr"]
         payload["modifications"] = sorted(CAPABILITIES)
         from feature_agent import run as run_feature
-        from activity_orientation import ORIENTATIONS
-        if not callable(run_feature) or set(ORIENTATIONS) != {"landscape", "portrait", "follow-system"}:
+        from feature_agent import tool_definitions
+        if not callable(run_feature) or not tool_definitions(True):
             raise RuntimeError("对话功能修改工具未完整打包")
-        payload["chat_features"] = ["activity-orientation"]
+        payload["agent_tools"] = [t["function"]["name"] for t in tool_definitions(True)]
         print(json.dumps(payload, ensure_ascii=False))
         return
     if "--apply-update" in sys.argv:

@@ -117,13 +117,13 @@ def _validate_config(config):
     return url, model
 
 
-def _request(url, payload, key):
+def _request(url, payload, key, *, timeout=20):
     headers = {"Content-Type": "application/json"}
     if key:
         headers["Authorization"] = "Bearer " + str(key)
     request = Request(url + "/chat/completions", data=json.dumps(chat_payload(url, payload)).encode("utf-8"), headers=headers)
     try:
-        with build_opener(_NoRedirect()).open(request, timeout=20) as response:
+        with build_opener(_NoRedirect()).open(request, timeout=timeout) as response:
             body = response.read(MAX_RESPONSE_BYTES + 1)
         if len(body) > MAX_RESPONSE_BYTES:
             raise ModelToolError("模型响应超过大小限制")

@@ -176,7 +176,7 @@ setInterval(async()=>{if(!job||sending||polling)return;polling=true;const id=job
 },1400);
 let lastPreview=0;
 setInterval(()=>{
-  if((!job?.tests.length&&!job?.modification) || document.hidden)return;
+  if((!job?.tests.length&&!job?.modification&&!job?.feature_candidates&&job?.action!=="chat-feature") || document.hidden)return;
   const now=Date.now();
   if(job.status==="running" && job.tests.some(test=>test.environment==="redroid-arm-lab") && now-lastPreview<12000)return;
   lastPreview=now;
@@ -190,7 +190,7 @@ function renderChat(busy){
   document.querySelector('[data-act="retry"]').disabled=!job?.pending_feedback||busy;
   if(!job)return;
   el("arch").textContent=job.package.native_abis.join(" · ")||"通用字节码";
-  const signature=JSON.stringify([job.id,versions,messages]);
+  const signature=JSON.stringify([job.id,versions,messages,job.latest_feature_candidate]);
   if(signature===chatSignature)return;
   const same=el("feedbackVersion").dataset.job===job.id;
   const sameCount=Number(el("feedbackVersion").dataset.count)===versions.length;
@@ -199,7 +199,13 @@ function renderChat(busy){
   chatSignature=signature;
   el("versions").replaceChildren();el("feedbackVersion").replaceChildren();
   el("feedbackVersion").dataset.job=job.id;
-  if(!versions.length){el("versions").textContent="通过验证后可在这里下载独立 APK。";el("feedbackVersion").add(new Option("当前任务",""));}
+  if(job.latest_feature_candidate){
+    el("feedbackVersion").add(new Option("最新候选",""));
+    el("feedbackVersion").add(new Option("原始 APK","original"));
+  }else if(!versions.length){
+    el("feedbackVersion").add(new Option("原始 APK",""));
+  }
+  if(!versions.length)el("versions").textContent="通过验证后可在这里下载独立 APK。";
   for(const v of [...versions].reverse()){
     el("feedbackVersion").add(new Option("V"+v.number,v.number));
     const row=document.createElement("div"),name=document.createElement("strong"),badge=document.createElement("span"),link=document.createElement("a");
@@ -239,7 +245,9 @@ async function feedback(kind){
   const text=el("message").value.trim()||(kind==="works"?"我在真机上试了，这个版本可以运行。":"");
   if(!text){el("message").focus();notice("请输入问题或复测结果");return;}
   const num=el("feedbackVersion").value;
-  const body={kind,text,version:num?Number(num):null};
+  if(kind==="works"&&(!num||num==="original")){notice("请选择已验证版本，或直接发送试用反馈。");return;}
+  const body={kind,text,version:num&&num!=="original"?Number(num):null};
+  if(num==="original")body.base_original=true;
   const tap=el("taskTap").value.trim(),expect=el("taskExpect").value.trim();
   if(kind==="issue" && (tap||expect)){if(!tap||!expect){notice("请完整填写复现步骤");return;}body.task={tap,expect};}
   sending=true;render();

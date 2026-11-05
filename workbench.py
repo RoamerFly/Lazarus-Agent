@@ -317,27 +317,42 @@ def chat_model_mode(body):
 
 def run_chat_feature(folder, state, source, expected_hash, run_id, body, config, user_message):
     def progress(text):
-        add_message(state, "assistant", text)
+        add_message(state, "assistant", text, agent_progress=True)
         save(folder, state)
 
     try:
         from feature_agent import run as run_feature
         from model_tools import ModelToolError
+        from agent_device import AgentDevice
 
         output = folder / "feature-candidates" / run_id / "candidate.apk"
+        history = [{"role": m["role"], "text": m.get("text", "")[:1800]}
+                   for m in state.get("messages", [])[:-2] if not m.get("agent_progress")][-12:]
+        tester = AgentDevice(device, folder.name, state["api"], TOOLS, progress) if ready(state["api"]) else None
         try:
             result = run_feature(source, output, TOOLS, state["api"], expected_hash,
-                                 body["text"], config, progress)
+                                 body["text"], config, progress, history=history, tester=tester)
         except ModelToolError as exc:
             add_message(state, "assistant", "本轮模型未能完成修改。" + str(exc))
             result = None
         if result is None:
             archive_version(folder, state)
             record_feedback(folder, state, body, existing_message=user_message)
-        else:
+        elif result["outcome"] == "candidate":
             state.setdefault("feature_candidates", {})[run_id] = result
-            add_message(state, "assistant", "已生成签名候选 APK。请在目标设备验证修改效果。",
+            state["latest_feature_candidate"] = run_id
+            proof = result.get("verification") or {}
+            if proof.get("verification") == "install-and-launch":
+                level = "已通过安装和启动检查，功能效果请继续复测。"
+            elif proof:
+                level = "候选的设备检查未通过，请查看工具结果。"
+            else:
+                level = "已回编并校验签名，待目标设备复测。"
+            add_message(state, "assistant", result["summary"] + "\n" + level,
                         feature_candidate_id=run_id)
+        else:
+            add_message(state, "assistant", result["summary"])
+            state.setdefault("agent_analyses", {})[run_id] = result
         state["status"] = "ready"
     except Exception as exc:
         state["status"] = "error"
@@ -370,15 +385,16 @@ def chat_message(job: str, body: dict):
         return feedback(job, body)
     localize = is_command(body.get("text"))
     model_config = None
-    if not localize:
+    if body.get("use_configured_model") is True:
         from model_settings import get_config
 
+        configured = get_config()
+        if configured["enabled"] and configured["url"] and configured["model"]:
+            model_config = configured
+            localize = False
+    if not localize:
         text = body.get("text")
-        if (body.get("task") is not None or body.get("use_configured_model") is not True or
-            not isinstance(text, str) or not 0 < len(text.strip()) <= 2000):
-            return feedback(job, body)
-        model_config = get_config()
-        if not model_config["enabled"] or not model_config["url"] or not model_config["model"]:
+        if not isinstance(text, str) or not 0 < len(text.strip()) <= 2000 or model_config is None:
             return feedback(job, body)
     folder = job_dir(job)
     if not operation.acquire(blocking=False):
@@ -395,9 +411,17 @@ def chat_message(job: str, body: dict):
             source = folder / "versions" / f"{selected}.apk"
             if not localize:
                 expected_hash = version["sha256"]
+        elif not localize and body.get("base_original") is not True:
+            latest = state.get("latest_feature_candidate")
+            candidate = state.get("feature_candidates", {}).get(latest)
+            if isinstance(latest, str) and re.fullmatch("[a-f0-9]{32}", latest) and candidate:
+                source = folder / "feature-candidates" / latest / "candidate.apk"
+                expected_hash = candidate["sha256"]
         run_id = uuid.uuid4().hex
         add_message(state, "user", body["text"].strip())
         user_message = state["messages"][-1]
+        if not localize:
+            user_message["base_sha256"] = expected_hash
         if localize:
             action, worker = "chat-localize", run_chat_localization
             args = (folder, state, source, run_id, chat_model_mode(body))
@@ -405,7 +429,7 @@ def chat_message(job: str, body: dict):
         else:
             action, worker = "chat-feature", run_chat_feature
             args = (folder, state, source, expected_hash, run_id, body, model_config, user_message)
-            add_message(state, "assistant", "开始分析这条需求。")
+            add_message(state, "assistant", "开始分析这条需求。", agent_progress=True)
         state.update(status="running", action=action, worker=INSTANCE, updated=now())
         save(folder,state)
         initial = read(folder)

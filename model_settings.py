@@ -233,7 +233,7 @@ def safe_urlopen(request: Request, timeout: int = 15):
 
 def chat_payload(url: str, payload: dict) -> dict:
     """Use the existing non-thinking tool protocol with the official DeepSeek API."""
-    if urlsplit(url).hostname == "api.deepseek.com":
+    if urlsplit(url).hostname == "api.deepseek.com" and "thinking" not in payload:
         return {**payload, "thinking": {"type": "disabled"}}
     return payload
 

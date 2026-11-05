@@ -15,6 +15,7 @@ import shutil
 import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import contextmanager
 from typing import Callable, Mapping, Any
 from urllib.request import ProxyHandler, Request, build_opener, urlopen
 from zipfile import BadZipFile, ZipFile
@@ -220,18 +221,10 @@ def _validate_decoded_tree(decoded: Path) -> None:
             raise ApkEditBuildError("解码结果路径越出临时目录") from exc
 
 
-def inspect_decoded(source: Path, tools: Path, inspect: Callable[[Path], Mapping[str, Any]]) -> dict[str, Any]:
-    """Run a read-only inspection against an isolated decoded APK tree.
-
-    This is the shared entry point for feature planners such as string
-    extraction.  The supplied callback gets no original path and cannot write
-    outside the disposable decoded directory.  ``tools`` remains part of the
-    interface so the caller can report the selected Android toolchain, but no
-    build-tools binary is required for a read-only inspection.
-    """
-    source, tools = Path(source), Path(tools)
-    if not callable(inspect):
-        raise ApkEditBuildError("检查器不可用")
+@contextmanager
+def decoded_apk(source: Path):
+    """Keep one validated, disposable decoded tree alive for an agent session."""
+    source = Path(source)
     if not source.is_file() or source.suffix.lower() != ".apk":
         raise ApkEditBuildError("请选择完整的单个 APK 文件")
     if source.stat().st_size <= 0 or source.stat().st_size > 320 * 1024 * 1024:
@@ -249,12 +242,20 @@ def inspect_decoded(source: Path, tools: Path, inspect: Callable[[Path], Mapping
             run([java, "-jar", jar, "d", "--force", "--frame-path", framework,
                  "--output", decoded, original], env, work)
             _validate_decoded_tree(decoded)
-            result = dict(inspect(decoded))
         except ApkEditBuildError:
             raise
         except Exception as exc:
             raise ApkEditBuildError("APK 结构检查失败：" + str(exc)[:800]) from exc
-    return {"source_sha256": _sha256(source), "apktool": {"version": APKTOOL_VERSION,
+        yield decoded
+
+
+def inspect_decoded(source: Path, tools: Path, inspect: Callable[[Path], Mapping[str, Any]]) -> dict[str, Any]:
+    """Run a local inspector against a validated, disposable APK tree."""
+    if not callable(inspect):
+        raise ApkEditBuildError("检查器不可用")
+    with decoded_apk(source) as decoded:
+        result = dict(inspect(decoded))
+    return {"source_sha256": _sha256(Path(source)), "apktool": {"version": APKTOOL_VERSION,
             "sha256": APKTOOL_SHA256}, "inspection": result}
 
 
