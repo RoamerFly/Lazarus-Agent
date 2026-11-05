@@ -1,0 +1,95 @@
+{
+  "version": "0.6.17",
+  "scope": "signed Windows candidate",
+  "build_run": "42109645786",
+  "build_source_commit": "a48ce0bd397fa9b72904d65463d197161e7e120d",
+  "installer_check_run": "42110501738",
+  "legacy_runtime_check_run": "42110500737",
+  "installer_sha256": "498742330892b2cac99b4e66ceb20d689d2a14b93697c08a4484a4724f9f333f",
+  "exe_sha256": "236d4517b74c14483c99035392601d3d0041f5ed560a989a39b50abc97a2757c",
+  "legacy_preparation_seconds": 101.0822449,
+  "legacy_replay_steps": 10,
+  "source_matrix": {
+    "report_sha256": "e3ea950211e0cc3dc72ee505aabb3df9c28187986f4c7bb59938d6149e3c1642",
+    "input_sha256": "f0d9ac4154ad8894ea95cfdb006838dbfdc41ed12fc698c9057ce93e571ee859",
+    "candidate_sha256": "cbcd96e4ce350b1ce071b39ccd84c33d32c6eec0033c1459076d0806b03b9cd7",
+    "field": {
+      "resource-id": "me.tsukanov.counter:id/edit_value",
+      "text": "2147483646"
+    },
+    "cases": [
+      {
+        "api": 36,
+        "abis": [
+          "x86_64"
+        ],
+        "status": "behavior-verified",
+        "baseline_steps": 8,
+        "candidate_steps": 12
+      },
+      {
+        "api": 35,
+        "abis": [
+          "x86_64",
+          "arm64-v8a"
+        ],
+        "status": "behavior-verified",
+        "baseline_steps": 8,
+        "candidate_steps": 12
+      },
+      {
+        "api": 34,
+        "abis": [
+          "x86_64"
+        ],
+        "status": "behavior-verified",
+        "baseline_steps": 8,
+        "candidate_steps": 12
+      }
+    ]
+  },
+  "signed_agent": {
+    "model": "deepseek-flash",
+    "direct_device_action_passed": true,
+    "tool_calls": 41,
+    "elapsed_seconds": 398.95,
+    "report_sha256": "66fdc744b2be7d35b0dbf77ecf6690ea2cd7bf693f4e1b1e28e5150a7e42af7d",
+    "input_sha256": "f0d9ac4154ad8894ea95cfdb006838dbfdc41ed12fc698c9057ce93e571ee859",
+    "candidate_sha256": "dee75ed7dbd4bd2da390965672e9b1a3acc976296da00e058d08c2ae2d6935a9",
+    "field": {
+      "resource-id": "me.tsukanov.counter:id/edit_value",
+      "text": "2147483646"
+    },
+    "cases": [
+      {
+        "api": 36,
+        "abis": [
+          "x86_64"
+        ],
+        "status": "behavior-verified",
+        "baseline_steps": 8,
+        "candidate_steps": 12
+      }
+    ]
+  },
+  "signed_no_model_replay": {
+    "report_sha256": "f3de56062dec99b9a8cc882ed70ba27136bbc2caa2f299523dd75db16dc356aa",
+    "input_sha256": "f0d9ac4154ad8894ea95cfdb006838dbfdc41ed12fc698c9057ce93e571ee859",
+    "candidate_sha256": "dee75ed7dbd4bd2da390965672e9b1a3acc976296da00e058d08c2ae2d6935a9",
+    "field": {
+      "resource-id": "me.tsukanov.counter:id/edit_value",
+      "text": "2147483646"
+    },
+    "cases": [
+      {
+        "api": 36,
+        "abis": [
+          "x86_64"
+        ],
+        "status": "behavior-verified",
+        "baseline_steps": 12,
+        "candidate_steps": 16
+      }
+    ]
+  }
+}
