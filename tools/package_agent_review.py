@@ -346,8 +346,10 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                 add_case(checkout / batch.results, batch_folder, case, mode, repeat,
                          distribute=row["state"] == "passed", sample_root=kit / "可分发样本" / label)
         # Only synthetic fixture evidence enters this package. Remove local workstation roots in text.
-        private_roots = sorted({str(path) for path in
-                                (results, *(batch[0] for batch in frozen_batches.values()), ROOT, Path.home())},
+        common_git = Path(subprocess.check_output(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"],
+                                                  cwd=ROOT, encoding="utf-8").strip())
+        roots = (results, *(batch[0] for batch in frozen_batches.values()), ROOT, common_git.parent, Path.home())
+        private_roots = sorted({form for path in roots for form in (str(path), path.as_posix())},
                                key=len, reverse=True)
         for path in kit.rglob("*"):
             if "评测记录" not in path.parts:
