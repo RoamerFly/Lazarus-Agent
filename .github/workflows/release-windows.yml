@@ -8,7 +8,7 @@ on:
       version:
         description: SemVer without v (must equal app_version.py)
         required: true
-        default: '0.6.15'
+        default: '0.6.16'
       publish:
         description: Create/update GitHub Release
         required: true
@@ -106,6 +106,9 @@ jobs:
           }
           if ($tag -eq 'v0.6.15') {
             $notes = "独立验收记录阻挡应用的系统窗口和恢复动作。冷启动须重新读到目标应用页面才通过。对话任务进入终态后清除上一轮处理提示。" + [Environment]::NewLine + [Environment]::NewLine + $notes
+          }
+          if ($tag -eq 'v0.6.16') {
+            $notes = "对话 Agent 可以在构建前复现原包故障，按目标系统证据声明兼容库，并在生成候选后重放用户填写的验收步骤。候选只有在所选系统通过独立验收后才标为已验收。" + [Environment]::NewLine + [Environment]::NewLine + $notes
           }
           if ($tag -eq 'v0.6.5') {
             $notes = "修复对话新增页面方向改造。启用模型后，可用一句话指定横屏、竖屏或跟随系统，模型会读取页面清单并调用本地工具生成签名候选。" + [Environment]::NewLine + [Environment]::NewLine + $notes
