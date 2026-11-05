@@ -156,11 +156,14 @@ def build(results, release_dir, output, capture_dir, regression_results=None):
         demo_trace = capture_dir / "storage/data/jobs" / demo_job["id"] / "feature-candidates" / demo_run
         for name in ("changes.diff", "agent-trace.json"):
             copy(demo_trace / name, kit / "评测记录/工作台演示" / name)
-        for name in ("初赛复核说明.md", "运行指南.md", "fixtures/评审样本使用说明.md",
+        copy(ROOT / "桌面复核运行指南.md", kit / "运行指南.md")
+        for name in ("初赛复核说明.md", "fixtures/评审样本使用说明.md",
                      "docs/F01-参赛优化与验收计划.md", "docs/F01-试点与部署验收.md",
-                     "docs/F01-答辩提纲.md", "docs/F01-交付验收清单.md"):
-            copy(ROOT / name, kit / Path(name).name)
+                     "docs/F01-答辩提纲.md", "docs/F01-交付验收清单.md",
+                     "docs/science-superpowers/preregistrations/2026-11-05-f01-apk-agent.md"):
+            copy(ROOT / name, kit / name)
         for name in ("f01-independent-acceptance.md", "f01-p1-results.json", "f01-p1-review.md",
+                     "0.6.6-general-agent.md",
                      "0.6.7-independent-windows.md", "0.6.8-independent-windows.md",
                      "0.6.8-windows-proof.json", "0.6.8-live-demo.md", "0.6.8-primary-regression.json",
                      "0.6.8-regression-results.json", "0.6.8-regression-review.md",
@@ -171,7 +174,7 @@ def build(results, release_dir, output, capture_dir, regression_results=None):
                      "0.6.10-live-demo.md"):
             path = ROOT / "docs/validation" / name
             if path.is_file():
-                copy(path, kit / "验证摘要" / name)
+                copy(path, kit / "docs/validation" / name)
         source = kit / "F01-源代码.zip"
         subprocess.run(["git", "archive", "--format=zip", "--output=" + str(source), "HEAD"],
                        cwd=ROOT, check=True)
