@@ -16,7 +16,7 @@ sys.path.insert(0, str(ROOT))
 from agent_acceptance import verified_for
 from app_version import APP_VERSION
 from updater import parse_manifest, verify_manifest
-from tools.audit_f01_p1b import SPEC as P1B_PROTOCOL, audit as audit_p1b, require_diff_review
+from tools.audit_f01_p1b import P1B, audit as audit_frozen, p1c_batch, require_diff_review
 from tools.run_f01_p1 import PROTOCOL, trial_schedule
 from tools.summarize_f01_p1 import summarize
 
@@ -139,7 +139,8 @@ Write-Output "校验通过。请打开 $target 安装 Lazarus Agent {APP_VERSION
 
 
 def build(results, release_dir, output, capture_dir, regression_results=None, regression_summary=None,
-          primary_results=None, primary_summary=None, materials_dir=ROOT / "交付", p1b_checkout=None):
+          primary_results=None, primary_summary=None, materials_dir=ROOT / "交付", p1b_checkout=None,
+          p1c_checkout=None):
     results = results.resolve()
     if not results.is_relative_to(ROOT / "build") or not results.is_dir():
         raise ValueError("请指定 build 目录内的原始评测结果")
@@ -155,15 +156,20 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT).decode().strip()
     protocol = read(PROTOCOL)
     summary = summarize(results, protocol)
-    p1b = None
-    if p1b_checkout is not None:
-        p1b_checkout = p1b_checkout.resolve()
-        if not p1b_checkout.is_relative_to(ROOT / "build"):
-            raise ValueError("请指定 build 目录内的 P1B 冻结检出")
-        p1b = audit_p1b(p1b_checkout)
-        if p1b != read(ROOT / "docs/validation/f01-p1b/results.json"):
-            raise ValueError("P1B 汇总与冻结记录不一致")
-        require_diff_review(p1b, read(ROOT / "docs/validation/f01-p1b/diff-review.json"))
+    frozen_batches = {}
+    for label, checkout in (("P1B", p1b_checkout), ("P1C", p1c_checkout)):
+        if checkout is None:
+            continue
+        checkout = checkout.resolve()
+        if not checkout.is_relative_to(ROOT / "build"):
+            raise ValueError(f"请指定 build 目录内的 {label} 冻结检出")
+        batch = P1B if label == "P1B" else p1c_batch(checkout)
+        audit_result = audit_frozen(checkout, batch=batch)
+        reports = Path("docs/validation") / f"f01-{label.lower()}"
+        if audit_result != read(ROOT / reports / "results.json"):
+            raise ValueError(f"{label} 汇总与冻结记录不一致")
+        require_diff_review(audit_result, read(ROOT / reports / "diff-review.json"))
+        frozen_batches[label] = (checkout, batch, audit_result, reports)
     primary = None
     primary_version = None
     if primary_results is not None:
@@ -310,30 +316,37 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                     add_case(regression_results, kit / label, case, mode, repeat)
                 if primary is not None and case["id"] == protocol["primary"]:
                     add_case(primary_results, kit / f"v{primary_version} 主案例开发回归", case, mode, repeat)
-        if p1b is not None:
-            p1b_folder = kit / "P1B 前瞻复验"
-            p1b_protocol = read(p1b_checkout / P1B_PROTOCOL)
-            copy(p1b_checkout / P1B_PROTOCOL, p1b_folder / P1B_PROTOCOL.name)
-            freeze = p1b["freeze_commit"]
+        for label, (checkout, batch, audited, reports) in frozen_batches.items():
+            batch_folder = kit / f"{label} 前瞻复验"
+            batch_protocol = read(checkout / batch.spec)
+            copy(checkout / batch.spec, batch_folder / batch.spec.name)
+            copy(ROOT / batch.registration, kit / batch.registration)
+            freeze = audited["freeze_commit"]
             subprocess.run(["git", "archive", "--format=zip",
-                            "--output=" + str(p1b_folder / f"F01-P1B-冻结源码-{freeze[:7]}.zip"), freeze],
+                            "--output=" + str(batch_folder / f"F01-{label}-冻结源码-{freeze[:7]}.zip"), freeze],
                            cwd=ROOT, check=True)
-            for name in ("results.json", "report.md", "diff-review.json", "p01-runtime-observation.json"):
-                path = Path("docs/validation/f01-p1b") / name
+            names = ["results.json", "report.md", "diff-review.json"]
+            if label == "P1B":
+                names.append("p01-runtime-observation.json")
+            for name in names:
+                path = reports / name
                 copy(ROOT / path, kit / path)
-            for case in p1b_protocol["cases"]:
-                source = ROOT / case["apk"]
-                copy(source, p1b_folder / "自有输入样本" / source.name)
-            for (case, mode, repeat), row in zip(trial_schedule(p1b_protocol), p1b["rows"]):
-                add_case(p1b_checkout / "build/p1b", p1b_folder, case, mode, repeat,
-                         distribute=row["state"] == "passed", sample_root=kit / "可分发样本/P1B")
+            for case in batch_protocol["cases"]:
+                source = checkout / case["apk"]
+                copy(source, batch_folder / "自有输入样本" / source.name)
+            for (case, mode, repeat), row in zip(trial_schedule(batch_protocol), audited["rows"]):
+                add_case(checkout / batch.results, batch_folder, case, mode, repeat,
+                         distribute=row["state"] == "passed", sample_root=kit / "可分发样本" / label)
         # Only synthetic fixture evidence enters this package. Remove local workstation roots in text.
+        private_roots = sorted({str(path) for path in
+                                (results, *(batch[0] for batch in frozen_batches.values()), ROOT, Path.home())},
+                               key=len, reverse=True)
         for path in kit.rglob("*"):
             if "评测记录" not in path.parts:
                 continue
             if path.is_file() and path.suffix in {".json", ".diff"}:
                 text = path.read_text(encoding="utf-8")
-                for original in (str(results), str(p1b_checkout or ROOT), str(ROOT), str(Path.home())):
+                for original in private_roots:
                     text = text.replace(original.replace("\\", "\\\\"), "<LOCAL>")
                     text = text.replace(original, "<LOCAL>")
                 path.write_text(text, encoding="utf-8")
@@ -351,15 +364,16 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
             counts["agent_positives"] >= 15 and counts["primary"] == 3 and
             counts["agent_negative_rejected"] == 6 and counts["agent_false_acceptances"] == 0
         )
-        if p1b is None:
+        if "P1B" not in frozen_batches:
             package_status["pending"].append("P1B 前瞻复验结果待归档")
-        else:
-            package_status["prospective_replication"] = {
-                key: p1b[key] for key in ("freeze_commit", "protocol_sha256", "planned_trials", "terminal_trials",
-                                           "held_out_passes", "joint_gate", "counts")
+        for label, (_, _, audited, _) in frozen_batches.items():
+            field = "prospective_replication" if label == "P1B" else "p1c_prospective_replication"
+            package_status[field] = {
+                key: audited[key] for key in ("freeze_commit", "protocol_sha256", "planned_trials", "terminal_trials",
+                                             "held_out_passes", "joint_gate", "counts")
             }
-            if not p1b["joint_gate"]:
-                package_status["pending"].append("P1B 前瞻复验联合门槛未达成")
+            if not audited["joint_gate"]:
+                package_status["pending"].append(f"{label} 前瞻复验联合门槛未达成")
         if not (ROOT / "docs/validation" / f"{APP_VERSION}-installer-check.json").is_file():
             package_status["pending"].append("正式版安装器的独立核验")
         if not (ROOT / "docs/validation" / f"{APP_VERSION}-local-rule-windows.json").is_file():
@@ -404,12 +418,13 @@ def main():
     parser.add_argument("--primary-results", type=Path)
     parser.add_argument("--primary-summary", type=Path)
     parser.add_argument("--p1b-checkout", type=Path, help="Frozen checkout with completed P1B evidence")
+    parser.add_argument("--p1c-checkout", type=Path, help="Frozen checkout with completed P1C evidence")
     parser.add_argument("--materials-dir", type=Path, default=ROOT / "交付", help="方案 PDF、演示视频和捕获记录的目录")
     parser.add_argument("--output", type=Path, default=ROOT / "交付/重邮GGBond-F01-工程复核包.zip")
     args = parser.parse_args()
     build(args.results, args.release_dir, args.output, args.capture_dir,
           args.regression_results, args.regression_summary, args.primary_results, args.primary_summary, args.materials_dir,
-          args.p1b_checkout)
+          args.p1b_checkout, args.p1c_checkout)
 
 
 if __name__ == "__main__":

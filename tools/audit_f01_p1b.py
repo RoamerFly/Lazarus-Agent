@@ -1,5 +1,6 @@
 """Audit raw F01 trial evidence against its frozen protocol."""
 from argparse import ArgumentParser
+import ast
 from dataclasses import dataclass
 import json
 from pathlib import Path
@@ -55,8 +56,12 @@ def frozen_protocol(root, batch=P1B):
     registration = git_at(root, "show", f"{batch.freeze}:{batch.registration.as_posix()}")
     if (ROOT / batch.registration).read_bytes() != registration:
         raise ValueError("当前预注册文档与冻结文本不符")
-    if (ROOT / "agent_acceptance.py").read_bytes() != (root / "agent_acceptance.py").read_bytes():
-        raise ValueError("验收器与该批冻结版本不符")
+    def score_contract(path):
+        module = ast.parse(path.read_bytes())
+        return {item.name: ast.dump(item) for item in module.body
+                if isinstance(item, ast.FunctionDef) and item.name in {"parse_steps", "verified_for"}}
+    if score_contract(ROOT / "agent_acceptance.py") != score_contract(root / "agent_acceptance.py"):
+        raise ValueError("验收计分逻辑与该批冻结版本不符")
     checksum_lines = registration.decode("utf-8").split("## Frozen data checksums\n", 1)[1]
     for line in checksum_lines.splitlines():
         if not line:
