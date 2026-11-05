@@ -21,8 +21,8 @@ from urllib.request import ProxyHandler, Request, build_opener, urlopen
 from xml.etree import ElementTree as ET
 from zipfile import BadZipFile, ZipFile
 
-from offline_kit import discover_java_home, java_environment
-from reviver import _tool_temp_root, run, test_key, tool_input
+from offline_kit import discover_java_home
+from reviver import _tool_temp_root, java_tool, run, test_key, tool_input
 from storage_paths import resolve_storage_paths
 
 
@@ -160,14 +160,13 @@ def apktool_jar() -> Path:
             time.sleep(0.15)
 
 
-def _java() -> str | Path:
+def _require_java() -> None:
     home = discover_java_home()
     if home is None:
         raise ApkEditBuildError("未找到可用 Java 运行时；请先准备 Android 工具包或设置 REVIVER_JAVA_HOME")
     candidate = home / "bin" / "java.exe"
     if not candidate.is_file():
         raise ApkEditBuildError("已配置 Java 运行时缺少 java.exe")
-    return candidate
 
 
 def _check_tools(tools: Path) -> tuple[Path, Path]:
@@ -232,9 +231,8 @@ def decoded_apk(source: Path):
         raise ApkEditBuildError("APK 大小不在支持范围内")
     _validate_source_archive(source)
     jar = apktool_jar()
-    env = java_environment(os.environ.copy())
-    java = _java()
-    with tempfile.TemporaryDirectory(dir=_tool_temp_root(), prefix="inspect-") as directory:
+    _require_java()
+    with tempfile.TemporaryDirectory(dir=_tool_temp_root(), prefix="inspect-") as directory, java_tool("java") as (java, env):
         work = Path(directory)
         jar = tool_input(jar, work, "apktool.jar")
         original, decoded, framework = work / "source.apk", work / "decoded", work / "framework"
@@ -304,7 +302,8 @@ def build_modified(
     output.parent.mkdir(parents=True, exist_ok=True)
     source_hash = _sha256(source)
     # Apktool and Android command tools receive only ASCII temporary names.
-    with tempfile.TemporaryDirectory(dir=_tool_temp_root(), prefix="edit-") as directory:
+    _require_java()
+    with tempfile.TemporaryDirectory(dir=_tool_temp_root(), prefix="edit-") as directory, java_tool("java") as (java, env):
         work = Path(directory)
         jar = tool_input(jar, work, "apktool.jar")
         signer = tool_input(signer, work, "apksigner.jar")
@@ -312,8 +311,6 @@ def build_modified(
         decoded, framework = work / "decoded", work / "framework"
         unsigned, aligned, signed = work / "unsigned.apk", work / "aligned.apk", work / "signed.apk"
         _copy_to_ascii(source, original)
-        env = java_environment(os.environ.copy())
-        java = _java()
         try:
             framework.mkdir()
             run([java, "-jar", jar, "d", "--force", "--frame-path", framework,

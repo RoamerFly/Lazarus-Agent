@@ -248,6 +248,8 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                      "0.6.10-primary-regression.json", "0.6.10-first-import-no-path.md",
                      "0.6.11-live-demo.md", "0.6.11-windows-proof.json", "0.6.11-independent-windows.md",
                      "0.6.11-installer-check.json", "0.6.11-installer-check.md",
+                     "0.6.12-live-demo.md", "0.6.12-windows-proof.json", "0.6.12-independent-windows.md",
+                     "0.6.12-installer-check.json", "0.6.12-installer-check.md", "0.6.12-tool-paths-local.md",
                      f"{APP_VERSION}-live-demo.md", f"{APP_VERSION}-windows-proof.json",
                      f"{APP_VERSION}-independent-windows.md", f"{APP_VERSION}-installer-check.json",
                      f"{APP_VERSION}-installer-check.md", f"{APP_VERSION}-local-rule-windows.json",
@@ -301,6 +303,8 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                           "primary_regression_version": primary_version,
                           "pending": (["当前版本全组回归与差异审查"] if regression is None else []) +
                                      ["非开发人员试用记录", "负责人提交前核对赛事平台要求"]}
+        if not (ROOT / "docs/validation" / f"{APP_VERSION}-local-rule-windows.json").is_file():
+            package_status["pending"].append("正式版在干净 Windows 上关闭模型并生成新 APK 的复验")
         windows_proof = ROOT / "docs/validation" / f"{APP_VERSION}-windows-proof.json"
         if windows_proof.is_file():
             record = read(windows_proof)

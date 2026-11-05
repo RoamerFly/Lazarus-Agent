@@ -1,5 +1,6 @@
 """APK-only compatibility repair. An exported candidate still requires runtime validation."""
 import argparse
+from contextlib import contextmanager
 import hashlib
 import json
 import os
@@ -13,7 +14,7 @@ import tempfile
 from zipfile import ZipFile
 
 from native_elf import elf_uses_textrel, library_member
-from offline_kit import discover_java_home, java_environment
+from offline_kit import discover_java_home
 from storage_paths import configure_environment
 
 INSTALL_FLOOR = {34: 23, 35: 24, 36: 24}
@@ -88,11 +89,10 @@ def test_key(env):
             f.write(secrets.token_urlsafe(32))
     env["REVIVER_KEYPASS"] = password.read_text(encoding="ascii")
     if not key.exists():
-        java_home = discover_java_home()
-        keytool = java_home / "bin" / "keytool.exe" if java_home else "keytool"
-        run([keytool, "-genkeypair", "-storetype", "PKCS12", "-keystore", key.name,
-             "-storepass:env", "REVIVER_KEYPASS", "-alias", "reviver", "-keyalg", "RSA",
-             "-keysize", "3072", "-validity", "3650", "-dname", "CN=Legacy APK Reviver Local Test"], env, home)
+        with java_tool("keytool", env) as (keytool, tool_env):
+            run([keytool, "-genkeypair", "-storetype", "PKCS12", "-keystore", key.name,
+                 "-storepass:env", "REVIVER_KEYPASS", "-alias", "reviver", "-keyalg", "RSA",
+                 "-keysize", "3072", "-validity", "3650", "-dname", "CN=Legacy APK Reviver Local Test"], tool_env, home)
     return key
 
 
@@ -119,6 +119,41 @@ def tool_input(source: Path, work: Path, name: str) -> Path:
     staged = work / name
     shutil.copyfile(source, staged)
     return staged
+
+
+@contextmanager
+def java_tool(name: str, base: dict[str, str] | None = None):
+    """Launch a prepared Java tool through an ASCII path on Windows."""
+    if name not in {"java", "keytool"}:
+        raise ValueError("Unsupported Java tool")
+    env = dict(os.environ if base is None else base)
+    home = discover_java_home()
+    if home is None:
+        yield name, env
+        return
+
+    def command(path):
+        bin_dir = path / "bin"
+        env["JAVA_HOME"] = str(path)
+        env["PATH"] = str(bin_dir) + os.pathsep + env.get("PATH", "")
+        return bin_dir / (name + ".exe"), env
+
+    if os.name != "nt" or str(home).isascii():
+        yield command(home)
+        return
+
+    with tempfile.TemporaryDirectory(dir=_tool_temp_root(), prefix="java-") as directory:
+        alias = Path(directory) / "runtime"
+        link_env = dict(os.environ, LAZARUS_JAVA_LINK=str(alias), LAZARUS_JAVA_TARGET=str(home))
+        powershell = Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32/WindowsPowerShell/v1.0/powershell.exe"
+        script = "$ErrorActionPreference='Stop'; New-Item -ItemType Junction -Path $env:LAZARUS_JAVA_LINK -Target $env:LAZARUS_JAVA_TARGET | Out-Null"
+        run([powershell, "-NoProfile", "-NonInteractive", "-Command", script], link_env)
+        try:
+            if not alias.samefile(home):
+                raise RuntimeError("无法确认 Java 工具目录映射")
+            yield command(alias)
+        finally:
+            alias.rmdir()
 
 
 def repair(source, output, api, tools, rule="installation-floor", remove_abis=(), modernize_crt=False,
@@ -253,13 +288,12 @@ def repair(source, output, api, tools, rule="installation-floor", remove_abis=()
                         with src.open(item) as a, dst.open(item,"w") as b:
                             shutil.copyfileobj(a,b)
         run([(tools/"zipalign.exe").resolve(), "-p", "4", unsigned.name, aligned.name],cwd=work)
-        env = java_environment(os.environ.copy())
+        env = os.environ.copy()
         key = test_key(env)
-        java_home = discover_java_home()
-        java = java_home / "bin" / "java.exe" if java_home else "java"
-        signer = [java,"-jar",tool_input(tools/"lib/apksigner.jar",work,"apksigner.jar")]
-        run(signer+["sign","--ks",key.name,"--ks-pass","env:REVIVER_KEYPASS","--out",signed,aligned],env,key.parent)
-        run(signer+["verify","--min-sdk-version",str(api),"--verbose", signed],env)
+        with java_tool("java", env) as (java, tool_env):
+            signer = [java,"-jar",tool_input(tools/"lib/apksigner.jar",work,"apksigner.jar")]
+            run(signer+["sign","--ks",key.name,"--ks-pass","env:REVIVER_KEYPASS","--out",signed,aligned],tool_env,key.parent)
+            run(signer+["verify","--min-sdk-version",str(api),"--verbose",signed],tool_env,work)
         with signed.open("rb") as f:
             digest = hashlib.file_digest(f,"sha256").hexdigest()
         # Signing tools need an ASCII path, which may be on a different drive

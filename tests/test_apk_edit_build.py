@@ -98,7 +98,7 @@ class ApkEditBuildTests(unittest.TestCase):
                 Path(command[command.index("--out") + 1]).write_bytes(b"signed")
             return ""
         with patch("apk_edit_build.apktool_jar", return_value=jar), patch("apk_edit_build.run", fake_run), \
-             patch("apk_edit_build.test_key", return_value=self.root / "key.p12"), patch("apk_edit_build._java", return_value="java"):
+             patch("apk_edit_build.test_key", return_value=self.root / "key.p12"), patch("apk_edit_build._require_java"):
             result = apk_edit_build.build_modified(source, output, 36, tools, lambda decoded: {"kind":"remember", "decoded": decoded.name})
         self.assertTrue(output.is_file())
         self.assertEqual(result["source_sha256"], hashlib.sha256(source.read_bytes()).hexdigest())
@@ -146,7 +146,7 @@ class ApkEditBuildTests(unittest.TestCase):
             Path(command[command.index("--output") + 1]).mkdir()
             return ""
         with patch("apk_edit_build.apktool_jar", return_value=jar), patch("apk_edit_build.run", fake_run), \
-             patch("apk_edit_build._java", return_value="java"):
+             patch("apk_edit_build._require_java"):
             result = apk_edit_build.inspect_decoded(source, self.root / "not-needed", lambda tree: {"directory": tree.name})
         self.assertEqual(result["inspection"], {"directory": "decoded"})
         self.assertTrue(all(all(ord(char) < 128 for char in item) for command in calls for item in command))
