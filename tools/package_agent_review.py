@@ -137,7 +137,8 @@ Write-Output "校验通过。请打开 $target 安装 Lazarus Agent {APP_VERSION
 '''
 
 
-def build(results, release_dir, output, capture_dir, regression_results=None, regression_summary=None):
+def build(results, release_dir, output, capture_dir, regression_results=None, regression_summary=None,
+          primary_results=None):
     results = results.resolve()
     if not results.is_relative_to(ROOT / "build") or not results.is_dir():
         raise ValueError("请指定 build 目录内的原始评测结果")
@@ -153,6 +154,27 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT).decode().strip()
     protocol = read(PROTOCOL)
     summary = summarize(results, protocol)
+    primary = None
+    if primary_results is not None:
+        primary_results = primary_results.resolve()
+        if not primary_results.is_relative_to(ROOT / "build") or not primary_results.is_dir():
+            raise ValueError("请指定 build 目录内的发版主案例回归结果")
+        primary_cases = [case for case in protocol["cases"] if case["id"] == protocol["primary"]]
+        primary = summarize(primary_results, {**protocol, "cases": primary_cases})
+        recorded = read(ROOT / "docs/validation" / f"{APP_VERSION}-primary-regression.json")
+        if (recorded["app_version"] != APP_VERSION or recorded["fixed_protocol_sha256"] != digest(PROTOCOL)
+                or recorded["agent_passes"] != primary["counts"]["primary"]):
+            raise ValueError("发版主案例回归摘要与原始评测不符")
+        recorded_rows = {row["trial"]: row for row in recorded["rows"]}
+        for row in primary["rows"]:
+            trial = f"{row['case']}-{row['mode']}-{row['repeat']}"
+            if not (primary_results / trial / "result.json").is_file():
+                raise ValueError("发版主案例回归轮次尚未形成终态：" + trial)
+            artifact = primary_results / trial / "candidate.apk"
+            sha256 = digest(artifact) if artifact.is_file() else None
+            note = recorded_rows.get(trial, {})
+            if note.get("state") != row["state"] or note.get("candidate_sha256") != sha256:
+                raise ValueError("发版主案例回归轮次的结果或候选哈希不符：" + trial)
     regression = None
     if regression_results is not None:
         regression_results = regression_results.resolve()
@@ -214,7 +236,10 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                      "0.6.10-windows-proof.json", "0.6.10-independent-windows.md",
                      "0.6.10-live-demo.md", "0.6.10-installer-check.md", "0.6.10-installer-check.json",
                      "0.6.10-counterexample-replay.md", "0.6.10-counterexample-replay.json",
-                     "0.6.10-package-replay.json"):
+                     "0.6.10-package-replay.json", "0.6.10-cold-start-observation.md",
+                     "0.6.10-cold-start-observation.json", "0.6.10-local-rule-windows.md",
+                     "0.6.10-local-rule-windows.json", "0.6.10-primary-regression.md",
+                     "0.6.10-primary-regression.json"):
             path = ROOT / "docs/validation" / name
             if path.is_file():
                 copy(path, kit / "docs/validation" / name)
@@ -243,6 +268,8 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                 add_case(results, kit, case, mode, repeat)
                 if regression is not None:
                     add_case(regression_results, kit / "当前版本工程回归", case, mode, repeat)
+                if primary is not None and case["id"] == protocol["primary"]:
+                    add_case(primary_results, kit / f"v{APP_VERSION} 主案例开发回归", case, mode, repeat)
         # Only synthetic fixture evidence enters this package. Remove local workstation roots in text.
         for path in kit.rglob("*"):
             if "评测记录" not in path.parts:
@@ -258,6 +285,7 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                           "frozen_benchmark_source": "17388e9", "benchmark": summary["counts"],
                           "current_regression": regression["counts"] if regression else None,
                           "regression_implementation": regression_metadata,
+                          "release_primary_regression": primary["counts"] if primary else None,
                           "pending": (["当前版本全组回归与差异审查"] if regression is None else []) +
                                      ["非开发人员试用记录", "负责人提交前核对赛事平台要求"]}
         windows_proof = ROOT / "docs/validation" / f"{APP_VERSION}-windows-proof.json"
@@ -295,10 +323,11 @@ def main():
     parser.add_argument("--capture-dir", type=Path, required=True)
     parser.add_argument("--regression-results", type=Path)
     parser.add_argument("--regression-summary", type=Path)
+    parser.add_argument("--primary-results", type=Path)
     parser.add_argument("--output", type=Path, default=ROOT / "交付/重邮GGBond-F01-工程复核包.zip")
     args = parser.parse_args()
     build(args.results, args.release_dir, args.output, args.capture_dir,
-          args.regression_results, args.regression_summary)
+          args.regression_results, args.regression_summary, args.primary_results)
 
 
 if __name__ == "__main__":

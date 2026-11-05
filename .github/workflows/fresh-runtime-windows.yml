@@ -88,22 +88,32 @@ jobs:
             $before | ConvertTo-Json -Depth 14 | Set-Content -Encoding utf8 evidence/before.json
             if ($before.targets.'36'.ready) { throw 'Target was unexpectedly prepared before the test' }
             $clock = [Diagnostics.Stopwatch]::StartNew()
-            $started = Invoke-RestMethod "$base/api/runtime/prepare" -Method Post -Headers $headers -ContentType 'application/json' -Body '{"targets":[36],"accept_terms":true}'
-            if (!$started.started) { throw 'Preparation did not start' }
             $deadline = (Get-Date).AddMinutes(20)
-            $events = [Collections.Generic.HashSet[string]]::new()
-            while ((Get-Date) -lt $deadline) {
-              $state = Invoke-RestMethod "$base/api/runtime"
-              foreach ($event in $state.active.events) {
-                $row = $event | ConvertTo-Json -Compress
-                if ($events.Add($row)) { Add-Content -Encoding utf8 evidence/events.jsonl $row }
+            for ($prepareAttempt = 1; $prepareAttempt -le 3; $prepareAttempt++) {
+              $started = Invoke-RestMethod "$base/api/runtime/prepare" -Method Post -Headers $headers -ContentType 'application/json' -Body '{"targets":[36],"accept_terms":true}'
+              if (!$started.started -and !$started.ready) { throw 'Preparation did not start' }
+              $events = [Collections.Generic.HashSet[string]]::new()
+              do {
+                $state = Invoke-RestMethod "$base/api/runtime"
+                foreach ($event in $state.active.events) {
+                  $row = $event | ConvertTo-Json -Compress
+                  if ($events.Add($row)) { Add-Content -Encoding utf8 evidence/events.jsonl $row }
+                }
+                $state | ConvertTo-Json -Depth 16 | Set-Content -Encoding utf8 evidence/latest.json
+                if ($state.active.status -ne 'running') { break }
+                Start-Sleep -Seconds 5
+              } while ((Get-Date) -lt $deadline)
+              Copy-Item evidence/latest.json "evidence/prepare-attempt-$prepareAttempt.json"
+              if ($state.targets.'36'.ready) { break }
+              if ($state.active.status -ne 'error' -or $state.active.message -notmatch 'HTTP Error 50[234]:' -or
+                  $prepareAttempt -eq 3 -or (Get-Date) -ge $deadline) {
+                throw "Preparation failed ($($state.active.status)): $($state.active.message)"
               }
-              $state | ConvertTo-Json -Depth 16 | Set-Content -Encoding utf8 evidence/latest.json
-              if ($state.active.status -ne 'running') { break }
-              Start-Sleep -Seconds 5
+              Write-Warning "Runtime preparation attempt $prepareAttempt ended with $($state.active.message). Retrying with the same cache."
+              Start-Sleep -Seconds 8
             }
             $clock.Stop()
-            if ($state.active.status -ne 'ready' -or !$state.targets.'36'.ready) { throw ('Preparation failed: ' + ($state.active | ConvertTo-Json -Depth 6)) }
+            if (!$state.targets.'36'.ready -or $state.active.status -eq 'running') { throw 'Runtime preparation did not finish' }
             $cached = Invoke-RestMethod "$base/api/runtime/prepare" -Method Post -Headers $headers -ContentType 'application/json' -Body '{"targets":[36],"accept_terms":true}'
             if ($cached.started -or !$cached.ready) { throw 'Prepared runtime was not reused' }
             $cached | ConvertTo-Json -Depth 8 | Set-Content -Encoding utf8 evidence/reuse.json
@@ -158,7 +168,7 @@ jobs:
             } finally {
               foreach ($name in $offlineRules) { Remove-NetFirewallRule -DisplayName $name }
             }
-            @{ duration_seconds=$clock.Elapsed.TotalSeconds; bytes=(Get-ChildItem -LiteralPath $runtime -Recurse -File | Measure-Object Length -Sum).Sum; platform='GitHub-hosted fresh Windows runner'; check=$check; verification_exit=$verificationExit; replay_exit=$replay.ExitCode; unicode_paths=$env:UNICODE_PATHS; storage=$env:LAZARUS_STORAGE_ROOT; temp=$env:TEMP } |
+            @{ duration_seconds=$clock.Elapsed.TotalSeconds; prepare_attempts=$prepareAttempt; bytes=(Get-ChildItem -LiteralPath $runtime -Recurse -File | Measure-Object Length -Sum).Sum; platform='GitHub-hosted fresh Windows runner'; check=$check; verification_exit=$verificationExit; replay_exit=$replay.ExitCode; unicode_paths=$env:UNICODE_PATHS; storage=$env:LAZARUS_STORAGE_ROOT; temp=$env:TEMP } |
               ConvertTo-Json | Set-Content -Encoding utf8 evidence/summary.json
           } finally {
             Get-ChildItem -LiteralPath $env:LAZARUS_STORAGE_ROOT -Filter desktop.log -Recurse -ErrorAction SilentlyContinue | ForEach-Object { Copy-Item -LiteralPath $_.FullName evidence/desktop.log }

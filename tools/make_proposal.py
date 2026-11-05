@@ -114,12 +114,19 @@ def build():
             story.append(para(f"v0.6.8 全组开发回归正例 {rc['agent_positives']}/18、主案例 {rc['primary']}/3、反例错误验收 {rc['agent_false_acceptances']}/6，全部 42 轮有终态。两个未交付正例保留在分母，通过候选的差异及安装哈希已复查。此批属于已观测任务的工程回归，未改称留出评测；两批正例总数相同，不宣称总体成功率提升。"))
     else:
         story.append(para("完整评测尚在执行。当前已完成巡检主案例 3 轮，2 轮通过独立 10 步检查；一次因追加试验后构建限额耗尽而未交付。该批次未达到预设的主案例 3/3 门槛，失败保留在分母内。新版针对候选回滚的补丁需另列验证。"))
-    block("已完成的其他核验", "工作台同一候选在 Android 14、15、16 上通过固定步骤，下载字节与设备安装字节一致。既有 OI Notepad 真实历史应用完成 DeepSeek Flash 两轮行为修改，设备记录和输入输出哈希链可复核。完整跨应用重复性及对照结果仍按本批次记录。")
+    primary_path = ROOT / "docs/validation/0.6.10-primary-regression.json"
+    primary_note = ""
+    if primary_path.is_file():
+        primary = json.loads(primary_path.read_text(encoding="utf-8"))
+        primary_note = f"v0.6.10 对既有巡检主案例复跑 {primary['agent_passes']}/{primary['planned_agent']} 轮通过，按开发回归归档。"
+    block("已完成的其他核验", primary_note + "工作台同一候选在 Android 14、15、16 上通过固定步骤，下载与设备安装哈希一致。真实历史应用 OI Notepad 完成两轮行为修改，设备记录和哈希链可复核。")
     story.append(PageBreak())
 
     heading("部署与试点", "给复核人员一条可重复的路径")
     block("Windows 安装", "提供按用户安装器和便携 ZIP。桌面内嵌 WebView2，模型凭据由 Windows DPAPI 加密。程序优先复用工具，首次按所选系统准备缺失的 SDK、Java 与镜像。后续可在已准备环境中断网复测已有候选。")
-    block("当前独立机器证据", "独立 Windows 安装检查已覆盖自检、输入哈希、篡改拒绝和卸载。正式 v0.6.10 在含中文及空格的存储与 TEMP 下首次准备五类组件约 76 秒，再通过实际 EXE 复测巡检单的 10 步操作，原包安装失败而候选通过。复测对所列程序配置 Internet 出站阻断，保留本机通信。运行后组件及 AVD 约占 6.38 GiB。非开发者试用仍待补充。")
+    local_rule_path = ROOT / "docs/validation/0.6.10-local-rule-windows.json"
+    local_rule_note = "另一次验证关闭模型，用本地规则生成新 APK 并通过指定操作。" if local_rule_path.is_file() else ""
+    block("当前独立机器证据", "正式安装器通过自检、输入哈希、篡改拒绝和卸载检查。v0.6.10 在含中文和空格的存储与 TEMP 下首次准备五类组件约 76 秒，实际 EXE 通过巡检单 10 步复测。所列程序的 Internet 出站已阻断，保留本机通信。" + local_rule_note + "运行后约占 6.38 GiB。另有一次模拟器界面观察失败，已保留报告。非开发者试用待补充。")
     block("资源与费用", "系统镜像是主要下载和存储项，默认安装包不随包分发全部镜像。每轮记录耗时、工具与构建请求、模型输入输出和缓存计量；缺少计量时保留空值。模型费用、环境准备耗时与人工复核分别记录，实际现场成本以试点测量为准。")
     block("拟定试点", "从授权的离线应用和合成业务记录开始，明确维护员、操作员与独立复核员。先完成关键流程及数据备份，再测设备更新、文件迁移与回滚。比较拿到 APK 到通过关键操作的用时、人工次数和失败恢复用时。当前巡检单是模拟场景，尚无企业试点收益数据。")
     table(["路径", "进入下一步的证据"], [
