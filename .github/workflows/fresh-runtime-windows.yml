@@ -6,7 +6,7 @@ on:
       version:
         description: Published Windows release version
         required: true
-        default: '0.6.13'
+        default: '0.6.14'
       unicode_paths:
         description: Test storage and TEMP paths containing Chinese and spaces
         type: boolean
@@ -144,7 +144,7 @@ jobs:
                   Get-ChildItem -LiteralPath $jobs -Directory -Recurse -Filter 'probe-*' | ForEach-Object {
                     $target = New-Item -ItemType Directory -Path (Join-Path evidence $_.Name) -Force
                     Get-ChildItem -LiteralPath $_.FullName -File | Where-Object {
-                      $_.Extension -in '.xml', '.png' -or $_.Name -eq 'crash.txt'
+                      $_.Extension -in '.xml', '.png' -or $_.Name -eq 'crash.txt' -or $_.Name -like '*-observation.txt'
                     } | Copy-Item -Destination $target.FullName
                   }
                 }

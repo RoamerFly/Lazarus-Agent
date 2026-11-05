@@ -1,5 +1,6 @@
 """Run a user-specified UI operation on an isolated emulator and preserve evidence."""
 import re
+import subprocess
 import time
 import xml.etree.ElementTree as ET
 from io import BytesIO
@@ -208,11 +209,17 @@ def resolve_platform_library(missing_class, available_libraries):
 
 def probe(serial,pkg,task,dest):
     dest.mkdir()
+    path = "/data/local/tmp/reviver-task.xml"
+    waited_for_system_ui = False
     def snapshot(label):
-        shell(serial,"uiautomator","dump","/data/local/tmp/reviver-task.xml")
-        xml=invoke([ADB,"-s",serial,"exec-out","cat","/data/local/tmp/reviver-task.xml"]).stdout
+        shell(serial,"rm","-f",path,timeout=5)
+        shell(serial,"uiautomator","dump",path,timeout=15)
+        result=invoke([ADB,"-s",serial,"exec-out","cat",path],5)
+        if result.returncode:
+            raise RuntimeError(output(result))
+        xml=result.stdout
         (dest/(label+".xml")).write_bytes(xml)
-        shot=invoke([ADB,"-s",serial,"exec-out","screencap","-p"]).stdout
+        shot=invoke([ADB,"-s",serial,"exec-out","screencap","-p"],8).stdout
         if shot.startswith(b"\x89PNG"):
             (dest/(label+".png")).write_bytes(shot)
         return ET.fromstring(xml)
@@ -220,29 +227,63 @@ def probe(serial,pkg,task,dest):
         return value in (node.get("text"),node.get("content-desc"),node.get("resource-id"))
     def tap(node):
         bounds=list(map(int,re.findall(r"\d+",node.get("bounds",""))))
-        if len(bounds)!=4:raise ValueError("控件位置无效")
-        shell(serial,"input","tap",str((bounds[0]+bounds[2])//2),str((bounds[1]+bounds[3])//2))
-    tree=snapshot("before")
-    system_nodes={n.get("resource-id"):n for n in tree.iter("node") if n.get("package")=="android"}
-    message=system_nodes.get("android:id/message")
-    ok=system_nodes.get("android:id/button1")
+        if len(bounds)!=4 or bounds[0]>=bounds[2] or bounds[1]>=bounds[3]:
+            raise ValueError("控件位置无效")
+        shell(serial,"input","tap",str((bounds[0]+bounds[2])//2),str((bounds[1]+bounds[3])//2),timeout=10)
     compatibility_notices=("This app was built for an older version of Android",
                            "This app isn't compatible with the latest version of Android.")
-    if (message is not None and message.get("text","").startswith(compatibility_notices)
-            and ok is not None and ok.get("text")=="OK"):
-        tap(ok)
-        time.sleep(.5)
-        tree=snapshot("after-legacy-notice")
-    node=next((n for n in tree.iter("node") if n.get("package")==pkg and is_match(n,task["tap"])),None)
+
+    def observe(label, value):
+        nonlocal waited_for_system_ui
+        deadline = time.monotonic() + 25
+        next_label = label
+        for _ in range(6):
+            try:
+                tree = snapshot(next_label)
+            except (ET.ParseError, RuntimeError, subprocess.TimeoutExpired) as exc:
+                (dest/(label+"-observation.txt")).write_text(str(exc)[-500:],encoding="utf-8")
+            else:
+                system = {n.get("resource-id"): n for n in tree.iter("node") if n.get("package")=="android"}
+                title = system.get("android:id/alertTitle")
+                wait = system.get("android:id/aerr_wait")
+                message = system.get("android:id/message")
+                ok = system.get("android:id/button1")
+                if wait is not None:
+                    if (waited_for_system_ui or title is None or
+                            title.get("text") != "System UI isn't responding" or wait.get("text") != "Wait"):
+                        return None
+                    # This probe runs on a disposable lab device. Leave other ANRs for diagnosis.
+                    for suffix in (".xml", ".png"):
+                        evidence = dest/(next_label+suffix)
+                        if evidence.is_file():
+                            evidence.replace(dest/(label+"-system-ui-wait"+suffix))
+                    tap(wait)
+                    waited_for_system_ui = True
+                elif (label == "before" and next_label == "before" and message is not None
+                      and message.get("text","").startswith(compatibility_notices)
+                      and ok is not None and ok.get("text") == "OK"):
+                    tap(ok)
+                    next_label = "after-legacy-notice"
+                else:
+                    matches = [n for n in tree.iter("node") if n.get("package")==pkg and is_match(n,value)]
+                    if matches and (label == "after" or len(matches) == 1):
+                        return matches[0]
+            if time.monotonic() >= deadline:
+                break
+            time.sleep(1)
+        return None
+
+    node=observe("before",task["tap"])
     if node is None:
-        return {"result":"insufficient","message":"找不到指定控件。请核对文案、系统弹窗和应用当前页面。"}
+        return {"result":"insufficient","system_ui_waited":waited_for_system_ui,
+                "message":"找不到指定控件。请核对文案、系统弹窗和应用当前页面。"}
     activities=shell(serial,"dumpsys","activity","top","-c")
     owner=re.findall(r"(?m)^\s*ACTIVITY "+re.escape(pkg)+r"/\S+ [^\r\n]*?\bpid=(\d+)",activities)
     # Only clear the crash buffer on our private lab AVD before this individual action.
     invoke([ADB,"-s",serial,"logcat","-b","crash","-c"])
     tap(node)
     time.sleep(1)
-    after=snapshot("after")
+    after=observe("after",task["expect"])
     pid_filter=["--pid",owner[-1]] if owner else []
     crash=output(invoke([ADB,"-s",serial,"logcat","-b","crash","-d",*pid_filter]))
     process=re.search(r"AndroidRuntime:\s+Process: ([\w.:]+), PID: (\d+)",crash)
@@ -250,12 +291,13 @@ def probe(serial,pkg,task,dest):
         (dest/"crash.txt").write_text(crash,encoding="utf-8")
         missing_class=extract_missing_class(crash)
         exception=re.search(r"AndroidRuntime:\s+(?:Caused by: )?(android\.os\.FileUriExposedException)\b",crash)
-        failure={"result":"failed","message":"核心操作触发应用崩溃",
+        failure={"result":"failed","system_ui_waited":waited_for_system_ui,"message":"核心操作触发应用崩溃",
                  "missing_class":missing_class}
         if exception:
             failure.update(exception=exception.group(1),message="共享文件时触发 FileUriExposedException")
         return failure
-    for n in after.iter("node"):
-        if n.get("package")==pkg and is_match(n,task["expect"]):
-            return {"result":"passed","message":"操作后在目标应用内找到预期内容："+task["expect"]}
-    return {"result":"insufficient","message":"操作后未找到预期内容，详见界面树。"}
+    if after is not None:
+        return {"result":"passed","system_ui_waited":waited_for_system_ui,
+                "message":"操作后在目标应用内找到预期内容："+task["expect"]}
+    return {"result":"insufficient","system_ui_waited":waited_for_system_ui,
+            "message":"操作后未找到预期内容，详见界面树。"}
