@@ -29,6 +29,7 @@ VARIANTS = {
     "field-route": ("field-route", "RouteActivity.java", "field-route-legacy.apk"),
     "vault": ("file-reader-variant", "ChoiceVaultActivity.java", "memo-vault-forgets-selection.apk"),
     "umbrella-desk": ("umbrella-desk", "LoanActivity.java", "umbrella-desk-en.apk"),
+    "temperature-card": ("temperature-card", "TemperatureActivity.java", "temperature-card-celsius.apk"),
 }
 
 
