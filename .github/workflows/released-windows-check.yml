@@ -1,0 +1,80 @@
+name: Published Windows installer check
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Published version to install and remove on a fresh runner
+        required: true
+        default: '0.6.10'
+
+permissions:
+  contents: read
+
+jobs:
+  check-published-installer:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Verify the published installer and prepare replay inputs
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          python -m pip install cryptography
+          if ($LASTEXITCODE) { throw 'Signature verifier dependency failed' }
+          New-Item -ItemType Directory inputs,evidence | Out-Null
+          gh release download "v$env:RELEASE_VERSION" --repo RoamerFly/Lazarus-Agent --dir inputs --pattern Lazarus-Agent-windows-x64-setup.exe --pattern latest.json --pattern latest.json.sig
+          if ($LASTEXITCODE) { throw 'Release download failed' }
+          python -c "from pathlib import Path; from updater import verify_manifest,parse_manifest; p=Path('inputs'); raw=(p/'latest.json').read_bytes(); verify_manifest(raw,(p/'latest.json.sig').read_bytes()); import os; assert parse_manifest(raw).version==os.environ['RELEASE_VERSION']"
+          if ($LASTEXITCODE) { throw 'Release signature or version failed' }
+          $manifest = Get-Content -Raw inputs/latest.json | ConvertFrom-Json
+          if ((Get-FileHash inputs/Lazarus-Agent-windows-x64-setup.exe).Hash.ToLowerInvariant() -ne $manifest.assets.'windows-x64-installer'.sha256) { throw 'Installer SHA mismatch' }
+          Copy-Item fixtures/field-route/field-route-legacy.apk inputs/base.apk
+          Copy-Item fixtures/verified/field-route-remember-route.apk inputs/candidate.apk
+          Copy-Item docs/validation/0.6.7-field-route-acceptance.json inputs/report.json
+          Copy-Item inputs/latest.json,inputs/latest.json.sig evidence
+      - name: Install, reject tampering and uninstall the actual release
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
+          $env:LAZARUS_STORAGE_ROOT = Join-Path $env:RUNNER_TEMP 'published-release-check'
+          $installed = Join-Path $env:LOCALAPPDATA 'Programs\Lazarus Agent\Lazarus-Agent.exe'
+          if (Test-Path -LiteralPath $installed) { throw 'Installation target was not clean' }
+          $setup = Start-Process -FilePath .\inputs\Lazarus-Agent-windows-x64-setup.exe -ArgumentList '/S' -WindowStyle Hidden -Wait -PassThru
+          if ($setup.ExitCode -ne 0) { throw 'Installation failed' }
+          $manifest = Get-Content -Raw inputs/latest.json | ConvertFrom-Json
+          $exeHash = (Get-FileHash -LiteralPath $installed).Hash.ToLowerInvariant()
+          if ($exeHash -ne $manifest.assets.'windows-x64-portable-exe'.sha256) { throw 'Installed EXE SHA mismatch' }
+          $self = Start-Process -FilePath $installed -ArgumentList '--self-test' -WindowStyle Hidden -Wait -PassThru
+          if ($self.ExitCode -ne 0) { throw 'Self-test failed' }
+          $arguments = '--replay-acceptance inputs/report.json inputs/base.apk inputs/candidate.apk --check-only --output evidence/inputs.json --log evidence/check.log'
+          $check = Start-Process -FilePath $installed -WorkingDirectory $PWD.Path -ArgumentList $arguments -WindowStyle Hidden -Wait -PassThru
+          if ($check.ExitCode -ne 0) { throw 'Input validation failed' }
+          if ((Get-Content -Raw evidence/inputs.json | ConvertFrom-Json).status -ne 'inputs-verified') { throw 'Unexpected check status' }
+          Add-Content -LiteralPath inputs/candidate.apk -Value 'tampered'
+          $arguments = $arguments.Replace('evidence/inputs.json','evidence/tampered.json').Replace('evidence/check.log','evidence/tampered.log')
+          $tampered = Start-Process -FilePath $installed -WorkingDirectory $PWD.Path -ArgumentList $arguments -WindowStyle Hidden -Wait -PassThru
+          if ($tampered.ExitCode -ne 2 -or (Test-Path evidence/tampered.json)) { throw 'Tampered input was not rejected' }
+          $sentinel = Join-Path $env:LOCALAPPDATA 'Lazarus-Agent\output\installer-check.txt'
+          if (Test-Path -LiteralPath $sentinel) { throw 'Sentinel unexpectedly existed' }
+          New-Item -ItemType Directory -Force -Path (Split-Path $sentinel) | Out-Null
+          Set-Content -LiteralPath $sentinel -Value 'preserve-user-output'
+          $uninstaller = Join-Path (Split-Path $installed) 'Uninstall.exe'
+          $removal = Start-Process -FilePath $uninstaller -ArgumentList '/S' -WindowStyle Hidden -Wait -PassThru
+          if ($removal.ExitCode -ne 0 -or (Test-Path -LiteralPath $installed)) { throw 'Uninstall failed' }
+          if ((Get-Content -LiteralPath $sentinel -Raw).Trim() -ne 'preserve-user-output') { throw 'Default uninstall removed output' }
+          @{ version=$manifest.version; installer_sha256=$manifest.assets.'windows-x64-installer'.sha256; installed_exe_sha256=$exeHash; signature_verified=$true; install_exit=$setup.ExitCode; self_test_exit=$self.ExitCode; input_check_exit=$check.ExitCode; tampered_exit=$tampered.ExitCode; uninstall_exit=$removal.ExitCode; user_output_preserved=$true; scope='Official published installer, fresh Windows, input checks only; device behavior is separate' } |
+            ConvertTo-Json | Set-Content -Encoding utf8 evidence/installer-check.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: published-installer-evidence
+          path: evidence/*
+          retention-days: 30
