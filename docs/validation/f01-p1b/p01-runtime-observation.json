@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "trial": "P01-agent-3",
+  "role": "exploratory runtime diagnosis after the trial",
+  "source": "scoped crash buffer from the private Android 16 emulator",
+  "device_threadtime": "11-05 16:50:23.713",
+  "runtime": {
+    "process": "org.ggbond.fieldroute",
+    "exception_types": [
+      "java.lang.NoSuchMethodError"
+    ],
+    "app_frames": [
+      {
+        "symbol": "org.ggbond.fieldroute.RouteActivity.lambda$addRoute$0$org-ggbond-fieldroute-RouteActivity",
+        "line": 39
+      },
+      {
+        "symbol": "org.ggbond.fieldroute.RouteActivity$$ExternalSyntheticLambda0.onClick",
+        "line": 0
+      }
+    ],
+    "missing_method": {
+      "owner": "Landroid/content/SharedPreferences;",
+      "signature": "edit()Landroid/content/SharedPreferences$Edit;"
+    }
+  },
+  "terminal_outcome": "blocked",
+  "build_tool_requests": 5,
+  "candidate_exported": false,
+  "local_capture_sha256": "518af95ff641b484d0d9aff7b4f70fb202963f72aef9ed324b9e8d0d775a4991"
+}

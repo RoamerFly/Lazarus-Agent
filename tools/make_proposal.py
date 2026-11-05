@@ -106,7 +106,7 @@ def build():
     ], [114, CONTENT_WIDTH - 114])
     if evidence:
         c = evidence["counts"]
-        story.append(para(f"自动汇总正例 {c['agent_positives']}/18，主案例 {c['primary']}/3，反例明确拒绝 {c['agent_negative_rejected']}/6，错误验收 {c['agent_false_acceptances']}/6。缺少完整观测的轮次 {c['unobserved']}/42。主案例未达到预设 3/3，本批次联合门槛未通过。通过候选的开发差异复查未扣减自动计数，非开发者试用仍待补充。"))
+        story.append(para(f"第一批正例 {c['agent_positives']}/18，主案例 {c['primary']}/3，反例明确拒绝 {c['agent_negative_rejected']}/6，错误验收 {c['agent_false_acceptances']}/6。缺少完整观测的轮次 {c['unobserved']}/42。主案例未达到预设 3/3，本批次联合门槛未通过。通过候选的开发差异复查未扣减自动计数，非开发者试用仍待补充。"))
         story.append(para("无修改回编为 0/6，旧规则为 2/6。同模型单次构建的五个已观测用例均通过，第六项在暂停时中断，因此无法据此确认多轮迭代更优。补丁后的工程回归另列。"))
         regression_path = ROOT / "docs/validation/0.6.8-regression-results.json"
         if regression_path.is_file():
@@ -127,7 +127,8 @@ def build():
         gate = "达到" if p1b["joint_gate"] else "未达到"
         story.append(para(f"P1B 正例 {counts['agent_positives']}/18，主案例 {counts['primary']}/3，"
                           f"反例拒绝 {counts['agent_negative_rejected']}/6，错误验收 {counts['agent_false_acceptances']}/6，"
-                          f"独立留出任务 {p1b['held_out_passes']}/3。{gate}该批联合门槛。"))
+                          f"独立留出任务 {p1b['held_out_passes']}/3。{gate}该批联合门槛。"
+                          f"42 轮均有终态，单次构建对照 {counts['one-build_positive_cases']}/6。"))
     elif (ROOT / "docs/science-superpowers/preregistrations/2026-11-06-f01-p1b.md").is_file():
         story.append(para("第二批前瞻复验已冻结 42 轮，加入一项独立留出任务。结果单独归档。"))
     story.append(PageBreak())

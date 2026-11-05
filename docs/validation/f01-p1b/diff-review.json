@@ -1,0 +1,436 @@
+{
+  "status": "complete",
+  "rows": [
+    {
+      "trial": "P01-one-build-1",
+      "candidate_sha256": "a41eabd0d50f2033f134033ae7d6b706d982d2070916b809e7c88b65eab85452",
+      "raw_diff_sha256": "6b5c837663dc4134979831f782ee1706a7df5343f8950ecc2d0c820a18a853f8",
+      "manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "review": "调整目标 SDK，使用 SharedPreferences 读取和保存路线，复用南北线原显示逻辑。",
+      "scope": "覆盖两次显式冷启动。"
+    },
+    {
+      "trial": "P01-agent-1",
+      "candidate_sha256": "849c1d09545c7b413f39df5dd9d0bf3c42a6a9a6f35496a6046a49848ed4ee97",
+      "raw_diff_sha256": "296daac9bb9d4de6507299aed4ee7e2cc1ec96df60345c7c859cf0be794f2410",
+      "manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "review": "安装门槛规则将目标 SDK 调到 24，代码用 SharedPreferences 保存并恢复路线。",
+      "scope": "apply 写入按固定冷启动间隔验证。"
+    },
+    {
+      "trial": "P01-agent-2",
+      "candidate_sha256": "b7ffa96c6f3ad939c8bbdc214babbdb716e2fcb89c84f78fe90fbcaa7dd0bde7",
+      "raw_diff_sha256": "211645286288eff2568fda367e214b5ce1f2a8b23a6c994e4c555f3c70cdb24a",
+      "manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "review": "显式将目标 SDK 调到 36，保存并恢复路线，另适配系统窗口边界。",
+      "scope": "apply 写入按固定冷启动间隔验证。"
+    },
+    {
+      "trial": "P02-rules-1",
+      "candidate_sha256": "98b13e7fb9825d0f5d1acb83296cea06d320e0f8a9ecd7ea46af86b59da2206f",
+      "raw_diff_sha256": null,
+      "manifest_changes": {
+        "source": "exact binary manifest transform and unchanged classes.dex",
+        "only_declared_library": "org.apache.http.legacy"
+      },
+      "review": "增加兼容库声明，保留原代码用构造器参数生成协议版本文本。",
+      "scope": "原 APK 没有归档文件。此对照覆盖依赖兼容和界面输出。"
+    },
+    {
+      "trial": "P02-one-build-1",
+      "candidate_sha256": "4f9d486f768144ac34819e8c344cfa72b1aeaf77a397a14f7d81475decec8f6d",
+      "raw_diff_sha256": "1832aa86773ad5e2c9dae80dca8f8e6cf54c532c870253fe0c95d64ac7a16ba3",
+      "manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "review": "新建合成归档资源，读取首行并解析版本后生成界面文字。",
+      "scope": "只验证固定的合成 HTTP/1.1 响应。"
+    },
+    {
+      "trial": "P02-agent-1",
+      "candidate_sha256": "0f6e511ed88bd244806b499a8f153a5183de32a5f7e0d5a5227b35e9900d620f",
+      "raw_diff_sha256": "136589152bced1a1ddefb2d4bfc65b37f93e158a0654591c2f4d4697323367d2",
+      "manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "review": "新增合成归档资源，点击时通过 BufferedReader 读取首行，从文本截取协议字段。",
+      "scope": "只验证固定的合成 HTTP/1.1 响应。"
+    },
+    {
+      "trial": "P02-agent-2",
+      "candidate_sha256": "740bcad86cded8e0335260410ed50203a0f535e14afb8873c9f5082e41b733c8",
+      "raw_diff_sha256": "95a596617bd02ab1f4db22c8a8d8ea3934d8c41cceae7240b953b3019d960517",
+      "manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "review": "新增合成归档资源，读取并关闭流，截取首行协议字段后显示。",
+      "scope": "只验证固定的合成 HTTP/1.1 响应。"
+    },
+    {
+      "trial": "P03-one-build-1",
+      "candidate_sha256": "df6593c985c6a6e6e4670c5168f8c989026b118b76fc36f1e89ff63837b94e6c",
+      "raw_diff_sha256": "f1f30f5f319e82bce073773d1b15cb59af41927226316eb89a142a887eca10c9",
+      "manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "review": "只修改字符串资源中的按钮和参数化计数提示，另外翻译页面标题。",
+      "scope": "连续两次计时通过。"
+    },
+    {
+      "trial": "P03-agent-1",
+      "candidate_sha256": "9be38bde47b7005a26fdf043ff3919016848ffe8cebc3be2f8d59fde1fdb06cd",
+      "raw_diff_sha256": "81aeeb4301cac579d0235f2b30fddd8900f94a20a9dfd249b33bdbdbed125057",
+      "manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "review": "修改按钮与含整数占位符的字符串，保留计时器代码。",
+      "scope": "连续两次计时通过。"
+    },
+    {
+      "trial": "P03-agent-2",
+      "candidate_sha256": "34eb4895bc74ac8d1a26b4e04c476a40cafeb7924117bb1c78a85ab78ede9754",
+      "raw_diff_sha256": "81aeeb4301cac579d0235f2b30fddd8900f94a20a9dfd249b33bdbdbed125057",
+      "manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "review": "修改按钮与含整数占位符的字符串，保留计时器代码。",
+      "scope": "连续两次计时通过。"
+    },
+    {
+      "trial": "P03-agent-3",
+      "candidate_sha256": "ff726c55911abf3d22a234cce7341e38a8e009124bc7f3a5a393f56d3bf54473",
+      "raw_diff_sha256": "81aeeb4301cac579d0235f2b30fddd8900f94a20a9dfd249b33bdbdbed125057",
+      "manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "review": "修改按钮与含整数占位符的字符串，保留页面标题和计时器代码。",
+      "scope": "连续两次计时通过。"
+    },
+    {
+      "trial": "P04-one-build-1",
+      "candidate_sha256": "a185cb3a97c0ac637178d8b9dc9bc517b4313bb0f921dcbd1b5542b7b2c8831c",
+      "raw_diff_sha256": "3fc08a1f784424610ca680ec6da910e0402b6ca8e4f88bdf7621300c0c7422ee",
+      "manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "review": "本地化标题、借还按钮和参数化计数字符串，保留加减逻辑。",
+      "scope": "15 步包括连续借还、重复归还到零和冷启动恢复为零。"
+    },
+    {
+      "trial": "P04-agent-1",
+      "candidate_sha256": "93d26c1562db2d0e14d0ceba67ffd084e501444561d9a75d7811bda47f212747",
+      "raw_diff_sha256": "3fc08a1f784424610ca680ec6da910e0402b6ca8e4f88bdf7621300c0c7422ee",
+      "manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "review": "本地化标题、借还按钮和参数化计数字符串，保留加减逻辑。",
+      "scope": "15 步包括连续借还、重复归还到零和冷启动恢复为零。"
+    },
+    {
+      "trial": "P04-agent-2",
+      "candidate_sha256": "1bc30bc38881d121025164fb5c1d8fe96422e633ab42189a4dca9f3af1d8153a",
+      "raw_diff_sha256": "3fc08a1f784424610ca680ec6da910e0402b6ca8e4f88bdf7621300c0c7422ee",
+      "manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "review": "本地化标题、借还按钮和参数化计数字符串，保留加减逻辑。",
+      "scope": "15 步包括连续借还、重复归还到零和冷启动恢复为零。"
+    },
+    {
+      "trial": "P04-agent-3",
+      "candidate_sha256": "5bd4a81b42434958cb071cef6cd15e9e2e38a4aad3e5632fd7e95df085956d5c",
+      "raw_diff_sha256": "3fc08a1f784424610ca680ec6da910e0402b6ca8e4f88bdf7621300c0c7422ee",
+      "manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "review": "本地化标题、借还按钮和参数化计数字符串，保留加减逻辑。",
+      "scope": "15 步包括连续借还、重复归还到零和冷启动恢复为零。"
+    },
+    {
+      "trial": "P05-rules-1",
+      "candidate_sha256": "362d85c99ad61c53cfbeb90869afc53294726f1f24f2ac7207ed776562afc164",
+      "raw_diff_sha256": null,
+      "manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "review": "原有规则在记录流成功打开后保存记录标识，启动时读取同一偏好键。",
+      "scope": "审核范围为自有文件阅读器的 A、B 两个记录。"
+    },
+    {
+      "trial": "P05-one-build-1",
+      "candidate_sha256": "cd5c1c5082b1108985073c57f0f369fe345b8ec7d527cd7dd604d42329e6fc3e",
+      "raw_diff_sha256": "36f274b8bc542b4116ee6e7a6078cca0b918b5f062cc9442338f17f7dde3238b",
+      "manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "review": "使用 SharedPreferences 保存上次记录并在启动时传给原 openRecord，默认 A。",
+      "scope": "验证 A、B 内容及冷启动恢复。"
+    },
+    {
+      "trial": "P05-agent-1",
+      "candidate_sha256": "fd8cc26e41e50d070753b9bebfb9564880c665f0784304ddedf8c83a8205d19d",
+      "raw_diff_sha256": "cb5852a6127b9a077ab47ce270b7f642895994b3fb68a0f79629e3495cb8565c",
+      "manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "review": "使用默认 SharedPreferences 保存记录，启动时以原 A 为默认值。",
+      "scope": "验证 A、B 内容及冷启动恢复。"
+    },
+    {
+      "trial": "P05-agent-2",
+      "candidate_sha256": "fa9dce36595a6709b73bf13e9bfe88259f160f369d2d3691c0d787f54be1e49e",
+      "raw_diff_sha256": "2fb202b24287fc3f16210ed8a8b19031a55d747bacd667b13f3a0089d2062eaf",
+      "manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "review": "在打开记录时同步提交记录名，启动时读取同一偏好并回退到 A。",
+      "scope": "固定记录 A、B 的内容和两次冷启动通过。"
+    },
+    {
+      "trial": "P05-agent-3",
+      "candidate_sha256": "d43db2cd02d53d80618c9ef7bb5096525a1d89ebbc8bb8fde31bbe3cc57054bf",
+      "raw_diff_sha256": "61101b7c13b18bce479adc0ca57655deb60576278c74df814efa01ec8f049bc6",
+      "manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "review": "保存打开的记录名，启动时读取后调用原 openRecord，默认 A。",
+      "scope": "固定记录 A、B 的内容和两次冷启动通过。"
+    },
+    {
+      "trial": "P06-one-build-1",
+      "candidate_sha256": "e9b185546b066bcac56e5e0835c64dd1e65fde579eff6fddad6c2eb0d47ab813",
+      "raw_diff_sha256": "14221c9c5fb34a000448785a6e3a00ba521a75996484b1424b5d55c2db294f3c",
+      "manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": [
+            {
+              "type": "provider",
+              "name": ".RecordProvider",
+              "exported": "(type 0x12)0x0",
+              "authorities": "org.ggbond.archivereader.records"
+            }
+          ]
+        }
+      },
+      "review": "声明非导出 ContentProvider，以只读方式提供固定的私有 record.txt。接收分支通过 ContentResolver 读取首字节，匹配后显示 Shared。",
+      "scope": "覆盖同包接收页面和固定记录，复核没有扩展到任意第三方收件方。"
+    },
+    {
+      "trial": "P06-agent-1",
+      "candidate_sha256": "f8888733c003c288a4b5ec91e0fe20994ad636cba5fe29da0a4ad1e6ce4b4b4f",
+      "raw_diff_sha256": "93a2dd9e3ab1299fd9357b5131d34ee8c6762bb6e52b838ea446866bd76f7138",
+      "manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": [
+            {
+              "type": "provider",
+              "name": "org.ggbond.archivereader.RecordProvider",
+              "exported": "(type 0x12)0x0",
+              "authorities": "org.ggbond.archivereader.records"
+            }
+          ]
+        }
+      },
+      "review": "用非导出 ContentProvider 将固定的私有 record.txt 包装成 content URI，接收分支沿用已有读取和校验。",
+      "scope": "覆盖同包接收页面，复测以固定记录首字节决定成功。"
+    },
+    {
+      "trial": "P06-agent-2",
+      "candidate_sha256": "e98f94eb3917fb2b4c8cbc6838bb854c1be313982dccc9a485995029e7f3106e",
+      "raw_diff_sha256": "cf7af2e5d3a25a0bc5e6985b37876f6cfc84f8dbe86a46610d3c5355b7961e8a",
+      "manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": [
+            {
+              "type": "provider",
+              "name": ".RecordProvider",
+              "exported": "(type 0x12)0x0",
+              "authorities": "org.ggbond.archivereader.records"
+            }
+          ]
+        }
+      },
+      "review": "使用非导出 ContentProvider 提供固定记录的 content URI，保留原接收分支。",
+      "scope": "固定测试覆盖同包接收页面和首字节校验。"
+    },
+    {
+      "trial": "P06-agent-3",
+      "candidate_sha256": "23f5cf74edb9dae081cb65532b91a2f94db00a9751da472c70a9402f9f2c753f",
+      "raw_diff_sha256": "d60a797cb5c08e8ccdbc924d9fbe0917ad2c70a08eff87a5b03b915d51e683ba",
+      "manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": [
+            {
+              "type": "provider",
+              "name": ".RecordProvider",
+              "exported": "(type 0x12)0x0",
+              "authorities": "org.ggbond.archivereader.records"
+            }
+          ]
+        }
+      },
+      "review": "声明非导出只读 ContentProvider，用固定私有记录的 content URI 交接，接收分支沿用读取后校验。",
+      "scope": "覆盖固定记录和同包接收页面。"
+    }
+  ],
+  "scope": "AI-assisted developer review of passing candidate differences. Stored fingerprints bind this review to the exact artifacts."
+}

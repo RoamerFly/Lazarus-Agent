@@ -16,7 +16,7 @@ sys.path.insert(0, str(ROOT))
 from agent_acceptance import verified_for
 from app_version import APP_VERSION
 from updater import parse_manifest, verify_manifest
-from tools.audit_f01_p1b import SPEC as P1B_PROTOCOL, audit as audit_p1b
+from tools.audit_f01_p1b import SPEC as P1B_PROTOCOL, audit as audit_p1b, require_diff_review
 from tools.run_f01_p1 import PROTOCOL, trial_schedule
 from tools.summarize_f01_p1 import summarize
 
@@ -35,7 +35,7 @@ def copy(source, destination):
     shutil.copyfile(source, destination)
 
 
-def add_case(root, output, case, mode, repeat, *, distribute=True):
+def add_case(root, output, case, mode, repeat, *, distribute=True, sample_root=None):
     trial = root / f"{case['id']}-{mode}-{repeat}"
     if not trial.is_dir():
         return
@@ -53,7 +53,7 @@ def add_case(root, output, case, mode, repeat, *, distribute=True):
         # Trial candidates retain their independent report, including failures.
         copy(candidate, target / "candidate.apk")
         if distribute and mode == "agent" and verified_for(report, digest(candidate)):
-            sample = output / "可分发样本" / trial.name
+            sample = (sample_root or output / "可分发样本") / trial.name
             source = ROOT / case["apk"]
             if digest(source) != report["input_sha256"]:
                 raise ValueError("输入样本与验收报告哈希不符：" + trial.name)
@@ -163,6 +163,7 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
         p1b = audit_p1b(p1b_checkout)
         if p1b != read(ROOT / "docs/validation/f01-p1b/results.json"):
             raise ValueError("P1B 汇总与冻结记录不一致")
+        require_diff_review(p1b, read(ROOT / "docs/validation/f01-p1b/diff-review.json"))
     primary = None
     primary_version = None
     if primary_results is not None:
@@ -317,7 +318,7 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
             subprocess.run(["git", "archive", "--format=zip",
                             "--output=" + str(p1b_folder / f"F01-P1B-冻结源码-{freeze[:7]}.zip"), freeze],
                            cwd=ROOT, check=True)
-            for name in ("results.json", "report.md"):
+            for name in ("results.json", "report.md", "diff-review.json", "p01-runtime-observation.json"):
                 path = Path("docs/validation/f01-p1b") / name
                 copy(ROOT / path, kit / path)
             for case in p1b_protocol["cases"]:
@@ -325,7 +326,7 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                 copy(source, p1b_folder / "自有输入样本" / source.name)
             for (case, mode, repeat), row in zip(trial_schedule(p1b_protocol), p1b["rows"]):
                 add_case(p1b_checkout / "build/p1b", p1b_folder, case, mode, repeat,
-                         distribute=row["state"] == "passed")
+                         distribute=row["state"] == "passed", sample_root=kit / "可分发样本/P1B")
         # Only synthetic fixture evidence enters this package. Remove local workstation roots in text.
         for path in kit.rglob("*"):
             if "评测记录" not in path.parts:
