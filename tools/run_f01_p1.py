@@ -186,6 +186,7 @@ def model_config(protocol, credential_file):
 def main():
     parser = ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--protocol", type=Path, default=PROTOCOL, help="Path to a frozen case manifest")
     parser.add_argument("--credential-file", type=Path)
     parser.add_argument("--only", nargs="+", help="Run a portion of the fixed schedule")
     parser.add_argument("--controls-only", action="store_true", help="Run offline controls only")
@@ -193,7 +194,7 @@ def main():
     output = args.out.resolve()
     if not output.is_relative_to(ROOT / "build"):
         parser.error("Store raw benchmark evidence under the ignored build/ directory")
-    protocol = json.loads(PROTOCOL.read_text(encoding="utf-8-sig"))
+    protocol = json.loads(args.protocol.read_text(encoding="utf-8-sig"))
     identifiers = {case["id"] for case in protocol["cases"]}
     if args.only and not set(args.only) <= identifiers:
         parser.error("Unknown case ID")

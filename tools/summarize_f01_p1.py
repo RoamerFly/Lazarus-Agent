@@ -84,6 +84,7 @@ def summarize(root, protocol):
 if __name__ == "__main__":
     parser = ArgumentParser(description=__doc__)
     parser.add_argument("results", type=Path)
+    parser.add_argument("--protocol", type=Path, default=PROTOCOL, help="Case manifest used by the runner")
     args = parser.parse_args()
-    spec = json.loads(PROTOCOL.read_text(encoding="utf-8-sig"))
+    spec = json.loads(args.protocol.read_text(encoding="utf-8-sig"))
     print(json.dumps(summarize(args.results, spec), ensure_ascii=False, indent=2))
