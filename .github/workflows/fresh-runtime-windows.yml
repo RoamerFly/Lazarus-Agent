@@ -11,6 +11,7 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 30
     steps:
+      - uses: actions/checkout@v4
       - name: Download the published Windows installer
         shell: pwsh
         env:
@@ -77,7 +78,27 @@ jobs:
             $emulator = Join-Path $runtime 'lab-sdk\emulator\emulator.exe'
             $accel = & $emulator -accel-check 2>&1
             $accel | Set-Content -Encoding utf8 evidence/acceleration.txt
-            @{ duration_seconds=$clock.Elapsed.TotalSeconds; bytes=(Get-ChildItem -LiteralPath $runtime -Recurse -File | Measure-Object Length -Sum).Sum; platform='GitHub-hosted fresh Windows runner'; workflow_head='This test checks fresh download and preparation. Android replay is recorded separately.' } |
+            $offlineRules = @()
+            try {
+              $programs = @($app, (Join-Path $runtime 'java\bin\java.exe'), (Join-Path $runtime 'lab-sdk\platform-tools\adb.exe'), $emulator)
+              $index = 0
+              foreach ($program in $programs) {
+                $name = "Lazarus-offline-$index"
+                New-NetFirewallRule -DisplayName $name -Direction Outbound -Program $program -Action Block -RemoteAddress Internet | Out-Null
+                $offlineRules += $name
+                $index++
+              }
+              $arguments = '--replay-acceptance docs/validation/0.6.7-field-route-acceptance.json fixtures/field-route/field-route-legacy.apk fixtures/verified/field-route-remember-route.apk --output evidence/replay.json --log evidence/replay.log'
+              $replay = Start-Process -FilePath $app -WorkingDirectory $PWD.Path -ArgumentList $arguments -WindowStyle Hidden -Wait -PassThru
+              if ($replay.ExitCode -ne 0) { throw "Independent replay failed: $($replay.ExitCode)" }
+              $proof = Get-Content -Raw evidence/replay.json | ConvertFrom-Json
+              if ($proof.status -ne 'behavior-verified' -or $proof.rows[0].candidate.device.installed_sha256 -ne '3cb6ce313e96d3bc997b4431cb891f293398f3f875dea8d8dce7336214a87261') { throw 'Independent replay proof did not match the frozen candidate' }
+              @{ app=$app; programs=$programs; outbound='Internet blocked per executable, loopback retained'; replay_exit=$replay.ExitCode } |
+                ConvertTo-Json | Set-Content -Encoding utf8 evidence/offline.json
+            } finally {
+              foreach ($name in $offlineRules) { Remove-NetFirewallRule -DisplayName $name }
+            }
+            @{ duration_seconds=$clock.Elapsed.TotalSeconds; bytes=(Get-ChildItem -LiteralPath $runtime -Recurse -File | Measure-Object Length -Sum).Sum; platform='GitHub-hosted fresh Windows runner'; replay_exit=$replay.ExitCode } |
               ConvertTo-Json | Set-Content -Encoding utf8 evidence/summary.json
           } finally {
             Get-ChildItem -LiteralPath $env:LAZARUS_STORAGE_ROOT -Filter desktop.log -Recurse -ErrorAction SilentlyContinue | ForEach-Object { Copy-Item -LiteralPath $_.FullName evidence/desktop.log }
