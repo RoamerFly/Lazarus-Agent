@@ -77,6 +77,10 @@ def existing_app(url):
 
 
 def main():
+    if sys.argv[1:2] == ["--replay-acceptance"]:
+        from tools.replay_agent_acceptance import main as replay_main
+
+        raise SystemExit(replay_main(sys.argv[2:]))
     if "--version" in sys.argv:
         print(f"{APP_NAME} {APP_VERSION}")
         return

@@ -163,7 +163,8 @@ def ready(api):
 
 
 class Device:
-    def __init__(self):
+    def __init__(self, *, allow_existing=True):
+        self.allow_existing=allow_existing
         self.owner=None
         self.serial=None
         self.api=None
@@ -186,7 +187,10 @@ class Device:
 
     def ensure(self,owner,api,progress,native_abis=()):
         needs_arm = bool({"armeabi", "armeabi-v7a", "arm64-v8a"}.intersection(native_abis)) and "x86_64" not in native_abis
-        if api == 36 and (needs_arm or not avd_ready(api)) and ensure_arm_lab(progress):
+        use_arm = api == 36 and (needs_arm or not avd_ready(api))
+        if use_arm and not self.allow_existing and self.serial != ARM_LAB and paired_arm_lab():
+            raise ValueError("ARM 验证环境正在使用，请退出其他工作台后复测")
+        if use_arm and ensure_arm_lab(progress):
             self.stop()
             self.serial,self.api,self.owner=ARM_LAB,api,owner
             progress("已选择配对的 Android 16 ARM 隔离环境，系统支持 32 位 ARM 原生库")
@@ -201,6 +205,8 @@ class Device:
         if serial in output(invoke([ADB,"devices"],10)):
             if name_at(serial)!=name:
                 raise RuntimeError("工作台端口已被其他设备占用")
+            if not self.allow_existing:
+                raise ValueError("验证环境正在使用，请退出其他工作台后复测")
             self.serial,self.api=serial,api
             self.stop()
         progress(f"正在冷启动 Android {api-20 if api>=34 else 11} 专用模拟器")

@@ -34,3 +34,73 @@ jobs:
           path: dist/Lazarus-Agent.exe
           if-no-files-found: error
           retention-days: 7
+
+      - name: Prepare installer and replay inputs for a separate Windows runner
+        shell: pwsh
+        run: |
+          choco install nsis --no-progress --yes
+          if ($LASTEXITCODE) { throw 'NSIS installation failed' }
+          New-Item -ItemType Directory -Path fresh-smoke | Out-Null
+          $nsis = Join-Path ${env:ProgramFiles(x86)} 'NSIS\makensis.exe'
+          $version = python -c "from app_version import APP_VERSION; print(APP_VERSION)"
+          & $nsis "/DVERSION=$version" "/DSOURCE_EXE=$($PWD.Path)\dist\Lazarus-Agent.exe" "/DOUTPUT=$($PWD.Path)\fresh-smoke\Setup.exe" installer\Lazarus-Agent.nsi
+          if ($LASTEXITCODE) { throw "NSIS build failed: $LASTEXITCODE" }
+          Copy-Item fixtures\tea-timer\tea-timer-en.apk fresh-smoke\base.apk
+          Copy-Item fixtures\verified\tea-timer-localize-zh.apk fresh-smoke\candidate.apk
+          $report = @{
+            schema = 1
+            targets = @(36)
+            steps = @(@{action='expect'; value='Tea timer'})
+            input_sha256 = (Get-FileHash fresh-smoke\base.apk).Hash.ToLowerInvariant()
+            candidate_sha256 = (Get-FileHash fresh-smoke\candidate.apk).Hash.ToLowerInvariant()
+          }
+          $report | ConvertTo-Json -Depth 4 | Set-Content -Encoding utf8 fresh-smoke\report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Lazarus-Agent-fresh-install-smoke-inputs
+          path: fresh-smoke/*
+          if-no-files-found: error
+          retention-days: 7
+
+  fresh-install-smoke:
+    runs-on: windows-latest
+    needs: test-and-package
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: Lazarus-Agent-fresh-install-smoke-inputs
+          path: inputs
+      - name: Install and check the replay inputs without external tools on PATH
+        shell: pwsh
+        run: |
+          $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
+          $env:LAZARUS_STORAGE_ROOT = Join-Path $env:RUNNER_TEMP 'lazarus-agent-fresh'
+          $installed = Join-Path $env:LOCALAPPDATA 'Programs\Lazarus Agent\Lazarus-Agent.exe'
+          if (Test-Path -LiteralPath $installed) { throw 'Installer target was not clean' }
+          $setup = Start-Process -FilePath .\inputs\Setup.exe -ArgumentList '/S' -WindowStyle Hidden -Wait -PassThru
+          if ($setup.ExitCode -ne 0) { throw "Installation failed: $($setup.ExitCode)" }
+          if (!(Test-Path -LiteralPath $installed -PathType Leaf)) { throw 'EXE was not installed' }
+          $self = Start-Process -FilePath $installed -ArgumentList '--self-test' -WindowStyle Hidden -Wait -PassThru
+          if ($self.ExitCode -ne 0) { throw "Packaged self-test failed: $($self.ExitCode)" }
+          New-Item -ItemType Directory evidence | Out-Null
+          $arguments = '--replay-acceptance inputs/report.json inputs/base.apk inputs/candidate.apk --check-only --output evidence/inputs.json --log evidence/check.log'
+          $check = Start-Process -FilePath $installed -WorkingDirectory $PWD.Path -ArgumentList $arguments -WindowStyle Hidden -Wait -PassThru
+          if ($check.ExitCode -ne 0) { throw "Input check failed: $($check.ExitCode)" }
+          $summary = Get-Content -Raw evidence/inputs.json | ConvertFrom-Json
+          if ($summary.status -ne 'inputs-verified' -or $summary.targets[0] -ne 36) { throw 'Unexpected replay status' }
+          Add-Content -Path inputs/candidate.apk -Value 'tampered'
+          $arguments = $arguments.Replace('evidence/inputs.json', 'evidence/tampered.json').Replace('evidence/check.log', 'evidence/tampered.log')
+          $tampered = Start-Process -FilePath $installed -WorkingDirectory $PWD.Path -ArgumentList $arguments -WindowStyle Hidden -Wait -PassThru
+          if ($tampered.ExitCode -ne 2 -or (Test-Path evidence/tampered.json)) { throw 'Tampered candidate was not rejected' }
+          $uninstaller = Join-Path (Split-Path $installed) 'Uninstall.exe'
+          $removal = Start-Process -FilePath $uninstaller -ArgumentList '/S' -WindowStyle Hidden -Wait -PassThru
+          if ($removal.ExitCode -ne 0 -or (Test-Path -LiteralPath $installed)) { throw 'Uninstall failed' }
+          @{ os=$env:RUNNER_OS; architecture=$env:RUNNER_ARCH; installer=(Get-FileHash inputs/Setup.exe).Hash; install_exit=$setup.ExitCode; self_test_exit=$self.ExitCode; check_exit=$check.ExitCode; tampered_exit=$tampered.ExitCode; uninstall_exit=$removal.ExitCode } |
+            ConvertTo-Json | Set-Content -Encoding utf8 evidence/windows.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Lazarus-Agent-fresh-install-smoke-evidence
+          path: evidence/*
+          retention-days: 7
