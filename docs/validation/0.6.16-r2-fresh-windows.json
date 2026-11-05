@@ -1,0 +1,37 @@
+{
+  "scope": "Fresh Windows automated replay using the byte-exact allowlisted r2 scripts and three samples",
+  "run_id": "42100357421",
+  "run_url": "https://github.com/RoamerFly/Lazarus-Agent/actions/runs/42100357421",
+  "workflow_commit": "a686cbeba368b270e652c3fbca26dfe6c26e6fba",
+  "review_archive_sha256": "45a134425fbf5056a328769d840bfc6608d9d04b71ec84f0bc4075f41c7ffead",
+  "version": "0.6.16",
+  "installer_sha256": "6fdfbefdf3702c31084e6151a3220057712d1516a9c1fc41bba534495a9b1214",
+  "exe_sha256": "d13a93650523dfda1299327f4a0f8f9038c964db0492dbdbdb142c2138f054be",
+  "target_api": 36,
+  "abi": "x86_64",
+  "runtime_preparation_seconds": 81.0409354,
+  "runtime_preparation_attempts": 1,
+  "prepared_bytes": 6854570616,
+  "internet_blocked_executables": 4,
+  "cached_runtime_reused": true,
+  "cases": {
+    "demo": {
+      "status": "behavior-verified",
+      "steps": 10,
+      "apk_sha256": "ff5e635b88796dc0335fe33fdd7425145a69a6586c29b2e558ec73e6332eff20",
+      "proof_sha256": "3052feb31212b0aa66ee25704893fe24b2932df991687c30e71a2583269a5530"
+    },
+    "counterexample": {
+      "status": "incomplete",
+      "steps": 2,
+      "apk_sha256": "4a9f89bfa7497fd7703f5bda63c9d5e6f96c50cf8c47d900715e3c0041bc892f",
+      "proof_sha256": "ee44e17b5b005d33966e61d726b4d71ae3cd001d79386831b080ca8bb43310a8"
+    },
+    "heldout": {
+      "status": "behavior-verified",
+      "steps": 16,
+      "apk_sha256": "0262229d68c7e5567d86370774c8b9e42cd51fd473f9e20efe60a066226a78c7",
+      "proof_sha256": "0f19612a6ff20e19afd11d494db500017be432efc26a8d0c42fc42848e778b68"
+    }
+  }
+}
