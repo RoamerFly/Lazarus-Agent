@@ -134,7 +134,7 @@ def build(results, release_dir, output, capture_dir):
             copy(ROOT / name, kit / Path(name).name)
         for name in ("f01-independent-acceptance.md", "f01-p1-results.json", "f01-p1-review.md",
                      "0.6.7-independent-windows.md", "0.6.8-independent-windows.md",
-                     "0.6.8-windows-proof.json", "0.6.8-live-demo.md"):
+                     "0.6.8-windows-proof.json", "0.6.8-live-demo.md", "0.6.8-primary-regression.json"):
             path = ROOT / "docs/validation" / name
             if path.is_file():
                 copy(path, kit / "验证摘要" / name)
@@ -169,7 +169,7 @@ def build(results, release_dir, output, capture_dir):
         package_status = {"app_version": APP_VERSION, "source_commit": commit,
                           "purpose": "engineering-review", "ready_for_submission": False,
                           "benchmark": summary["counts"],
-                          "pending": ["主案例当前版本重复性回归", "非开发人员试用记录",
+                          "pending": ["当前版本全组回归与差异审查", "非开发人员试用记录",
                                       "提交前最终独立复核"]}
         (kit / "复核状态.json").write_text(json.dumps(package_status, ensure_ascii=False, indent=2), encoding="utf-8")
         files = sorted(path for path in kit.rglob("*") if path.is_file())

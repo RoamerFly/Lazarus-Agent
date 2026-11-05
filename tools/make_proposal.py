@@ -108,6 +108,8 @@ def build():
         c = evidence["counts"]
         story.append(para(f"自动汇总正例 {c['agent_positives']}/18，主案例 {c['primary']}/3，反例明确拒绝 {c['agent_negative_rejected']}/6，错误验收 {c['agent_false_acceptances']}/6。缺少完整观测的轮次 {c['unobserved']}/42。主案例未达到预设 3/3，本批次联合门槛未通过。通过候选的开发差异复查未扣减自动计数，非开发者试用仍待补充。"))
         story.append(para("无修改回编为 0/6，旧规则为 2/6。同模型单次构建的五个已观测用例均通过，第六项在暂停时中断，因此无法据此确认多轮迭代更优。补丁后的工程回归另列。"))
+        if (ROOT / "docs/validation/0.6.8-primary-regression.json").is_file():
+            story.append(para("v0.6.8 修正后的巡检单回归为 3/3，三份候选各自通过独立 10 步验收。此任务已用于工程改进，结果属于开发回归，其余应用的当前版本回归继续执行。"))
     else:
         story.append(para("完整评测尚在执行。当前已完成巡检主案例 3 轮，2 轮通过独立 10 步检查；一次因追加试验后构建限额耗尽而未交付。该批次未达到预设的主案例 3/3 门槛，失败保留在分母内。新版针对候选回滚的补丁需另列验证。"))
     block("已完成的其他核验", "工作台同一候选在 Android 14、15、16 上通过固定步骤，下载字节与设备安装字节一致。既有 OI Notepad 真实历史应用完成 DeepSeek Flash 两轮行为修改，设备记录和输入输出哈希链可复核。完整跨应用重复性及对照结果仍按本批次记录。")
