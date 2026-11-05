@@ -8,7 +8,7 @@ on:
       version:
         description: SemVer without v (must equal app_version.py)
         required: true
-        default: '0.6.6'
+        default: '0.6.7'
       publish:
         description: Create/update GitHub Release
         required: true
@@ -80,6 +80,9 @@ jobs:
         run: |
           $tag = 'v${{ steps.release.outputs.version }}'
           $notes = "Windows 下载建议：`n- 常规使用：下载 Lazarus-Agent-windows-x64-setup.exe。`n- 免安装或移动存放：下载 portable ZIP，解压后保留 portable.flag。`n`n更新包先校验 Ed25519 签名和 SHA-256；APK 修复仍需在目标设备复测。"
+          if ($tag -eq 'v0.6.7') {
+            $notes = "对话候选支持逐系统的独立行为验收，保留基准、候选和设备安装哈希。桌面程序可按下载的报告离线复测。实验失败后，回滚到已构建的相同文件内容可以继续交付候选。" + [Environment]::NewLine + [Environment]::NewLine + $notes
+          }
           if ($tag -eq 'v0.6.5') {
             $notes = "修复对话新增页面方向改造。启用模型后，可用一句话指定横屏、竖屏或跟随系统，模型会读取页面清单并调用本地工具生成签名候选。" + [Environment]::NewLine + [Environment]::NewLine + $notes
           }

@@ -116,6 +116,11 @@ def main():
         if not callable(run_feature) or not tool_definitions(True):
             raise RuntimeError("对话功能修改工具未完整打包")
         payload["agent_tools"] = [t["function"]["name"] for t in tool_definitions(True)]
+        from agent_acceptance import verify, verified_for
+        from tools.replay_agent_acceptance import read_inputs
+        if not all(callable(entry) for entry in (verify, verified_for, read_inputs)):
+            raise RuntimeError("候选独立验收与复测工具未完整打包")
+        payload["acceptance_replay"] = "--replay-acceptance"
         print(json.dumps(payload, ensure_ascii=False))
         return
     if "--apply-update" in sys.argv:
