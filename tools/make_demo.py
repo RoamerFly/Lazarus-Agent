@@ -13,6 +13,7 @@ sys.path.insert(0, str(ROOT))
 from app_version import APP_VERSION
 
 FONT = "C:/Windows/Fonts/msyh.ttc"
+OUT = ROOT / "交付/遗留软件复活智能体演示.mp4"
 
 
 def wrapped(text, draw, font, width):
@@ -26,15 +27,15 @@ def wrapped(text, draw, font, width):
     return lines + [current]
 
 
-def build(capture):
+def build(capture, out=OUT):
     metadata = json.loads((capture / "capture.json").read_text(encoding="utf-8"))
     if metadata["app_version"] != APP_VERSION:
         raise ValueError("演示捕获与当前程序版本不同")
     frames = list(metadata["frames"])
     if len(frames) < 6:
         raise ValueError("缺少实际操作画面")
-    out = ROOT / "交付/遗留软件复活智能体演示.mp4"
-    out.parent.mkdir(exist_ok=True)
+    out = out.resolve()
+    out.parent.mkdir(parents=True, exist_ok=True)
     keyframes = [(0, "导入老 APK，选择 Android 16。", 5),
                  (1, "自有巡检单原包 targetSdk 22，Android 16 默认安装被拒绝。", 6),
                  (2, "在发送需求之前，固定路线切换和冷启动的验收步骤。", 7),
@@ -99,4 +100,6 @@ def build(capture):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("capture_directory", type=Path)
-    build(parser.parse_args().capture_directory)
+    parser.add_argument("--output", type=Path, default=OUT)
+    args = parser.parse_args()
+    build(args.capture_directory, args.output)

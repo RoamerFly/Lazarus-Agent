@@ -429,7 +429,7 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
             current_protocol = read(current_spec)
             copy(current_spec, current_folder / current_spec.name)
             copy(run_plan, current_folder / "plan.json")
-            for name in ("results.json", "diff-review.json"):
+            for name in ("results.json", "diff-review.json", "report.md"):
                 copy(current_reports / name, current_folder / name)
             for case in current_protocol["cases"]:
                 sample = regression_checkout / case["apk"]
