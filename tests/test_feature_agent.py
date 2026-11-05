@@ -67,6 +67,56 @@ class WorkspaceTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             session.finish("candidate", "Done")
 
+    def test_new_process_bypasses_are_rejected_before_the_build_budget_is_spent(self):
+        empty_policy = """
+    new-instance v3, Landroid/os/StrictMode$VmPolicy$Builder;
+    invoke-direct {v3}, Landroid/os/StrictMode$VmPolicy$Builder;-><init>()V
+    invoke-virtual {v3}, Landroid/os/StrictMode$VmPolicy$Builder;->build()Landroid/os/StrictMode$VmPolicy;
+    move-result-object v4
+    .line 42
+    invoke-static {v4}, Landroid/os/StrictMode;->setVmPolicy(Landroid/os/StrictMode$VmPolicy;)V
+"""
+        lax_policy = """
+    sget-object p0, Landroid/os/StrictMode$VmPolicy;->LAX:Landroid/os/StrictMode$VmPolicy;
+    invoke-static {p0}, Landroid/os/StrictMode;->setVmPolicy(Landroid/os/StrictMode$VmPolicy;)V
+"""
+        direct_bypass = "    invoke-static {}, Landroid/os/StrictMode;->disableDeathOnFileUriExposure()V"
+        session = Session(self.root, Path("source.apk"), self.root / "candidate.apk",
+                          Path("tools"), 36, {}, lambda _: None, None)
+        name = "smali/example/Helper.smali"
+        with patch.object(session, "start_build") as start:
+            for source in (empty_policy, lax_policy, direct_bypass):
+                with self.subTest(source=source):
+                    session.workspace.create_text_file(name, source.replace("\n", "\r\n"))
+                    with self.assertRaisesRegex(ValueError, "StrictMode"):
+                        session.dispatch("build_apk", {})
+                    session.workspace.restore_file(name)
+            start.assert_not_called()
+            self.assertEqual(session.build_count, 0)
+
+    def test_existing_bypass_and_new_vm_policy_with_detection_reach_builder(self):
+        name = "smali/example/Helper.smali"
+        path = self.root / name
+        path.parent.mkdir(parents=True)
+        existing = "    invoke-static {}, Landroid/os/StrictMode;->disableDeathOnFileUriExposure()V\n"
+        path.write_text(existing, encoding="utf-8")
+        enforced_policy = """
+    new-instance v0, Landroid/os/StrictMode$VmPolicy$Builder;
+    invoke-direct {v0}, Landroid/os/StrictMode$VmPolicy$Builder;-><init>()V
+    invoke-virtual {v0}, Landroid/os/StrictMode$VmPolicy$Builder;->detectFileUriExposure()Landroid/os/StrictMode$VmPolicy$Builder;
+    invoke-virtual {v0}, Landroid/os/StrictMode$VmPolicy$Builder;->build()Landroid/os/StrictMode$VmPolicy;
+    move-result-object v0
+    invoke-static {v0}, Landroid/os/StrictMode;->setVmPolicy(Landroid/os/StrictMode$VmPolicy;)V
+"""
+        session = Session(self.root, Path("source.apk"), self.root / "candidate.apk",
+                          Path("tools"), 36, {}, lambda _: None, None)
+        row = session.workspace.read_text(name)
+        session.workspace.replace_text(name, row["sha256"], existing, existing + enforced_policy)
+        with patch.object(session, "start_build", side_effect=RuntimeError("builder reached")) as start:
+            with self.assertRaisesRegex(RuntimeError, "builder reached"):
+                session.dispatch("build_apk", {})
+        start.assert_called_once_with()
+
     def test_original_can_be_reproduced_without_building_and_cannot_verify_a_candidate(self):
         source, candidate = self.root / "original.apk", self.root / "built.apk"
         source_sha, candidate_sha = "a" * 64, "b" * 64

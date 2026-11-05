@@ -3,6 +3,7 @@ import difflib
 from contextlib import ExitStack
 import json
 from pathlib import Path
+import re
 import shutil
 import tempfile
 from urllib.parse import urlsplit
@@ -18,6 +19,26 @@ from reviver import INSTALL_FLOOR, repair
 MAX_ROUNDS = 40
 MAX_CALLS = 72
 MAX_BUILDS = 4
+
+# These instruction patterns identify direct process-wide bypasses. Compare against
+# the input smali so an unrelated edit can still be built for an existing APK.
+_VM = rb"Landroid/os/StrictMode\$VmPolicy;"
+_BUILDER = rb"Landroid/os/StrictMode\$VmPolicy\$Builder;"
+_POLICY_SET = rb"Landroid/os/StrictMode;->setVmPolicy\(" + _VM + rb"\)V"
+_SMALI_GAP = rb"[ \t]*(?:\#[^\n]*)?\n(?:[ \t]*(?:\#[^\n]*|\.line \d+)?\n)*[ \t]*"
+_FILE_EXPOSURE_BYPASS = re.compile(
+    rb"(?m)^[ \t]*invoke-static(?:/range)?\s+\{\s*\},\s*"
+    rb"Landroid/os/StrictMode;->disableDeathOnFileUriExposure\(\)V")
+_LAX_VM_POLICY = re.compile(
+    rb"(?m)^[ \t]*sget-object\s+(?P<policy>[vp]\d+),\s*" + _VM + rb"->LAX:" + _VM + _SMALI_GAP
+    + rb"invoke-static\s+\{(?P=policy)\},\s*" + _POLICY_SET)
+_EMPTY_VM_POLICY = re.compile(
+    rb"(?m)^[ \t]*new-instance\s+(?P<builder>[vp]\d+),\s*" + _BUILDER + _SMALI_GAP
+    + rb"invoke-direct\s+\{(?P=builder)\},\s*" + _BUILDER + rb"-><init>\(\)V" + _SMALI_GAP
+    + rb"invoke-virtual\s+\{(?P=builder)\},\s*" + _BUILDER + rb"->build\(\)" + _VM + _SMALI_GAP
+    + rb"move-result-object\s+(?P<policy>[vp]\d+)" + _SMALI_GAP
+    + rb"invoke-static\s+\{(?P=policy)\},\s*" + _POLICY_SET)
+_PROCESS_BYPASSES = (_FILE_EXPOSURE_BYPASS, _LAX_VM_POLICY, _EMPTY_VM_POLICY)
 
 
 def _tool(name, description, properties, required=None):
@@ -76,6 +97,7 @@ PROMPT = """你是 APK 修复与功能改造 Agent。分析任意用户需求，
 通过文件列表、全文搜索、分段读取理解 APK 的 manifest、资源、smali 和 assets，再选择修改。
 需求没有预设类别。可以设计并实现当前需求需要的代码和资源改动，不局限于已有功能示例。
 先理解相关代码路径及调用关系，准确修改，不要用无关的外观改动替代用户要求的行为。
+恢复或保留已有内容时，先从原包、现有存储路径或用户提供的材料查证来源。缺失的数据要说明，不能把新编的记录、文件或输出值当作恢复成果。原实现只处理固定演示数据时，保留该行为并如实标明范围。
 局部需求优先搜索和 read_method 定位，不必通读整个类。获得足够证据后尽快修改并构建来验证假设。
 replace_text 的 old 必须来自 read_text 返回的原文件内容，去掉显示用的行号前缀。
 精确文本匹配失败时，可使用已读取的行号和哈希调用 replace_lines。
@@ -87,8 +109,9 @@ replace_text 的 old 必须来自 read_text 返回的原文件内容，去掉显
 诊断兼容或崩溃问题时，可先测试原 APK 并执行用户描述的动作。根据复现证据优先考虑保留原功能的最小修复。
 如果运行证据列出 platform_library，可先用 declare_platform_library 恢复系统库可见性，再回编复验。
 若声明后仍失败或需求本身需要改写功能，继续按实际证据分析。
+兼容修复应保留原有权限和安全检查。文件交接保留实际写入、传递和读取，优先采用范围明确的只读内容 URI 或同应用的受限文件入口。检查接收端的 URI、授权范围和规范化后的路径边界。不能关闭进程范围的安全检查，也不能让导出组件接收可由外部指定的私有文件路径。
 有设备工具时应测试最新候选，基于界面执行与需求有关的操作。安装启动成功只能证明安装启动。
-有 rehearse_acceptance 时，构建后优先重放用户给出的固定验收步骤。根据首个失败步骤继续诊断或修改；
+有 rehearse_acceptance 时，构建后直接用它运行固定步骤。只有需要追查具体失败时再用 test_apk 和逐个设备动作；
 一旦通过就保留该候选。这是当前目标系统的预检，正式交付还要重新做独立验收。
 没有工具能完成、缺少服务/原生库/重要信息或达到限额时，说明已查证的阻碍，finish blocked/needs_input。
 用户也可能只问问题或描述上一轮问题，结合历史分析并回答。无需生成 APK 时 finish analysis。
@@ -186,6 +209,16 @@ class Session:
             dir=self.output.parent, prefix=f"build-{self.build_count}-")))
 
     def build(self):
+        for change in self.changes():
+            path = change["path"]
+            if not path.endswith(".smali"):
+                continue
+            before = (self.workspace.originals[path] or b"").replace(b"\r\n", b"\n")
+            after = self.workspace.path(path).read_bytes().replace(b"\r\n", b"\n")
+            if any(len(check.findall(after)) > len(check.findall(before))
+                   for check in _PROCESS_BYPASSES):
+                raise ValueError(f"{path} 新增了进程范围的 StrictMode 检查绕过。"
+                                 "请保留原安全策略并限制文件交接的访问范围。")
         attempt = self.start_build()
         edited = attempt / "edited.apk"
         report = build_modified(self.source, edited, self.api, self.tools, self.workspace.copy_changes)
