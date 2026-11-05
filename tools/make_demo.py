@@ -30,7 +30,7 @@ def build(capture):
     metadata = json.loads((capture / "capture.json").read_text(encoding="utf-8"))
     if metadata["app_version"] != APP_VERSION:
         raise ValueError("演示捕获与当前程序版本不同")
-    frames = metadata["frames"]
+    frames = list(metadata["frames"])
     if len(frames) < 6:
         raise ValueError("缺少实际操作画面")
     out = ROOT / "交付/遗留软件复活智能体演示.mp4"
@@ -44,6 +44,16 @@ def build(capture):
     for index in selected:
         keyframes.append((index, "DeepSeek Flash 实际执行节选。模型自主读取、修改、构建和测试。", 3))
     keyframes.append((len(frames)-1, "Android 16 专用模拟器独立复测，核对安装包哈希并执行固定的 10 步操作。", 9))
+    device_screen = metadata.get("device_screen")
+    if device_screen:
+        if (device_screen["file"] != "device-final.png" or device_screen["api"] != 36
+                or device_screen["apk_sha256"] != metadata["candidate_sha256"]):
+            raise ValueError("Android 画面与候选身份不符")
+        with (capture / device_screen["file"]).open("rb") as stream:
+            if hashlib.file_digest(stream, "sha256").hexdigest() != device_screen["sha256"]:
+                raise ValueError("Android 画面哈希不符")
+        keyframes.append((len(frames), "验收后在专用模拟器上看到的应用界面，设备安装哈希与导出 APK 一致。", 7))
+        frames.append(device_screen)
     with tempfile.TemporaryDirectory(dir=ROOT / "build", prefix="demo-") as directory:
         temporary = Path(directory)
         timeline = ["ffconcat version 1.0"]
