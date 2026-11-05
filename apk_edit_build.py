@@ -18,6 +18,7 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from typing import Callable, Mapping, Any
 from urllib.request import ProxyHandler, Request, build_opener, urlopen
+from xml.etree import ElementTree as ET
 from zipfile import BadZipFile, ZipFile
 
 from offline_kit import discover_java_home, java_environment
@@ -259,6 +260,18 @@ def inspect_decoded(source: Path, tools: Path, inspect: Callable[[Path], Mapping
             "sha256": APKTOOL_SHA256}, "inspection": result}
 
 
+def validate_manifest(decoded: Path) -> None:
+    """Reject misplaced SDK attributes before they become ambiguous binary XML."""
+    manifest = ET.parse(decoded / "AndroidManifest.xml").getroot()
+    namespace = "{http://schemas.android.com/apk/res/android}"
+    for name in ("minSdkVersion", "targetSdkVersion", "maxSdkVersion"):
+        if namespace + name in manifest.attrib:
+            raise ApkEditBuildError(
+                f"AndroidManifest.xml 的 {name} 应位于 <uses-sdk>，不能写在 <manifest> 根节点")
+    if len(manifest.findall("uses-sdk")) > 1:
+        raise ApkEditBuildError("AndroidManifest.xml 只能声明一个 <uses-sdk>")
+
+
 def build_modified(
     source: Path,
     output: Path,
@@ -307,6 +320,7 @@ def build_modified(
             if not isinstance(audit.get("kind"), str) or not audit["kind"].strip():
                 raise ApkEditBuildError("修改器未返回可审计的改造类型")
             _validate_decoded_tree(decoded)
+            validate_manifest(decoded)
             run([java, "-jar", jar, "b", "--frame-path", framework, decoded, "--output", unsigned], env, work)
             run([zipalign, "-p", "-f", "4", unsigned, aligned], env, work)
             key = test_key(env)

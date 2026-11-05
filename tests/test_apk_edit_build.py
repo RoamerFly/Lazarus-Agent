@@ -87,7 +87,9 @@ class ApkEditBuildTests(unittest.TestCase):
         def fake_run(command, env=None, cwd=None):
             seen.append([str(x) for x in command])
             if "d" in command:
-                Path(command[command.index("--output") + 1]).mkdir()
+                decoded = Path(command[command.index("--output") + 1])
+                decoded.mkdir()
+                (decoded / "AndroidManifest.xml").write_text("<manifest/>", encoding="utf-8")
             elif "b" in command:
                 Path(command[command.index("--output") + 1]).write_bytes(b"unsigned")
             elif "zipalign.exe" in str(command[0]):
@@ -108,6 +110,16 @@ class ApkEditBuildTests(unittest.TestCase):
     def test_transform_must_have_kind(self):
         with self.assertRaisesRegex(apk_edit_build.ApkEditBuildError, "尚不存在"):
             apk_edit_build.build_modified(self.root / "none.apk", self.root / "none.apk", 36, self.root, lambda _: {})
+
+    def test_sdk_attributes_on_root_report_the_correct_edit_location(self):
+        manifest = self.root / "AndroidManifest.xml"
+        manifest.write_text('<manifest xmlns:android="http://schemas.android.com/apk/res/android" '
+                            'android:targetSdkVersion="26"/>', encoding="utf-8")
+        with self.assertRaisesRegex(apk_edit_build.ApkEditBuildError, "uses-sdk"):
+            apk_edit_build.validate_manifest(self.root)
+        manifest.write_text('<manifest xmlns:android="http://schemas.android.com/apk/res/android">'
+                            '<uses-sdk android:targetSdkVersion="26"/></manifest>', encoding="utf-8")
+        apk_edit_build.validate_manifest(self.root)
 
     def test_unsafe_archive_is_rejected_before_tool_download(self):
         source = self.root / "bad.apk"
