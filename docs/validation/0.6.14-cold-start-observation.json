@@ -129,5 +129,137 @@
       }
     ],
     "status": "incomplete"
-  }
+  },
+  "repeats": [
+    {
+      "workflow": "https://github.com/RoamerFly/Lazarus-Agent/actions/runs/42060996575",
+      "replay_exit": 1,
+      "acceptance": {
+        "schema": 1,
+        "targets": [
+          36
+        ],
+        "steps": [
+          {
+            "action": "expect",
+            "value": "Active route: North"
+          },
+          {
+            "action": "tap",
+            "value": "Open south route"
+          },
+          {
+            "action": "expect",
+            "value": "Inspect the pump seal"
+          },
+          {
+            "action": "cold_start"
+          },
+          {
+            "action": "expect",
+            "value": "Active route: South"
+          },
+          {
+            "action": "expect",
+            "value": "Inspect the pump seal"
+          },
+          {
+            "action": "tap",
+            "value": "Open north route"
+          },
+          {
+            "action": "cold_start"
+          },
+          {
+            "action": "expect",
+            "value": "Active route: North"
+          },
+          {
+            "action": "expect",
+            "value": "Check the valve position"
+          }
+        ],
+        "input_sha256": "08ed16b9f6a149bd8063bae99dd72aad200dafea7d3a0504af004187bde20deb",
+        "candidate_sha256": "3cb6ce313e96d3bc997b4431cb891f293398f3f875dea8d8dce7336214a87261",
+        "rows": [
+          {
+            "api": 36,
+            "status": "failed",
+            "baseline": {
+              "sha256": "08ed16b9f6a149bd8063bae99dd72aad200dafea7d3a0504af004187bde20deb",
+              "build": "hash-matched",
+              "install": "failed",
+              "launch": "not-run",
+              "function": "not-run",
+              "steps": [],
+              "device": {
+                "api": 36,
+                "environment": "private-workbench-device",
+                "install": {
+                  "exit": 1,
+                  "output": "Performing Streamed Install\r\nadb.exe: failed to install field-route-legacy.apk: Failure [INSTALL_FAILED_DEPRECATED_SDK_VERSION: App package must target at least SDK version 24, but found 22]"
+                },
+                "launch": null,
+                "installed_sha256": null,
+                "abis": [
+                  "x86_64"
+                ],
+                "ui": null,
+                "verification": "device-check-failed",
+                "steps": []
+              }
+            },
+            "candidate": {
+              "sha256": "3cb6ce313e96d3bc997b4431cb891f293398f3f875dea8d8dce7336214a87261",
+              "build": "hash-matched",
+              "install": "passed",
+              "launch": "failed",
+              "function": "not-run",
+              "steps": [],
+              "device": {
+                "api": 36,
+                "environment": "private-workbench-device",
+                "install": {
+                  "exit": 0,
+                  "output": "Performing Streamed Install\r\nSuccess"
+                },
+                "launch": {
+                  "exit": 0,
+                  "output": "Starting: Intent { cmp=org.ggbond.fieldroute/.RouteActivity }\r\nStatus: ok\r\nLaunchState: COLD\r\nActivity: org.ggbond.fieldroute/.RouteActivity\r\nTotalTime: 3382\r\nWaitTime: 3458\r\nComplete",
+                  "focused_package": null
+                },
+                "installed_sha256": "3cb6ce313e96d3bc997b4431cb891f293398f3f875dea8d8dce7336214a87261",
+                "abis": [
+                  "x86_64"
+                ],
+                "ui": null,
+                "verification": "install-and-launch",
+                "steps": []
+              },
+              "launch_observations": [
+                {
+                  "target_nodes": 0
+                },
+                {
+                  "target_nodes": 0
+                },
+                {
+                  "target_nodes": 0
+                },
+                {
+                  "target_nodes": 0
+                },
+                {
+                  "target_nodes": 0
+                }
+              ],
+              "failure": "启动返回成功，但未观察到目标应用页面"
+            },
+            "comparison": "baseline-install-failed"
+          }
+        ],
+        "status": "incomplete"
+      }
+    }
+  ]
 }

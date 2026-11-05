@@ -135,8 +135,11 @@ def build():
         replay_note = (f"v{APP_VERSION} 在含中文和空格的存储与 TEMP 下首次准备约 "
                        f"{preparation['duration_seconds']:.0f} 秒，正式 EXE 通过巡检单 {count} 步复测。"
                        f"运行后占用约 {preparation['bytes']/1024**3:.2f} GiB。")
-    if (validation / f"{APP_VERSION}-cold-start-observation.json").is_file():
-        cold_note = "一次固定候选冷启动未观察到目标页面，未执行行为步骤。"
+    cold_path = validation / f"{APP_VERSION}-cold-start-observation.json"
+    if cold_path.is_file():
+        cold = json.loads(cold_path.read_text(encoding="utf-8"))
+        count = 1 + len(cold.get("repeats", []))
+        cold_note = f"固定候选冷启动 {count} 轮未观测到目标页面。"
         replay_note = replay_note + "另有" + cold_note if replay_path.is_file() else cold_note
     local_rule_path = validation / f"{APP_VERSION}-local-rule-windows.json"
     local_rule_note = "本版关闭模型并从原包生成 APK 的结果待独立核验。"
