@@ -172,7 +172,7 @@ Write-Output "校验通过。请打开 $target 安装 Lazarus Agent {APP_VERSION
 
 def build(results, release_dir, output, capture_dir, regression_results=None, regression_summary=None,
           primary_results=None, primary_summary=None, materials_dir=ROOT / "交付", p1b_checkout=None,
-          p1c_checkout=None, release_regression=None):
+          p1c_checkout=None, release_regression=None, focused_results=None):
     results = results.resolve()
     if not results.is_relative_to(ROOT / "build") or not results.is_dir():
         raise ValueError("请指定 build 目录内的原始评测结果")
@@ -230,6 +230,26 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
         require_p1c(APP_VERSION, publication["signed_build_run"], publication["source_commit"])
         if current is None:
             raise ValueError("正式复核包缺少当前版本的发布回归原始记录")
+    focused_samples = []
+    if focused_results:
+        focused_results = focused_results.resolve()
+        if not focused_results.is_relative_to(ROOT / "build") or current is None:
+            raise ValueError("专项样本需要当前版本发布回归和 build 目录内的原始记录")
+        focused = read(ROOT / f"docs/validation/{APP_VERSION}-focused.json")
+        if any(focused[key] != current[key] for key in ("app_version", "implementation_commit", "protocol_sha256")):
+            raise ValueError("专项复测与签名构建的版本或协议不符")
+        cases = {case["id"]: case for case in read(regression_checkout / p1c_batch(regression_checkout).spec)["cases"]}
+        for row in focused["rows"]:
+            if row.get("distributable") is not True:
+                continue
+            case, mode, repeat = cases[row["case"]], row["mode"], row["repeat"]
+            trial = focused_results / f"{case['id']}-{mode}-{repeat}"
+            sha = digest(trial / "candidate.apk")
+            if (mode != "agent" or row["state"] != "passed" or sha != row["candidate_sha256"]
+                    or digest(trial / "changes.diff") != row["raw_diff_sha256"]
+                    or not verified_for(read(trial / "acceptance.json"), sha)):
+                raise ValueError("专项样本与候选复核记录不符：" + trial.name)
+            focused_samples.append((case, mode, repeat))
     primary = None
     primary_version = None
     if primary_results is not None:
@@ -438,12 +458,17 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
             for (case, mode, repeat), row in zip(trial_schedule(current_protocol), current["rows"]):
                 add_case(raw_results, current_folder, case, mode, repeat, distribute=row["trial"] in distributable,
                          sample_root=kit / "可分发样本" / f"发布回归-v{APP_VERSION}")
+        for case, mode, repeat in focused_samples:
+            add_case(focused_results, kit / f"v{APP_VERSION} 专项复测", case, mode, repeat,
+                     sample_root=kit / "可分发样本" / f"专项复测-v{APP_VERSION}")
         # Only synthetic fixture evidence enters this package. Remove local workstation roots in text.
         common_git = Path(subprocess.check_output(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"],
                                                   cwd=ROOT, encoding="utf-8").strip())
         roots = (results, *(batch[0] for batch in frozen_batches.values()), ROOT, common_git.parent, Path.home())
         if current:
             roots += (regression_checkout,)
+        if focused_results:
+            roots += (focused_results,)
         private_roots = sorted({form for path in roots for form in (str(path), path.as_posix())},
                                key=len, reverse=True)
         for path in kit.rglob("*"):
@@ -543,12 +568,13 @@ def main():
     parser.add_argument("--p1c-checkout", type=Path, help="Frozen checkout with completed P1C evidence")
     parser.add_argument("--release-regression", type=Path, nargs=3, metavar=("CHECKOUT", "RESULTS", "PLAN"),
                         help="Current version checkout, raw trial directory and run plan")
+    parser.add_argument("--focused-results", type=Path, help="Raw records for reviewed supplemental samples")
     parser.add_argument("--materials-dir", type=Path, default=ROOT / "交付", help="方案 PDF、演示视频和捕获记录的目录")
     parser.add_argument("--output", type=Path, default=ROOT / "交付/重邮GGBond-F01-工程复核包.zip")
     args = parser.parse_args()
     build(args.results, args.release_dir, args.output, args.capture_dir,
           args.regression_results, args.regression_summary, args.primary_results, args.primary_summary, args.materials_dir,
-          args.p1b_checkout, args.p1c_checkout, args.release_regression)
+          args.p1b_checkout, args.p1c_checkout, args.release_regression, args.focused_results)
 
 
 if __name__ == "__main__":

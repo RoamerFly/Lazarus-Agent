@@ -1,0 +1,600 @@
+{
+  "scope": "v0.6.18 当前版本发布回归的候选语义审查",
+  "rows": [
+    {
+      "trial": "P01-agent-1",
+      "candidate_sha256": "cb52dd338df1c0131071128b3fcc86bea8a0ed9958903001dde5a7bf14c183a1",
+      "raw_diff_sha256": "d633ce86c41e519b5f6305b541188d7a6841b4e6a573bf8fdfd622399be02315",
+      "target_sdk": [
+        22,
+        24
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "apktool.yml",
+        "original/AndroidManifest.xml",
+        "smali/org/ggbond/fieldroute/RouteActivity.smali"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compatible_library": false,
+      "distributable": true,
+      "review": "在路线显示方法写入默认 SharedPreferences，启动读回并调用同一显示方法。编译包的 targetSdk 由 22 提至 24。",
+      "scope": "Android 16 x86_64 的两条固定巡检路线、原有说明和冷启动。"
+    },
+    {
+      "trial": "P01-agent-2",
+      "candidate_sha256": "ade8e105a2b09bb99e5cd946cc69a4973cb8939b9587d9ec09b8d9711938af7b",
+      "raw_diff_sha256": "e265d6784fcce46c03f7f6dee062d1d16307efe50f5efab5fee8457994cc2d30",
+      "target_sdk": [
+        22,
+        24
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "apktool.yml",
+        "original/AndroidManifest.xml",
+        "smali/org/ggbond/fieldroute/RouteActivity.smali"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compatible_library": false,
+      "distributable": true,
+      "review": "用应用私有 SharedPreferences 保存并恢复路线。复用原路线显示方法，编译包的 targetSdk 由 22 提至 24。",
+      "scope": "Android 16 x86_64 的两条固定巡检路线、原有说明和冷启动。"
+    },
+    {
+      "trial": "P01-agent-3",
+      "candidate_sha256": "8aff110e61196483f267ba01e3fbf547d2cbd4d96959d1e4aae4edb2b62d65f0",
+      "raw_diff_sha256": "94849631fadf3289ec5febc5b7e84c33e35a81aa4ee82147918504115fae0f0f",
+      "target_sdk": [
+        22,
+        24
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "apktool.yml",
+        "original/AndroidManifest.xml",
+        "smali/org/ggbond/fieldroute/RouteActivity.smali"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compatible_library": false,
+      "distributable": true,
+      "review": "在原路线显示方法入口写入私有首选项，启动时读回并显示。编译包的 targetSdk 由 22 提至 24。",
+      "scope": "Android 16 x86_64 的两条固定巡检路线、原有说明和冷启动。"
+    },
+    {
+      "trial": "P01-one-build-1",
+      "candidate_sha256": "ae60b770fea31f3652d2dbe6943f39bf8c31db5068b7c6164a02028fec031edf",
+      "raw_diff_sha256": "071125919d48d175a3c5138da4d2b0f6b0401d9d694e3705b5710c4d159d26de",
+      "target_sdk": [
+        22,
+        24
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "apktool.yml",
+        "original/AndroidManifest.xml",
+        "smali/org/ggbond/fieldroute/RouteActivity.smali"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compatible_library": false,
+      "distributable": true,
+      "review": "一次构建对照用 SharedPreferences.commit 保存当前路线，启动读取同一首选项。编译包的 targetSdk 由 22 提至 24。",
+      "scope": "Android 16 x86_64 的两条固定巡检路线、原有说明和冷启动。"
+    },
+    {
+      "trial": "P02-agent-1",
+      "candidate_sha256": "ec57dacd7642827d6762023d1f82c12a594a322fb73f9d37280dbb8e0fd3710a",
+      "raw_diff_sha256": "9db27fe54e42e4f4b9d3a90f30a575f6638b4af2981f2bb89deb33ff4882b0dc",
+      "target_sdk": [
+        28,
+        28
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "AndroidManifest.xml",
+        "original/AndroidManifest.xml"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compatible_library": true,
+      "distributable": true,
+      "review": "声明可选的 org.apache.http.legacy 共享库。编译包解码后的 smali 与原包一致，未新增归档数据。",
+      "scope": "Android 16 x86_64 上恢复原有的固定参数协议对象调用。"
+    },
+    {
+      "trial": "P02-agent-2",
+      "candidate_sha256": "5b5b171c4c1aafa9de7bac56c4113fe36db66d6f91ec0a62a2a1228858bedcbd",
+      "raw_diff_sha256": "9db27fe54e42e4f4b9d3a90f30a575f6638b4af2981f2bb89deb33ff4882b0dc",
+      "target_sdk": [
+        28,
+        28
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "AndroidManifest.xml",
+        "original/AndroidManifest.xml"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compatible_library": true,
+      "distributable": true,
+      "review": "声明可选的 org.apache.http.legacy 共享库。编译包解码后的 smali 与原包一致，未新增归档数据。",
+      "scope": "Android 16 x86_64 上恢复原有的固定参数协议对象调用。"
+    },
+    {
+      "trial": "P02-agent-3",
+      "candidate_sha256": "05a175f4ea6455b70f48736596228fd4400161f1731c507b48c2bc063a7eebc8",
+      "raw_diff_sha256": "9db27fe54e42e4f4b9d3a90f30a575f6638b4af2981f2bb89deb33ff4882b0dc",
+      "target_sdk": [
+        28,
+        28
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "AndroidManifest.xml",
+        "original/AndroidManifest.xml"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compatible_library": true,
+      "distributable": true,
+      "review": "只声明可选的 org.apache.http.legacy 共享库，解包后的 smali 与原包一致，未新增数据。",
+      "scope": "Android 16 x86_64 上恢复原有的固定参数协议对象调用。"
+    },
+    {
+      "trial": "P02-one-build-1",
+      "candidate_sha256": "d9a0b22ae353748011645af9ed61ed474087b04f744ad3f22bd6ca53f3fa2450",
+      "raw_diff_sha256": "64626b89c52db4fc197a005200426e7d001fc8e97c72a3482d7e7f01dbe49f01",
+      "target_sdk": [
+        28,
+        28
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "original/AndroidManifest.xml",
+        "smali/org/ggbond/archivereader/ProtocolVersion.smali",
+        "smali/org/ggbond/archivereader/ReaderActivity.smali"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compatible_library": false,
+      "distributable": true,
+      "review": "一次构建对照加入应用内 ProtocolVersion，保留原调用的输入参数和字符串格式化，未引入归档记录。",
+      "scope": "原 APK 只构造固定参数的协议对象。验证其字符串输出和冷启动后的重复调用。"
+    },
+    {
+      "trial": "P02-rules-1",
+      "candidate_sha256": "6b05a29692da478319f92a3bd89237e7e513eff8f32b45c0bb1aff0727897b48",
+      "raw_diff_sha256": null,
+      "target_sdk": [
+        28,
+        28
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "AndroidManifest.xml",
+        "original/AndroidManifest.xml"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compatible_library": false,
+      "distributable": true,
+      "review": "规则对照仅在二进制清单声明可选的 org.apache.http.legacy 共享库。DEX 与原包一致。",
+      "scope": "Android 16 x86_64 上恢复原有的固定参数协议对象调用。"
+    },
+    {
+      "trial": "P03-agent-1",
+      "candidate_sha256": "81f8f96523ca2df40f4066d44d8e8f52be5fd556e62bc1d3edb79f3d6d441e0c",
+      "raw_diff_sha256": "81aeeb4301cac579d0235f2b30fddd8900f94a20a9dfd249b33bdbdbed125057",
+      "target_sdk": [
+        28,
+        28
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "original/AndroidManifest.xml",
+        "res/values/strings.xml"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compatible_library": false,
+      "distributable": true,
+      "review": "只改按钮和结果资源文字，保留 %1$d 与原计数 smali。",
+      "scope": "Android 16 x86_64 的中文按钮和连续两次计数。"
+    },
+    {
+      "trial": "P03-agent-2",
+      "candidate_sha256": "07910d45bae7a3b54595195dae996f625ea936b1fc5cf8907907e22e70154a27",
+      "raw_diff_sha256": "81aeeb4301cac579d0235f2b30fddd8900f94a20a9dfd249b33bdbdbed125057",
+      "target_sdk": [
+        28,
+        28
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "original/AndroidManifest.xml",
+        "res/values/strings.xml"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compatible_library": false,
+      "distributable": true,
+      "review": "只改按钮和结果资源文字，保留 %1$d 与原计数 smali。",
+      "scope": "Android 16 x86_64 的中文按钮和连续两次计数。"
+    },
+    {
+      "trial": "P03-agent-3",
+      "candidate_sha256": "3704af12add54aee18f12a0e257f72df3d6b93204860743c54764b62deb64071",
+      "raw_diff_sha256": "81aeeb4301cac579d0235f2b30fddd8900f94a20a9dfd249b33bdbdbed125057",
+      "target_sdk": [
+        28,
+        28
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "original/AndroidManifest.xml",
+        "res/values/strings.xml"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compatible_library": false,
+      "distributable": true,
+      "review": "只改按钮和结果资源文字，保留 %1$d 与原计数 smali。",
+      "scope": "Android 16 x86_64 的中文按钮和连续两次计数。"
+    },
+    {
+      "trial": "P03-one-build-1",
+      "candidate_sha256": "7c003868ee7494845f2f695ba242710608808fc6e2f6e6e758fe5eadcd310088",
+      "raw_diff_sha256": "81aeeb4301cac579d0235f2b30fddd8900f94a20a9dfd249b33bdbdbed125057",
+      "target_sdk": [
+        28,
+        28
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "original/AndroidManifest.xml",
+        "res/values/strings.xml"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compatible_library": false,
+      "distributable": true,
+      "review": "一次构建对照只改按钮和结果资源文字，保留格式参数和原计数 smali。",
+      "scope": "Android 16 x86_64 的中文按钮和连续两次计数。"
+    },
+    {
+      "trial": "P04-agent-1",
+      "candidate_sha256": "531009fb94d42bf855c99a152e1b4f0f6a66746c8dc9e286f95ae29383e56fdc",
+      "raw_diff_sha256": "bff18f1b28c674db735d0ff7a251404ead36718f501c93d21a0e51b949a57f27",
+      "target_sdk": [
+        28,
+        28
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "original/AndroidManifest.xml",
+        "smali/org/ggbond/temperaturecard/TemperatureActivity.smali",
+        "smali/org/ggbond/temperaturecard/UnitToggleListener.smali"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compatible_library": false,
+      "distributable": true,
+      "review": "新增单位监听器与布尔首选项。读取实际输入，按双精度计算并用 Math.round(double) 取整，随后将结果转为 Int。",
+      "scope": "Android 16 x86_64 的固定 16 步，覆盖 0、100 和 25 摄氏度。超出 Int 表示范围时转型可能溢出。"
+    },
+    {
+      "trial": "P04-agent-2",
+      "candidate_sha256": "d42589d321cc597f2eb0c250a24d7ddfc27c4c801b8f27db239f2c8610b25482",
+      "raw_diff_sha256": "391f0f69414d87092eb86c4c793dcbf915be2f48bb3704cb756d158a4a9841bd",
+      "target_sdk": [
+        28,
+        28
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "original/AndroidManifest.xml",
+        "smali/org/ggbond/temperaturecard/TemperatureActivity$$ExternalSyntheticLambda1.smali",
+        "smali/org/ggbond/temperaturecard/TemperatureActivity.smali"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compatible_library": false,
+      "distributable": true,
+      "review": "在布尔首选项保存单位，按输入执行华氏换算并用 Math.round(float) 输出。",
+      "scope": "Android 16 x86_64 的固定 16 步，覆盖 0、100 和 25 摄氏度。极端输入受单精度和 Int 取整范围限制。"
+    },
+    {
+      "trial": "P04-agent-3",
+      "candidate_sha256": "b1700fb2316f6b7cae39f12e14a3d84bf8989549d72d891aa1deda8b8a89a50b",
+      "raw_diff_sha256": "e445a05834c80ecfc1c9dccc4973acaad94d6ba57ec9ed63856ef3e692b6e373",
+      "target_sdk": [
+        28,
+        28
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "original/AndroidManifest.xml",
+        "smali/org/ggbond/temperaturecard/TemperatureActivity$$ExternalSyntheticLambda1.smali",
+        "smali/org/ggbond/temperaturecard/TemperatureActivity.smali"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compatible_library": false,
+      "distributable": true,
+      "review": "新增单位按钮监听器，持久化布尔单位选择，华氏分支读取实际输入并用 Math.round(float) 取整。",
+      "scope": "Android 16 x86_64 的固定 16 步。极端输入受单精度和 Int 取整范围限制。"
+    },
+    {
+      "trial": "P04-one-build-1",
+      "candidate_sha256": "06e0735831a6400d0aeae7d25ab13189678941408f903d8aafac8b287a604889",
+      "raw_diff_sha256": "42cb3f58193201878298b433d77fead6f4bd587506e77e96932682f527ad2db5",
+      "target_sdk": [
+        28,
+        28
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "original/AndroidManifest.xml",
+        "smali/org/ggbond/temperaturecard/TemperatureActivity$$ExternalSyntheticLambda1.smali",
+        "smali/org/ggbond/temperaturecard/TemperatureActivity.smali"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compatible_library": false,
+      "distributable": true,
+      "review": "一次构建对照加入单位按钮、私有布尔首选项及单精度换算，从输入计算后按 Math.round(float) 取整。",
+      "scope": "Android 16 x86_64 的固定 16 步。极端输入受单精度和 Int 取整范围限制。"
+    },
+    {
+      "trial": "P05-agent-1",
+      "candidate_sha256": "9f6ec228cea4328a0ded12b99898983f98c895a3276a9aa07c839810cee6443a",
+      "raw_diff_sha256": "f6484377919f27533626043eeb913063175011481896a5421f2a7b6957d74112",
+      "target_sdk": [
+        28,
+        28
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "original/AndroidManifest.xml",
+        "smali/org/ggbond/filereader/FileReaderActivity.smali"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compatible_library": false,
+      "distributable": true,
+      "review": "选中记录后保存记录名，冷启动读取私有首选项并调用原读取路径。两份原始记录资源字节一致。",
+      "scope": "自有阅读器的 A、B 两份内置记录和固定冷启动流程。"
+    },
+    {
+      "trial": "P05-agent-2",
+      "candidate_sha256": "af07cfc24dc327130a46ce8164f006517ca4e48429226543e78a08217e28a645",
+      "raw_diff_sha256": "0107be208768cfd6b1d99a30e2a355ce1eb790bc004d909e2bd687ea22aa1a25",
+      "target_sdk": [
+        28,
+        28
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "original/AndroidManifest.xml",
+        "smali/org/ggbond/filereader/FileReaderActivity.smali"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compatible_library": false,
+      "distributable": true,
+      "review": "把选中记录名写入应用私有文件，冷启动读回文件名。内容仍来自原 APK 的记录资源，两份原始记录字节一致。",
+      "scope": "自有阅读器的 A、B 两份内置记录和固定冷启动流程。"
+    },
+    {
+      "trial": "P05-agent-3",
+      "candidate_sha256": "68ec7f2248faf24b63dc0a4e1009c610acb0de5bbbb756843886bd3370daa847",
+      "raw_diff_sha256": "80e95fe0ea58e779238e70b520cb74d4e5322c20887fa3af691ae3313291095d",
+      "target_sdk": [
+        28,
+        28
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "original/AndroidManifest.xml",
+        "smali/org/ggbond/filereader/FileReaderActivity.smali"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compatible_library": false,
+      "distributable": true,
+      "review": "选中文件后保存记录名，启动通过私有首选项读回并调用原有 openRecord。原记录资产保持一致。",
+      "scope": "自有阅读器的 A、B 两份内置记录和固定冷启动流程。"
+    },
+    {
+      "trial": "P05-one-build-1",
+      "candidate_sha256": "04977ed24a6f471317e09648817bfb9e7702846853f38e4e5da59b2390a4bce6",
+      "raw_diff_sha256": "47a654b79506fed5e26891a6205a976a2192e012436c1bf7255b54efab262512",
+      "target_sdk": [
+        28,
+        28
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "original/AndroidManifest.xml",
+        "smali/org/ggbond/filereader/FileReaderActivity.smali"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compatible_library": false,
+      "distributable": true,
+      "review": "一次构建对照用私有首选项保存和读取记录名。原有读取方法和两份记录资源保留。",
+      "scope": "自有阅读器的 A、B 两份内置记录和固定冷启动流程。"
+    },
+    {
+      "trial": "P05-rules-1",
+      "candidate_sha256": "debf454ac0d3b060fe34931ecc682c1e3ba6550748e2afe48bc921c27329d1ec",
+      "raw_diff_sha256": null,
+      "target_sdk": [
+        28,
+        28
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "original/AndroidManifest.xml",
+        "smali/org/ggbond/filereader/FileReaderActivity.smali"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compatible_library": false,
+      "distributable": true,
+      "review": "规则对照在打开原资源流后记录选中的文件名。冷启动继续调用原有读取方法，两份原始记录资源逐字节一致。",
+      "scope": "自有阅读器的 A、B 两份内置记录和固定冷启动流程。"
+    },
+    {
+      "trial": "P06-agent-1",
+      "candidate_sha256": "4ddfa115491c57c227f8f0d59f4f618abf0da3dc6b4ee73f7d7e5b021cadf5a3",
+      "raw_diff_sha256": "cd81f286720b41e1c7c757ee0ba100d74d1826906d14a031bfa682cbb1e32b27",
+      "target_sdk": [
+        22,
+        24
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "AndroidManifest.xml",
+        "apktool.yml",
+        "original/AndroidManifest.xml",
+        "smali/org/ggbond/archivereader/RecordProvider.smali",
+        "smali/org/ggbond/archivereader/ShareActivity.smali"
+      ],
+      "manifest_declarations": {
+        "added": [
+          "[\"provider\", {\"{http://schemas.android.com/apk/res/android}authorities\": \"org.ggbond.archivereader.records\", \"{http://schemas.android.com/apk/res/android}exported\": \"false\", \"{http://schemas.android.com/apk/res/android}grantUriPermissions\": \"true\", \"{http://schemas.android.com/apk/res/android}name\": \".RecordProvider\"}]"
+        ],
+        "removed": []
+      },
+      "compatible_library": false,
+      "distributable": false,
+      "review": "使用非导出内容提供器和只读文件描述符。发送端给隐式 Intent 附加 URI 读取权限，未限定接收包或组件，可能向匹配的其他应用授权。",
+      "scope": "隔离模拟器内固定记录可读。该结果不满足指定原接收方的安全语义。"
+    },
+    {
+      "trial": "P06-agent-3",
+      "candidate_sha256": "750e99ea1e45d32d34050cee940192075f1dfa4a02579fd0fedc338092704258",
+      "raw_diff_sha256": "8cf2d9d8f52e6ed998331bd19a513f5223da475231af9d04c703d2a44e742ee6",
+      "target_sdk": [
+        22,
+        24
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "apktool.yml",
+        "original/AndroidManifest.xml",
+        "smali/org/ggbond/archivereader/ShareActivity.smali"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compatible_library": false,
+      "distributable": false,
+      "review": "接收端为固定 URI 读取应用私有文件，实际进行了文件读取。发送端仍用隐式 Intent 启动接收页，目标包或组件未固定。该自定义 URI 未注册为真实内容提供器。",
+      "scope": "隔离模拟器内原接收页读取成功。其他应用声明相同过滤器时，无法保证由原接收组件接收。"
+    },
+    {
+      "trial": "P06-one-build-1",
+      "candidate_sha256": "62e97b35a5c584769e79ee05216436a2ca970c0953e71a11251fc562436234d2",
+      "raw_diff_sha256": "31b05f8569b09534fd8fbe2eff4af30c6a723ffbad1bac7a258ac3f16ab5ca99",
+      "target_sdk": [
+        22,
+        24
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "AndroidManifest.xml",
+        "apktool.yml",
+        "original/AndroidManifest.xml",
+        "smali/org/ggbond/archivereader/RecordProvider.smali",
+        "smali/org/ggbond/archivereader/ShareActivity.smali"
+      ],
+      "manifest_declarations": {
+        "added": [
+          "[\"provider\", {\"{http://schemas.android.com/apk/res/android}authorities\": \"org.ggbond.archivereader.records\", \"{http://schemas.android.com/apk/res/android}exported\": \"false\", \"{http://schemas.android.com/apk/res/android}grantUriPermissions\": \"false\", \"{http://schemas.android.com/apk/res/android}name\": \".RecordProvider\"}]"
+        ],
+        "removed": []
+      },
+      "compatible_library": false,
+      "distributable": false,
+      "review": "一次构建对照增加非导出、固定文件的只读内容提供器。提供器禁止 URI 授权，发送端仍使用隐式 Intent，未确保由原接收组件处理。",
+      "scope": "隔离模拟器内固定记录可读，排除候选的单独分发。"
+    }
+  ]
+}
