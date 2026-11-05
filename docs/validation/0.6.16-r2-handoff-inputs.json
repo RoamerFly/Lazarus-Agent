@@ -1,0 +1,61 @@
+{
+  "review_package_sha256": "45a134425fbf5056a328769d840bfc6608d9d04b71ec84f0bc4075f41c7ffead",
+  "files": {
+    "Windows桌面版/latest.json": {
+      "bytes": 867,
+      "sha256": "a1920c510a20c826a0207961393a88dd18cef7a7a55ef05a6e3bf2ab099dc6bc"
+    },
+    "Windows桌面版/latest.json.sig": {
+      "bytes": 89,
+      "sha256": "39933c7e430f79820859a473acd14798aefbbc1841c9d1a065a0e745e2bafcce"
+    },
+    "Windows桌面版/下载并校验安装包.ps1": {
+      "bytes": 1853,
+      "sha256": "6a10cb3692743a8ce987d59c6c349b7f8319d16d0f4caef0e58fb1cb0cac2cef"
+    },
+    "反例样本/N03-agent-1/agent-acceptance.json": {
+      "bytes": 8825,
+      "sha256": "5b68520defb0e947e899f1c739699aa657e8ad25049b20b9a3dbaab5377fdbef"
+    },
+    "反例样本/N03-agent-1/base.apk": {
+      "bytes": 12689,
+      "sha256": "1476a30063a68f27a2e3c10d3d99383aeee0afbf5177e09fbc44f36cc6f237da"
+    },
+    "反例样本/N03-agent-1/candidate.apk": {
+      "bytes": 12689,
+      "sha256": "4a9f89bfa7497fd7703f5bda63c9d5e6f96c50cf8c47d900715e3c0041bc892f"
+    },
+    "反例样本/N03-agent-1/expected-outcome.json": {
+      "bytes": 299,
+      "sha256": "c22f92e2351e15891da71ddd483397122e835f2b1f07361d53f661760b8a1522"
+    },
+    "可分发样本/P1C/P04-agent-1/agent-acceptance.json": {
+      "bytes": 51809,
+      "sha256": "6b1ca4bab468082d834ecaea250ad4dca23b3fa9ff8f89fb64295044f4027cdf"
+    },
+    "可分发样本/P1C/P04-agent-1/base.apk": {
+      "bytes": 12689,
+      "sha256": "ffce5821e6eeb1c0b9faaa5d0c79fadaa17dcdcc1a77d5b3062d4d947189a85b"
+    },
+    "可分发样本/P1C/P04-agent-1/candidate.apk": {
+      "bytes": 12689,
+      "sha256": "0262229d68c7e5567d86370774c8b9e42cd51fd473f9e20efe60a066226a78c7"
+    },
+    "可分发样本/工作台演示/agent-acceptance.json": {
+      "bytes": 25378,
+      "sha256": "675f3c5069fab1172d7ada67fff19561df55b67761c843c7ee768c869d7ac90c"
+    },
+    "可分发样本/工作台演示/base.apk": {
+      "bytes": 12689,
+      "sha256": "08ed16b9f6a149bd8063bae99dd72aad200dafea7d3a0504af004187bde20deb"
+    },
+    "可分发样本/工作台演示/candidate.apk": {
+      "bytes": 12689,
+      "sha256": "ff5e635b88796dc0335fe33fdd7425145a69a6586c29b2e558ec73e6332eff20"
+    },
+    "复测样本.ps1": {
+      "bytes": 5101,
+      "sha256": "8269034a8ea843e6b9903e1192f3a68ba4d68ecee4c05b5a4c6c4e7cf102dd66"
+    }
+  }
+}

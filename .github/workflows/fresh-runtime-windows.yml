@@ -19,6 +19,10 @@ on:
         description: Test a new local-rule repair instead of replaying the published candidate
         type: boolean
         default: false
+      review_input:
+        description: Optional fixed replay files from the F01 v0.6.16 r2 review ZIP
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -30,6 +34,21 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+      - name: Restore the exact r2 review inputs
+        if: ${{ inputs.review_input != '' }}
+        shell: pwsh
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+          CANDIDATE_BUILD_RUN: ${{ inputs.build_run }}
+          OFFLINE_REPAIR: ${{ inputs.offline_repair }}
+        run: |
+          if ($env:RELEASE_VERSION -ne '0.6.16' -or $env:CANDIDATE_BUILD_RUN -or $env:OFFLINE_REPAIR -eq 'true') {
+            throw 'Use the official v0.6.16 replay mode for the r2 review inputs'
+          }
+          $review = Join-Path $env:RUNNER_TEMP 'F01 评审复核 输入'
+          python -X utf8 tools/prepare_review_handoff_probe.py --restore $review
+          if ($LASTEXITCODE -ne 0) { throw 'Review replay inputs did not match r2' }
+          "F01_REVIEW_INPUTS=$review" >> $env:GITHUB_ENV
       - name: Download the published Windows installer
         shell: pwsh
         env:
@@ -38,7 +57,16 @@ jobs:
           CANDIDATE_BUILD_RUN: ${{ inputs.build_run }}
         run: |
           New-Item -ItemType Directory inputs,evidence | Out-Null
-          .\tools\fetch_windows_review_input.ps1 -Version $env:RELEASE_VERSION -BuildRun $env:CANDIDATE_BUILD_RUN -Commit $env:GITHUB_SHA
+          if ($env:F01_REVIEW_INPUTS) {
+            $reviewDesktop = Join-Path $env:F01_REVIEW_INPUTS 'Windows桌面版'
+            $shell = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
+            & $shell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File (Join-Path $reviewDesktop '下载并校验安装包.ps1')
+            if ($LASTEXITCODE -ne 0) { throw 'Review ZIP installer download failed' }
+            Copy-Item -LiteralPath (Join-Path $reviewDesktop 'latest.json'),(Join-Path $reviewDesktop 'latest.json.sig'),(Join-Path $reviewDesktop 'Lazarus-Agent-windows-x64-setup.exe') -Destination inputs
+            Copy-Item docs/validation/0.6.16-r2-handoff-inputs.json evidence/review-inputs.json
+          } else {
+            .\tools\fetch_windows_review_input.ps1 -Version $env:RELEASE_VERSION -BuildRun $env:CANDIDATE_BUILD_RUN -Commit $env:GITHUB_SHA
+          }
           $manifest = Get-Content -Raw inputs/latest.json | ConvertFrom-Json
           $asset = $manifest.assets.'windows-x64-installer'
           if ($manifest.version -ne $env:RELEASE_VERSION -or
@@ -79,9 +107,10 @@ jobs:
             New-Item -ItemType Directory -Path $env:TEMP | Out-Null
           }
           if (Test-Path -LiteralPath $env:LAZARUS_STORAGE_ROOT) { throw 'Storage root was not clean' }
+          $app = Join-Path $env:LOCALAPPDATA 'Programs\Lazarus Agent\Lazarus-Agent.exe'
+          if ($env:F01_REVIEW_INPUTS -and (Test-Path -LiteralPath $app)) { throw 'Review installation path was not clean' }
           $setup = Start-Process -FilePath .\inputs\Lazarus-Agent-windows-x64-setup.exe -ArgumentList '/S' -WindowStyle Hidden -Wait -PassThru
           if ($setup.ExitCode -ne 0) { throw 'Installer failed' }
-          $app = Join-Path $env:LOCALAPPDATA 'Programs\Lazarus Agent\Lazarus-Agent.exe'
           $desktop = Start-Process -FilePath $app -WindowStyle Hidden -PassThru
           try {
             $base = 'http://127.0.0.1:18786'
@@ -167,6 +196,27 @@ jobs:
                     $result.export.level -ne '指定操作已验证') { throw 'Local rule did not prove the expected install failure, new output identity and operation' }
                 @{ rule=$result.patch.rule; downloaded_sha256=$newHash; installed_sha256=$result.export.installed_sha256; target=36; model_enabled=$false; operation='Open south route'; expected='Inspect the pump seal'; level=$result.export.level } |
                   ConvertTo-Json | Set-Content -Encoding utf8 evidence/local-rule-summary.json
+              } elseif ($env:F01_REVIEW_INPUTS) {
+                $check = 'review-zip-replay'
+                $shell = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
+                $wrapper = Join-Path $env:F01_REVIEW_INPUTS '复测样本.ps1'
+                foreach ($item in @(
+                    @{name='demo'; options=@(); status='behavior-verified'; steps=10},
+                    @{name='counterexample'; options=@('-Counterexample'); status='incomplete'; steps=2},
+                    @{name='heldout'; options=@('-Sample','P1C/P04-agent-1'); status='behavior-verified'; steps=16})) {
+                  $options = $item.options
+                  $output = @(& $shell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $wrapper @options)
+                  $verificationExit = $LASTEXITCODE
+                  $output | Set-Content -Encoding utf8 "evidence/review-$($item.name).log"
+                  if ($verificationExit -ne 0 -or !$output.Count) { throw "Review replay $($item.name) failed: $verificationExit" }
+                  $reportPath = $output[-1]
+                  $proof = Get-Content -LiteralPath $reportPath -Raw | ConvertFrom-Json
+                  if ($proof.status -ne $item.status -or @($proof.steps).Count -ne $item.steps -or
+                      $proof.rows[0].candidate.device.installed_sha256 -ne $proof.candidate_sha256) {
+                    throw "Review replay $($item.name) produced unexpected evidence"
+                  }
+                  Copy-Item -LiteralPath $reportPath -Destination "evidence/review-$($item.name).json"
+                }
               } else {
                 $arguments = '--replay-acceptance docs/validation/0.6.7-field-route-acceptance.json fixtures/field-route/field-route-legacy.apk fixtures/verified/field-route-remember-route.apk --output evidence/replay.json --log evidence/replay.log'
                 $replay = Start-Process -FilePath $app -WorkingDirectory $PWD.Path -ArgumentList $arguments -WindowStyle Hidden -PassThru
