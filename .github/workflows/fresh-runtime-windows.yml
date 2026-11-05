@@ -12,7 +12,7 @@ on:
         type: boolean
         default: true
       offline_repair:
-        description: Also generate and verify a new APK with the local compatibility rule
+        description: Test a new local-rule repair instead of replaying the published candidate
         type: boolean
         default: false
 
@@ -121,26 +121,15 @@ jobs:
                 $offlineRules += $name
                 $index++
               }
-              $arguments = '--replay-acceptance docs/validation/0.6.7-field-route-acceptance.json fixtures/field-route/field-route-legacy.apk fixtures/verified/field-route-remember-route.apk --output evidence/replay.json --log evidence/replay.log'
-              $replay = Start-Process -FilePath $app -WorkingDirectory $PWD.Path -ArgumentList $arguments -WindowStyle Hidden -PassThru
-              $lastProgress = ''
-              while (!$replay.HasExited) {
-                if (Test-Path evidence/replay.log) {
-                  $progress = Get-Content evidence/replay.log -Tail 1
-                  if ($progress -ne $lastProgress) { Write-Output $progress; $lastProgress = $progress }
-                }
-                Start-Sleep -Seconds 3
-                $replay.Refresh()
-              }
-              if ($replay.ExitCode -ne 0) { throw "Independent replay failed: $($replay.ExitCode)" }
-              $proof = Get-Content -Raw evidence/replay.json | ConvertFrom-Json
-              if ($proof.status -ne 'behavior-verified' -or $proof.rows[0].candidate.device.installed_sha256 -ne '3cb6ce313e96d3bc997b4431cb891f293398f3f875dea8d8dce7336214a87261') { throw 'Independent replay proof did not match the frozen candidate' }
-              @{ app=$app; programs=$programs; outbound='Internet blocked per executable, loopback retained'; replay_exit=$replay.ExitCode } |
+              $check = if ($env:OFFLINE_REPAIR -eq 'true') { 'local-rule' } else { 'candidate-replay' }
+              @{ app=$app; programs=$programs; outbound='Internet blocked per executable, loopback retained'; check=$check } |
                 ConvertTo-Json | Set-Content -Encoding utf8 evidence/offline.json
-              if ($env:OFFLINE_REPAIR -eq 'true') {
+              $verificationExit = $null
+              if ($check -eq 'local-rule') {
                 if ((Invoke-RestMethod "$base/api/config").model) { throw 'Model must be disabled for the local-rule test' }
                 & $clientPython -X utf8 tools/repair_apk.py fixtures/field-route/field-route-legacy.apk --android 16 --workbench $base --output evidence/local-rule --tap 'Open south route' --expect 'Inspect the pump seal'
-                if ($LASTEXITCODE -ne 0) { throw "Local-rule repair failed: $LASTEXITCODE" }
+                $verificationExit = $LASTEXITCODE
+                if ($verificationExit -ne 0) { throw "Local-rule repair failed: $verificationExit" }
                 $result = Get-Content -Raw evidence/local-rule/report.json | ConvertFrom-Json
                 $newHash = (Get-FileHash evidence/local-rule/verified.apk).Hash.ToLowerInvariant()
                 if ($result.tests[0].install.output -notmatch 'INSTALL_FAILED_DEPRECATED_SDK_VERSION' -or
@@ -149,11 +138,27 @@ jobs:
                     $result.export.level -ne '指定操作已验证') { throw 'Local rule did not prove the expected install failure, new output identity and operation' }
                 @{ rule=$result.patch.rule; downloaded_sha256=$newHash; installed_sha256=$result.export.installed_sha256; target=36; model_enabled=$false; operation='Open south route'; expected='Inspect the pump seal'; level=$result.export.level } |
                   ConvertTo-Json | Set-Content -Encoding utf8 evidence/local-rule-summary.json
+              } else {
+                $arguments = '--replay-acceptance docs/validation/0.6.7-field-route-acceptance.json fixtures/field-route/field-route-legacy.apk fixtures/verified/field-route-remember-route.apk --output evidence/replay.json --log evidence/replay.log'
+                $replay = Start-Process -FilePath $app -WorkingDirectory $PWD.Path -ArgumentList $arguments -WindowStyle Hidden -PassThru
+                $lastProgress = ''
+                while (!$replay.HasExited) {
+                  if (Test-Path evidence/replay.log) {
+                    $progress = Get-Content evidence/replay.log -Tail 1
+                    if ($progress -ne $lastProgress) { Write-Output $progress; $lastProgress = $progress }
+                  }
+                  Start-Sleep -Seconds 3
+                  $replay.Refresh()
+                }
+                $verificationExit = $replay.ExitCode
+                if ($verificationExit -ne 0) { throw "Independent replay failed: $verificationExit" }
+                $proof = Get-Content -Raw evidence/replay.json | ConvertFrom-Json
+                if ($proof.status -ne 'behavior-verified' -or $proof.rows[0].candidate.device.installed_sha256 -ne '3cb6ce313e96d3bc997b4431cb891f293398f3f875dea8d8dce7336214a87261') { throw 'Independent replay proof did not match the frozen candidate' }
               }
             } finally {
               foreach ($name in $offlineRules) { Remove-NetFirewallRule -DisplayName $name }
             }
-            @{ duration_seconds=$clock.Elapsed.TotalSeconds; bytes=(Get-ChildItem -LiteralPath $runtime -Recurse -File | Measure-Object Length -Sum).Sum; platform='GitHub-hosted fresh Windows runner'; replay_exit=$replay.ExitCode; unicode_paths=$env:UNICODE_PATHS; storage=$env:LAZARUS_STORAGE_ROOT; temp=$env:TEMP } |
+            @{ duration_seconds=$clock.Elapsed.TotalSeconds; bytes=(Get-ChildItem -LiteralPath $runtime -Recurse -File | Measure-Object Length -Sum).Sum; platform='GitHub-hosted fresh Windows runner'; check=$check; verification_exit=$verificationExit; replay_exit=$replay.ExitCode; unicode_paths=$env:UNICODE_PATHS; storage=$env:LAZARUS_STORAGE_ROOT; temp=$env:TEMP } |
               ConvertTo-Json | Set-Content -Encoding utf8 evidence/summary.json
           } finally {
             Get-ChildItem -LiteralPath $env:LAZARUS_STORAGE_ROOT -Filter desktop.log -Recurse -ErrorAction SilentlyContinue | ForEach-Object { Copy-Item -LiteralPath $_.FullName evidence/desktop.log }
