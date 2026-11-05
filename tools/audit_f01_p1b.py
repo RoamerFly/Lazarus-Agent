@@ -1,5 +1,6 @@
-"""Audit raw P1B trial evidence against the frozen protocol."""
+"""Audit raw F01 trial evidence against its frozen protocol."""
 from argparse import ArgumentParser
+from dataclasses import dataclass
 import json
 from pathlib import Path
 import subprocess
@@ -20,17 +21,39 @@ SPEC = Path("tools/f01-p1b-cases.json")
 REGISTRATION = Path("docs/science-superpowers/preregistrations/2026-11-06-f01-p1b.md")
 
 
+@dataclass(frozen=True)
+class FrozenBatch:
+    freeze: str
+    implementation: str
+    version: str
+    spec: Path
+    registration: Path
+    results: Path
+
+
+P1B = FrozenBatch(FREEZE, IMPLEMENTATION, "0.6.15", SPEC, REGISTRATION, Path("build/p1b"))
+
+
 def git_at(root, *args):
     return subprocess.check_output(["git", "-C", str(root), *args])
 
 
-def frozen_protocol(root):
-    if git_at(root, "rev-parse", "HEAD").decode().strip() != FREEZE:
+def p1c_batch(root):
+    registration = Path("docs/science-superpowers/preregistrations/2026-11-06-f01-p1c.md")
+    commits = git_at(root, "log", "--diff-filter=A", "--format=%H", "--", registration.as_posix()).decode().splitlines()
+    if len(commits) != 1:
+        raise ValueError("P1C 预注册必须有唯一的首次冻结提交")
+    return FrozenBatch(commits[0], "5fdbc0c40633637508a5d2d461b7811b6561c74e", "0.6.15-dev",
+                       Path("tools/f01-p1c-cases.json"), registration, Path("build/p1c"))
+
+
+def frozen_protocol(root, batch=P1B):
+    if git_at(root, "rev-parse", "HEAD").decode().strip() != batch.freeze:
         raise ValueError("评测检出目录与冻结提交不符")
     if git_at(root, "status", "--porcelain"):
         raise ValueError("冻结检出目录含未归档的源码变更")
-    registration = git_at(root, "show", f"{FREEZE}:{REGISTRATION.as_posix()}")
-    if (ROOT / REGISTRATION).read_bytes() != registration:
+    registration = git_at(root, "show", f"{batch.freeze}:{batch.registration.as_posix()}")
+    if (ROOT / batch.registration).read_bytes() != registration:
         raise ValueError("当前预注册文档与冻结文本不符")
     if (ROOT / "agent_acceptance.py").read_bytes() != (root / "agent_acceptance.py").read_bytes():
         raise ValueError("验收器与该批冻结版本不符")
@@ -43,12 +66,12 @@ def frozen_protocol(root):
             observed = git_at(location, "hash-object", "--", name).decode().strip()
             if observed != expected:
                 raise ValueError("冻结输入校验失败：" + name)
-    return load(root / SPEC)
+    return load(root / batch.spec)
 
 
-def audit(root, *, partial=False):
-    protocol = frozen_protocol(root)
-    results = root / "build/p1b"
+def audit(root, *, partial=False, batch=P1B):
+    protocol = frozen_protocol(root, batch)
+    results = root / batch.results
     if not partial and (results / "running.lock").exists():
         raise ValueError("请在进程结束后生成正式汇总")
     summary = summarize(results, protocol)
@@ -88,6 +111,8 @@ def audit(root, *, partial=False):
                 raise ValueError("候选、设备计划或验收报告不一致：" + trial)
             if verified_for(proof, sha) != bool(result.get("behavior_verified")):
                 raise ValueError("保存的通过标记与独立验收不符：" + trial)
+            if len(proof["rows"]) != 1 or result.get("comparison") != proof["rows"][0].get("comparison"):
+                raise ValueError("基准比较与独立验收不符：" + trial)
             for observed in proof["rows"]:
                 for field, expected in (("baseline", source), ("candidate", sha)):
                     stage = observed.get(field) or {}
@@ -110,8 +135,9 @@ def audit(root, *, partial=False):
              "negatives": counts["agent_negative_rejected"] == 6 and counts["agent_false_acceptances"] == 0,
              "held_out": held_out >= 2}
     return {
-        "schema": 1, "app_version": "0.6.15", "freeze_commit": FREEZE, "implementation_commit": IMPLEMENTATION,
-        "evaluation_role": protocol["evaluation_role"], "protocol_sha256": digest_file(root / SPEC),
+        "schema": 1, "app_version": batch.version, "freeze_commit": batch.freeze,
+        "implementation_commit": batch.implementation,
+        "evaluation_role": protocol["evaluation_role"], "protocol_sha256": digest_file(root / batch.spec),
         "model": protocol["model"], "target_api": protocol["target"], "source_apk_sha256": source_hashes,
         "planned_trials": len(trials), "terminal_trials": sum(row["terminal"] for row in summary["rows"]),
         "held_out_passes": held_out, "joint_gate": None if partial else all(gates.values()),
@@ -126,6 +152,9 @@ def audit(root, *, partial=False):
 if __name__ == "__main__":
     parser = ArgumentParser(description=__doc__)
     parser.add_argument("checkout", type=Path)
+    parser.add_argument("--batch", choices=("p1b", "p1c"), default="p1b")
     parser.add_argument("--partial", action="store_true", help="Audit available records without evaluating the gate")
     args = parser.parse_args()
-    print(json.dumps(audit(args.checkout.resolve(), partial=args.partial), ensure_ascii=False, indent=2))
+    checkout = args.checkout.resolve()
+    batch = p1c_batch(checkout) if args.batch == "p1c" else P1B
+    print(json.dumps(audit(checkout, partial=args.partial, batch=batch), ensure_ascii=False, indent=2))
