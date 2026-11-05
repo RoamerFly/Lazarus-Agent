@@ -43,7 +43,7 @@ def p1c_batch(root):
     commits = git_at(root, "log", "--diff-filter=A", "--format=%H", "--", registration.as_posix()).decode().splitlines()
     if len(commits) != 1:
         raise ValueError("P1C 预注册必须有唯一的首次冻结提交")
-    return FrozenBatch(commits[0], "5fdbc0c40633637508a5d2d461b7811b6561c74e", "0.6.15-dev",
+    return FrozenBatch(commits[0], "1a7bbbeed8e2b75386f7d8b79f61bed091458440", "0.6.15-dev",
                        Path("tools/f01-p1c-cases.json"), registration, Path("build/p1c"))
 
 
