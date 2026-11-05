@@ -67,6 +67,29 @@ class WorkspaceTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             session.finish("candidate", "Done")
 
+    def test_rollback_reuses_the_exact_previous_build_after_a_failed_attempt(self):
+        session = Session(self.root, Path("source.apk"), self.root/"candidate.apk",
+                          Path("tools"), 36, {}, lambda _: None, None)
+        path = "AndroidManifest.xml"
+        read = session.workspace.read_text(path)
+        session.workspace.replace_text(path, read["sha256"], "<manifest/>", "<verified/>")
+        with session.stack:
+            artifact = session.start_build() / "verified.apk"
+            artifact.write_bytes(b"signed")
+            report = {"sha256": digest(b"signed")}
+            session.built(artifact, report, reusable=True)
+            read = session.workspace.read_text(path)
+            session.workspace.replace_text(path, read["sha256"], "<verified/>", "<invalid/>")
+            session.start_build()
+            with self.assertRaises(ValueError):
+                session.finish("candidate", "Edited content has never been built")
+            read = session.workspace.read_text(path)
+            session.workspace.replace_text(path, read["sha256"], "<invalid/>", "<verified/>")
+            session.finish("candidate", "Restored exact file contents")
+            self.assertEqual(session.artifact, artifact)
+            self.assertEqual(session.build_count, 2)
+            self.assertIsNone(session.device_report)
+
     def test_build_failure_is_returned_to_model_for_repair(self):
         def call(name, **args):
             return {"role": "assistant", "reasoning_content": "provider-continuation",
