@@ -113,14 +113,19 @@ def build(results, release_dir, output):
         copy(video, kit / video.name)
         copy(video.with_suffix(".json"), kit / "演示记录.json")
         for name in ("初赛复核说明.md", "运行指南.md", "fixtures/评审样本使用说明.md",
-                     "docs/F01-参赛优化与验收计划.md", "docs/F01-试点与部署验收.md"):
+                     "docs/F01-参赛优化与验收计划.md", "docs/F01-试点与部署验收.md",
+                     "docs/F01-答辩提纲.md", "docs/F01-交付验收清单.md"):
             copy(ROOT / name, kit / Path(name).name)
-        for name in ("f01-independent-acceptance.md", "f01-p1-results.json", "f01-p1-review.md"):
+        for name in ("f01-independent-acceptance.md", "f01-p1-results.json", "f01-p1-review.md",
+                     "0.6.7-independent-windows.md", "0.6.8-independent-windows.md", "0.6.8-live-demo.md"):
             path = ROOT / "docs/validation" / name
             if path.is_file():
                 copy(path, kit / "验证摘要" / name)
         source = kit / "F01-源代码.zip"
         subprocess.run(["git", "archive", "--format=zip", "--output=" + str(source), "HEAD"],
+                       cwd=ROOT, check=True)
+        subprocess.run(["git", "archive", "--format=zip",
+                        "--output=" + str(kit / "F01-固定评测源码-17388e9.zip"), "17388e9"],
                        cwd=ROOT, check=True)
         (kit / "源码版本.txt").write_text(commit + "\n", encoding="utf-8")
         desktop = kit / "Windows桌面版"
@@ -147,8 +152,8 @@ def build(results, release_dir, output):
         package_status = {"app_version": APP_VERSION, "source_commit": commit,
                           "purpose": "engineering-review", "ready_for_submission": False,
                           "benchmark": summary["counts"],
-                          "pending": ["评测全量终态及人工差异审查", "首次完整环境与断网复跑",
-                                      "非开发人员试用记录", "提交前最终独立复核"]}
+                          "pending": ["主案例当前版本重复性回归", "非开发人员试用记录",
+                                      "提交前最终独立复核"]}
         (kit / "复核状态.json").write_text(json.dumps(package_status, ensure_ascii=False, indent=2), encoding="utf-8")
         files = sorted(path for path in kit.rglob("*") if path.is_file())
         (kit / "SHA256SUMS.txt").write_text(
