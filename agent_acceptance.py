@@ -82,6 +82,26 @@ def _read(tester):
     return nodes
 
 
+def _wait_for_launch_ui(tester, row):
+    # am start -W can finish before the first accessibility frame appears on
+    # a newly booted, busy emulator. Observe again without relaunching the app
+    # or accepting a successful command as proof that its UI was displayed.
+    deadline = time.monotonic() + 20
+    observations = row["launch_observations"] = []
+    for attempt in range(8):
+        try:
+            nodes = _read(tester)
+            observations.append({"target_nodes": len(nodes)})
+            if nodes:
+                return True
+        except DEVICE_ERRORS as exc:
+            observations.append({"error": str(exc)[-500:]})
+        if attempt == 7 or time.monotonic() >= deadline:
+            break
+        time.sleep(1.5)
+    return False
+
+
 def _step(tester, step, row):
     action, value = step["action"], step.get("value")
     tester.device.check(tester.owner)
@@ -130,7 +150,7 @@ def _observe(tester, apk, expected_hash, steps):
         if launch.get("exit") != 0 or not re.search(r"(?m)^Status: ok\s*$", launch.get("output", "")):
             row["launch"] = "failed"
             return row
-        if not _read(tester):
+        if not _wait_for_launch_ui(tester, row):
             row["launch"] = "failed"
             raise ValueError("启动返回成功，但未观察到目标应用页面")
         row["launch"] = "passed"

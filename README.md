@@ -24,7 +24,7 @@ Windows 桌面版「遗留软件复活智能体」。导入旧 APK，选择 Andr
 
 下载验收报告后，可按[运行指南](运行指南.md#复测已生成的候选)使用桌面程序执行离线复测。复测使用报告里的步骤，核对基准 APK 和候选 APK 的文件哈希，再在专用设备安装运行。
 
-从 [Releases](https://github.com/RoamerFly/Lazarus-Agent/releases) 下载 Lazarus-Agent.exe。桌面程序自带 Python 和 Web 服务，使用内嵌 WebView2 显示独立桌面窗口。重复启动会激活已有窗口。系统需要 Microsoft Edge WebView2 Runtime，缺少时程序会显示官方下载地址。首次运行 APK 时，工作台检查 Android SDK、Java 和所选系统镜像，优先复用本机已有资源；需要联网时在你同意发布方条款后，从官方来源仅下载所缺组件。下载可取消，应用更新不会重新打包镜像。启动后点击“修复记录”可恢复历史任务。
+从 [Releases](https://github.com/RoamerFly/Lazarus-Agent/releases) 下载 setup.exe 安装器，或下载 portable.zip 并解压后打开其中的 Lazarus-Agent.exe。桌面程序自带 Python 和 Web 服务，使用内嵌 WebView2 显示独立桌面窗口。重复启动会激活已有窗口。系统需要 Microsoft Edge WebView2 Runtime，缺少时程序会显示官方下载地址。首次运行 APK 时，工作台检查 Android SDK、Java 和所选系统镜像，优先复用本机已有资源；需要联网时在你同意发布方条款后，从官方来源仅下载所缺组件。下载可取消，应用更新不会重新打包镜像。启动后点击“修复记录”可恢复历史任务。
 
 设置 `REVIVER_SDK` 指向 Android SDK 根目录（包括 platform-tools、emulator、build-tools），按需设置 `REVIVER_BUILD_TOOLS`、`REVIVER_LAB`。默认本地端口为 8767，可通过 `REVIVER_PORT` 调整。任务数据位于 `%LOCALAPPDATA%\LegacyApkReviver\jobs`。初次使用前见[运行指南](运行指南.md)。若桌面版与旧网页服务使用同一端口，请先退出旧服务。
 
@@ -56,7 +56,7 @@ Windows 桌面版「遗留软件复活智能体」。导入旧 APK，选择 Andr
 1. 导入 APK，选择目标系统，点击“修复并验证”。通过验证的文件进入版本列表，保留当时的验证等级。
 2. 在手机上测试，选择对应版本，点击“真机可运行”，或描述问题并附一张 PNG/JPEG 截图。
 3. 如能复现，请在“设置复现步骤”填写点击的控件和预期内容。也可以发送形如「点击“Open archived record”后应显示“Read OK: HTTP/1.1”」的消息。
-4. 点击“继续修复”。工作台依据本轮运行证据选择已实现的规则。通过验证且内容变化时新增版本；相同哈希会沿用原版本。截图作为本机反馈记录，当前规则引擎使用可观测的安装、启动、控件和运行时证据进行判断。
+4. 对功能改造，启用模型后在修复对话描述问题或新需求，选择对应候选再发送，Agent 会读取实际代码、工具反馈并继续修改。“继续修复”按钮用于已有兼容规则的重试。截图作为本机反馈记录；规则使用可观测的安装、启动、控件和运行时证据，通用 Agent 根据对话与工具读取结果执行。
 
 代码仓库包含团队自制测试 APK。第三方商业游戏、实验室虚拟机、私有签名密钥和用户对话不入库。《环太平洋》的完整游戏交互复核需要事先配对的 ARM 实验室和本地参考画面；可通过 `REVIVER_GAME_REFERENCES` 指定参考目录。原开发机的验证范围见[阶段进度](阶段进度.md)。
 

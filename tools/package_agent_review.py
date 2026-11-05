@@ -161,7 +161,9 @@ def build(results, release_dir, output, capture_dir, regression_results=None):
         for name in ("f01-independent-acceptance.md", "f01-p1-results.json", "f01-p1-review.md",
                      "0.6.7-independent-windows.md", "0.6.8-independent-windows.md",
                      "0.6.8-windows-proof.json", "0.6.8-live-demo.md", "0.6.8-primary-regression.json",
-                     "0.6.8-regression-results.json", "0.6.8-regression-review.md"):
+                     "0.6.8-regression-results.json", "0.6.8-regression-review.md",
+                     "f01-package-replay.md", "0.6.9-windows-proof.json",
+                     "0.6.9-independent-windows.md", "0.6.9-live-demo.md"):
             path = ROOT / "docs/validation" / name
             if path.is_file():
                 copy(path, kit / "验证摘要" / name)
@@ -177,6 +179,8 @@ def build(results, release_dir, output, capture_dir, regression_results=None):
         copy(release_dir / "latest.json", desktop / "latest.json")
         copy(release_dir / "latest.json.sig", desktop / "latest.json.sig")
         (desktop / "下载并校验安装包.ps1").write_text(download_script(manifest), encoding="utf-8-sig")
+        (kit / "复测样本.ps1").write_text(
+            (ROOT / "tools/review_replay.ps1").read_text(encoding="utf-8-sig"), encoding="utf-8-sig")
         for case in protocol["cases"]:
             source = ROOT / case["apk"]
             copy(source, kit / "自有输入样本" / source.name)
@@ -201,8 +205,8 @@ def build(results, release_dir, output, capture_dir, regression_results=None):
                           "purpose": "engineering-review", "ready_for_submission": False,
                           "frozen_benchmark_source": "17388e9", "benchmark": summary["counts"],
                           "current_regression": regression["counts"] if regression else None,
-                          "pending": ["当前版本全组回归与差异审查", "非开发人员试用记录",
-                                      "提交前最终独立复核"]}
+                          "pending": (["当前版本全组回归与差异审查"] if regression is None else []) +
+                                     ["非开发人员试用记录", "提交前最终独立复核"]}
         (kit / "复核状态.json").write_text(json.dumps(package_status, ensure_ascii=False, indent=2), encoding="utf-8")
         (kit / "校验文件.ps1").write_text(FILE_CHECK_SCRIPT, encoding="utf-8-sig")
         files = sorted(path for path in kit.rglob("*") if path.is_file())

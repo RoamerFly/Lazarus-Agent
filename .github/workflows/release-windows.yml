@@ -8,7 +8,7 @@ on:
       version:
         description: SemVer without v (must equal app_version.py)
         required: true
-        default: '0.6.9'
+        default: '0.6.10'
       publish:
         description: Create/update GitHub Release
         required: true
@@ -88,6 +88,9 @@ jobs:
           }
           if ($tag -eq 'v0.6.9') {
             $notes = "修复中文临时目录下模拟器路径桥接失败的问题。助手会为本次模拟器进程选择可写的工具临时目录。保留通用 APK 改造和独立行为验收能力。" + [Environment]::NewLine + [Environment]::NewLine + $notes
+          }
+          if ($tag -eq 'v0.6.10') {
+            $notes = "独立验收在启动命令成功后，有限等待目标应用界面出现，并记录各次观察。未观察到目标应用时仍拒绝通过。保留中文目录支持、通用 APK 改造与离线复测。" + [Environment]::NewLine + [Environment]::NewLine + $notes
           }
           if ($tag -eq 'v0.6.5') {
             $notes = "修复对话新增页面方向改造。启用模型后，可用一句话指定横屏、竖屏或跟随系统，模型会读取页面清单并调用本地工具生成签名候选。" + [Environment]::NewLine + [Environment]::NewLine + $notes

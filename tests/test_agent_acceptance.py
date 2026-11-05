@@ -6,7 +6,7 @@ import unittest
 from unittest.mock import Mock, patch
 import xml.etree.ElementTree as ET
 
-from agent_acceptance import parse_steps, verify, verified_for
+from agent_acceptance import _wait_for_launch_ui, parse_steps, verify, verified_for
 
 
 def screen(package, text):
@@ -17,6 +17,27 @@ def screen(package, text):
 
 
 class AcceptanceTests(unittest.TestCase):
+    def test_launch_wait_requires_observed_target_ui(self):
+        tester = SimpleNamespace(facts={"package": "example.app"},
+                                 tree=Mock(side_effect=[screen("other.app", "Loading"),
+                                                        screen("example.app", "Ready")]))
+        row = {}
+        with patch("agent_acceptance.time.sleep"):
+            self.assertTrue(_wait_for_launch_ui(tester, row))
+        self.assertEqual([r["target_nodes"] for r in row["launch_observations"]], [0, 2])
+        tester.tree = Mock(return_value=screen("other.app", "Ready"))
+        with patch("agent_acceptance.time.sleep"):
+            self.assertFalse(_wait_for_launch_ui(tester, {}))
+        self.assertEqual(tester.tree.call_count, 8)
+
+    def test_launch_wait_records_transient_tree_failure(self):
+        tester = SimpleNamespace(facts={"package": "example.app"},
+                                 tree=Mock(side_effect=[ValueError("界面树无效"), screen("example.app", "Ready")]))
+        row = {}
+        with patch("agent_acceptance.time.sleep"):
+            self.assertTrue(_wait_for_launch_ui(tester, row))
+        self.assertIn("error", row["launch_observations"][0])
+
     def test_replay_rejects_plan_without_positive_assertion(self):
         with self.assertRaisesRegex(ValueError, "预期"):
             parse_steps({"steps": [{"action": "cold_start"}, {"action": "absent", "value": "Error"}]})
