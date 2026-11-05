@@ -361,6 +361,7 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                      f"{APP_VERSION}-candidate-windows-runtime.md", f"{APP_VERSION}-candidate-windows-runtime.json",
                      f"{APP_VERSION}-candidate-publication-check.json", f"{APP_VERSION}-candidate-replay-inputs.json",
                      f"{APP_VERSION}-replace-input.md", f"{APP_VERSION}-replace-input.json",
+                     f"{APP_VERSION}-focused.md", f"{APP_VERSION}-focused.json",
                      f"{APP_VERSION}-source-replay.md", f"{APP_VERSION}-source-replay.json"):
             path = ROOT / "docs/validation" / name
             if path.is_file():

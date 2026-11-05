@@ -95,6 +95,12 @@ def build(output=OUT):
         steps = cases[0]["candidate_steps"]
         block("可回读的替换输入", "点选普通文本框后，可替换已有内容并回读同一字段。"
               f"旧版 Counter 的上限场景在 Android {versions} 各复跑 {steps} 步。")
+    focused_path = validation / f"{APP_VERSION}-focused.json"
+    if focused_path.is_file():
+        focused = json.loads(focused_path.read_text(encoding="utf-8"))
+        semantic = focused["semantic_counts"]
+        block("数据来源和文件访问", "恢复已有内容时检查原包及数据来源。回编前拦截已知的进程级检查绕过。"
+              f"专项复测中有 {semantic['agent_positives']}/{semantic['planned_agent_positives']} 个正例通过候选语义复核。")
     block("成功候选的保存", "后续试验失败时，只在文件集合与内容哈希精确回到某次成功构建时复用该候选。其安装与行为仍由验收器确认。每轮保留原始工具轨迹，限制目录、文件大小、工具调用与构建次数。")
     story.append(PageBreak())
 
