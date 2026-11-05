@@ -281,7 +281,9 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
             for mode, repeat in modes:
                 add_case(results, kit, case, mode, repeat)
                 if regression is not None:
-                    add_case(regression_results, kit / "当前版本工程回归", case, mode, repeat)
+                    label = (f"v{regression_metadata['app_version']} 全组开发回归"
+                             if regression_metadata else "全组开发回归")
+                    add_case(regression_results, kit / label, case, mode, repeat)
                 if primary is not None and case["id"] == protocol["primary"]:
                     add_case(primary_results, kit / f"v{primary_version} 主案例开发回归", case, mode, repeat)
         # Only synthetic fixture evidence enters this package. Remove local workstation roots in text.
