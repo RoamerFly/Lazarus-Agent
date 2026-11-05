@@ -20,7 +20,7 @@ on:
         type: boolean
         default: false
       review_input:
-        description: Optional fixed replay files from the F01 v0.6.16 r2 review ZIP
+        description: Optional version-specific fixed replay files from the F01 review ZIP
         required: false
         default: ''
 
@@ -34,7 +34,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: Restore the exact r2 review inputs
+      - name: Restore the exact review inputs
         if: ${{ inputs.review_input != '' }}
         shell: pwsh
         env:
@@ -42,12 +42,12 @@ jobs:
           CANDIDATE_BUILD_RUN: ${{ inputs.build_run }}
           OFFLINE_REPAIR: ${{ inputs.offline_repair }}
         run: |
-          if ($env:RELEASE_VERSION -ne '0.6.16' -or $env:CANDIDATE_BUILD_RUN -or $env:OFFLINE_REPAIR -eq 'true') {
-            throw 'Use the official v0.6.16 replay mode for the r2 review inputs'
+          if ($env:CANDIDATE_BUILD_RUN -or $env:OFFLINE_REPAIR -eq 'true') {
+            throw 'Use the official published release for the review inputs'
           }
           $review = Join-Path $env:RUNNER_TEMP 'F01 评审复核 输入'
-          python -X utf8 tools/prepare_review_handoff_probe.py --restore $review
-          if ($LASTEXITCODE -ne 0) { throw 'Review replay inputs did not match r2' }
+          python -X utf8 tools/prepare_review_handoff_probe.py --restore $review --version $env:RELEASE_VERSION
+          if ($LASTEXITCODE -ne 0) { throw 'Review replay inputs did not match the version receipt' }
           "F01_REVIEW_INPUTS=$review" >> $env:GITHUB_ENV
       - name: Download the published Windows installer
         shell: pwsh
@@ -63,7 +63,7 @@ jobs:
             & $shell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File (Join-Path $reviewDesktop '下载并校验安装包.ps1')
             if ($LASTEXITCODE -ne 0) { throw 'Review ZIP installer download failed' }
             Copy-Item -LiteralPath (Join-Path $reviewDesktop 'latest.json'),(Join-Path $reviewDesktop 'latest.json.sig'),(Join-Path $reviewDesktop 'Lazarus-Agent-windows-x64-setup.exe') -Destination inputs
-            Copy-Item docs/validation/0.6.16-r2-handoff-inputs.json evidence/review-inputs.json
+            Copy-Item -LiteralPath (Join-Path $env:F01_REVIEW_INPUTS 'review-inputs.json') -Destination evidence/review-inputs.json
           } else {
             .\tools\fetch_windows_review_input.ps1 -Version $env:RELEASE_VERSION -BuildRun $env:CANDIDATE_BUILD_RUN -Commit $env:GITHUB_SHA
           }
@@ -200,10 +200,12 @@ jobs:
                 $check = 'review-zip-replay'
                 $shell = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
                 $wrapper = Join-Path $env:F01_REVIEW_INPUTS '复测样本.ps1'
+                $receipt = Get-Content -Raw -LiteralPath evidence/review-inputs.json | ConvertFrom-Json
+                $temperatureSample = if ($receipt.temperature_sample) { $receipt.temperature_sample } else { 'P1C/P04-agent-1' }
                 foreach ($item in @(
                     @{name='demo'; options=@(); status='behavior-verified'; steps=10},
                     @{name='counterexample'; options=@('-Counterexample'); status='incomplete'; steps=2},
-                    @{name='heldout'; options=@('-Sample','P1C/P04-agent-1'); status='behavior-verified'; steps=16})) {
+                    @{name='heldout'; options=@('-Sample',$temperatureSample); status='behavior-verified'; steps=16})) {
                   $options = $item.options
                   $output = @(& $shell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $wrapper @options)
                   $verificationExit = $LASTEXITCODE

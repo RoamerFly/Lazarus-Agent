@@ -435,7 +435,8 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                 sample = regression_checkout / case["apk"]
                 copy(sample, current_folder / "自有输入样本" / sample.name)
             for (case, mode, repeat), row in zip(trial_schedule(current_protocol), current["rows"]):
-                add_case(raw_results, current_folder, case, mode, repeat, distribute=row["trial"] in distributable)
+                add_case(raw_results, current_folder, case, mode, repeat, distribute=row["trial"] in distributable,
+                         sample_root=kit / "可分发样本" / f"发布回归-v{APP_VERSION}")
         # Only synthetic fixture evidence enters this package. Remove local workstation roots in text.
         common_git = Path(subprocess.check_output(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"],
                                                   cwd=ROOT, encoding="utf-8").strip())
