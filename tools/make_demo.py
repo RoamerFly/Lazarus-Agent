@@ -43,7 +43,7 @@ def build(capture):
     selected = middle[::max(1, len(middle)//8)][:8]
     for index in selected:
         keyframes.append((index, "DeepSeek Flash 实际执行节选。模型自主读取、修改、构建和测试。", 3))
-    keyframes.append((len(frames)-1, "独立验收重新安装原包和候选，核对 APK 哈希并执行固定的 10 步操作。", 9))
+    keyframes.append((len(frames)-1, "Android 16 专用模拟器独立复测，核对安装包哈希并执行固定的 10 步操作。", 9))
     with tempfile.TemporaryDirectory(dir=ROOT / "build", prefix="demo-") as directory:
         temporary = Path(directory)
         timeline = ["ffconcat version 1.0"]
