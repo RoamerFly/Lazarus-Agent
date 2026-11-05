@@ -14,12 +14,17 @@ on:
         required: true
         type: boolean
         default: false
+      verified_build:
+        description: Existing signed Windows build run to verify or publish without rebuilding
+        required: false
+        default: ''
 
 permissions:
   contents: write
 
 jobs:
   build-sign-release:
+    if: github.event_name != 'workflow_dispatch' || inputs.verified_build == ''
     runs-on: windows-latest
     timeout-minutes: 30
     steps:
@@ -144,3 +149,82 @@ jobs:
           } else {
             gh release create $tag release/* --title "Lazarus Agent $tag" --notes $notes --target '${{ github.sha }}'
           }
+
+  promote-verified-candidate:
+    if: github.event_name == 'workflow_dispatch' && inputs.verified_build != ''
+    runs-on: windows-latest
+    timeout-minutes: 15
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Check and optionally publish the exact Windows artifacts
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+          VERIFIED_BUILD: ${{ inputs.verified_build }}
+          PUBLISH: ${{ inputs.publish }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $repo = 'RoamerFly/Lazarus-Agent'
+          if ($env:VERIFIED_BUILD -notmatch '^\d+$' -or $env:VERSION -notmatch '^\d+\.\d+\.\d+$') {
+            throw 'Invalid version or build run'
+          }
+          $tag = "v$env:VERSION"
+          $build = gh run view $env:VERIFIED_BUILD --repo $repo --json headSha,conclusion,workflowName,event | ConvertFrom-Json
+          if ($LASTEXITCODE -or $build.workflowName -ne 'Release Windows' -or $build.event -ne 'workflow_dispatch' -or
+              $build.conclusion -ne 'success' -or $build.headSha -notmatch '^[0-9a-f]{40}$') { throw 'Unexpected signed build' }
+          git merge-base --is-ancestor $build.headSha $env:GITHUB_SHA
+          if ($LASTEXITCODE) { throw 'Signed build is outside the release source history' }
+          $versionSource = git show "$($build.headSha):app_version.py"
+          if ($LASTEXITCODE -or $versionSource -notcontains "APP_VERSION = `"$env:VERSION`"") { throw 'Build version mismatch' }
+          $receipt = Get-Content -LiteralPath "docs/validation/$env:VERSION-candidate-windows-runtime.json" -Raw | ConvertFrom-Json
+          foreach ($check in @(
+              @{ id=$receipt.installer_workflow_run; name='Published Windows installer check' },
+              @{ id=$receipt.runtime.replay.workflow_run; name='Fresh Windows runtime' },
+              @{ id=$receipt.runtime.offline_repair.workflow_run; name='Fresh Windows runtime' })) {
+            $run = gh run view $check.id --repo $repo --json headSha,conclusion,workflowName | ConvertFrom-Json
+            if ($LASTEXITCODE -or $run.headSha -ne $build.headSha -or $run.conclusion -ne 'success' -or
+                $run.workflowName -ne $check.name) { throw 'Independent Windows workflow does not match' }
+          }
+          gh run download $env:VERIFIED_BUILD --repo $repo --dir release --name "Lazarus-Agent-windows-$env:VERSION"
+          if ($LASTEXITCODE) { throw 'Signed artifact download failed' }
+          python -m pip install cryptography
+          if ($LASTEXITCODE) { throw 'Signature verifier dependency failed' }
+          $verifyArgs = @('tools/verify_release_candidate.py','release','--version',$env:VERSION,
+                          '--build-run',$env:VERIFIED_BUILD,'--source-commit',$build.headSha)
+          if ($env:PUBLISH -eq 'true') { $verifyArgs += '--require-p1c' }
+          $json = python @verifyArgs
+          if ($LASTEXITCODE) { throw 'Signed candidate or release evidence validation failed' }
+          $files = $json | ConvertFrom-Json -AsHashtable
+          $json | Set-Content -Encoding utf8 verified-release-assets.json
+          if ($env:PUBLISH -ne 'true') { return }
+          $tags = gh api "repos/$repo/git/matching-refs/tags/$tag" | ConvertFrom-Json
+          if ($LASTEXITCODE -or @($tags | Where-Object { $_.ref -eq "refs/tags/$tag" }).Count) {
+            throw 'Tag already exists or could not be checked'
+          }
+          $paths = @($files.Keys | ForEach-Object { Join-Path release $_ })
+          $notes = "已验证签名资产原样发布。Agent 支持原包复现、按设备证据声明兼容库和行为预检。通过正式独立验收后才标为已验收。"
+          gh release create $tag @paths --repo $repo --draft --title "Lazarus Agent $tag" --notes $notes --target $build.headSha
+          if ($LASTEXITCODE) { throw 'Draft release creation failed' }
+          $published = gh release view $tag --repo $repo --json isDraft,targetCommitish,assets | ConvertFrom-Json
+          if ($LASTEXITCODE -or !$published.isDraft -or $published.targetCommitish -ne $build.headSha -or
+              @($published.assets).Count -ne $files.Count) { throw 'Unexpected draft assets or source commit' }
+          foreach ($asset in $published.assets) {
+            if (!$files.ContainsKey($asset.name) -or $asset.size -ne $files[$asset.name].bytes -or
+                $asset.digest -ne "sha256:$($files[$asset.name].sha256)") { throw 'Uploaded draft asset hash differs' }
+          }
+          gh release edit $tag --repo $repo --draft=false --latest
+          if ($LASTEXITCODE) { throw 'Verified draft publication failed' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: verified-release-assets
+          path: verified-release-assets.json
+          if-no-files-found: error
