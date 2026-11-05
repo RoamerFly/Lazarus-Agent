@@ -86,7 +86,7 @@ Write-Output "校验通过。请打开 $target 安装 Lazarus Agent {APP_VERSION
 '''
 
 
-def build(results, release_dir, output):
+def build(results, release_dir, output, capture_dir):
     results = results.resolve()
     if not results.is_relative_to(ROOT / "build") or not results.is_dir():
         raise ValueError("请指定 build 目录内的原始评测结果")
@@ -107,17 +107,34 @@ def build(results, release_dir, output):
     metadata = read(video.with_suffix(".json"))
     if metadata["app_version"] != APP_VERSION or metadata["video_sha256"] != digest(video):
         raise ValueError("演示版本或视频哈希与当前材料不符")
+    demo_proof = read(capture_dir / "agent-acceptance.json")
+    demo_candidate = capture_dir / "candidate.apk"
+    demo_source = ROOT / "fixtures/field-route/field-route-legacy.apk"
+    if (not verified_for(demo_proof, digest(demo_candidate)) or
+            digest(demo_source) != demo_proof["input_sha256"] or
+            demo_proof["candidate_sha256"] != metadata["capture"]["candidate_sha256"]):
+        raise ValueError("演示 APK、视频和独立验收没有对应到同一产物")
     with tempfile.TemporaryDirectory(dir=ROOT / "build", prefix="review-") as temporary:
         kit = Path(temporary)
         copy(proposal, kit / proposal.name)
         copy(video, kit / video.name)
         copy(video.with_suffix(".json"), kit / "演示记录.json")
+        demo_sample = kit / "可分发样本/工作台演示"
+        copy(demo_source, demo_sample / "base.apk")
+        copy(demo_candidate, demo_sample / "candidate.apk")
+        copy(capture_dir / "agent-acceptance.json", demo_sample / "agent-acceptance.json")
+        demo_job = read(capture_dir / "job.json")
+        demo_run = demo_job["latest_feature_candidate"]
+        demo_trace = capture_dir / "storage/data/jobs" / demo_job["id"] / "feature-candidates" / demo_run
+        for name in ("changes.diff", "agent-trace.json"):
+            copy(demo_trace / name, kit / "评测记录/工作台演示" / name)
         for name in ("初赛复核说明.md", "运行指南.md", "fixtures/评审样本使用说明.md",
                      "docs/F01-参赛优化与验收计划.md", "docs/F01-试点与部署验收.md",
                      "docs/F01-答辩提纲.md", "docs/F01-交付验收清单.md"):
             copy(ROOT / name, kit / Path(name).name)
         for name in ("f01-independent-acceptance.md", "f01-p1-results.json", "f01-p1-review.md",
-                     "0.6.7-independent-windows.md", "0.6.8-independent-windows.md", "0.6.8-live-demo.md"):
+                     "0.6.7-independent-windows.md", "0.6.8-independent-windows.md",
+                     "0.6.8-windows-proof.json", "0.6.8-live-demo.md"):
             path = ROOT / "docs/validation" / name
             if path.is_file():
                 copy(path, kit / "验证摘要" / name)
@@ -180,9 +197,10 @@ def main():
     parser = ArgumentParser(description=__doc__)
     parser.add_argument("--results", type=Path, required=True)
     parser.add_argument("--release-dir", type=Path, required=True)
+    parser.add_argument("--capture-dir", type=Path, required=True)
     parser.add_argument("--output", type=Path, default=ROOT / "交付/重邮GGBond-F01-工程复核包.zip")
     args = parser.parse_args()
-    build(args.results, args.release_dir, args.output)
+    build(args.results, args.release_dir, args.output, args.capture_dir)
 
 
 if __name__ == "__main__":
