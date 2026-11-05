@@ -14,6 +14,7 @@ NAMES = {
     "windows-x64-installer": "Lazarus-Agent-windows-x64-setup.exe",
     "windows-x64-portable-exe": "Lazarus-Agent-windows-x64-portable.exe",
 }
+REGRESSION_ROLE = "development-regression-on-seen-cases"
 
 
 def read(path):
@@ -56,25 +57,39 @@ def verify(directory, receipt, version, build_run, commit):
             for name in files}
 
 
-def require_p1c():
-    validation = ROOT / "docs/validation/f01-p1c"
+def require_audited_batch(validation, label):
     result_path, review_path = validation / "results.json", validation / "diff-review.json"
     if not result_path.is_file() or not review_path.is_file():
-        raise ValueError("P1C 评测结果与差异审查尚未归档")
+        raise ValueError(f"{label} 评测结果与差异审查尚未归档")
     result = read(result_path)
     counts = result["counts"]
     if not (result["planned_trials"] == result["terminal_trials"] == 42 and result["joint_gate"]
             and counts["agent_positives"] >= 15 and counts["primary"] == 3
             and counts["agent_negative_rejected"] == 6 and counts["agent_false_acceptances"] == 0
             and result["held_out_passes"] >= 2):
-        raise ValueError("P1C 冻结评测尚未达到完整发布门槛")
+        raise ValueError(f"{label} 尚未达到完整发布门槛")
     reviewed = read(review_path)["rows"]
     expected = {(row["trial"], row["candidate_sha256"], row["raw_diff_sha256"]) for row in result["rows"]
                 if row["state"] == "passed"}
     checked = {(row["trial"], row["candidate_sha256"], row["raw_diff_sha256"]) for row in reviewed
                if row["review"].strip() and row["scope"].strip()}
-    if checked != expected or len(reviewed) != len(expected):
-        raise ValueError("P1C 通过候选的差异审查尚未完成")
+    if (checked != expected or len(reviewed) != len(expected)
+            or any(not row["candidate_sha256"] or (row["mode"] == "agent" and not row["raw_diff_sha256"])
+                   for row in result["rows"] if row["state"] == "passed")):
+        raise ValueError(f"{label} 通过候选的差异审查尚未完成")
+    return result
+
+
+def require_p1c(version, build_run, commit):
+    validation = ROOT / "docs/validation"
+    historical = require_audited_batch(validation / "f01-p1c", "P1C")
+    if tuple(map(int, version.split("."))) >= (0, 6, 17):
+        current = require_audited_batch(validation / "f01-release-regression" / version, f"v{version} 发布回归")
+        if (current["app_version"] != version or current["implementation_commit"] != commit
+                or current["source_build_run"] != build_run or current["evaluation_role"] != REGRESSION_ROLE
+                or any(current[key] != historical[key] for key in
+                       ("freeze_commit", "protocol_sha256", "source_apk_sha256", "target_api", "model"))):
+            raise ValueError("发布回归与候选签名构建或历史方案不符")
 
 
 def main():
@@ -86,7 +101,7 @@ def main():
     parser.add_argument("--require-p1c", action="store_true")
     args = parser.parse_args()
     if args.require_p1c:
-        require_p1c()
+        require_p1c(args.version, args.build_run, args.source_commit)
     receipt = read(ROOT / f"docs/validation/{args.version}-candidate-windows-runtime.json")
     print(json.dumps(verify(args.directory, receipt, args.version, args.build_run, args.source_commit),
                      ensure_ascii=False, indent=2))

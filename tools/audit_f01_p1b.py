@@ -75,7 +75,10 @@ def frozen_protocol(root, batch=P1B):
 
 
 def audit(root, *, partial=False, batch=P1B):
-    protocol = frozen_protocol(root, batch)
+    return audit_records(root, batch, frozen_protocol(root, batch), partial=partial)
+
+
+def audit_records(root, batch, protocol, *, partial=False):
     results = root / batch.results
     if not partial and (results / "running.lock").exists():
         raise ValueError("请在进程结束后生成正式汇总")

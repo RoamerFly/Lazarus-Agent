@@ -1,0 +1,47 @@
+{
+  "scope": "independent-Windows-signed-candidate-not-published",
+  "version": "0.6.17",
+  "source_build_run": "42109645786",
+  "source_commit": "a48ce0bd397fa9b72904d65463d197161e7e120d",
+  "manifest_sha256": "2af842c990865a1955503429222ac0cb6fca192831f808d6b44e9a7d9912354a",
+  "installer_workflow_run": "42110501738",
+  "installer": {
+    "uninstall_exit": 0,
+    "tampered_exit": 2,
+    "signature_verified": true,
+    "self_test_exit": 0,
+    "user_output_preserved": true,
+    "installed_exe_sha256": "236d4517b74c14483c99035392601d3d0041f5ed560a989a39b50abc97a2757c",
+    "installer_sha256": "498742330892b2cac99b4e66ceb20d689d2a14b93697c08a4484a4724f9f333f",
+    "install_exit": 0,
+    "source_build_run": "42109645786",
+    "input_check_exit": 0,
+    "version": "0.6.17",
+    "scope": "Signed build artifact, fresh Windows, input checks only",
+    "source_commit": "a48ce0bd397fa9b72904d65463d197161e7e120d"
+  },
+  "runtime": {
+    "replay": {
+      "workflow_run": "42110500737",
+      "runtime_preparation_seconds": 101.0822449,
+      "prepared_bytes": 6849972886.0,
+      "prepare_attempts": 1,
+      "offline_program_count": 4,
+      "candidate_sha256": "3cb6ce313e96d3bc997b4431cb891f293398f3f875dea8d8dce7336214a87261",
+      "behavior_steps": 10,
+      "report_sha256": "edad690b20310a4ac4a9e44cb97500b4ed79cdf5a04e60e884d96ca782843889"
+    },
+    "offline_repair": {
+      "workflow_run": "42114505757",
+      "runtime_preparation_seconds": 71.1270352,
+      "prepared_bytes": 6265589240.0,
+      "prepare_attempts": 1,
+      "offline_program_count": 4,
+      "candidate_sha256": "ede3521318e55e5f5dbe62c3203df9e01e72348a6e65f6e7f421fc7ff57a9b34",
+      "rule": "installation-floor",
+      "model_enabled": false,
+      "operation": "Open south route",
+      "report_sha256": "030e5f3cf97251642ec28f79aa7a97164f2274d04c6fc1b458d23bd7ca26ddb8"
+    }
+  }
+}

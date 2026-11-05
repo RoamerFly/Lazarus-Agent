@@ -16,10 +16,29 @@ sys.path.insert(0, str(ROOT))
 from agent_acceptance import verified_for
 from app_version import APP_VERSION
 from updater import parse_manifest, verify_manifest
-from tools.audit_f01_p1b import P1B, audit as audit_frozen, p1c_batch, require_diff_review
+from tools.audit_f01_p1b import P1B, p1c_batch, require_diff_review
+from tools.audit_f01_release_regression import audit_release_regression
 from tools.run_f01_p1 import PROTOCOL, trial_schedule
 from tools.summarize_f01_p1 import summarize
+from tools.verify_release_candidate import require_p1c
 from tools.verify_release_candidate import verify as verify_signed_candidate
+
+HISTORICAL_AUDITOR = "41fe5b1af3f047dbee730d672e4a5639fe61aa59"
+
+
+def audit_frozen(checkout, label):
+    # Score historical proofs using the acceptance code shipped with those audits.
+    with tempfile.TemporaryDirectory(dir=ROOT / "build") as directory:
+        workspace = Path(directory)
+        source = workspace / "source"
+        archive_path = workspace / "auditor.zip"
+        subprocess.run(["git", "archive", "--format=zip", f"--output={archive_path}", HISTORICAL_AUDITOR],
+                       cwd=ROOT, check=True)
+        with ZipFile(archive_path) as archive:
+            archive.extractall(source)
+        output = subprocess.check_output([sys.executable, "-X", "utf8", str(source / "tools/audit_f01_p1b.py"),
+                                          str(checkout), "--batch", label.lower()], cwd=source)
+    return json.loads(output)
 
 
 def digest(path):
@@ -153,7 +172,7 @@ Write-Output "校验通过。请打开 $target 安装 Lazarus Agent {APP_VERSION
 
 def build(results, release_dir, output, capture_dir, regression_results=None, regression_summary=None,
           primary_results=None, primary_summary=None, materials_dir=ROOT / "交付", p1b_checkout=None,
-          p1c_checkout=None):
+          p1c_checkout=None, release_regression=None):
     results = results.resolve()
     if not results.is_relative_to(ROOT / "build") or not results.is_dir():
         raise ValueError("请指定 build 目录内的原始评测结果")
@@ -189,12 +208,26 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
         if not checkout.is_relative_to(ROOT / "build"):
             raise ValueError(f"请指定 build 目录内的 {label} 冻结检出")
         batch = P1B if label == "P1B" else p1c_batch(checkout)
-        audit_result = audit_frozen(checkout, batch=batch)
+        audit_result = audit_frozen(checkout, label)
         reports = Path("docs/validation") / f"f01-{label.lower()}"
         if audit_result != read(ROOT / reports / "results.json"):
             raise ValueError(f"{label} 汇总与冻结记录不一致")
         require_diff_review(audit_result, read(ROOT / reports / "diff-review.json"))
         frozen_batches[label] = (checkout, batch, audit_result, reports)
+    current = None
+    if release_regression:
+        regression_checkout, raw_results, run_plan = (path.resolve() for path in release_regression)
+        if not regression_checkout.is_relative_to(ROOT / "build"):
+            raise ValueError("请指定 build 目录内的发布回归检出")
+        current_reports = ROOT / "docs/validation/f01-release-regression" / APP_VERSION
+        current = audit_release_regression(regression_checkout, raw_results, read(run_plan))
+        if current["app_version"] != APP_VERSION or current != read(current_reports / "results.json"):
+            raise ValueError("发布回归与当前版本的归档结果不一致")
+        require_diff_review(current, read(current_reports / "diff-review.json"))
+    if publication and tuple(map(int, APP_VERSION.split("."))) >= (0, 6, 17):
+        require_p1c(APP_VERSION, publication["signed_build_run"], publication["source_commit"])
+        if current is None:
+            raise ValueError("正式复核包缺少当前版本的发布回归原始记录")
     primary = None
     primary_version = None
     if primary_results is not None:
@@ -387,10 +420,25 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
             for (case, mode, repeat), row in zip(trial_schedule(batch_protocol), audited["rows"]):
                 add_case(checkout / batch.results, batch_folder, case, mode, repeat,
                          distribute=row["state"] == "passed", sample_root=kit / "可分发样本" / label)
+        if current:
+            current_folder = kit / f"v{APP_VERSION} 发布回归"
+            current_spec = regression_checkout / p1c_batch(regression_checkout).spec
+            current_protocol = read(current_spec)
+            copy(current_spec, current_folder / current_spec.name)
+            copy(run_plan, current_folder / "plan.json")
+            for name in ("results.json", "diff-review.json"):
+                copy(current_reports / name, current_folder / name)
+            for case in current_protocol["cases"]:
+                sample = regression_checkout / case["apk"]
+                copy(sample, current_folder / "自有输入样本" / sample.name)
+            for (case, mode, repeat), row in zip(trial_schedule(current_protocol), current["rows"]):
+                add_case(raw_results, current_folder, case, mode, repeat, distribute=row["state"] == "passed")
         # Only synthetic fixture evidence enters this package. Remove local workstation roots in text.
         common_git = Path(subprocess.check_output(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"],
                                                   cwd=ROOT, encoding="utf-8").strip())
         roots = (results, *(batch[0] for batch in frozen_batches.values()), ROOT, common_git.parent, Path.home())
+        if current:
+            roots += (regression_checkout,)
         private_roots = sorted({form for path in roots for form in (str(path), path.as_posix())},
                                key=len, reverse=True)
         for path in kit.rglob("*"):
@@ -409,8 +457,17 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                           "regression_implementation": regression_metadata,
                           "release_primary_regression": primary["counts"] if primary else None,
                           "primary_regression_version": primary_version,
-                          "pending": (["当前版本全组回归与差异审查"] if regression is None else []) +
+                          "pending": (["当前版本全组回归与差异审查"] if current is None and
+                                      (regression_metadata or {}).get("app_version") != APP_VERSION else []) +
                                      ["非开发人员试用记录", "负责人提交前核对赛事平台要求"]}
+        if current:
+            package_status["release_regression"] = {
+                key: current[key] for key in ("app_version", "implementation_commit", "source_build_run",
+                                             "evaluation_role", "freeze_commit", "protocol_sha256",
+                                             "planned_trials", "terminal_trials", "joint_gate", "counts")
+            }
+            if not current["joint_gate"]:
+                package_status["pending"].append("当前版本发布回归联合门槛未达成")
         counts = summary["counts"]
         package_status["original_frozen_gate"] = (
             counts["agent_positives"] >= 15 and counts["primary"] == 3 and
@@ -476,12 +533,14 @@ def main():
     parser.add_argument("--primary-summary", type=Path)
     parser.add_argument("--p1b-checkout", type=Path, help="Frozen checkout with completed P1B evidence")
     parser.add_argument("--p1c-checkout", type=Path, help="Frozen checkout with completed P1C evidence")
+    parser.add_argument("--release-regression", type=Path, nargs=3, metavar=("CHECKOUT", "RESULTS", "PLAN"),
+                        help="Current version checkout, raw trial directory and run plan")
     parser.add_argument("--materials-dir", type=Path, default=ROOT / "交付", help="方案 PDF、演示视频和捕获记录的目录")
     parser.add_argument("--output", type=Path, default=ROOT / "交付/重邮GGBond-F01-工程复核包.zip")
     args = parser.parse_args()
     build(args.results, args.release_dir, args.output, args.capture_dir,
           args.regression_results, args.regression_summary, args.primary_results, args.primary_summary, args.materials_dir,
-          args.p1b_checkout, args.p1c_checkout)
+          args.p1b_checkout, args.p1c_checkout, args.release_regression)
 
 
 if __name__ == "__main__":

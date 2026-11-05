@@ -38,10 +38,15 @@ jobs:
       - name: Resolve and verify release version
         id: release
         shell: pwsh
+        env:
+          PUBLISH: ${{ inputs.publish }}
         run: |
           $version = if ('${{ github.ref_type }}' -eq 'tag') { '${{ github.ref_name }}'.TrimStart('v') } else { '${{ inputs.version }}' }
           $appVersion = python -c "from app_version import APP_VERSION; print(APP_VERSION)"
           if ($version -ne $appVersion) { throw "Tag/dispatch version $version does not match app_version.py $appVersion" }
+          if ([version]$version -ge [version]'0.6.17' -and ($env:GITHUB_REF_TYPE -eq 'tag' -or $env:PUBLISH -eq 'true')) {
+            throw 'Publish from a verified signed build after independent acceptance'
+          }
           "version=$version" >> $env:GITHUB_OUTPUT
       - name: Install dependencies
         run: python -m pip install --upgrade pip; python -m pip install -r requirements-dev.txt
@@ -212,6 +217,9 @@ jobs:
           }
           $paths = @($files.Keys | ForEach-Object { Join-Path release $_ })
           $notes = "已验证签名资产原样发布。Agent 支持原包复现、按设备证据声明兼容库和行为预检。通过正式独立验收后才标为已验收。"
+          if ([version]$env:VERSION -ge [version]'0.6.17') {
+            $notes += "`n`n独立验收支持替换文本框已有内容，并回读同一个字段确认结果。"
+          }
           gh release create $tag @paths --repo $repo --draft --title "Lazarus Agent $tag" --notes $notes --target $build.headSha
           if ($LASTEXITCODE) { throw 'Draft release creation failed' }
           $published = gh release view $tag --repo $repo --json isDraft,targetCommitish,assets | ConvertFrom-Json
