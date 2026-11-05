@@ -1,0 +1,47 @@
+{
+  "scope": "unmodified-holdout-input-feasibility",
+  "original_sha256": "ffce5821e6eeb1c0b9faaa5d0c79fadaa17dcdcc1a77d5b3062d4d947189a85b",
+  "api": 36,
+  "device_abis": [
+    "x86_64"
+  ],
+  "model_calls": 0,
+  "candidate_runs": 0,
+  "raw_proof_sha256": "62343b13941a4fe56ec76b497f630295743ffa87f835e8f2263f13cde7e3aad6",
+  "steps": [
+    {
+      "action": "expect",
+      "value": "Units: Celsius",
+      "status": "passed"
+    },
+    {
+      "action": "tap",
+      "value": "Temperature input",
+      "status": "passed"
+    },
+    {
+      "action": "input",
+      "value": "14",
+      "status": "passed"
+    },
+    {
+      "action": "tap",
+      "value": "Calculate",
+      "status": "passed"
+    },
+    {
+      "action": "expect",
+      "value": "Result: 14 °C",
+      "status": "passed"
+    },
+    {
+      "action": "cold_start",
+      "status": "passed"
+    },
+    {
+      "action": "expect",
+      "value": "No result",
+      "status": "passed"
+    }
+  ]
+}
