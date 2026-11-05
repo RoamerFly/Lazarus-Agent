@@ -6,7 +6,7 @@ on:
       version:
         description: Published Windows release version
         required: true
-        default: '0.6.10'
+        default: '0.6.11'
       unicode_paths:
         description: Test storage and TEMP paths containing Chinese and spaces
         type: boolean
