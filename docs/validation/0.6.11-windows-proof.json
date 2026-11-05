@@ -1,0 +1,857 @@
+{
+  "schema": 1,
+  "app_version": "0.6.11",
+  "workflow": "https://github.com/RoamerFly/Lazarus-Agent/actions/runs/42051128391",
+  "release_source_commit": "38bc482a44306ee8af992ee8deff0ed0022ab44b",
+  "workflow_source_commit": "452655a7276e625e4c4af8df4d226c3313faba88",
+  "scope": "Official Windows installer, first preparation and replay with per-executable Internet outbound rules",
+  "summary": {
+    "verification_exit": 0,
+    "replay_exit": 0,
+    "unicode_paths": "true",
+    "prepare_attempts": 1,
+    "duration_seconds": 70.8314816,
+    "check": "candidate-replay",
+    "storage": "D:\\a\\_temp\\lazarus-first-runtime-中文 验证",
+    "temp": "D:\\a\\_temp\\中文临时 目录",
+    "bytes": 6849448598.0,
+    "platform": "GitHub-hosted fresh Windows runner"
+  },
+  "offline": {
+    "app": "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Lazarus Agent\\Lazarus-Agent.exe",
+    "check": "candidate-replay",
+    "programs": [
+      "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Lazarus Agent\\Lazarus-Agent.exe",
+      "D:\\a\\_temp\\lazarus-first-runtime-中文 验证\\runtimes\\android-lab\\java\\bin\\java.exe",
+      "D:\\a\\_temp\\lazarus-first-runtime-中文 验证\\runtimes\\android-lab\\lab-sdk\\platform-tools\\adb.exe",
+      "D:\\a\\_temp\\lazarus-first-runtime-中文 验证\\runtimes\\android-lab\\lab-sdk\\emulator\\emulator.exe"
+    ],
+    "outbound": "Internet blocked per executable, loopback retained"
+  },
+  "before": {
+    "terms_accepted": false,
+    "targets": {
+      "34": {
+        "api": 34,
+        "runtime": "D:\\a\\_temp\\lazarus-first-runtime-中文 验证\\runtimes\\android-lab",
+        "ready": false,
+        "components": {
+          "platform-tools": false,
+          "emulator": false,
+          "build-tools": false,
+          "system-image": false,
+          "java": false
+        },
+        "missing": [
+          "platform-tools",
+          "emulator",
+          "build-tools",
+          "system-image",
+          "java"
+        ],
+        "payloadSize": 0,
+        "componentSizes": {
+          "platform-tools": 0,
+          "emulator": 0,
+          "build-tools": 0,
+          "system-image": 0,
+          "java": 0
+        },
+        "networkRequired": true
+      },
+      "35": {
+        "api": 35,
+        "runtime": "D:\\a\\_temp\\lazarus-first-runtime-中文 验证\\runtimes\\android-lab",
+        "ready": false,
+        "components": {
+          "platform-tools": false,
+          "emulator": false,
+          "build-tools": false,
+          "system-image": false,
+          "java": false
+        },
+        "missing": [
+          "platform-tools",
+          "emulator",
+          "build-tools",
+          "system-image",
+          "java"
+        ],
+        "payloadSize": 0,
+        "componentSizes": {
+          "platform-tools": 0,
+          "emulator": 0,
+          "build-tools": 0,
+          "system-image": 0,
+          "java": 0
+        },
+        "networkRequired": true
+      },
+      "36": {
+        "api": 36,
+        "runtime": "D:\\a\\_temp\\lazarus-first-runtime-中文 验证\\runtimes\\android-lab",
+        "ready": false,
+        "components": {
+          "platform-tools": false,
+          "emulator": false,
+          "build-tools": false,
+          "system-image": false,
+          "java": false
+        },
+        "missing": [
+          "platform-tools",
+          "emulator",
+          "build-tools",
+          "system-image",
+          "java"
+        ],
+        "payloadSize": 0,
+        "componentSizes": {
+          "platform-tools": 0,
+          "emulator": 0,
+          "build-tools": 0,
+          "system-image": 0,
+          "java": 0
+        },
+        "networkRequired": true
+      }
+    },
+    "active": null
+  },
+  "reuse": {
+    "started": false,
+    "ready": true,
+    "message": "所选运行环境已完整可用，不会联网下载"
+  },
+  "acceleration": "??\\runtimes\\android-lab\\lab-sdk\\emulator\\emulator-check.exe:\n100\nUnknown argument\n??\\runtimes\\android-lab\\lab-sdk\\emulator\\emulator-check.exe\naccel:\n0\nWHPX(10.0.26100) is installed and usable.\naccel\n",
+  "acceptance": {
+    "schema": 1,
+    "targets": [
+      36
+    ],
+    "steps": [
+      {
+        "action": "expect",
+        "value": "Active route: North"
+      },
+      {
+        "action": "tap",
+        "value": "Open south route"
+      },
+      {
+        "action": "expect",
+        "value": "Inspect the pump seal"
+      },
+      {
+        "action": "cold_start"
+      },
+      {
+        "action": "expect",
+        "value": "Active route: South"
+      },
+      {
+        "action": "expect",
+        "value": "Inspect the pump seal"
+      },
+      {
+        "action": "tap",
+        "value": "Open north route"
+      },
+      {
+        "action": "cold_start"
+      },
+      {
+        "action": "expect",
+        "value": "Active route: North"
+      },
+      {
+        "action": "expect",
+        "value": "Check the valve position"
+      }
+    ],
+    "input_sha256": "08ed16b9f6a149bd8063bae99dd72aad200dafea7d3a0504af004187bde20deb",
+    "candidate_sha256": "3cb6ce313e96d3bc997b4431cb891f293398f3f875dea8d8dce7336214a87261",
+    "rows": [
+      {
+        "api": 36,
+        "status": "behavior-verified",
+        "baseline": {
+          "sha256": "08ed16b9f6a149bd8063bae99dd72aad200dafea7d3a0504af004187bde20deb",
+          "build": "hash-matched",
+          "install": "failed",
+          "launch": "not-run",
+          "function": "not-run",
+          "steps": [],
+          "device": {
+            "api": 36,
+            "environment": "private-workbench-device",
+            "install": {
+              "exit": 1,
+              "output": "Performing Streamed Install\r\nadb.exe: failed to install field-route-legacy.apk: Failure [INSTALL_FAILED_DEPRECATED_SDK_VERSION: App package must target at least SDK version 24, but found 22]"
+            },
+            "launch": null,
+            "installed_sha256": null,
+            "abis": [
+              "x86_64"
+            ],
+            "ui": null,
+            "verification": "device-check-failed",
+            "steps": []
+          }
+        },
+        "candidate": {
+          "sha256": "3cb6ce313e96d3bc997b4431cb891f293398f3f875dea8d8dce7336214a87261",
+          "build": "hash-matched",
+          "install": "passed",
+          "launch": "passed",
+          "function": "passed",
+          "steps": [
+            {
+              "action": "expect",
+              "value": "Active route: North",
+              "status": "passed",
+              "matches": [
+                {
+                  "text": "Active route: North",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,212][696,241]"
+                }
+              ],
+              "match_count": 1,
+              "observed": [
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/content",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "Field route sheet",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,24][696,68]"
+                },
+                {
+                  "text": "Open north route",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,68][696,140]"
+                },
+                {
+                  "text": "Open south route",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,140][696,212]"
+                },
+                {
+                  "text": "Active route: North",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,212][696,241]"
+                },
+                {
+                  "text": "Check the valve position",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,241][696,270]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/navigationBarBackground",
+                  "bounds": "[0,1208][720,1280]"
+                }
+              ]
+            },
+            {
+              "action": "tap",
+              "value": "Open south route",
+              "status": "passed",
+              "matches": [
+                {
+                  "text": "Open south route",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,140][696,212]"
+                }
+              ],
+              "match_count": 1,
+              "observed": [
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/content",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "Field route sheet",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,24][696,68]"
+                },
+                {
+                  "text": "Open north route",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,68][696,140]"
+                },
+                {
+                  "text": "Open south route",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,140][696,212]"
+                },
+                {
+                  "text": "Active route: North",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,212][696,241]"
+                },
+                {
+                  "text": "Check the valve position",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,241][696,270]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/navigationBarBackground",
+                  "bounds": "[0,1208][720,1280]"
+                }
+              ]
+            },
+            {
+              "action": "expect",
+              "value": "Inspect the pump seal",
+              "status": "passed",
+              "matches": [
+                {
+                  "text": "Inspect the pump seal",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,241][696,270]"
+                }
+              ],
+              "match_count": 1,
+              "observed": [
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/content",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "Field route sheet",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,24][696,68]"
+                },
+                {
+                  "text": "Open north route",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,68][696,140]"
+                },
+                {
+                  "text": "Open south route",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,140][696,212]"
+                },
+                {
+                  "text": "Active route: South",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,212][696,241]"
+                },
+                {
+                  "text": "Inspect the pump seal",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,241][696,270]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/navigationBarBackground",
+                  "bounds": "[0,1208][720,1280]"
+                }
+              ]
+            },
+            {
+              "action": "cold_start",
+              "status": "passed"
+            },
+            {
+              "action": "expect",
+              "value": "Active route: South",
+              "status": "passed",
+              "matches": [
+                {
+                  "text": "Active route: South",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,212][696,241]"
+                }
+              ],
+              "match_count": 1,
+              "observed": [
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/content",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "Field route sheet",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,24][696,68]"
+                },
+                {
+                  "text": "Open north route",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,68][696,140]"
+                },
+                {
+                  "text": "Open south route",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,140][696,212]"
+                },
+                {
+                  "text": "Active route: South",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,212][696,241]"
+                },
+                {
+                  "text": "Inspect the pump seal",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,241][696,270]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/navigationBarBackground",
+                  "bounds": "[0,1208][720,1280]"
+                }
+              ]
+            },
+            {
+              "action": "expect",
+              "value": "Inspect the pump seal",
+              "status": "passed",
+              "matches": [
+                {
+                  "text": "Inspect the pump seal",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,241][696,270]"
+                }
+              ],
+              "match_count": 1,
+              "observed": [
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/content",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "Field route sheet",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,24][696,68]"
+                },
+                {
+                  "text": "Open north route",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,68][696,140]"
+                },
+                {
+                  "text": "Open south route",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,140][696,212]"
+                },
+                {
+                  "text": "Active route: South",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,212][696,241]"
+                },
+                {
+                  "text": "Inspect the pump seal",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,241][696,270]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/navigationBarBackground",
+                  "bounds": "[0,1208][720,1280]"
+                }
+              ]
+            },
+            {
+              "action": "tap",
+              "value": "Open north route",
+              "status": "passed",
+              "matches": [
+                {
+                  "text": "Open north route",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,68][696,140]"
+                }
+              ],
+              "match_count": 1,
+              "observed": [
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/content",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "Field route sheet",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,24][696,68]"
+                },
+                {
+                  "text": "Open north route",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,68][696,140]"
+                },
+                {
+                  "text": "Open south route",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,140][696,212]"
+                },
+                {
+                  "text": "Active route: South",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,212][696,241]"
+                },
+                {
+                  "text": "Inspect the pump seal",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,241][696,270]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/navigationBarBackground",
+                  "bounds": "[0,1208][720,1280]"
+                }
+              ]
+            },
+            {
+              "action": "cold_start",
+              "status": "passed"
+            },
+            {
+              "action": "expect",
+              "value": "Active route: North",
+              "status": "passed",
+              "matches": [
+                {
+                  "text": "Active route: North",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,212][696,241]"
+                }
+              ],
+              "match_count": 1,
+              "observed": [
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/content",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "Field route sheet",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,24][696,68]"
+                },
+                {
+                  "text": "Open north route",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,68][696,140]"
+                },
+                {
+                  "text": "Open south route",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,140][696,212]"
+                },
+                {
+                  "text": "Active route: North",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,212][696,241]"
+                },
+                {
+                  "text": "Check the valve position",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,241][696,270]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/navigationBarBackground",
+                  "bounds": "[0,1208][720,1280]"
+                }
+              ]
+            },
+            {
+              "action": "expect",
+              "value": "Check the valve position",
+              "status": "passed",
+              "matches": [
+                {
+                  "text": "Check the valve position",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,241][696,270]"
+                }
+              ],
+              "match_count": 1,
+              "observed": [
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/content",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "Field route sheet",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,24][696,68]"
+                },
+                {
+                  "text": "Open north route",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,68][696,140]"
+                },
+                {
+                  "text": "Open south route",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,140][696,212]"
+                },
+                {
+                  "text": "Active route: North",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,212][696,241]"
+                },
+                {
+                  "text": "Check the valve position",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,241][696,270]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/navigationBarBackground",
+                  "bounds": "[0,1208][720,1280]"
+                }
+              ]
+            }
+          ],
+          "device": {
+            "api": 36,
+            "environment": "private-workbench-device",
+            "install": {
+              "exit": 0,
+              "output": "Performing Streamed Install\r\nSuccess"
+            },
+            "launch": {
+              "exit": 0,
+              "output": "Starting: Intent { cmp=org.ggbond.fieldroute/.RouteActivity }\r\nStatus: ok\r\nLaunchState: COLD\r\nActivity: org.ggbond.fieldroute/.RouteActivity\r\nTotalTime: 2520\r\nWaitTime: 2546\r\nComplete",
+              "focused_package": "org.ggbond.fieldroute"
+            },
+            "installed_sha256": "3cb6ce313e96d3bc997b4431cb891f293398f3f875dea8d8dce7336214a87261",
+            "abis": [
+              "x86_64"
+            ],
+            "ui": null,
+            "verification": "install-and-launch",
+            "steps": []
+          },
+          "launch_observations": [
+            {
+              "target_nodes": 10
+            }
+          ]
+        },
+        "comparison": "baseline-install-failed"
+      }
+    ],
+    "status": "behavior-verified"
+  }
+}

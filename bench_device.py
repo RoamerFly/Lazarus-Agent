@@ -8,6 +8,7 @@ import sys
 import time
 import tempfile
 from offline_kit import discover_sdk
+from reviver import _tool_temp_root, tool_input
 from storage_paths import configure_environment
 
 ROOT = Path(__file__).resolve().parent
@@ -245,9 +246,11 @@ class Device:
             removed=invoke([ADB,"-s",self.serial,"uninstall",pkg])
             if removed.returncode or "Success" not in output(removed):
                 raise RuntimeError("测试实例中旧安装未能清理")
-        proc=invoke([ADB,"-s",self.serial,"install",apk],600 if self.serial==ARM_LAB else 120)
+        with tempfile.TemporaryDirectory(dir=_tool_temp_root(),prefix="install-") as directory:
+            target=tool_input(apk,Path(directory),"input.apk")
+            proc=invoke([ADB,"-s",self.serial,"install",target],600 if self.serial==ARM_LAB else 120)
         result={"api":self.api,"abis":shell(self.serial,"getprop","ro.product.cpu.abilist").split(","),
-                "install":{"exit":proc.returncode,"output":output(proc).replace(str(apk),apk.name)}}
+                "install":{"exit":proc.returncode,"output":output(proc).replace(str(target),apk.name)}}
         if not proc.returncode and launcher:
             proc=invoke([ADB,"-s",self.serial,"shell","am","start","-W","-n",pkg+"/"+launcher])
             result["launch"]={"exit":proc.returncode,"output":output(proc)}

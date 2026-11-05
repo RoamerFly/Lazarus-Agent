@@ -90,21 +90,35 @@ def test_key(env):
     if not key.exists():
         java_home = discover_java_home()
         keytool = java_home / "bin" / "keytool.exe" if java_home else "keytool"
-        run([keytool, "-genkeypair", "-storetype", "PKCS12", "-keystore", key,
+        run([keytool, "-genkeypair", "-storetype", "PKCS12", "-keystore", key.name,
              "-storepass:env", "REVIVER_KEYPASS", "-alias", "reviver", "-keyalg", "RSA",
-             "-keysize", "3072", "-validity", "3650", "-dname", "CN=Legacy APK Reviver Local Test"], env)
+             "-keysize", "3072", "-validity", "3650", "-dname", "CN=Legacy APK Reviver Local Test"], env, home)
     return key
 
 
 def _tool_temp_root() -> Path:
     """Return a Windows tool-safe staging path (aapt/zipalign reject Unicode paths)."""
-    candidates = [os.environ.get("REVIVER_TOOL_TEMP", ""), os.environ.get("TEMP", ""), r"C:\Temp"]
+    candidates = [os.environ.get("REVIVER_TOOL_TEMP", ""), tempfile.gettempdir()]
+    if os.name == "nt":
+        candidates.append(r"C:\Temp")
     for candidate in candidates:
         if candidate and candidate.isascii():
-            root = Path(candidate) / "Lazarus-Agent-work"
+            root = Path(candidate).absolute() / "Lazarus-Agent-work"
+            if not str(root).isascii():
+                continue
             root.mkdir(parents=True, exist_ok=True)
             return root
     raise RuntimeError("Android build tools require an ASCII TEMP path; set REVIVER_TOOL_TEMP to an ASCII directory")
+
+
+def tool_input(source: Path, work: Path, name: str) -> Path:
+    """Stage an input when a Windows tool may misread its command-line path."""
+    source = source.absolute()
+    if os.name != "nt" or str(source).isascii():
+        return source
+    staged = work / name
+    shutil.copyfile(source, staged)
+    return staged
 
 
 def repair(source, output, api, tools, rule="installation-floor", remove_abis=(), modernize_crt=False,
@@ -243,8 +257,8 @@ def repair(source, output, api, tools, rule="installation-floor", remove_abis=()
         key = test_key(env)
         java_home = discover_java_home()
         java = java_home / "bin" / "java.exe" if java_home else "java"
-        signer = [java,"-jar",tools/"lib/apksigner.jar"]
-        run(signer+["sign","--ks", key, "--ks-pass","env:REVIVER_KEYPASS","--out",signed,aligned],env)
+        signer = [java,"-jar",tool_input(tools/"lib/apksigner.jar",work,"apksigner.jar")]
+        run(signer+["sign","--ks",key.name,"--ks-pass","env:REVIVER_KEYPASS","--out",signed,aligned],env,key.parent)
         run(signer+["verify","--min-sdk-version",str(api),"--verbose", signed],env)
         with signed.open("rb") as f:
             digest = hashlib.file_digest(f,"sha256").hexdigest()

@@ -8,7 +8,7 @@ on:
       version:
         description: SemVer without v (must equal app_version.py)
         required: true
-        default: '0.6.11'
+        default: '0.6.12'
       publish:
         description: Create/update GitHub Release
         required: true
@@ -94,6 +94,9 @@ jobs:
           }
           if ($tag -eq 'v0.6.11') {
             $notes = "导入与导出验签直接使用工作台已准备的 Java。系统 PATH 没有 Java 时，也可在完成环境准备后导入和验证 APK。" + [Environment]::NewLine + [Environment]::NewLine + $notes
+          }
+          if ($tag -eq 'v0.6.12') {
+            $notes = "修复英文 Windows 上中文路径导致的 APK 验签、回编和安装参数错误。需要时在工作区暂存工具输入，原包与现有签名密钥保持原位置。" + [Environment]::NewLine + [Environment]::NewLine + $notes
           }
           if ($tag -eq 'v0.6.5') {
             $notes = "修复对话新增页面方向改造。启用模型后，可用一句话指定横屏、竖屏或跟随系统，模型会读取页面清单并调用本地工具生成签名候选。" + [Environment]::NewLine + [Environment]::NewLine + $notes

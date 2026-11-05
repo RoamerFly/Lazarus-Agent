@@ -22,7 +22,7 @@ from xml.etree import ElementTree as ET
 from zipfile import BadZipFile, ZipFile
 
 from offline_kit import discover_java_home, java_environment
-from reviver import _tool_temp_root, run, test_key
+from reviver import _tool_temp_root, run, test_key, tool_input
 from storage_paths import resolve_storage_paths
 
 
@@ -236,6 +236,7 @@ def decoded_apk(source: Path):
     java = _java()
     with tempfile.TemporaryDirectory(dir=_tool_temp_root(), prefix="inspect-") as directory:
         work = Path(directory)
+        jar = tool_input(jar, work, "apktool.jar")
         original, decoded, framework = work / "source.apk", work / "decoded", work / "framework"
         _copy_to_ascii(source, original)
         framework.mkdir()
@@ -305,6 +306,8 @@ def build_modified(
     # Apktool and Android command tools receive only ASCII temporary names.
     with tempfile.TemporaryDirectory(dir=_tool_temp_root(), prefix="edit-") as directory:
         work = Path(directory)
+        jar = tool_input(jar, work, "apktool.jar")
+        signer = tool_input(signer, work, "apksigner.jar")
         original = work / "source.apk"
         decoded, framework = work / "decoded", work / "framework"
         unsigned, aligned, signed = work / "unsigned.apk", work / "aligned.apk", work / "signed.apk"
@@ -327,8 +330,8 @@ def build_modified(
             # Do not force the selected verification target into signing.  The
             # original manifest's minSdk lets apksigner retain schemes required
             # by older devices; verification below remains target-specific.
-            run([java, "-jar", signer, "sign", "--ks", key,
-                 "--ks-pass", "env:REVIVER_KEYPASS", "--out", signed, aligned], env, work)
+            run([java, "-jar", signer, "sign", "--ks", key.name,
+                 "--ks-pass", "env:REVIVER_KEYPASS", "--out", signed, aligned], env, key.parent)
             run([java, "-jar", signer, "verify", "--min-sdk-version", str(api), "--verbose", signed], env, work)
         except ApkEditBuildError:
             raise

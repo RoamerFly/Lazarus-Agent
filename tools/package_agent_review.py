@@ -246,6 +246,8 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                      "0.6.10-cold-start-observation.json", "0.6.10-local-rule-windows.md",
                      "0.6.10-local-rule-windows.json", "0.6.10-primary-regression.md",
                      "0.6.10-primary-regression.json", "0.6.10-first-import-no-path.md",
+                     "0.6.11-live-demo.md", "0.6.11-windows-proof.json", "0.6.11-independent-windows.md",
+                     "0.6.11-installer-check.json", "0.6.11-installer-check.md",
                      f"{APP_VERSION}-live-demo.md", f"{APP_VERSION}-windows-proof.json",
                      f"{APP_VERSION}-independent-windows.md", f"{APP_VERSION}-installer-check.json",
                      f"{APP_VERSION}-installer-check.md", f"{APP_VERSION}-local-rule-windows.json",

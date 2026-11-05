@@ -9,12 +9,12 @@ import tempfile
 from zipfile import ZipFile
 
 from native_elf import elf_uses_textrel, library_member
-from reviver import INSTALL_FLOOR, run
+from reviver import INSTALL_FLOOR, _tool_temp_root, run
 
 
 def inspect_package(apk, tools):
     # Some Windows SDK binaries decode non-ASCII arguments using the wrong code page.
-    with tempfile.TemporaryDirectory() as temp:
+    with tempfile.TemporaryDirectory(dir=_tool_temp_root(),prefix="badging-") as temp:
         shutil.copyfile(apk,Path(temp)/"input.apk")
         summary = run([(tools/"aapt.exe").resolve(),"dump","badging","input.apk"],cwd=temp)
     def field(pattern, default=None):
@@ -49,7 +49,7 @@ def inspect_package(apk, tools):
 
 def manifest_surface(apk, tools):
     """Record explicit permission/component declarations from the compiled manifest."""
-    with tempfile.TemporaryDirectory() as temp:
+    with tempfile.TemporaryDirectory(dir=_tool_temp_root(),prefix="manifest-") as temp:
         shutil.copyfile(apk, Path(temp) / "input.apk")
         text = run([(tools / "aapt.exe").resolve(), "dump", "xmltree", "input.apk", "AndroidManifest.xml"], cwd=temp)
     permissions, components = [], []

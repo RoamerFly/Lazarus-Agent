@@ -8,6 +8,7 @@ import re
 import secrets
 import shutil
 import subprocess
+import tempfile
 import threading
 import time
 import uuid
@@ -24,7 +25,7 @@ from function_probe import (MAX_LIBRARY_JAR_BYTES, discover_shared_library, extr
                             probe, resolve_platform_library)
 from model_settings import public_config
 from offline_kit import discover_java_home
-from reviver import INSTALL_FLOOR, repair, run
+from reviver import INSTALL_FLOOR, _tool_temp_root, repair, run, tool_input
 from tools.note_smoke import exercise
 from repair_history import add_message, archive_version, record_feedback
 from compatibility_matrix import finish_matrix, new_matrix, normalize_targets, set_row
@@ -134,7 +135,11 @@ def signing_fingerprints(apk, api=None):
     options=[] if api is None else ["--min-sdk-version",str(api),"--max-sdk-version",str(api)]
     java_home=discover_java_home()
     java=java_home/"bin"/"java.exe" if java_home else "java"
-    details=run([java,"-jar",TOOLS/"lib/apksigner.jar","verify",*options,"--print-certs",apk.name],cwd=apk.parent)
+    with tempfile.TemporaryDirectory(dir=_tool_temp_root(),prefix="verify-") as directory:
+        work=Path(directory)
+        signer=tool_input(TOOLS/"lib/apksigner.jar",work,"apksigner.jar")
+        target=tool_input(apk,work,"input.apk")
+        details=run([java,"-jar",signer,"verify",*options,"--print-certs",target],cwd=work)
     certs=re.findall(r"(?m)^Signer #\d+ certificate SHA-256 digest: ([0-9a-fA-F]{64})\s*$",details)
     if not certs:
         raise ValueError("未验证到 APK 签名证书")
