@@ -1,0 +1,164 @@
+{
+  "mode": "local-development-replay",
+  "version": "0.6.22",
+  "source_commit": "f24d5a583586785d388ae5133e4141f538456686",
+  "exe_sha256": "1d9be043acd87b01df62067f0b6c65e0e6ccb239f29d79b8de26626ef8641cef",
+  "protocol_sha256": "aa7f164a5247d363a792d59e47c5fee88400e88da94fcf2c37100d11303368f9",
+  "terminal_trials": 42,
+  "counts": {
+    "agent_positives": 18,
+    "primary": 3,
+    "agent_negative_rejected": 6,
+    "agent_false_acceptances": 0,
+    "unobserved": 0,
+    "majority_agent_cases": 6,
+    "roundtrip_positive_cases": 0,
+    "rules_positive_cases": 2,
+    "one-build_positive_cases": 5
+  },
+  "distributable_agent_trials": [
+    "P01-agent-1",
+    "P01-agent-2",
+    "P01-agent-3",
+    "P02-agent-1",
+    "P02-agent-2",
+    "P02-agent-3",
+    "P03-agent-1",
+    "P03-agent-2",
+    "P03-agent-3",
+    "P04-agent-1",
+    "P04-agent-2",
+    "P04-agent-3",
+    "P05-agent-1",
+    "P05-agent-2",
+    "P05-agent-3"
+  ],
+  "counterexamples": [
+    "N03-agent-1"
+  ],
+  "bundle_sha256": "3572f1011d2f46953a627acaeabe269d14bddad32e7759ecf5680735b4bb0e5f",
+  "bundle_bytes": 272896,
+  "files": 57,
+  "check_only": [
+    {
+      "trial": "P01-agent-1",
+      "steps": 10,
+      "status": "inputs-verified",
+      "candidate_sha256": "d390bc1846466e31c194dff0e4bfc30872e94308c8a5711fbbc1d07a42b5c423",
+      "receipt_sha256": "1f1cdc65796cd40e00defc53e409c0b5c323c50bd2e6edf46b475c8979d5eb23"
+    },
+    {
+      "trial": "P01-agent-2",
+      "steps": 10,
+      "status": "inputs-verified",
+      "candidate_sha256": "c685a959364b520a5ac9f25bf6954efedde313ad30912dfdd3a66b9bde48882b",
+      "receipt_sha256": "dfcf40efc6ebc17af50c2a4c5f33c7c40d4163a4b0ee005f7f4f1ab76aa14203"
+    },
+    {
+      "trial": "P01-agent-3",
+      "steps": 10,
+      "status": "inputs-verified",
+      "candidate_sha256": "1920db25876fffef856f2edd375d9fa34828f7cdbdaf539b127165d802f67380",
+      "receipt_sha256": "1ee41fa577ed461ce4210e3399922de07c9d483c299e78349f7e4684b4c3ac70"
+    },
+    {
+      "trial": "P02-agent-1",
+      "steps": 6,
+      "status": "inputs-verified",
+      "candidate_sha256": "8d9dbeab42d533337f4cda130a0bc9a75a9a4923ac75ddb212e97341b4228009",
+      "receipt_sha256": "056a7a7715e63dee3c0f6fb3ebbd678fdeb2b586326ea9c88d35ea0ac64c3548"
+    },
+    {
+      "trial": "P02-agent-2",
+      "steps": 6,
+      "status": "inputs-verified",
+      "candidate_sha256": "7e17106b5c16b46b296466ff8b9fbb596f6a8330ceec6cd0b8ef58493faee944",
+      "receipt_sha256": "24dce7d245129aa0ff01fc861933457df3f82044d8dfe6bf489bf19d4ecf0a8d"
+    },
+    {
+      "trial": "P02-agent-3",
+      "steps": 6,
+      "status": "inputs-verified",
+      "candidate_sha256": "34017d30718db2d841ce7f9360e0056ef5880de6352808d592f08b26adb17bd5",
+      "receipt_sha256": "3e1a7e0f5f5934f5242248e91eb43850a330ac6faef245217c598742b6e64439"
+    },
+    {
+      "trial": "P03-agent-1",
+      "steps": 4,
+      "status": "inputs-verified",
+      "candidate_sha256": "ca11af9bc8a04d8ea8d08eb026bc503ed7e71e59b6a6a83ec51c092dcfab0166",
+      "receipt_sha256": "5d5571c740401b6f8e224e0c0b5e707cf98b4d5f404cced0751c3490feb598d0"
+    },
+    {
+      "trial": "P03-agent-2",
+      "steps": 4,
+      "status": "inputs-verified",
+      "candidate_sha256": "2b061615be1ae8f9ae78248b4323661d21fdb0410ae6a4c169f7b52f637bae13",
+      "receipt_sha256": "0f226a61d8a9f427688d099dadc18a9cce2d501c36b8393c9f209648c645eb43"
+    },
+    {
+      "trial": "P03-agent-3",
+      "steps": 4,
+      "status": "inputs-verified",
+      "candidate_sha256": "3bddcfa682ff6b25298f27271e6855f79fc9b68333bbf81c908fee7b8a15e38a",
+      "receipt_sha256": "c3115495bd49fc170fa6bd754fddc6c07a04e33ba63c49cabb09f42b709eb84e"
+    },
+    {
+      "trial": "P04-agent-1",
+      "steps": 16,
+      "status": "inputs-verified",
+      "candidate_sha256": "7de253ab3823b9fab28fdc16e752a24978549fe2323dcc7c89a30b932467b48c",
+      "receipt_sha256": "b781c88caf93d18e1c62d8111c10afe07d6a9bae666c493f6531211f199598dd"
+    },
+    {
+      "trial": "P04-agent-2",
+      "steps": 16,
+      "status": "inputs-verified",
+      "candidate_sha256": "7666ac4760e24f1771e9465314f42f9b55c9f238166e75e322371e89b3dfa039",
+      "receipt_sha256": "ef151b59f78ada3daab0fedd1e5a543443c7d52ffb46324db67426cc6c0b931c"
+    },
+    {
+      "trial": "P04-agent-3",
+      "steps": 16,
+      "status": "inputs-verified",
+      "candidate_sha256": "7cdcc4a9a3403217df60c746bea06049d802bf3b1c5f58667c70d49be187cd92",
+      "receipt_sha256": "66d9004f2aa80e3e2eff93e7de4cc55fd2cff15c560baabd1430100be93fd48a"
+    },
+    {
+      "trial": "P05-agent-1",
+      "steps": 8,
+      "status": "inputs-verified",
+      "candidate_sha256": "155bfe11b0b90c4ab95acba8b53e2e6772e4fb0dc04e707d5a6a55edb68e8d60",
+      "receipt_sha256": "07653b6baac16613d2cde3584e86990cb592a8d3aaddc463cff52cae6cc70417"
+    },
+    {
+      "trial": "P05-agent-2",
+      "steps": 8,
+      "status": "inputs-verified",
+      "candidate_sha256": "ddd03bbd463504158c42c7b67687b748b9273c69f9e8a41022175d853e5892e1",
+      "receipt_sha256": "0772a248f595f42a684da3167b4121d3d0054343adaca1b499a6d59128798816"
+    },
+    {
+      "trial": "P05-agent-3",
+      "steps": 8,
+      "status": "inputs-verified",
+      "candidate_sha256": "111ff196b0c6a8d2df279c04a742c95f5699663878eb802fabc3c52b98df6b07",
+      "receipt_sha256": "9809169db9cb1eadf6abc82751b795ca993bb506e53577279564a04f0d37752d"
+    },
+    {
+      "trial": "N03-agent-1",
+      "steps": 2,
+      "status": "inputs-verified",
+      "candidate_sha256": "d6145b0df950be6dee0baab7ac9847d554d5b58d137b7b92a700b331ed172d8e",
+      "receipt_sha256": "fb24d0dd052a72845ece766a0e82f6cd4c6b9676117240cf6714a45312f769bd"
+    }
+  ],
+  "wrong_exe_exit": 1,
+  "official_branch_check": {
+    "version": "0.6.18",
+    "exe_sha256": "ec9143fb4066c1360df4b95d25cb95e4bee6069fb2f53032cbf9033e579008ce",
+    "exit_code": 0,
+    "receipt_sha256": "2f4868ae094181678ca66a8adbc25e488f01b58dcebb4ee80b08648d00e79ef6"
+  },
+  "verification_scope": "existing Windows PowerShell 5.1; clean app storage; no device"
+}

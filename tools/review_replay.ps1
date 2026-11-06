@@ -2,12 +2,15 @@ param(
     [string]$Sample = '工作台演示',
     [string]$App = (Join-Path $env:LOCALAPPDATA 'Programs\Lazarus Agent\Lazarus-Agent.exe'),
     [switch]$CheckOnly,
-    [switch]$Counterexample
+    [switch]$Counterexample,
+    [switch]$LocalBuild
 )
 $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSHOME 'Modules/Microsoft.PowerShell.Utility/Microsoft.PowerShell.Utility.psd1') -ErrorAction Stop
 $root = [IO.Path]::GetFullPath($PSScriptRoot)
 if ($Counterexample -and !$PSBoundParameters.ContainsKey('Sample')) { $Sample = 'N03-agent-1' }
+if ($LocalBuild -and !$Counterexample -and !$PSBoundParameters.ContainsKey('Sample')) { $Sample = 'P01-agent-1' }
+if ($LocalBuild -and !$PSBoundParameters.ContainsKey('App')) { throw '请用 -App 指定本地候选 EXE' }
 $category = if ($Counterexample) { '反例样本' } else { '可分发样本' }
 $samples = Join-Path $root $category
 $folder = [IO.Path]::GetFullPath((Join-Path $samples $Sample))
@@ -25,8 +28,17 @@ if ((Get-FileHash -LiteralPath $base).Hash.ToLowerInvariant() -ne $proof.input_s
 if (!(Test-Path -LiteralPath $App -PathType Leaf)) {
     throw '请先按复核说明校验并安装程序，或用 -App 指定同版程序路径'
 }
-$manifest = Get-Content -LiteralPath (Join-Path $root 'Windows桌面版/latest.json') -Raw -Encoding utf8 | ConvertFrom-Json
-if ((Get-FileHash -LiteralPath $App).Hash.ToLowerInvariant() -ne $manifest.assets.'windows-x64-portable-exe'.sha256) {
+if ($LocalBuild) {
+    $build = Get-Content -LiteralPath (Join-Path $root '本地构建回执.json') -Raw -Encoding utf8 | ConvertFrom-Json
+    if ($build.self_test_exit -ne 0 -or $build.exe_sha256 -cnotmatch '^[a-f0-9]{64}$') {
+        throw '本地候选构建回执无效'
+    }
+    $expectedExe = $build.exe_sha256
+} else {
+    $manifest = Get-Content -LiteralPath (Join-Path $root 'Windows桌面版/latest.json') -Raw -Encoding utf8 | ConvertFrom-Json
+    $expectedExe = $manifest.assets.'windows-x64-portable-exe'.sha256
+}
+if ((Get-FileHash -LiteralPath $App).Hash.ToLowerInvariant() -cne $expectedExe) {
     throw '程序与包内版本不符，请使用本包固定版本的安装器或便携版'
 }
 $output = Join-Path $root ('复测结果/' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '-' + [Guid]::NewGuid().ToString('N').Substring(0, 8))
