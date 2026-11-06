@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "app_version": "0.6.28",
+  "source_commit": "cbd58ed08345f5c7f61d127d8ba989f8eca4d5ab",
+  "exe_sha256": "058d59a6a90c266129765191a449e1eb02ccdf1ee1c5ea348ae9a349b84e3b08",
+  "blank_virtual_disk": true,
+  "boot_recovery": {
+    "prior_vcpus": 2,
+    "previous_failure_at_utc": [
+      "2026-11-06T19:00:39.281Z",
+      "2026-11-06T19:05:05.608Z"
+    ],
+    "stop_code": "0x0000007e",
+    "exception_code": "0xc0000094",
+    "verified_vcpus": 1,
+    "host_settings_changed": false
+  },
+  "guest": {
+    "status": "passed",
+    "baseline": {
+      "product": "Windows Server 2022 Standard",
+      "edition": "ServerStandard",
+      "build": "20348.1006",
+      "powershell": "5.1.20348.859",
+      "tool_commands": [],
+      "override_names": [],
+      "android_local_sdk": false,
+      "active_hardware_networks": 0
+    },
+    "samples": [
+      {
+        "case": "P03",
+        "status": "inputs-verified",
+        "candidate_sha256": "cb3aaa79a4be959462ed5a2a504ea511474550ddd888affc07e29d13e7fc0f84",
+        "steps": 4
+      },
+      {
+        "case": "P05",
+        "status": "inputs-verified",
+        "candidate_sha256": "6ed0b49e7dcca6db56212c5e64f8b7be9b759c83932be2068f4618f3025ac993",
+        "steps": 8
+      }
+    ],
+    "setup": {
+      "scope": "isolated install on existing Windows; no Android device",
+      "version": "0.6.28",
+      "source_commit": "cbd58ed08345f5c7f61d127d8ba989f8eca4d5ab",
+      "installer_script_sha256": "07457811c226d7f56ed231bcd583202b5ed173dfdf9134273005cc0a32aa6944",
+      "nsis_version": "v3.11",
+      "installer_sha256": "7640ba292bcfcd81fd62731e0f2ad4e1f94b0b045a2551de1d420f42b111a86f",
+      "exe_sha256": "058d59a6a90c266129765191a449e1eb02ccdf1ee1c5ea348ae9a349b84e3b08",
+      "installed_exe_sha256": "058d59a6a90c266129765191a449e1eb02ccdf1ee1c5ea348ae9a349b84e3b08",
+      "install_exit": 0,
+      "installed_self_test_exit": 0,
+      "uninstall_exit": 0,
+      "system_only_path_for_self_test": true,
+      "isolated_registration_removed": true,
+      "exported_output_preserved": true
+    },
+    "sample_zip_sha256": "d28f0c4a9fb8b4d9b5b09ad3cd049f2c15a11fb1f7d6a42bf277a40a5b5eff8f",
+    "network_model_calls": 0
+  },
+  "desktop": {
+    "status": "workbench-started",
+    "session_id": 1,
+    "window": "Lazarus Agent",
+    "native_window_handle": 655444,
+    "renderer_processes": 2,
+    "workbench_http": 200,
+    "desktop_protocol": 1,
+    "android_16_ready": false,
+    "model_enabled": false,
+    "portable_sha256": "058d59a6a90c266129765191a449e1eb02ccdf1ee1c5ea348ae9a349b84e3b08",
+    "webview2_publisher": "Valid",
+    "network_model_calls": 0
+  },
+  "android_device_tested_in_this_guest": false,
+  "source_receipt_sha256": "b130dcdab5531ea22f8de63355e14098b2f775eb6d3cb890ba11564d7ffac1bf"
+}
