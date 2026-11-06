@@ -78,7 +78,7 @@ def audit(root, *, partial=False, batch=P1B):
     return audit_records(root, batch, frozen_protocol(root, batch), partial=partial)
 
 
-def audit_records(root, batch, protocol, *, partial=False):
+def audit_records(root, batch, protocol, *, partial=False, expected_trials=42):
     results = root / batch.results
     if not partial and (results / "running.lock").exists():
         raise ValueError("请在进程结束后生成正式汇总")
@@ -88,7 +88,7 @@ def audit_records(root, batch, protocol, *, partial=False):
     trial_ids = {f"{case['id']}-{mode}-{repeat}" for case, mode, repeat in trials}
     if {path.name for path in results.iterdir() if path.is_dir()} - trial_ids:
         raise ValueError("结果目录含有固定日程之外的轮次")
-    if len(trials) != 42 or not partial and any(not (results / trial).is_dir() for trial in trial_ids):
+    if len(trials) != expected_trials or not partial and any(not (results / trial).is_dir() for trial in trial_ids):
         raise ValueError("固定日程尚未全部尝试")
 
     responses = []
@@ -150,8 +150,8 @@ def audit_records(root, batch, protocol, *, partial=False):
         "evaluation_role": protocol["evaluation_role"], "protocol_sha256": digest_file(root / batch.spec),
         "model": protocol["model"], "target_api": protocol["target"], "source_apk_sha256": source_hashes,
         "planned_trials": len(trials), "terminal_trials": sum(row["terminal"] for row in summary["rows"]),
-        "held_out_passes": held_out, "joint_gate": None if partial else all(gates.values()),
-        "gate_checks": None if partial else gates,
+        "held_out_passes": held_out, "joint_gate": None if partial or expected_trials != 42 else all(gates.values()),
+        "gate_checks": None if partial or expected_trials != 42 else gates,
         "model_responses_recorded": len(responses),
         "recorded_chat_cost_usd_range": price_bounds(responses),
         "model_fingerprints": sorted({row["fingerprint"] for row in responses if row.get("fingerprint")}),

@@ -1,0 +1,224 @@
+{
+  "scope": "Compiled APK and raw diff identity for all passing focused trials",
+  "source_commit": "9149285f01e1708ff69aa83c51fccf66b06c2258",
+  "rows": [
+    {
+      "trial": "P05-agent-1",
+      "candidate_sha256": "8eda93786b6ba7341c415328e39381096fae9cef3fcd0890b95e18742c84c16b",
+      "raw_diff_sha256": "9b59b53bec8306457ab511d549336b49e8f278db892c722974947b5970327870",
+      "target_sdk": [
+        28,
+        28
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "original/AndroidManifest.xml",
+        "smali/org/ggbond/filereader/FileReaderActivity.smali"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compiled_manifest_changes": {
+        "permissions": {
+          "added": [],
+          "removed": []
+        },
+        "components": {
+          "added": [],
+          "removed": []
+        },
+        "libraries": {
+          "added": [],
+          "removed": []
+        }
+      },
+      "compatible_library": false
+    },
+    {
+      "trial": "P05-agent-2",
+      "candidate_sha256": "47293d2618b34a6f6ad9379bb48baf47445fe0d4eeed60c7eccb3f9acfe669b2",
+      "raw_diff_sha256": "4937e38db9d252a200f3355db667424a2b6f26920cdddac4870bfada99faa03b",
+      "target_sdk": [
+        28,
+        28
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "original/AndroidManifest.xml",
+        "smali/org/ggbond/filereader/FileReaderActivity.smali"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compiled_manifest_changes": {
+        "permissions": {
+          "added": [],
+          "removed": []
+        },
+        "components": {
+          "added": [],
+          "removed": []
+        },
+        "libraries": {
+          "added": [],
+          "removed": []
+        }
+      },
+      "compatible_library": false
+    },
+    {
+      "trial": "P05-agent-3",
+      "candidate_sha256": "90b1e54227bfc94cb1d6e1332225b4821b8f98156dc1ba9beb757ce13ad307bf",
+      "raw_diff_sha256": "3eff6e8544dc8cb539ce686eccd75094f3f233f538f6b0ce688722d56a584a9e",
+      "target_sdk": [
+        28,
+        28
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "original/AndroidManifest.xml",
+        "smali/org/ggbond/filereader/FileReaderActivity.smali"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compiled_manifest_changes": {
+        "permissions": {
+          "added": [],
+          "removed": []
+        },
+        "components": {
+          "added": [],
+          "removed": []
+        },
+        "libraries": {
+          "added": [],
+          "removed": []
+        }
+      },
+      "compatible_library": false
+    },
+    {
+      "trial": "P05-rules-1",
+      "candidate_sha256": "82ca17a2602a8ad2f34736d9d05a457a1a6259ef334c67bfd46e62e2f99cf4cf",
+      "raw_diff_sha256": null,
+      "target_sdk": [
+        28,
+        28
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "original/AndroidManifest.xml",
+        "smali/org/ggbond/filereader/FileReaderActivity.smali"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compiled_manifest_changes": {
+        "permissions": {
+          "added": [],
+          "removed": []
+        },
+        "components": {
+          "added": [],
+          "removed": []
+        },
+        "libraries": {
+          "added": [],
+          "removed": []
+        }
+      },
+      "compatible_library": false
+    },
+    {
+      "trial": "P06-agent-1",
+      "candidate_sha256": "760618588da691ac2c06f849fc1ebba29d361c51767d2171a5c345302537b1fe",
+      "raw_diff_sha256": "aa1ca2a42bf00cab1636f48274f6f93d89a1a5b504842658a1235f0bee2c7f32",
+      "target_sdk": [
+        22,
+        24
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "apktool.yml",
+        "original/AndroidManifest.xml",
+        "smali/org/ggbond/archivereader/ShareActivity.smali"
+      ],
+      "manifest_declarations": {
+        "added": [],
+        "removed": []
+      },
+      "compiled_manifest_changes": {
+        "permissions": {
+          "added": [],
+          "removed": []
+        },
+        "components": {
+          "added": [],
+          "removed": []
+        },
+        "libraries": {
+          "added": [],
+          "removed": []
+        }
+      },
+      "compatible_library": false
+    },
+    {
+      "trial": "P06-agent-2",
+      "candidate_sha256": "442c1201a406e6ca76105a5a40ec500a6a220e1c0efa3775c2cbd4fad3ee0dbd",
+      "raw_diff_sha256": "12fc8ce84732034fffed123414b5ecfdc1abe4695294df95948bb3a8070a7ccf",
+      "target_sdk": [
+        22,
+        24
+      ],
+      "assets_modified": [],
+      "assets_added": [],
+      "decoded_files_changed": [
+        "AndroidManifest.xml",
+        "apktool.yml",
+        "original/AndroidManifest.xml",
+        "smali/org/ggbond/archivereader/RecordProvider.smali",
+        "smali/org/ggbond/archivereader/ShareActivity.smali"
+      ],
+      "manifest_declarations": {
+        "added": [
+          "[\"provider\", {\"{http://schemas.android.com/apk/res/android}authorities\": \"org.ggbond.archivereader.records\", \"{http://schemas.android.com/apk/res/android}exported\": \"false\", \"{http://schemas.android.com/apk/res/android}grantUriPermissions\": \"true\", \"{http://schemas.android.com/apk/res/android}name\": \".RecordProvider\"}]"
+        ],
+        "removed": []
+      },
+      "compiled_manifest_changes": {
+        "permissions": {
+          "added": [],
+          "removed": []
+        },
+        "components": {
+          "added": [
+            {
+              "type": "provider",
+              "name": ".RecordProvider",
+              "exported": "(type 0x12)0x0",
+              "authorities": "org.ggbond.archivereader.records",
+              "grantUriPermissions": "(type 0x12)0xffffffff"
+            }
+          ],
+          "removed": []
+        },
+        "libraries": {
+          "added": [],
+          "removed": []
+        }
+      },
+      "compatible_library": false
+    }
+  ]
+}

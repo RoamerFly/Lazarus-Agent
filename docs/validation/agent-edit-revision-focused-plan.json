@@ -1,0 +1,16 @@
+{
+  "source_commit": "9149285f01e1708ff69aa83c51fccf66b06c2258",
+  "freeze_commit": "a28bea979d0b9d8ae6f5074028e8c64d1547ac60",
+  "protocol_sha256": "aa7f164a5247d363a792d59e47c5fee88400e88da94fcf2c37100d11303368f9",
+  "cases": [
+    "P05",
+    "P06"
+  ],
+  "trials": 12,
+  "role": "focused development replay; source only",
+  "after": [
+    "regression0624",
+    "demo0624",
+    "record-caller0624-control"
+  ]
+}

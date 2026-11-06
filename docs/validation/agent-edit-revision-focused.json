@@ -1,0 +1,384 @@
+{
+  "schema": 1,
+  "app_version": null,
+  "freeze_commit": "a28bea979d0b9d8ae6f5074028e8c64d1547ac60",
+  "implementation_commit": "9149285f01e1708ff69aa83c51fccf66b06c2258",
+  "evaluation_role": "focused development replay; source only",
+  "protocol_sha256": "aa7f164a5247d363a792d59e47c5fee88400e88da94fcf2c37100d11303368f9",
+  "model": "deepseek-flash",
+  "target_api": 36,
+  "source_apk_sha256": {
+    "P05": "4049359b01c7c7348d7d2bc4c4efdb27a7844975f3dc147a1cef0996632de9ac",
+    "P06": "55ca244e70ab959fbb179a04c757c1974821ff790578e8811a345f31e024d8da"
+  },
+  "planned_trials": 12,
+  "terminal_trials": 12,
+  "held_out_passes": 0,
+  "joint_gate": null,
+  "gate_checks": null,
+  "model_responses_recorded": 152,
+  "recorded_chat_cost_usd_range": [
+    0.12077663,
+    0.24155327
+  ],
+  "model_fingerprints": [
+    "bc19ba97cbe016479903222bb1578db6"
+  ],
+  "counts": {
+    "agent_positives": 5,
+    "primary": 0,
+    "agent_negative_rejected": 0,
+    "agent_false_acceptances": 0,
+    "unobserved": 1,
+    "majority_agent_cases": 2,
+    "roundtrip_positive_cases": 0,
+    "rules_positive_cases": 1,
+    "one-build_positive_cases": 0
+  },
+  "rows": [
+    {
+      "case": "P05",
+      "class": "positive",
+      "mode": "roundtrip",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 104.694,
+      "build_attempts": 1,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null,
+      "trial": "P05-roundtrip-1",
+      "terminal": true,
+      "candidate_sha256": "f5a744decdb68f306f467c6bbd195ae51a778aaceae4a97eec6c9e6e95f9b615",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "failed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "6770028ba59ef8766afb95f4a9d64995862933ff1f95842532d54510a89d752a",
+      "raw_acceptance_sha256": "f5cabeee50e7da01df280038d944f71df04ac1335b86f5fcd62c4cef8be9a0fd",
+      "raw_diff_sha256": null
+    },
+    {
+      "case": "P05",
+      "class": "positive",
+      "mode": "rules",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 46.781,
+      "build_attempts": 1,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null,
+      "trial": "P05-rules-1",
+      "terminal": true,
+      "candidate_sha256": "82ca17a2602a8ad2f34736d9d05a457a1a6259ef334c67bfd46e62e2f99cf4cf",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "2682169b36b149f1b0c914f4980d9a28b06d4211425b11a95c140f7c3a53efe9",
+      "raw_acceptance_sha256": "c356fba0290c5de5cad69035dc85e04b8ebf88f258f716791ab52be7340d7005",
+      "raw_diff_sha256": null
+    },
+    {
+      "case": "P05",
+      "class": "positive",
+      "mode": "one-build",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 59.071,
+      "build_attempts": 1,
+      "model_requests_with_usage": 6,
+      "model_price_usd_range": [
+        0.0022031,
+        0.0044062
+      ],
+      "trial": "P05-one-build-1",
+      "terminal": true,
+      "candidate_sha256": "76f1124a69b75c3efa9acda734ed7b640ffee7f173dd1f6675612693aa055314",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "failed",
+        "function": "not-run"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "b0b644aaae9f8696b7f163b63446bb2114ed1744422d8ceca4701d7bba5334e5",
+      "raw_acceptance_sha256": "63908c78f21271cd980de2f39e09a7afed89dc45ea7a3e9e9aa7e02a1263a48a",
+      "raw_diff_sha256": "c175ebcd69eb56429b7b0f3042c0a2fcf63ccc1f46200699b2aae3da5d72f9d0"
+    },
+    {
+      "case": "P05",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 176.667,
+      "build_attempts": 2,
+      "model_requests_with_usage": 21,
+      "model_price_usd_range": [
+        0.00731828,
+        0.01463656
+      ],
+      "trial": "P05-agent-1",
+      "terminal": true,
+      "candidate_sha256": "8eda93786b6ba7341c415328e39381096fae9cef3fcd0890b95e18742c84c16b",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "969003e420e3e01a53f9cc799d0750f8b5ea0fad8974f19c216c4e752a8a7294",
+      "raw_acceptance_sha256": "400de2928ec3f98f57826e4051dd6e3297ffe1e499e1893f137c469157ed5f4e",
+      "raw_diff_sha256": "9b59b53bec8306457ab511d549336b49e8f278db892c722974947b5970327870"
+    },
+    {
+      "case": "P05",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 2,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 94.139,
+      "build_attempts": 1,
+      "model_requests_with_usage": 8,
+      "model_price_usd_range": [
+        0.0025128,
+        0.0050256
+      ],
+      "trial": "P05-agent-2",
+      "terminal": true,
+      "candidate_sha256": "47293d2618b34a6f6ad9379bb48baf47445fe0d4eeed60c7eccb3f9acfe669b2",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "4cf5ac3f6848157a93a870864dbdfee8930849388026fdcb7569f3fa46aa1878",
+      "raw_acceptance_sha256": "df3e1dfb83eef6518ff8a4787a8b31ca2236bb3f79c33c55b6cf3a2f8ddf8555",
+      "raw_diff_sha256": "4937e38db9d252a200f3355db667424a2b6f26920cdddac4870bfada99faa03b"
+    },
+    {
+      "case": "P05",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 3,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 100.498,
+      "build_attempts": 1,
+      "model_requests_with_usage": 11,
+      "model_price_usd_range": [
+        0.00300369,
+        0.00600738
+      ],
+      "trial": "P05-agent-3",
+      "terminal": true,
+      "candidate_sha256": "90b1e54227bfc94cb1d6e1332225b4821b8f98156dc1ba9beb757ce13ad307bf",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "7a2d83174ab018a1d10382162e73eaef9da2b1eb2804c855b28fac734c69fb44",
+      "raw_acceptance_sha256": "e4f174710971fff942ec2a309149e080e16c37380431418530d666e4a3f3856b",
+      "raw_diff_sha256": "3eff6e8544dc8cb539ce686eccd75094f3f233f538f6b0ce688722d56a584a9e"
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "roundtrip",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 3.997,
+      "build_attempts": 1,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null,
+      "trial": "P06-roundtrip-1",
+      "terminal": true,
+      "candidate_sha256": "af077b79859ee6080e58252201744c4b68f906ff098899a14590f8bb80d01896",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "failed",
+        "launch": "not-run",
+        "function": "not-run"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "42506bef1f2f65cd7d4b94985c292527848a732f405b10291449552d4b49d3eb",
+      "raw_acceptance_sha256": "c35a9840f32297e1ca082fb9f9d9eae1361887731fef47be37a87e6bbfa1eb8b",
+      "raw_diff_sha256": null
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "rules",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 0.001,
+      "build_attempts": 0,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null,
+      "trial": "P06-rules-1",
+      "terminal": true,
+      "candidate_sha256": null,
+      "candidate_status": null,
+      "abi": null,
+      "tool_error": null,
+      "raw_result_sha256": "d6efc79ed07a4f60c48906d90155841626aa401dc58685c586500f738ba7d0bc",
+      "raw_acceptance_sha256": null,
+      "raw_diff_sha256": null
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "one-build",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 83.357,
+      "build_attempts": 1,
+      "model_requests_with_usage": 13,
+      "model_price_usd_range": [
+        0.01111453,
+        0.02222906
+      ],
+      "trial": "P06-one-build-1",
+      "terminal": true,
+      "candidate_sha256": null,
+      "candidate_status": null,
+      "abi": null,
+      "tool_error": null,
+      "raw_result_sha256": "cbfd644f8634faeedef82fe9a6989a5a2d7bd23721fd0b529538fc654d34231d",
+      "raw_acceptance_sha256": null,
+      "raw_diff_sha256": "49222c8c8a54c3bebd6458db338bae7ea61b554380575c8d3bb50e5081f5092d"
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 406.05,
+      "build_attempts": 4,
+      "model_requests_with_usage": 36,
+      "model_price_usd_range": [
+        0.03086597,
+        0.06173195
+      ],
+      "trial": "P06-agent-1",
+      "terminal": true,
+      "candidate_sha256": "760618588da691ac2c06f849fc1ebba29d361c51767d2171a5c345302537b1fe",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "006dcab47de6ec221f09382d056a07b5f0080b8ef8381242321601a60a673b2c",
+      "raw_acceptance_sha256": "26a91348a42be05cd5c345227ad826781aaf2ac508f38bad1fa164e32007d3fa",
+      "raw_diff_sha256": "aa1ca2a42bf00cab1636f48274f6f93d89a1a5b504842658a1235f0bee2c7f32"
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 2,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 123.117,
+      "build_attempts": 1,
+      "model_requests_with_usage": 17,
+      "model_price_usd_range": [
+        0.00917908,
+        0.01835816
+      ],
+      "trial": "P06-agent-2",
+      "terminal": true,
+      "candidate_sha256": "442c1201a406e6ca76105a5a40ec500a6a220e1c0efa3775c2cbd4fad3ee0dbd",
+      "candidate_status": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed"
+      },
+      "abi": [
+        "x86_64"
+      ],
+      "tool_error": null,
+      "raw_result_sha256": "dde0e8bd8a8434a61386bee1ac8165d704dcc2ff8015c4b7552ad7f07ce9cf1e",
+      "raw_acceptance_sha256": "c5d0a8981ef291df5ce3ac42f4640d194ba6d0de5de35b8fccb9b8c75c32049e",
+      "raw_diff_sha256": "12fc8ce84732034fffed123414b5ecfdc1abe4695294df95948bb3a8070a7ccf"
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 3,
+      "state": "unobserved",
+      "started": true,
+      "duration_seconds": 398.299,
+      "build_attempts": 3,
+      "model_requests_with_usage": 40,
+      "model_price_usd_range": [
+        0.05457918,
+        0.10915837
+      ],
+      "trial": "P06-agent-3",
+      "terminal": true,
+      "candidate_sha256": null,
+      "candidate_status": null,
+      "abi": null,
+      "tool_error": "ModelToolError",
+      "raw_result_sha256": "ed310c0feb75b7e5a12c92f56deb7e43f43dc39deccbf4036628ff0777d9bcf6",
+      "raw_acceptance_sha256": null,
+      "raw_diff_sha256": "041c0bc3d5cb3aeaa76b333761cdc5d50acab3b54693e019a3dd8f05e5e734b8"
+    }
+  ],
+  "selected_cases": [
+    "P05",
+    "P06"
+  ],
+  "source_build_run": null
+}
