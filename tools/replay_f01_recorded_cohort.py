@@ -131,13 +131,19 @@ def plan_inputs(checkout, benchmark, build, historical_trials=None, recorded_inp
     return protocol, schedule, plan, traces
 
 
-def replay(checkout, historical_trials, output, recorded_input=RECORDED_INPUT, *, check_only=False):
+def replay(checkout, historical_trials, output, recorded_input=RECORDED_INPUT, *, check_only=False,
+           validated_build=None, expected_plan=None):
     if not output.is_relative_to(checkout / "build"):
         raise ValueError("复跑输出必须位于候选检出目录的 build 下")
-    commit = subprocess.check_output(["git", "-C", str(checkout), "rev-parse", "HEAD"], text=True).strip()
-    if subprocess.check_output(["git", "-C", str(checkout), "status", "--porcelain"]):
-        raise ValueError("需要干净的候选源码检出")
     build = read(checkout / "build/local-exe-selftest-receipt.json")
+    if validated_build is None:
+        commit = subprocess.check_output(["git", "-C", str(checkout), "rev-parse", "HEAD"], text=True).strip()
+        if subprocess.check_output(["git", "-C", str(checkout), "status", "--porcelain"]):
+            raise ValueError("需要干净的候选源码检出")
+    else:
+        commit = validated_build["source_commit"]
+        if build != validated_build:
+            raise ValueError("离线源码工作区的构建回执已变化")
     if (build["source_commit"] != commit or build["self_test_exit"] != 0
             or build["exe_sha256"] != digest(checkout / "dist/Lazarus-Agent.exe")):
         raise ValueError("受测源码与便携构建回执不一致")
@@ -152,6 +158,8 @@ def replay(checkout, historical_trials, output, recorded_input=RECORDED_INPUT, *
     from model_tools import ModelToolError
 
     protocol, schedule, plan, traces = plan_inputs(checkout, benchmark, build, historical_trials, recorded_input)
+    if expected_plan is not None and plan != expected_plan:
+        raise ValueError("包内源码重算的计划与冻结回执不一致")
     planned = plan["trials"]
     if check_only:
         print(json.dumps(plan, ensure_ascii=False, indent=2))

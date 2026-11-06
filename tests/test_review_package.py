@@ -7,11 +7,42 @@ import unittest
 from unittest.mock import patch
 from zipfile import ZipFile
 
-from tools import package_private_handoff, review_evidence, verify_review_package
+from tools import package_private_handoff, review_archive, review_evidence, verify_review_package
 from tools.verify_review_package import verify
 
 
 class ReviewPackageTests(unittest.TestCase):
+    def test_review_archive_preflight_binds_existing_workspace_to_source_bytes(self):
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            package, workspace, exe = root / "package", root / "workspace", root / "Lazarus-Agent.exe"
+            package.mkdir()
+            exe.write_bytes(b"portable test build")
+            build = {"version": "0.6.29", "source_commit": "a" * 40,
+                     "exe_sha256": sha256(exe.read_bytes()).hexdigest(), "self_test_exit": 0}
+            (package / "本地构建回执.json").write_text(json.dumps(build), encoding="utf-8")
+            source = package / "F01-源代码-v0.6.29.zip"
+            with ZipFile(source, "w") as archive:
+                archive.comment = build["source_commit"].encode()
+                archive.writestr("app_version.py", 'APP_VERSION = "0.6.29"')
+            receipt = {**build, "app_version": build["version"],
+                       "source_archive_sha256": sha256(source.read_bytes()).hexdigest()}
+            (package / "同版材料校验回执.json").write_text(json.dumps(receipt), encoding="utf-8")
+            self.assertEqual(review_archive.prepare_workspace(package, workspace, exe), build)
+            self.assertEqual(review_archive.prepare_workspace(package, workspace, exe), build)
+            (workspace / "app_version.py").write_text('APP_VERSION = "0.6.29-dev"', encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "工作区源码已变化"):
+                review_archive.prepare_workspace(package, workspace, exe)
+
+    def test_review_source_rejects_unsafe_and_case_colliding_members(self):
+        for names in (("src/../outside.py",), ("src/CON.txt",), ("build/replay.py",),
+                      ("tools/Run.py", "tools/run.py")):
+            with self.subTest(names=names), ZipFile(BytesIO(), "w") as archive:
+                for name in names:
+                    archive.writestr(name, "test")
+                with self.assertRaisesRegex(ValueError, "不安全或重复"):
+                    review_archive.source_members(archive)
+
     def test_private_handoff_rejects_an_external_shared_observation(self):
         target, caller = package_private_handoff.TARGET, package_private_handoff.CALLER
         apk, probe = "a" * 64, "b" * 64

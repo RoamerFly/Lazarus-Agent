@@ -24,6 +24,8 @@ AUDIT = PREFIX + "audit.json"
 REPLAY = PREFIX + "tools/replay_f01_recorded_cohort.py"
 HISTORY = PREFIX + "docs/validation/f01-p1c/results.json"
 TRACE = PREFIX + "docs/validation/f01-p1c/replay-input.json"
+ARCHIVE_TOOLS = {PREFIX + "tools/" + name for name in
+                 ("review_archive.py", "audit_f01_recorded_cohort.py", "audit_f01_p1b.py")}
 COMPONENTS = {"platform-tools", "emulator", "build-tools", "system-image", "java"}
 CONSENT_VALUES = {'false', '"false"', '"true"', '1', '[true]', '{"checked":true}', 'null'}
 SCOPE = "offline-replay-of-historical-tool-decisions"
@@ -97,6 +99,11 @@ def verify_extension(archive, checksums, status):
     required = {AUDIT, GUIDE, HISTORY, PLAN, REPLAY, RUNTIME, TRACE}
     if declared != "windows-and-recorded-cohort" or not required <= present:
         raise ValueError("缺少完整的同版补充复核材料")
+    archive_replay = status.get("archive_replay")
+    if archive_replay is not None or ARCHIVE_TOOLS & present:
+        if archive_replay != "same-build-source-zip" or not ARCHIVE_TOOLS <= present:
+            raise ValueError("缺少源码 ZIP 离线复跑工具")
+        required.update(ARCHIVE_TOOLS)
     def load(name):
         return json.loads(archive.read(name))
 
@@ -164,7 +171,8 @@ def verify_extension(archive, checksums, status):
     counts = summary(protocol, rows)
     if present != required or counts != audit["counts"]:
         raise ValueError("冻结批次证据清单或计分不一致")
-    return {"windows": runtime, "cohort": counts, "device_reports": proofs, "network_model_calls": 0}
+    return {"windows": runtime, "cohort": counts, "device_reports": proofs, "network_model_calls": 0,
+            **({"archive_replay": archive_replay} if archive_replay else {})}
 
 
 def extend(base, output, runtime, audit, batch):
@@ -179,10 +187,12 @@ def extend(base, output, runtime, audit, batch):
         files = {name: archive.read(name) for name in archive.namelist() if name != "SHA256SUMS.txt"}
     status = verified["package_status"]
     status["same_build_evidence"] = "windows-and-recorded-cohort"
+    status["archive_replay"] = "same-build-source-zip"
     files["复核状态.json"] = json.dumps(status, ensure_ascii=False, indent=2).encode()
     files.update({RUNTIME: runtime.read_bytes(), AUDIT: audit.read_bytes(), PLAN: (batch / "plan.json").read_bytes(),
                   REPLAY: (ROOT / "tools/replay_f01_recorded_cohort.py").read_bytes(),
                   HISTORY: HISTORICAL.read_bytes(), TRACE: RECORDED_INPUT.read_bytes()})
+    files.update({name: (ROOT / "tools" / Path(name).name).read_bytes() for name in ARCHIVE_TOOLS})
     audited = json.loads(files[AUDIT])
     for row in audited["rows"]:
         label = row["trial"]
@@ -192,7 +202,7 @@ def extend(base, output, runtime, audit, batch):
     files[GUIDE] = guide(status, audited["counts"]).encode()
     intro = files["从这里开始.md"].decode("utf-8")
     intro = intro.replace("空白系统首次准备见 v0.6.28。", "空白 Windows 系统安装见 v0.6.28。")
-    intro += f"\n[同版首次下载回执]({RUNTIME}) · [42 轮冻结评测和复跑入口]({GUIDE})\n"
+    intro += f"\n[同版首次下载回执]({RUNTIME}) · [42 轮冻结评测和源码 ZIP 离线复跑]({GUIDE})\n"
     files["从这里开始.md"] = intro.encode()
     files["SHA256SUMS.txt"] = "".join(f"{sha256(data).hexdigest()}  {name}\n"
                                      for name, data in sorted(files.items())).encode()
@@ -210,7 +220,7 @@ def extend(base, output, runtime, audit, batch):
 
 
 def guide(status, counts):
-    return f"""# v{status['version']} 同版冻结评测复核
+    return rf"""# v{status['version']} 同版冻结评测复核
 
 [Windows 首次下载和复用](../{RUNTIME}) · [42 轮结果](audit.json) · [冻结计划](plan.json)
 
@@ -222,11 +232,17 @@ Windows 回执覆盖专用来宾从空应用数据目录下载五项组件及复
 
 只复跑演示或可分发样本时，返回[评审包入口](../从这里开始.md)并使用其中的 PowerShell 命令。
 
-完整复跑需要 Python、Git、已准备的 Android 16 专用模拟器和源码检出 `{status['source_commit']}`。可从 RoamerFly/Lazarus-Agent 仓库检出该提交。保留本目录结构并将交付 EXE 与[本地构建回执](../本地构建回执.json)分别放在源码检出的 `dist/Lazarus-Agent.exe` 和 `build/local-exe-selftest-receipt.json`。在本目录运行下列命令，将两处路径替换为实际源码目录。
+完整复跑使用包内源码 ZIP，校验其 SHA-256、提交 `{status['source_commit']}` 和便携 EXE。准备 Python 3.11 或更新版本，保留评审包目录结构，在「冻结评测」目录执行下列命令。EXE 路径按实际位置替换，工作区选择一个新目录。预检会验证并解出源码，逐项重算 42 轮计划。
 
-    python -X utf8 tools/replay_f01_recorded_cohort.py --checkout "源码目录" --output "源码目录/build/f01-recorded-cohort" --check-only
+    python -I -B -X utf8 tools/review_archive.py --exe "..\..\Lazarus-Agent.exe" --workspace "..\..\离线复跑" --check-only
 
-预检核对 42 轮计划、原包、工具参数、源码提交和 EXE 哈希。去掉 `--check-only` 后从原 APK 开始重新构建并执行设备步骤。
+实跑使用工作台已准备的 Android 16 x86_64 SDK、Java 和已下载并校验的 Apktool JAR。指定的 SDK 目录必须包含目标系统镜像，缺失时预检会停止。将示例路径改为实际路径。首次准备可按[下载回执](../{RUNTIME})核对组件，Apktool 通常保存在工作台应用数据目录的 `runtimes/apktool` 下。
+
+    python -I -B -X utf8 tools/review_archive.py --exe "..\..\Lazarus-Agent.exe" --workspace "..\..\离线复跑" --sdk "SDK 目录" --java-home "Java 目录" --apktool "Apktool JAR 路径"
+
+完整实跑完成后执行独立审核。计划、逐轮结果和验收报告位于工作区的 `build/f01-recorded-cohort`。
+
+    python -I -B -X utf8 tools/review_archive.py --exe "..\..\Lazarus-Agent.exe" --workspace "..\..\离线复跑" --audit
 """
 
 

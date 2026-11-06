@@ -8,9 +8,9 @@ from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from tools.audit_f01_p1b import audit_records, git_at, p1c_batch
+from tools.audit_f01_p1b import FrozenBatch, audit_records, git_at, p1c_batch
 from tools import run_f01_p1, summarize_f01_p1
-from tools.replay_f01_recorded_cohort import digest, plan_inputs, read, score, summary, tool_sequence
+from tools.replay_f01_recorded_cohort import HISTORICAL, digest, plan_inputs, read, score, summary, tool_sequence
 
 
 def score_trial(case, result, proof):
@@ -22,26 +22,38 @@ def summarize_trials(results, protocol):
         return summarize_f01_p1.summarize(results, protocol)
 
 
-def audit(checkout, results):
+def audit(checkout, results, *, validated_build=None, expected_plan=None):
     if not results.is_relative_to(checkout / "build"):
         raise ValueError("复跑结果必须在受测检出的 build 下")
     if (results / "running.lock").exists():
         raise ValueError("请在批次停止后审核完整结果")
     plan_path = results / "plan.json"
     build = read(checkout / "build/local-exe-selftest-receipt.json")
-    commit = git_at(checkout, "rev-parse", "HEAD").decode().strip()
-    if (git_at(checkout, "status", "--porcelain") or commit != build["source_commit"]
-            or build["self_test_exit"] != 0 or digest(checkout / "dist/Lazarus-Agent.exe") != build["exe_sha256"]):
+    if validated_build is None:
+        commit = git_at(checkout, "rev-parse", "HEAD").decode().strip()
+        if git_at(checkout, "status", "--porcelain") or commit != build["source_commit"]:
+            raise ValueError("受测源码与构建回执不一致")
+        for name in ("agent_acceptance.py", "tools/run_f01_p1.py", "tools/summarize_f01_p1.py"):
+            if digest(ROOT / name) != digest(checkout / name):
+                raise ValueError(f"审核使用的验收代码与候选版本不一致 {name}")
+        historical = p1c_batch(checkout)
+    else:
+        commit = validated_build["source_commit"]
+        if build != validated_build:
+            raise ValueError("离线源码工作区的构建回执已变化")
+        original = read(HISTORICAL)
+        historical = FrozenBatch(original["freeze_commit"], commit, build["version"],
+                                 Path("tools/f01-p1c-cases.json"),
+                                 Path("docs/science-superpowers/preregistrations/2026-11-06-f01-p1c.md"),
+                                 results.relative_to(checkout))
+    if build["self_test_exit"] != 0 or digest(checkout / "dist/Lazarus-Agent.exe") != build["exe_sha256"]:
         raise ValueError("受测源码或构建身份不一致")
-    for name in ("agent_acceptance.py", "tools/run_f01_p1.py", "tools/summarize_f01_p1.py"):
-        if digest(ROOT / name) != digest(checkout / name):
-            raise ValueError(f"审核使用的验收代码与候选版本不一致 {name}")
     protocol, _, expected, traces = plan_inputs(checkout, run_f01_p1, build)
     cohort = read(results / "cohort.json")
-    if (read(plan_path) != expected or cohort["plan_sha256"] != digest(plan_path)
+    if ((expected_plan is not None and expected != expected_plan)
+            or read(plan_path) != expected or cohort["plan_sha256"] != digest(plan_path)
             or cohort["build"] != build or cohort["scope"] != expected["scope"] or cohort["network_model_calls"] != 0):
         raise ValueError("复跑计划与固定输入或批次回执不一致")
-    historical = p1c_batch(checkout)
     batch = replace(historical, implementation=commit, version=build["version"], results=results.relative_to(checkout))
     observed = audit_records(checkout, batch, {**protocol, "evaluation_role": expected["scope"]},
                              summarize_trials=summarize_trials, sidecar_directories=("storage",))
