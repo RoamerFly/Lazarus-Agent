@@ -22,6 +22,7 @@ from tools.run_f01_p1 import PROTOCOL, trial_schedule
 from tools.summarize_f01_p1 import summarize
 from tools.verify_release_candidate import require_p1c
 from tools.verify_release_candidate import verify as verify_signed_candidate
+from tools.verify_review_package import verify as verify_review_archive
 
 HISTORICAL_AUDITOR = "41fe5b1af3f047dbee730d672e4a5639fe61aa59"
 
@@ -371,6 +372,13 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                      "0.6.15-independent-windows.md", "0.6.15-windows-proof.json",
                      "0.6.15-installer-check.md", "0.6.15-installer-check.json",
                      "0.6.15-local-rule-windows.md", "0.6.15-local-rule-windows.json",
+                     "0.6.16-counter20-feedback.md", "0.6.16-counter20-feedback.json",
+                     "0.6.16-candidate-installer-check.md", "0.6.16-candidate-installer-check.json",
+                     "0.6.16-candidate-windows-runtime.md", "0.6.16-candidate-windows-runtime.json",
+                     "0.6.16-release-publication.json", "0.6.16-live-demo.md",
+                     "0.6.16-r2-fresh-windows.md", "0.6.16-r2-fresh-windows.json", "0.6.16-r2-handoff-inputs.json",
+                     "0.6.17-candidate-windows-runtime.md", "0.6.17-candidate-windows-runtime.json",
+                     "0.6.17-candidate-publication-check.json",
                      f"{APP_VERSION}-live-demo.md", f"{APP_VERSION}-windows-proof.json",
                      f"{APP_VERSION}-independent-windows.md", f"{APP_VERSION}-installer-check.json",
                      f"{APP_VERSION}-installer-check.md", f"{APP_VERSION}-local-rule-windows.json",
@@ -450,8 +458,12 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
             current_protocol = read(current_spec)
             copy(current_spec, current_folder / current_spec.name)
             copy(run_plan, current_folder / "plan.json")
-            for name in ("results.json", "diff-review.json", "report.md"):
-                copy(current_reports / name, current_folder / name)
+            for version in dict.fromkeys(("0.6.17", APP_VERSION)):
+                folder = current_reports.with_name(version)
+                for name in ("results.json", "diff-review.json", "report.md"):
+                    path = folder / name
+                    if path.is_file():
+                        copy(path, kit / path.relative_to(ROOT))
             for case in current_protocol["cases"]:
                 sample = regression_checkout / case["apk"]
                 copy(sample, current_folder / "自有输入样本" / sample.name)
@@ -546,9 +558,7 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
             for path in sorted(kit.rglob("*")):
                 if path.is_file():
                     archive.write(path, path.relative_to(kit).as_posix())
-        with ZipFile(staged) as archive:
-            if archive.testzip() is not None:
-                raise ValueError("复核 ZIP 读取校验失败")
+        verify_review_archive(staged)
         if staged.stat().st_size > 100 * 1024 * 1024:
             raise ValueError("复核包超过 100 MiB，请拆分评审附件")
         staged.replace(output)

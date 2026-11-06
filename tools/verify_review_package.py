@@ -3,11 +3,30 @@ import argparse
 import hashlib
 import json
 from pathlib import Path, PurePosixPath
+import posixpath
+import re
 import sys
+from urllib.parse import unquote, urlsplit
 from zipfile import ZipFile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from agent_acceptance import verified_for
+
+
+def check_local_links(archive, names):
+    count = 0
+    for name in names:
+        if not name.endswith(".md"):
+            continue
+        for link in re.findall(r"\]\(([^\s)]+)\)", archive.read(name).decode("utf-8-sig")):
+            parsed = urlsplit(link)
+            if parsed.scheme or parsed.netloc or not parsed.path:
+                continue
+            target = posixpath.normpath(posixpath.join(posixpath.dirname(name), unquote(parsed.path)))
+            if target not in names:
+                raise ValueError(f"复核文档引用缺失文件 {name} → {target}")
+            count += 1
+    return count
 
 
 def verify(path):
@@ -73,6 +92,7 @@ def verify(path):
                     raise ValueError("反例没有对应到指定的行为失败：" + folder)
             counterexamples.append({"sample": folder, "candidate_sha256": candidate, "status": "incomplete"})
         return {"status": "archive-and-proofs-verified", "file_count": len(names),
+                "local_links_checked": check_local_links(archive, set(names)),
                 "samples": samples, "counterexamples": counterexamples,
                 "package_status": json.loads(archive.read("复核状态.json")),
                 "scope": "Files, checksums and stored proofs. Device replay is a separate operation."}
