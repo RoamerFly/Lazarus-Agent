@@ -24,10 +24,13 @@ class RecordCallerProbeTests(unittest.TestCase):
               patch.object(probe.bench, "shell", side_effect=uid_rows),
               patch.object(probe, "send_known_uri", timeline.external),
               patch.object(probe, "_step", timeline.step)):
-            result = probe.replay(Mock(), Path("candidate.apk"), expected, Path("caller.apk"), compare_uri=True)
+            result = probe.replay(Mock(), Path("candidate.apk"), expected, Path("caller.apk"),
+                                  compare_uri=True, record_path="/record")
         self.assertEqual([call[0] for call in timeline.mock_calls], ["external", "step", "step", "step", "external"])
         self.assertEqual(timeline.external.call_args_list[0], timeline.external.call_args_list[1])
+        timeline.external.assert_called_with(caller, "/record")
         self.assertEqual(result["before_share"], before)
         self.assertEqual(result["outcome"], after["outcome"])
         self.assertEqual(result["observed"], after["observed"])
+        self.assertEqual(result["record_uri"], "content://org.ggbond.archivereader.records/record")
         self.assertEqual([step["action"] for step in result["in_app_share"]], ["cold_start", "tap", "expect"])

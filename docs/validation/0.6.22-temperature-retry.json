@@ -1,0 +1,34 @@
+{
+  "version": "0.6.22",
+  "implementation_commit": "f24d5a583586785d388ae5133e4141f538456686",
+  "case": "P04-agent-3",
+  "target_api": 36,
+  "abis": [
+    "x86_64"
+  ],
+  "charged_build_attempts": 2,
+  "trace_sha256": "a3885c6d2b1cda94db2da36eacbc6c2ced9741dee1a022b3f2015dd4f9402bde",
+  "final_acceptance_sha256": "4b61af4699f17fbff9525a80563c275dfc2274a23e424ba22a7b4d90cc7c8978",
+  "first_candidate": {
+    "candidate_sha256": "c2a9037319e714aaac1b2ff832046b02b7e30f51e8504b9e7d1aab27f3d3f8b7",
+    "build_tool_index": 18,
+    "install": "passed",
+    "launch": "failed",
+    "passed_steps": 0,
+    "crash": [
+      "java.lang.VerifyError"
+    ],
+    "bad_reference": "SharedPreferences$Edit",
+    "reference_tool_index": 13
+  },
+  "recovered_candidate": {
+    "candidate_sha256": "7cdcc4a9a3403217df60c746bea06049d802bf3b1c5f58667c70d49be187cd92",
+    "build_tool_index": 26,
+    "install": "passed",
+    "launch": "passed",
+    "passed_steps": 16,
+    "independent_status": "behavior-verified",
+    "corrected_reference": "SharedPreferences$Editor",
+    "reference_tool_index": 23
+  }
+}

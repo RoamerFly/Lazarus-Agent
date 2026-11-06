@@ -15,7 +15,9 @@ public class BoundaryActivity extends Activity {
         handoff.setClassName("org.ggbond.archivereader", "org.ggbond.archivereader.ShareActivity");
         String type = "application/vnd.ggbond.record";
         if (getIntent().getBooleanExtra("probe_record_uri", false)) {
-            handoff.setDataAndType(Uri.parse("content://org.ggbond.archivereader.records/record.txt"), type);
+            String requestedPath = getIntent().getStringExtra("record_path");
+            String path = "/record".equals(requestedPath) ? "/record" : "/record.txt";
+            handoff.setDataAndType(Uri.parse("content://org.ggbond.archivereader.records" + path), type);
         } else {
             handoff.setType(type);
             handoff.putExtra("org.ggbond.archivereader.EXTRA_RECORD", new byte[]{42});
