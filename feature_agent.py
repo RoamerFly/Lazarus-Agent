@@ -21,6 +21,7 @@ from reviver import INSTALL_FLOOR, repair
 MAX_ROUNDS = 40
 MAX_CALLS = 72
 MAX_BUILDS = 4
+MAX_CONTEXT_CHARS = 240000
 
 # These instruction patterns identify direct process-wide bypasses. Compare against
 # the input smali so an unrelated edit can still be built for an existing APK.
@@ -117,7 +118,7 @@ replace_text 的 old 必须来自 read_text 返回的原文件内容，去掉显
 兼容修复应保留原有权限和安全检查。文件交接保留实际写入、传递和读取，优先采用范围明确的只读内容 URI 或同应用的受限文件入口。检查接收端的 URI、授权范围和规范化后的路径边界。不能关闭进程范围的安全检查，也不能让导出组件接收可由外部指定的私有文件路径。
 新增或修改涉及 Intent、外部输入和私有数据的代码前，调用 inspect_manifest 检查原组件的导出及权限声明。构建后对候选再核对声明。目录边界校验只限制目录，还需确认外部调用者有权访问具体数据。仅供本应用使用的文件交接可新增非导出接收组件，保留原有主入口。需要对外提供的接口应按需求限制文件集合和调用权限。结合代码与设备结果说明已检查的范围。
 交接目标已知时，在发送前用 setPackage、setComponent 或显式 Intent 构造器限定目标。用户确实要求选择其他应用时，使用系统分享面板，由用户选择接收方并仅授予必要权限。
-使用字节数组交接现有文件时，发送的字节必须来自读取同一个实际文件。保留读取失败路径，并由接收端读取和校验实际收到的数据。
+使用字节数组交接现有文件时，发送的字节必须来自读取同一个实际文件。保留读取失败路径，并由接收端读取和校验实际收到的数据。显式 Intent 只限定发送目标。若接收端仍可被外部应用调用，外部应用也能构造同样的 Extra。仅供本应用使用的接收逻辑应拒绝外部构造的数据，保留原有启动入口。
 有设备工具时应测试最新候选，基于界面执行与需求有关的操作。安装启动成功只能证明安装启动。
 有 rehearse_acceptance 时，构建后直接用它运行固定步骤。只有需要追查具体失败时再用 test_apk 和逐个设备动作；
 一旦通过就保留该候选。这是当前目标系统的预检，正式交付还要重新做独立验收。
@@ -378,6 +379,18 @@ def run(source, output, tools, api, expected_hash, request, config, progress, *,
                 encoding="utf-8")
 
 
+def _trim_tool_history(messages):
+    tools = [message for message in messages if message["role"] == "tool"]
+    for message in tools[:-4]:
+        if len(message["content"]) <= 1500:
+            continue
+        message["content"] = json.dumps({
+            "history_compacted": True,
+            "preview": message["content"][:750],
+            "note": "旧工具结果仅保留预览。需要精确内容或当前哈希时，请重新读取。",
+        }, ensure_ascii=False)
+
+
 def _loop(session, messages, definitions, allowed, config, progress):
     call_ids = set()
     thinking = (urlsplit(config["url"]).hostname == "api.deepseek.com" and
@@ -387,8 +400,10 @@ def _loop(session, messages, definitions, allowed, config, progress):
         if round_number and round_number % 8 == 0:
             messages.append({"role": "user", "content":
                              f"剩余 {MAX_ROUNDS-round_number} 轮。请收敛分析，基于证据尝试修改和构建，或说明具体阻碍。"})
-        if len(json.dumps(messages, ensure_ascii=False)) > 240000:
-            raise ModelToolError("本轮上下文已达上限，请缩小需求范围后继续")
+        if len(json.dumps(messages, ensure_ascii=False)) > MAX_CONTEXT_CHARS:
+            _trim_tool_history(messages)
+            if len(json.dumps(messages, ensure_ascii=False)) > MAX_CONTEXT_CHARS:
+                raise ModelToolError("本轮上下文已达上限，请缩小需求范围后继续")
         reply = _request(config["url"], {"model": config["model"], "messages": messages, "tools": definitions,
                                         "tool_choice": "auto", "temperature": 0, "max_tokens": 4096, **options},
                          config["key"], timeout=60)

@@ -291,6 +291,40 @@ class WorkspaceTests(unittest.TestCase):
         self.assertEqual(tester.test.call_count, 2)
         self.assertEqual(tester.action.call_count, 2)
 
+    def test_long_tool_history_preserves_recent_results_and_reasoning(self):
+        session = Session(self.root, Path("source.apk"), self.root / "candidate.apk",
+                          Path("tools"), 36, {}, lambda _: None, None)
+        dispatch = session.dispatch
+        evidence = {"text": "e" * 3000}
+        requests = 0
+
+        def model(url, payload, key, **kwargs):
+            nonlocal requests
+            index = requests
+            requests += 1
+            if index == 6:
+                previous = [item for item in payload["messages"] if item["role"] == "assistant"]
+                tools = [item for item in payload["messages"] if item["role"] == "tool"]
+                self.assertEqual([item["reasoning_content"] for item in previous],
+                                 [f"reasoning-{i}" for i in range(6)])
+                self.assertEqual([item["tool_call_id"] for item in tools], [f"call-{i}" for i in range(6)])
+                self.assertTrue(json.loads(tools[0]["content"])["history_compacted"])
+                self.assertEqual(json.loads(tools[-1]["content"])["result"], evidence)
+            name = "finish" if index == 6 else "read_text"
+            args = {"outcome": "analysis", "summary": "Read evidence"} if name == "finish" else {}
+            return {"content": None, "reasoning_content": f"reasoning-{index}",
+                    "tool_calls": [{"id": f"call-{index}", "type": "function",
+                                    "function": {"name": name, "arguments": json.dumps(args)}}]}
+
+        with (patch("feature_agent.MAX_CONTEXT_CHARS", 16500),
+              patch("feature_agent._request", side_effect=model),
+              patch.object(session, "dispatch",
+                           side_effect=lambda name, args: evidence if name == "read_text" else dispatch(name, args))):
+            _loop(session, [], [], {"read_text", "finish"},
+                  {"url": "https://api.deepseek.com", "model": "deepseek-flash", "key": ""}, lambda _: None)
+        self.assertEqual(requests, 7)
+        self.assertEqual(session.trace[0]["result"], evidence)
+
     def test_build_failure_is_returned_to_model_for_repair(self):
         def call(name, **args):
             return {"role": "assistant", "reasoning_content": "provider-continuation",
