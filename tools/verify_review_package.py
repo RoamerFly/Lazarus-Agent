@@ -25,6 +25,11 @@ COLD_WINDOWS_FILE = "Windows复核/同版空目录准备回执.json"
 COLD_COMPONENTS = {"platform-tools", "emulator", "build-tools", "system-image", "java"}
 REVIEWER_GUIDE = "评审操作与答辩提纲.md"
 SAMPLE_NOTICE = "评审样本使用说明.md"
+DESKTOP_FILE = "Windows复核/干净Windows交互桌面回执.json"
+HANDOFF_FILE = "专项复核/文件交接外部调用回执.json"
+HANDOFF_PAIR = "专项复核/文件交接配对对照.zip"
+RULE_FILE = "专项复核/无模型归档修复回执.json"
+RULE_SAMPLE = "可分发样本/P02/"
 
 
 def check_local_links(archive, names):
@@ -404,6 +409,81 @@ def check_offline_materials(archive, checksums, status, windows):
     return result
 
 
+def check_offline_addendum(archive, checksums, status, materials):
+    files = {DESKTOP_FILE, HANDOFF_FILE, HANDOFF_PAIR, RULE_FILE}
+    scope = status.get("offline_review_addendum")
+    if scope is None and not files.intersection(checksums):
+        return None
+    if scope != "same-build-specialized-proofs" or not materials or not files <= checksums.keys():
+        raise ValueError("同版评审包缺少完整专项复核")
+
+    desktop_receipt = json.loads(archive.read(DESKTOP_FILE))
+    rule = json.loads(archive.read(RULE_FILE))
+    version, commit, exe = (status[key] for key in ("version", "source_commit", "exe_sha256"))
+    if any((receipt["app_version"], receipt["source_commit"], receipt["exe_sha256"]) != (version, commit, exe)
+           for receipt in (desktop_receipt, rule)):
+        raise ValueError("专项复核与同版构建身份不一致")
+
+    guest, desktop = (desktop_receipt[key] for key in ("guest", "desktop"))
+    setup = guest["setup"]
+    if (desktop_receipt["blank_virtual_disk"] is not True
+            or desktop_receipt["android_device_tested_in_this_guest"] is not False
+            or guest["status"] != "passed" or desktop["status"] != "workbench-started"
+            or desktop["session_id"] < 1 or desktop["renderer_processes"] < 1 or not desktop["native_window_handle"]
+            or desktop["workbench_http"] != 200 or desktop["webview2_publisher"] != "Valid"
+            or guest["network_model_calls"] != 0 or desktop["network_model_calls"] != 0
+            or any(guest["baseline"][key] for key in
+                   ("tool_commands", "override_names", "android_local_sdk", "active_hardware_networks"))
+            or setup["source_commit"] != commit or setup["version"] != version
+            or not (setup["exe_sha256"] == setup["installed_exe_sha256"] == desktop["portable_sha256"] == exe)
+            or any(setup[key] != 0 for key in ("install_exit", "installed_self_test_exit", "uninstall_exit"))
+            or not setup["exported_output_preserved"] or not setup["isolated_registration_removed"]
+            or [row["case"] for row in guest["samples"]] != ["P03", "P05"]):
+        raise ValueError("干净 Windows 交互复核证据不一致")
+    for row in guest["samples"]:
+        prefix = f"可分发样本/{row['case']}/"
+        report = json.loads(archive.read(prefix + "agent-acceptance.json"))
+        if (row["status"] != "inputs-verified" or row["steps"] != len(report["steps"])
+                or row["candidate_sha256"] != checksums[prefix + "candidate.apk"]):
+            raise ValueError("干净 Windows 复核样本与同版归档不一致")
+
+    proof = json.loads(archive.read(RULE_SAMPLE + "agent-acceptance.json"))
+    candidate = checksums[RULE_SAMPLE + "candidate.apk"]
+    steps = rule["candidate"]["steps"]
+    libraries = rule["diff"]["manifest"]["libraries"]
+    if (rule["case"] != "P02" or rule["target_api"] != 36 or proof["targets"] != [36]
+            or rule["diagnosis_source"] != "rules" or rule["model_status"] != "not-configured"
+            or rule["real_model_calls"] != 0 or rule["original"]["click_result"] != "failed"
+            or rule["original"]["missing_class"].replace("/", ".") != "org.apache.http.ProtocolVersion"
+            or rule["original"]["sha256"] != checksums[RULE_SAMPLE + "base.apk"]
+            or rule["proof_sha256"] != checksums[RULE_SAMPLE + "agent-acceptance.json"]
+            or not (rule["candidate"]["sha256"] == rule["candidate"]["installed_sha256"] == candidate)
+            or [step["action"] for step in steps] != ["expect", "tap", "expect", "cold_start", "tap", "expect"]
+            or any(step["status"] != "passed" for step in steps)
+            or libraries != {"removed": [], "added": [{"type": "uses-library", "name": "org.apache.http.legacy"}]}
+            or not verified_for(proof, candidate)):
+        raise ValueError("无模型修复回执与独立设备复测不一致")
+
+    handoff = json.loads(archive.read(HANDOFF_FILE))
+    run = handoff["result"]
+    probe = run["uri_before_and_after"]
+    with ZipFile(BytesIO(archive.read(HANDOFF_PAIR))) as paired:
+        paired_apk = paired.read("prior-agent-candidate.apk")
+        paired_proof = paired.read("prior-agent-candidate-acceptance.json")
+    if (handoff["app_version"] != version or handoff["paired_acceptance_exe_sha256"] != exe
+            or run["status"] != "verified" or run["source_commit"] != commit or run["network_model_calls"] != 0
+            or run["acceptance_sha256"] != hashlib.sha256(paired_proof).hexdigest()
+            or not (run["candidate_sha256"] == probe["candidate_and_installed_sha256"]
+                    == hashlib.sha256(paired_apk).hexdigest())
+            or not verified_for(json.loads(paired_proof), run["candidate_sha256"])
+            or probe["api"] != 36 or len(set(probe["uids"].values())) != 2
+            or {probe["before_share"]["outcome"], probe["outcome"], run["forged_bytes_after"]["outcome"]}
+                != {"target-rejected"}):
+        raise ValueError("外部调用结果与文件交接候选的设备证据不一致")
+    return {"status": scope, "windows_desktop": desktop["status"], "local_rule_steps": len(steps),
+            "external_target_rejections": 3}
+
+
 def verify(path):
     with ZipFile(path) as archive:
         names = archive.namelist()
@@ -479,6 +559,7 @@ def verify(path):
         offline_windows = check_offline_windows(archive, checksums, status, samples)
         offline_cold_runtime = check_offline_cold_runtime(archive, checksums, status)
         offline_materials = check_offline_materials(archive, checksums, status, offline_windows or offline_cold_runtime)
+        addendum = check_offline_addendum(archive, checksums, status, offline_materials)
         return {"status": "archive-and-proofs-verified", "file_count": len(names),
                 "local_links_checked": check_local_links(archive, set(names)),
                 "samples": samples, "counterexamples": counterexamples,
@@ -487,6 +568,7 @@ def verify(path):
                 "local_regression": local_regression,
                 "local_review": local_review, "offline_windows": offline_windows,
                 "offline_cold_runtime": offline_cold_runtime, "offline_materials": offline_materials,
+                "offline_addendum": addendum,
                 "scope": "Files, checksums and stored proofs. Device replay is a separate operation."}
 
 

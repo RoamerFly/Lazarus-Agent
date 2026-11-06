@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "version": "0.6.28",
+  "source_commit": "cbd58ed08345f5c7f61d127d8ba989f8eca4d5ab",
+  "exe_sha256": "058d59a6a90c266129765191a449e1eb02ccdf1ee1c5ea348ae9a349b84e3b08",
+  "archive": "v0.6.28-F01-同版离线评审包-r3.zip",
+  "archive_sha256": "b4c920e70586f7edb712ef48dab1ec6037c442f54a7769afa1b49579b5fed379",
+  "archive_bytes": 3178720,
+  "registered_files": 53,
+  "unchanged_r2_entries": 44,
+  "input_checks": 7,
+  "scope": {
+    "status": "same-build-specialized-proofs",
+    "windows_desktop": "workbench-started",
+    "local_rule_steps": 6,
+    "external_target_rejections": 3
+  },
+  "tamper_rejections": {
+    "noninteractive-session": "干净 Windows 交互复核证据不一致",
+    "wrong-installed-apk": "无模型修复回执与独立设备复测不一致",
+    "forged-success": "外部调用结果与文件交接候选的设备证据不一致"
+  },
+  "real_model_calls": 0,
+  "device_replay": {
+    "case": "P02",
+    "target_api": 36,
+    "abi": "x86_64",
+    "steps_passed": 6,
+    "status": "behavior-verified",
+    "installed_sha256": "132b72702d43ec04996ed3c72a5db5d83cb13890c75a071440df0f8d57189101",
+    "report_sha256": "652cb6db3aa28595c42039a0a3a5f3daba099bf7cf1aebf55453cc3222c6a4a9"
+  }
+}
