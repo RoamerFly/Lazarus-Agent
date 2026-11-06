@@ -1,0 +1,35 @@
+{
+  "candidate_and_installed_sha256": "2743bf6a5dd3219beb3d756a79cb8f97c30f8cd18ed64dde791b7c1d68744180",
+  "caller_apk_sha256": "4f53e76270261bca57cbe737babb8976d88bd5bca162f9e5a5a699d7d78fc51a",
+  "api": 36,
+  "abi": "x86_64",
+  "uids": {
+    "org.ggbond.archivereader": 10150,
+    "org.ggbond.recordcaller": 10151
+  },
+  "observed": [
+    {
+      "package": "org.ggbond.archivereader",
+      "text": "Archive Reader"
+    },
+    {
+      "package": "org.ggbond.archivereader",
+      "text": "Shared"
+    }
+  ],
+  "caller_supplied_success_without_original_write": true,
+  "probe_intent": {
+    "action": "org.ggbond.archivereader.OPEN_RECORD",
+    "component": "org.ggbond.archivereader/.ShareActivity",
+    "mime_type": "application/vnd.ggbond.record",
+    "extra_name": "org.ggbond.archivereader.EXTRA_RECORD",
+    "extra_byte_array": [
+      42
+    ]
+  },
+  "prepared_state": "Fresh test AVD. Candidate installed and launched. Its original share button was not pressed during this probe.",
+  "probe_source_sha256": {
+    "BoundaryActivity.java": "388fad6e3d803eec6316d3d437901a7076f639905ada0d0161b529bc9712d4a7",
+    "AndroidManifest.xml": "2ed709f840581bd8d239c86eeabc739292dd99c772548e5515678e70400458b5"
+  }
+}

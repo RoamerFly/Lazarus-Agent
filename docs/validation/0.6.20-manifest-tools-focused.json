@@ -1,0 +1,163 @@
+{
+  "counts": {
+    "agent_positives": 1,
+    "primary": 0,
+    "agent_negative_rejected": 0,
+    "agent_false_acceptances": 0,
+    "unobserved": 2,
+    "majority_agent_cases": 0,
+    "roundtrip_positive_cases": 0,
+    "rules_positive_cases": 0,
+    "one-build_positive_cases": 0
+  },
+  "rows": [
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "roundtrip",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 97.578,
+      "build_attempts": 1,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null,
+      "trial": "P06-roundtrip-1",
+      "candidate_sha256": "d3046a078243835954ffa5e04b02969d7f4e3d2f88fa3002eac86e58a0ab7818",
+      "manifest_inspections": [],
+      "distributable": false
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "rules",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 0.003,
+      "build_attempts": 0,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null,
+      "trial": "P06-rules-1",
+      "candidate_sha256": null,
+      "manifest_inspections": [],
+      "distributable": false
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "one-build",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 103.892,
+      "build_attempts": 1,
+      "model_requests_with_usage": 15,
+      "model_price_usd_range": [
+        0.01098404,
+        0.02196809
+      ],
+      "trial": "P06-one-build-1",
+      "candidate_sha256": "9d942084f650e3c90df2b410544984b5f93e4813308b5f8247477509f8d7b3a9",
+      "manifest_inspections": [
+        {
+          "artifact": "original",
+          "ok": true
+        }
+      ],
+      "distributable": false
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 1,
+      "state": "unobserved",
+      "started": true,
+      "duration_seconds": null,
+      "build_attempts": 1,
+      "model_requests_with_usage": 12,
+      "model_price_usd_range": [
+        0.00896699,
+        0.01793398
+      ],
+      "trial": "P06-agent-1",
+      "candidate_sha256": null,
+      "manifest_inspections": [],
+      "distributable": false,
+      "terminal_reason": "InterruptedByUserPause"
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 2,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 199.923,
+      "build_attempts": 1,
+      "model_requests_with_usage": 15,
+      "model_price_usd_range": [
+        0.00954488,
+        0.01908976
+      ],
+      "trial": "P06-agent-2",
+      "candidate_sha256": "2743bf6a5dd3219beb3d756a79cb8f97c30f8cd18ed64dde791b7c1d68744180",
+      "manifest_inspections": [
+        {
+          "artifact": "original",
+          "ok": true
+        },
+        {
+          "artifact": "candidate",
+          "ok": true
+        }
+      ],
+      "raw_diff_sha256": "9371123d12287630604e8b866a753d7dd67f4aed29aca048ba21548b717aac2e",
+      "distributable": false,
+      "review": "发送方打开实际文件并传递文件字节，但接收 Activity 仍对外导出，直接信任字节数组 Extra。外部应用可构造符合成功判定的字节，原界面流程不能证明外部调用来源。",
+      "scope": "固定同包操作通过。Android 16 另用独立应用及独立 UID 构造字节数组 Extra，在未操作原写入按钮时使目标页面显示 Shared。"
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 3,
+      "state": "unobserved",
+      "started": true,
+      "duration_seconds": 375.691,
+      "build_attempts": 3,
+      "model_requests_with_usage": 38,
+      "model_price_usd_range": [
+        0.03695643,
+        0.07391286
+      ],
+      "trial": "P06-agent-3",
+      "candidate_sha256": null,
+      "manifest_inspections": [
+        {
+          "artifact": "original",
+          "ok": true
+        }
+      ],
+      "distributable": false,
+      "terminal_reason": "ModelToolError"
+    }
+  ],
+  "app_version": "0.6.20",
+  "implementation_commit": "b71c39d6d7d8d083936f31b51dec196433541cbd",
+  "purpose": "development-diagnostic-on-seen-cases",
+  "cases": [
+    "P06"
+  ],
+  "planned_trials": 6,
+  "source_protocol_freeze_commit": "a28bea979d0b9d8ae6f5074028e8c64d1547ac60",
+  "started_at": "2026-11-06T02:53:58.351585+00:00",
+  "note": "Uses the frozen P1C request, steps, controls and three scheduled Agent repetitions. Separate from the v0.6.19 denominator.",
+  "terminal_trials": 6,
+  "semantic_agent_passes": 0,
+  "model": "deepseek-flash",
+  "target_api": 36,
+  "original_protocol_sha256": "aa7f164a5247d363a792d59e47c5fee88400e88da94fcf2c37100d11303368f9",
+  "external_probe": "0.6.20-exported-receiver-probe.json"
+}
