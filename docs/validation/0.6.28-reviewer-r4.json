@@ -1,0 +1,134 @@
+{
+  "schema": 1,
+  "app_version": "0.6.28",
+  "source_commit": "cbd58ed08345f5c7f61d127d8ba989f8eca4d5ab",
+  "exe_sha256": "058d59a6a90c266129765191a449e1eb02ccdf1ee1c5ea348ae9a349b84e3b08",
+  "archive": "v0.6.28-F01-同版离线评审包-r4.zip",
+  "archive_sha256": "728baa9c7e6bf5673ce0d6c64b6d960440948f3ab365f70372c0d15919d61f0b",
+  "archive_bytes": 3210632,
+  "registered_files": 61,
+  "unchanged_r3_entries": 50,
+  "tamper_rejections": {
+    "wrong-install-reason": "反例没有对应到指定的失败阶段：反例样本/N01",
+    "swapped-frozen-assertion": "反例与同版源码中的冻结用例不一致：N02",
+    "removed-scope-marker": "同版评审包的冻结反例范围不一致"
+  },
+  "device": {
+    "api": 36,
+    "abi": "x86_64"
+  },
+  "inputs_checked": 3,
+  "expected_rejections": 3,
+  "incorrect_acceptances": 0,
+  "network_model_calls": 0,
+  "replays": [
+    {
+      "case": "N01",
+      "kind": "missing-abi",
+      "replay_status": "incomplete",
+      "application_exit": 1,
+      "install": "failed",
+      "launch": "not-run",
+      "function": "not-run",
+      "candidate_sha256": "ae4958b8ffaff5ac22a9d396ac70ceb6861cdd4b99ae8e439d386a1bc544cb66",
+      "installed_sha256": null,
+      "observed_steps": 0,
+      "device_report_sha256": "3d48e1ed5f5862660baff8204d2266a10eec8aee0e1cfc918132d14b2fdf4a90"
+    },
+    {
+      "case": "N02",
+      "kind": "missing-information",
+      "replay_status": "incomplete",
+      "application_exit": 1,
+      "install": "passed",
+      "launch": "passed",
+      "function": "failed",
+      "candidate_sha256": "1362d89bb4e7f5e842fbc7a1183ec613a1fea501b61af64cc5edb44a54ba6837",
+      "installed_sha256": "1362d89bb4e7f5e842fbc7a1183ec613a1fea501b61af64cc5edb44a54ba6837",
+      "observed_steps": 1,
+      "device_report_sha256": "26d404bdc992f6b618f0e2ad886a51b7b26f666d01abbb2629f500712b08ffed"
+    },
+    {
+      "case": "N03",
+      "kind": "contradictory-assertions",
+      "replay_status": "incomplete",
+      "application_exit": 1,
+      "install": "passed",
+      "launch": "passed",
+      "function": "failed",
+      "candidate_sha256": "fb180169f40a279c6e867bf82516e1cbff13ff319eca2a938ca4945902244507",
+      "installed_sha256": "fb180169f40a279c6e867bf82516e1cbff13ff319eca2a938ca4945902244507",
+      "observed_steps": 2,
+      "device_report_sha256": "1bd2334e71dccfd68c700f92ff6708e1387673dba1936edee8c97df59ecaed76"
+    }
+  ],
+  "recorded_agent_replay": {
+    "scope": "recorded-tool-replay",
+    "network_model_calls": 0,
+    "source_commit": "cbd58ed08345f5c7f61d127d8ba989f8eca4d5ab",
+    "rows": [
+      {
+        "case": "N01",
+        "recorded_trace_sha256": "84ab0c22749ede1153aa544f072eef19a950a4ab4c90b5233c8c5a9fc2be6b32",
+        "replayed_trace_sha256": "66efbed5bd87edf64be985c6dddac7098d9abd46e906da108ad1cbff5d6251c4",
+        "apk_sha256": "ae4958b8ffaff5ac22a9d396ac70ceb6861cdd4b99ae8e439d386a1bc544cb66",
+        "tool_calls": 15,
+        "outcome": "blocked",
+        "build_attempts": 1,
+        "exported_candidate": false,
+        "workspace_changes": 0,
+        "installation_probes": [
+          {
+            "input": "original",
+            "api": 36,
+            "abis": [
+              "x86_64"
+            ],
+            "install": {
+              "exit": 1,
+              "output": "Performing Streamed Install\r\nadb.exe: failed to install native-proxy-mips-only.apk: Failure [INSTALL_FAILED_NO_MATCHING_ABIS: INSTALL_FAILED_NO_MATCHING_ABIS: Failed to extract native libraries, res=-113]"
+            },
+            "installed_sha256": null
+          },
+          {
+            "input": "candidate",
+            "api": 36,
+            "abis": [
+              "x86_64"
+            ],
+            "install": {
+              "exit": 1,
+              "output": "Performing Streamed Install\r\nadb.exe: failed to install edited.apk: Failure [INSTALL_FAILED_NO_MATCHING_ABIS: INSTALL_FAILED_NO_MATCHING_ABIS: Failed to extract native libraries, res=-113]"
+            },
+            "installed_sha256": null
+          }
+        ]
+      },
+      {
+        "case": "N02",
+        "recorded_trace_sha256": "7c8e8d160a05812e7d0e3937168f3651e33b07c217e9b9f97b2aefd0beaa0480",
+        "replayed_trace_sha256": "72ca1fa88d55390a1b45d629b102ab3c2e8d3ab2d45382fecd118017b05e5674",
+        "apk_sha256": "1362d89bb4e7f5e842fbc7a1183ec613a1fea501b61af64cc5edb44a54ba6837",
+        "tool_calls": 8,
+        "outcome": "analysis",
+        "build_attempts": 0,
+        "exported_candidate": false,
+        "workspace_changes": 0,
+        "searches": [
+          {
+            "query": "Stock code",
+            "hits": 0
+          },
+          {
+            "query": "UNAVAILABLE",
+            "hits": 0
+          },
+          {
+            "query": "stock",
+            "hits": 0
+          }
+        ]
+      }
+    ]
+  }
+}

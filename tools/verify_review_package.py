@@ -484,6 +484,74 @@ def check_offline_addendum(archive, checksums, status, materials):
             "external_target_rejections": 3}
 
 
+def verify_counterexample(folder, report, expected, source, candidate):
+    kind = expected.get("kind", "contradictory-assertions")
+    plan = expected["steps"]
+    actions = [step["action"] for step in plan]
+    statuses = [step["status"] for step in plan]
+    if kind == "contradictory-assertions":
+        if (actions != ["expect", "absent"] or plan[0]["value"] != plan[1]["value"]
+                or statuses != ["passed", "failed"] or any(step["match_count"] < 1 for step in plan)):
+            raise ValueError("反例没有声明可复核的矛盾断言：" + folder)
+    elif kind == "missing-information":
+        if actions != ["expect"] or statuses != ["failed"] or plan[0]["match_count"] != 0:
+            raise ValueError("反例没有声明可复核的信息缺失断言：" + folder)
+    elif kind == "missing-abi":
+        if plan or source != candidate or [step["action"] for step in report["steps"]] != ["tap", "expect"]:
+            raise ValueError("反例缺少原包的 ABI 失败验证计划：" + folder)
+    else:
+        raise ValueError("未知反例类型：" + folder)
+    if kind != "missing-abi" and report["steps"] != [{k: s[k] for k in ("action", "value")} for s in plan]:
+        raise ValueError("反例验证步骤与预期不一致：" + folder)
+
+    targets = report["targets"]
+    if (source != report["input_sha256"] or candidate != report["candidate_sha256"]
+            or report["status"] != "incomplete" or expected["exit_code"] != 1
+            or not targets or len(report["rows"]) != len(targets)):
+        raise ValueError("反例身份、目标或未通过状态无效：" + folder)
+    if any(type(api) is not int for api in targets) or len(targets) != len(set(targets)):
+        raise ValueError("反例目标版本无效：" + folder)
+
+    for api, row in zip(targets, report["rows"]):
+        proof = row["candidate"]
+        device = proof["device"]
+        if row["api"] != api or device["api"] != api:
+            raise ValueError("反例设备版本与复测目标不一致：" + folder)
+        if kind == "missing-abi":
+            valid = (proof["install"] == "failed" and proof["launch"] == proof["function"] == "not-run"
+                     and device["install"]["exit"] != 0 and device["abis"] == ["x86_64"]
+                     and "INSTALL_FAILED_NO_MATCHING_ABIS" in device["install"]["output"]
+                     and device["installed_sha256"] is None and proof["steps"] == [])
+        else:
+            observed = [{k: step[k] for k in ("action", "value", "status", "match_count")}
+                        for step in proof["steps"]]
+            valid = (proof["install"] == proof["launch"] == "passed" and proof["function"] == "failed"
+                     and device["installed_sha256"] == candidate and observed == plan)
+        if row["status"] != "failed" or not valid:
+            raise ValueError("反例没有对应到指定的失败阶段：" + folder)
+
+
+def verify_frozen_counterexamples(archive, checksums, status, addendum, counterexamples):
+    kinds = {"N01": "missing-abi", "N02": "missing-information", "N03": "contradictory-assertions"}
+    cases = list(kinds)
+    if (not addendum or status.get("offline_negative_cases") != cases
+            or sorted(item["sample"] for item in counterexamples) != [f"反例样本/{case}" for case in cases]):
+        raise ValueError("同版评审包的冻结反例范围不一致")
+    with ZipFile(BytesIO(archive.read(f"F01-源代码-v{status['version']}.zip"))) as code:
+        protocol = json.loads(code.read("tools/f01-p1c-cases.json"))
+        for case in (row for row in protocol["cases"] if row["class"] == "negative"):
+            prefix = f"反例样本/{case['id']}/"
+            base = hashlib.sha256(code.read(case["apk"])).hexdigest()
+            report = json.loads(archive.read(prefix + "agent-acceptance.json"))
+            expected = json.loads(archive.read(prefix + "expected-outcome.json"))
+            kind = kinds[case["id"]]
+            if (checksums[prefix + "base.apk"] != base or report["targets"] != [protocol["target"]]
+                    or report["steps"] != [{"action": a, "value": v} for a, v in case["steps"]]
+                    or expected.get("kind", "contradictory-assertions") != kind
+                    or (case["id"] != "N03" and checksums[prefix + "candidate.apk"] != base)):
+                raise ValueError("反例与同版源码中的冻结用例不一致：" + case["id"])
+
+
 def verify(path):
     with ZipFile(path) as archive:
         names = archive.namelist()
@@ -531,35 +599,15 @@ def verify(path):
             expected = json.loads(archive.read(folder + "/expected-outcome.json"))
             source = hashlib.sha256(archive.read(folder + "/base.apk")).hexdigest()
             candidate = hashlib.sha256(archive.read(folder + "/candidate.apk")).hexdigest()
-            plan = expected["steps"]
-            if (len(plan) != 2 or [s["action"] for s in plan] != ["expect", "absent"] or
-                    plan[0]["value"] != plan[1]["value"] or
-                    [s["status"] for s in plan] != ["passed", "failed"] or
-                    any(s["match_count"] < 1 for s in plan) or
-                    report["steps"] != [{k: s[k] for k in ("action", "value")} for s in plan]):
-                raise ValueError("反例没有声明可复核的矛盾断言：" + folder)
-            if (source != report["input_sha256"] or candidate != report["candidate_sha256"] or
-                    report["status"] != "incomplete" or expected["exit_code"] != 1 or
-                    len(report["rows"]) != len(report["targets"]) or not report["targets"]):
-                raise ValueError("反例身份、目标或未通过状态无效：" + folder)
-            targets = report["targets"]
-            if any(type(api) is not int for api in targets) or len(targets) != len(set(targets)):
-                raise ValueError("反例目标版本无效：" + folder)
-            for api, row in zip(targets, report["rows"]):
-                proof = row["candidate"]
-                if row["api"] != api or proof["device"]["api"] != api:
-                    raise ValueError("反例设备版本与复测目标不一致：" + folder)
-                observed = [{k: step[k] for k in ("action", "value", "status", "match_count")}
-                            for step in proof["steps"]]
-                if (row["status"] != "failed" or proof["install"] != "passed" or proof["launch"] != "passed" or
-                        proof["function"] != "failed" or proof["device"]["installed_sha256"] != candidate or
-                        observed != expected["steps"]):
-                    raise ValueError("反例没有对应到指定的行为失败：" + folder)
+            verify_counterexample(folder, report, expected, source, candidate)
             counterexamples.append({"sample": folder, "candidate_sha256": candidate, "status": "incomplete"})
         offline_windows = check_offline_windows(archive, checksums, status, samples)
         offline_cold_runtime = check_offline_cold_runtime(archive, checksums, status)
         offline_materials = check_offline_materials(archive, checksums, status, offline_windows or offline_cold_runtime)
         addendum = check_offline_addendum(archive, checksums, status, offline_materials)
+        if ("offline_negative_cases" in status
+                or any(item["sample"] in {"反例样本/N01", "反例样本/N02"} for item in counterexamples)):
+            verify_frozen_counterexamples(archive, checksums, status, addendum, counterexamples)
         return {"status": "archive-and-proofs-verified", "file_count": len(names),
                 "local_links_checked": check_local_links(archive, set(names)),
                 "samples": samples, "counterexamples": counterexamples,

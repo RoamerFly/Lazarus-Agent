@@ -17,7 +17,8 @@ from tools.verify_review_package import (
 )
 
 
-def build(delivery, materials, capture, output, reviewer_guide=None, rule_sample=None, evidence_dir=None):
+def build(delivery, materials, capture, output, reviewer_guide=None, rule_sample=None, evidence_dir=None,
+          negative_evidence=None):
     if output.exists():
         raise ValueError("请选择新的同版评审包输出路径")
     version = read(delivery / "本地构建回执.json")["version"]
@@ -71,6 +72,24 @@ def build(delivery, materials, capture, output, reviewer_guide=None, rule_sample
             files[name] = (evidence_dir / f"{version}-{label}.json").read_bytes()
         files[HANDOFF_PAIR] = (delivery / f"v{version}-文件交接对照复测包.zip").read_bytes()
         status["offline_review_addendum"] = "same-build-specialized-proofs"
+    negative_note = ""
+    if negative_evidence:
+        if not evidence_dir:
+            raise ValueError("冻结反例需要同版专项证据")
+        for case in ("N01", "N02"):
+            for name in ("base.apk", "candidate.apk", "agent-acceptance.json", "expected-outcome.json"):
+                files[f"反例样本/{case}/{name}"] = (negative_evidence / case / name).read_bytes()
+        files["复测样本.ps1"] = (ROOT / "tools/review_replay.ps1").read_text(encoding="utf-8-sig").encode("utf-8-sig")
+        status["offline_negative_cases"] = ["N01", "N02", "N03"]
+        negative_note = r"""
+三份冻结反例分别覆盖 ABI 不兼容、无法恢复的信息与矛盾断言。使用同一份 EXE 逐个复跑。
+
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\复测样本.ps1 -LocalBuild -App "..\Lazarus-Agent.exe" -Sample N01 -Counterexample
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\复测样本.ps1 -LocalBuild -App "..\Lazarus-Agent.exe" -Sample N02 -Counterexample
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\复测样本.ps1 -LocalBuild -App "..\Lazarus-Agent.exe" -Sample N03 -Counterexample
+
+N01 在安装阶段被拒绝。N02 使用未修改原包验证缺失信息断言，N03 使用已有标题修改候选。后两项均启动成功，功能断言未通过。
+"""
     files["复核状态.json"] = json.dumps(status, ensure_ascii=False, indent=2).encode()
     files["同版材料校验回执.json"] = json.dumps(receipt, ensure_ascii=False, indent=2).encode()
     if original["offline_cold_runtime"]:
@@ -102,7 +121,7 @@ def build(delivery, materials, capture, output, reviewer_guide=None, rule_sample
     powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\复测样本.ps1 -LocalBuild -App "..\Lazarus-Agent.exe" -Sample 工作台演示 -CheckOnly
 
 准备好 Android 16 后去掉 -CheckOnly 可复跑十步。[其他样本及反例说明](离线样本复测说明.md) · {windows_note}
-{addendum_note}
+{addendum_note}{negative_note}
 v0.6.24 的全组开发回归作为历史证据单列。
 """.encode()
     files["SHA256SUMS.txt"] = "".join(
@@ -130,5 +149,6 @@ if __name__ == "__main__":
     parser.add_argument("--reviewer-guide", type=Path)
     parser.add_argument("--rule-sample", type=Path)
     parser.add_argument("--evidence-dir", type=Path)
+    parser.add_argument("--negative-evidence", type=Path)
     paths = {name: path.resolve() if path else None for name, path in vars(parser.parse_args()).items()}
     print(json.dumps(build(**paths), ensure_ascii=False, indent=2))

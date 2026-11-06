@@ -161,6 +161,34 @@ class ReviewPackageTests(unittest.TestCase):
                         self.assertEqual(verify_review_package.check_signed_release(archive, checksums, status),
                                          {"version": "0.6.18", "source_commit": implementation})
 
+    def test_counterexample_requires_the_recorded_failure_stage(self):
+        digest = "a" * 64
+        install = {"exit": 1, "output": "INSTALL_FAILED_NO_MATCHING_ABIS"}
+        candidate = {"install": "failed", "launch": "not-run", "function": "not-run", "steps": [],
+                     "device": {"api": 36, "abis": ["x86_64"], "installed_sha256": None, "install": install}}
+        report = {"input_sha256": digest, "candidate_sha256": digest, "status": "incomplete",
+                  "targets": [36], "rows": [{"api": 36, "status": "failed", "candidate": candidate}],
+                  "steps": [{"action": "tap", "value": "Run"}, {"action": "expect", "value": "OK"}]}
+        expected = {"kind": "missing-abi", "exit_code": 1, "steps": []}
+        check = verify_review_package.verify_counterexample
+        check("N01", report, expected, digest, digest)
+        for output in ("INSTALL_FAILED_DEPRECATED_SDK_VERSION", "INSTALL_FAILED_INVALID_APK"):
+            with self.subTest(output=output):
+                install["output"] = output
+                with self.assertRaises(ValueError):
+                    check("N01", report, expected, digest, digest)
+
+        step = {"action": "expect", "value": "Code"}
+        missing = {**step, "status": "failed", "match_count": 0}
+        expected = {"kind": "missing-information", "exit_code": 1, "steps": [missing.copy()]}
+        report["steps"] = [step]
+        candidate.update(install="passed", launch="passed", function="failed", steps=[missing])
+        candidate["device"]["installed_sha256"] = digest
+        check("N02", report, expected, digest, digest)
+        missing["match_count"] = 1
+        with self.assertRaises(ValueError):
+            check("N02", report, expected, digest, digest)
+
     def test_counterexample_device_versions_must_match_target(self):
         base = b"test APK input"
         candidate = b"test APK output"

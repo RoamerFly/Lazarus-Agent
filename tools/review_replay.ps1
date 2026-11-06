@@ -71,14 +71,28 @@ if ($CheckOnly) {
         $actual.candidate_sha256 -ne $proof.candidate_sha256 -or
         (@($actual.targets) -join ',') -ne (@($proof.targets) -join ',') -or
         @($actual.rows).Count -ne @($proof.targets).Count) { throw '反例报告的身份、范围或状态不符合预期' }
+    $kind = if ($expected.kind) { $expected.kind } else { 'contradictory-assertions' }
+    if ($kind -cnotin @('contradictory-assertions','missing-information','missing-abi')) {
+        throw '无法复核未知的反例类型'
+    }
     for ($targetIndex = 0; $targetIndex -lt @($actual.targets).Count; $targetIndex++) {
         $row = $actual.rows[$targetIndex]
         $candidateResult = $row.candidate
+        $device = $candidateResult.device
         $api = $actual.targets[$targetIndex]
-        if ($row.api -ne $api -or $candidateResult.device.api -ne $api) { throw '反例设备版本与复测目标不一致' }
-        if ($row.status -ne 'failed' -or $candidateResult.install -ne 'passed' -or
-            $candidateResult.launch -ne 'passed' -or $candidateResult.function -ne 'failed' -or
-            $candidateResult.device.installed_sha256 -ne $proof.candidate_sha256 -or
+        if ($row.api -ne $api -or $device.api -ne $api) { throw '反例设备版本与复测目标不一致' }
+        if ($row.status -ne 'failed') { throw '反例获得了意外的验收结果' }
+        if ($kind -ceq 'missing-abi') {
+            if ($actual.input_sha256 -ne $actual.candidate_sha256 -or
+                $candidateResult.install -ne 'failed' -or $candidateResult.launch -ne 'not-run' -or
+                $candidateResult.function -ne 'not-run' -or $device.installed_sha256 -or
+                $device.install.exit -eq 0 -or ($device.abis -join ',') -cne 'x86_64' -or
+                $device.install.output -cnotmatch 'INSTALL_FAILED_NO_MATCHING_ABIS' -or
+                @($candidateResult.steps).Count -ne 0) { throw '反例没有在 ABI 安装检查处失败' }
+            continue
+        }
+        if ($candidateResult.install -ne 'passed' -or $candidateResult.launch -ne 'passed' -or
+            $candidateResult.function -ne 'failed' -or $device.installed_sha256 -ne $proof.candidate_sha256 -or
             @($candidateResult.steps).Count -ne @($expected.steps).Count) { throw '反例没有在指定的行为检查处失败' }
         for ($index = 0; $index -lt @($expected.steps).Count; $index++) {
             $observed = $candidateResult.steps[$index]
@@ -88,7 +102,7 @@ if ($CheckOnly) {
             }
         }
     }
-    Write-Output '反例复核符合预期：APK 已安装并启动，矛盾行为断言失败，候选未获功能验收。'
+    Write-Output '反例在预定的安装或功能检查阶段被拒绝。'
 } else {
     if ($actual.status -ne 'behavior-verified') { throw "未完成行为验收：$($actual.status)" }
     Write-Output '本次固定步骤的行为验收通过，适用系统和 ABI 见新报告。'
