@@ -1,0 +1,88 @@
+{
+  "source_commit": "9149285f01e1708ff69aa83c51fccf66b06c2258",
+  "api": 36,
+  "abi": "x86_64",
+  "scope": "Two observed passing candidates from source-only focused replay; fixed in-app behavior",
+  "rows": [
+    {
+      "trial": "P06-agent-1",
+      "record_uri": "ggbond-record://local/record.txt",
+      "candidate_sha256": "760618588da691ac2c06f849fc1ebba29d361c51767d2171a5c345302537b1fe",
+      "installed_sha256": "760618588da691ac2c06f849fc1ebba29d361c51767d2171a5c345302537b1fe",
+      "input_sha256": "55ca244e70ab959fbb179a04c757c1974821ff790578e8811a345f31e024d8da",
+      "acceptance_sha256": "26a91348a42be05cd5c345227ad826781aaf2ac508f38bad1fa164e32007d3fa",
+      "changes_sha256": "aa1ca2a42bf00cab1636f48274f6f93d89a1a5b504842658a1235f0bee2c7f32",
+      "install": "passed",
+      "launch": "passed",
+      "function": "passed",
+      "steps": [
+        {
+          "action": "tap",
+          "value": "Share local record",
+          "status": "passed"
+        },
+        {
+          "action": "expect",
+          "value": "Shared",
+          "status": "passed"
+        },
+        {
+          "action": "cold_start",
+          "value": null,
+          "status": "passed"
+        },
+        {
+          "action": "tap",
+          "value": "Share local record",
+          "status": "passed"
+        },
+        {
+          "action": "expect",
+          "value": "Shared",
+          "status": "passed"
+        }
+      ],
+      "distribution": "pending-external-probe"
+    },
+    {
+      "trial": "P06-agent-2",
+      "record_uri": "content://org.ggbond.archivereader.records/record",
+      "candidate_sha256": "442c1201a406e6ca76105a5a40ec500a6a220e1c0efa3775c2cbd4fad3ee0dbd",
+      "installed_sha256": "442c1201a406e6ca76105a5a40ec500a6a220e1c0efa3775c2cbd4fad3ee0dbd",
+      "input_sha256": "55ca244e70ab959fbb179a04c757c1974821ff790578e8811a345f31e024d8da",
+      "acceptance_sha256": "c5d0a8981ef291df5ce3ac42f4640d194ba6d0de5de35b8fccb9b8c75c32049e",
+      "changes_sha256": "12fc8ce84732034fffed123414b5ecfdc1abe4695294df95948bb3a8070a7ccf",
+      "install": "passed",
+      "launch": "passed",
+      "function": "passed",
+      "steps": [
+        {
+          "action": "tap",
+          "value": "Share local record",
+          "status": "passed"
+        },
+        {
+          "action": "expect",
+          "value": "Shared",
+          "status": "passed"
+        },
+        {
+          "action": "cold_start",
+          "value": null,
+          "status": "passed"
+        },
+        {
+          "action": "tap",
+          "value": "Share local record",
+          "status": "passed"
+        },
+        {
+          "action": "expect",
+          "value": "Shared",
+          "status": "passed"
+        }
+      ],
+      "distribution": "pending-external-probe"
+    }
+  ]
+}

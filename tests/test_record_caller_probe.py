@@ -35,6 +35,10 @@ class RecordCallerProbeTests(unittest.TestCase):
         self.assertEqual(result["record_uri"], "content://org.ggbond.archivereader.records/record")
         self.assertEqual([step["action"] for step in result["in_app_share"]], ["cold_start", "tap", "expect"])
 
+    def test_synthetic_application_scheme_is_accepted(self):
+        self.assertIsNotNone(probe.RECORD_URI.fullmatch("ggbond-record://local/record.txt"))
+        self.assertIsNone(probe.RECORD_URI.fullmatch("file://local/record.txt"))
+
     def test_known_uri_passes_exact_authority_and_path_to_the_separate_app(self):
         caller = Mock()
         caller.serial = "emulator-5578"

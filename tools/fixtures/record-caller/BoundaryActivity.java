@@ -24,7 +24,8 @@ public class BoundaryActivity extends Activity {
         String type = "application/vnd.ggbond.record";
         if (recordUri != null) {
             Uri uri = Uri.parse(recordUri);
-            if (!"content".equals(uri.getScheme()) || uri.getAuthority() == null) {
+            String scheme = uri.getScheme();
+            if (!("content".equals(scheme) || "ggbond-record".equals(scheme)) || uri.getAuthority() == null) {
                 status.setText("Invalid probe input");
                 return;
             }

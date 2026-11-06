@@ -19,7 +19,7 @@ from tools.replay_intent_boundary import TARGET, build_probe, wait_for
 CALLER = "org.ggbond.recordcaller"
 RECORD_PATHS = ("/record.txt", "/record")
 DEFAULT_AUTHORITY = "org.ggbond.archivereader.records"
-CONTENT_URI = re.compile(r"content://[a-zA-Z0-9_.-]+/[a-zA-Z0-9_./-]+")
+RECORD_URI = re.compile(r"(?:content|ggbond-record)://[a-zA-Z0-9_.-]+/[a-zA-Z0-9_./-]+")
 OUTCOMES = {
     (TARGET, "Shared"): "forged-success",
     (TARGET, "Cannot read record"): "target-rejected",
@@ -57,8 +57,8 @@ def replay(device, apk, expected, probe, *, uri_after_share=False, compare_uri=F
         raise ValueError("Unknown record path for this fixture")
     if record_uri is None:
         record_uri = f"content://{DEFAULT_AUTHORITY}{record_path}"
-    if not CONTENT_URI.fullmatch(record_uri):
-        raise ValueError("Expected a content URI with a literal authority and path")
+    if not RECORD_URI.fullmatch(record_uri):
+        raise ValueError("Expected a supported record URI with a literal authority and path")
     owner = "f01-record-caller"
     target = AgentDevice(device, owner, 36, bench.TOOLS, print)
     target_install = target.test(apk, expected)
@@ -120,11 +120,11 @@ def main():
                      help="Send the same known URI before and after the target writes its record")
     address = parser.add_mutually_exclusive_group()
     address.add_argument("--record-path", choices=RECORD_PATHS)
-    address.add_argument("--record-uri", help="Exact content URI observed in the synthetic candidate")
+    address.add_argument("--record-uri", help="Exact content or ggbond-record URI observed in the synthetic candidate")
     args = parser.parse_args()
-    if args.record_uri and (not CONTENT_URI.fullmatch(args.record_uri)
+    if args.record_uri and (not RECORD_URI.fullmatch(args.record_uri)
                             or not (args.uri_after_share or args.uri_before_and_after_share)):
-        parser.error("--record-uri requires a literal content URI and a URI replay mode")
+        parser.error("--record-uri requires a supported literal record URI and a URI replay mode")
     out = args.out.resolve()
     if not out.is_relative_to(ROOT / "build"):
         parser.error("Store probe evidence under the ignored build directory")

@@ -4,6 +4,6 @@
 
     python tools/replay_record_caller.py --apk <留档候选.apk> --sha256 <候选 SHA-256> --uri-before-and-after-share --record-uri <从候选核对的完整 content URI> --out build/record-caller-review
 
-旧命令中的 `--record-path` 仍可用于默认 authority 的两个历史路径。自定义 URI 只接受字面 authority 和路径。复测要求 Android 16 x86_64 专用模拟器，报告核对两个 UID、候选与设备安装哈希、实际发出的 URI 及前后 UI。结论范围只覆盖记录中的输入和候选。
+旧命令中的 `--record-path` 仍可用于默认 authority 的两个历史路径。除 content URI 外，探针支持本次自有样本的 ggbond-record URI。两者均要求字面 authority 和路径。复测要求 Android 16 x86_64 专用模拟器，报告核对两个 UID、候选与设备安装哈希、实际发出的 URI 及前后 UI。结论范围只覆盖记录中的输入和候选。
 
 本次已通过 Python 单元测试及探针 APK 编译、签名和包名回读。新版探针在 Android 16 上用 v0.6.22 固定候选完成设备校准。独立 UID 在应用内写入前被拒绝，写入后可触发接收页面显示 Shared。[校准回执](0.6.24-local-materials.json)旧版探针对三份 v0.6.22 候选的设备发现继续独立留档。[历史设备回执](0.6.22-external-uri-before-after.json)
