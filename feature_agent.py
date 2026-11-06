@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import re
 import shutil
+import subprocess
 import tempfile
 from urllib.parse import urlsplit
 
@@ -197,7 +198,12 @@ class Session:
                 expected_hash = self.build_report["sha256"]
             if (self.device_report or {}).get("installed_sha256") != expected_hash:
                 raise ValueError("请先成功安装要操作的原 APK 或最新候选")
-            return self.observe_device_result({**self.tester.action(**args), "tested_input": role})
+            try:
+                result = self.tester.action(**args)
+            except subprocess.TimeoutExpired:
+                self.device_report = None
+                raise
+            return self.observe_device_result({**result, "tested_input": role})
         if name == "finish" and set(args) == {"outcome", "summary"}:
             return self.finish(**args)
         raise ValueError("未知工具或参数格式无效")
@@ -399,6 +405,9 @@ def _loop(session, messages, definitions, allowed, config, progress):
                 progress("调用工具 · " + name)
                 value = session.dispatch(name, args)
                 evidence = {"ok": True, "result": value}
+            except subprocess.TimeoutExpired as exc:
+                evidence = {"ok": False, "error": f"工具执行超过 {exc.timeout:g} 秒，结果未确认。请先重新核对状态。"}
+                progress("工具执行超时，交由模型继续处理。")
             except (ValueError, TypeError, OSError, RuntimeError) as exc:
                 error = str(exc)
                 if config["key"]:
