@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "version": "0.6.29",
+  "source_commit": "0e95b5f14be122c2d06069db43ddeeeb473ffd6d",
+  "exe_sha256": "0f83908f99e9b2d39e0074bfd8eedb16f70ba1e51349c70f3d3edbec98ad30b8",
+  "scope": "reused dedicated Windows guest with fresh application storage",
+  "status": "first-download-and-reuse-verified",
+  "target_api": 36,
+  "windows": {
+    "name": "Windows Server 2022 Standard",
+    "build": "20348.1006",
+    "virtual_cpus_during_preparation": 1,
+    "initial_boot_stop_code": "0x7e",
+    "single_cpu_first_boot_stop_code": "0x50",
+    "guest_booted_after_automatic_restart": true
+  },
+  "first_use": {
+    "before_missing": [
+      "platform-tools",
+      "emulator",
+      "build-tools",
+      "system-image",
+      "java"
+    ],
+    "invalid_requests": [
+      {
+        "value": "false",
+        "http": 400
+      },
+      {
+        "value": "\"false\"",
+        "http": 400
+      },
+      {
+        "value": "\"true\"",
+        "http": 400
+      },
+      {
+        "value": "1",
+        "http": 400
+      },
+      {
+        "value": "[true]",
+        "http": 400
+      },
+      {
+        "value": "{\"checked\":true}",
+        "http": 400
+      },
+      {
+        "value": "null",
+        "http": 400
+      }
+    ],
+    "invalid_requests_started_preparation": false,
+    "authorized_download_started": true,
+    "components": [
+      {
+        "id": "platform-tools",
+        "downloaded_bytes": 8044989,
+        "publisher_hash_checked": true
+      },
+      {
+        "id": "emulator",
+        "downloaded_bytes": 455344678,
+        "publisher_hash_checked": true
+      },
+      {
+        "id": "build-tools;36.0.0",
+        "downloaded_bytes": 58699878,
+        "publisher_hash_checked": true
+      },
+      {
+        "id": "system-image",
+        "downloaded_bytes": 844217077,
+        "publisher_hash_checked": true
+      },
+      {
+        "id": "java",
+        "downloaded_bytes": 49106397,
+        "publisher_hash_checked": true
+      }
+    ],
+    "downloaded_bytes": 1415413019,
+    "elapsed_seconds": 309.3,
+    "poll_failures": 0,
+    "reuse_without_download": true
+  },
+  "probe": {
+    "adb_version": "Android Debug Bridge version 1.0.41",
+    "java_version": "openjdk 21.0.13 2026-10-20 LTS",
+    "verified_paths": [
+      "lab-sdk\\platform-tools\\adb.exe",
+      "lab-sdk\\emulator\\emulator.exe",
+      "lab-sdk\\build-tools\\36.0.0\\lib\\apksigner.jar",
+      "lab-sdk\\system-images\\android-36\\default\\x86_64\\system.img",
+      "java\\bin\\java.exe",
+      "java\\bin\\keytool.exe"
+    ],
+    "emulator_acceleration_exit": 3,
+    "acceleration_output_included_split_path_arguments": true,
+    "short_path_probe": "guest-tools-unavailable-after-restart",
+    "guest_device_steps_run": false
+  },
+  "evidence_sha256": {
+    "guest_preparation_receipt": "401da9cc76f1acd4ce0fee375d50ecf9dbf6587f23aeebe98c28528ce5cd2f8a",
+    "independent_component_probe": "dbfb682cbe58d68e84267548b2f5519083bddc156826c4b6be684a34f97844e4"
+  },
+  "network_model_calls": 0
+}
