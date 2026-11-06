@@ -1,0 +1,17 @@
+{
+  "version": "0.6.24",
+  "source_commit": "b60c33230318c526ec4fb831b870ce2569e2cc40",
+  "protocol_sha256": "aa7f164a5247d363a792d59e47c5fee88400e88da94fcf2c37100d11303368f9",
+  "case": "P01",
+  "input_sha256": "08ed16b9f6a149bd8063bae99dd72aad200dafea7d3a0504af004187bde20deb",
+  "target_api": 36,
+  "step_count": 10,
+  "http": {
+    "page": 200,
+    "import": 200,
+    "unconfigured_model": 400,
+    "invalid_steps": 400,
+    "accepted": 200
+  },
+  "scope": "real workbench page and HTTP intake; background worker intercepted before model, build or device"
+}
