@@ -12,6 +12,45 @@ from tools.verify_review_package import verify
 
 
 class ReviewPackageTests(unittest.TestCase):
+    def test_empty_storage_preparation_requires_current_binary_and_all_downloads(self):
+        identity = {"version": "0.6.28", "source_commit": "a" * 40, "exe_sha256": "b" * 64}
+        scope = "same-exe-empty-storage-runtime"
+        status = {**identity, "mode": "offline-trace-development-samples", "offline_cold_runtime": scope}
+        components = sorted(verify_review_package.COLD_COMPONENTS)
+        runtime = {"status": "ready", "version": identity["version"], "api": 36,
+                   "terms_accepted": True, "missing": [], "reuse_without_download": True,
+                   "components": dict.fromkeys(components, True)}
+        downloads = {name: {"current": 1, "total": 1} for name in components}
+        started = {"request_started": True, "status": "ready", "ready": True, "missing": [],
+                   "reuse_without_download": True, "verified": components, "before_missing": components, "downloads": downloads,
+                   "invalid_requests": [{"value": value, "http": 400} for value in
+                                        ('false', '"false"', '"true"', '1', '[true]', '{"checked":true}', 'null')]}
+        install = {**identity, "installed_exe_sha256": identity["exe_sha256"], "install_exit": 0,
+                   "installed_self_test_exit": 0, "uninstall_exit": 0, "isolated_registration_removed": True,
+                   "exported_output_preserved": True}
+        valid = {**identity, "schema": 1, "status": scope, "windows": "Windows Server 2022", "api": 36,
+                 "network_model_calls": 0, "preparation": started, "runtime": runtime, "install": install,
+                 "interactive_desktop_verified": False, "device_steps_on_guest": 0}
+        cases = (
+            ({}, True),
+            ({"exe_sha256": "c" * 64}, False),
+            ({"preparation": {**started, "downloads": {key: value for key, value in downloads.items()
+                                                        if key != "java"}}}, False),
+            ({"runtime": {**runtime, "reuse_without_download": False}}, False),
+            ({"interactive_desktop_verified": True}, False),
+        )
+        name = verify_review_package.COLD_WINDOWS_FILE
+        for changes, accepted in cases:
+            with self.subTest(changes=changes), ZipFile(BytesIO(), "w") as archive:
+                archive.writestr("本地构建回执.json", json.dumps({**identity, "self_test_exit": 0}))
+                archive.writestr(name, json.dumps({**valid, **changes}))
+                check = verify_review_package.check_offline_cold_runtime
+                if accepted:
+                    self.assertEqual(check(archive, {name: "checksum"}, status)["components"], components)
+                else:
+                    with self.assertRaisesRegex(ValueError, "首次准备"):
+                        check(archive, {name: "checksum"}, status)
+
     def test_local_regression_binds_build_and_counterexample_report(self):
         version, commit, exe_hash = "0.6.22", "a" * 40, "b" * 64
         audited = {"app_version": version, "implementation_commit": commit,

@@ -1,5 +1,6 @@
 """Capture the workbench with recorded tool calls and real Android acceptance."""
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -19,14 +20,18 @@ def capture(source, output, port):
     commit = subprocess.check_output(["git", "-C", str(source), "rev-parse", "HEAD"], text=True).strip()
     if subprocess.check_output(["git", "-C", str(source), "status", "--porcelain"]):
         raise ValueError("使用干净的候选源码检出目录")
-    build = json.loads((ROOT / "docs/validation/0.6.25-local-exe.json").read_text(encoding="utf-8"))
-    if build["source_commit"] != commit:
+    build = json.loads((source / "build/local-exe-selftest-receipt.json").read_text(encoding="utf-8-sig"))
+    with (source / "dist/Lazarus-Agent.exe").open("rb") as executable:
+        exe_sha256 = hashlib.file_digest(executable, "sha256").hexdigest()
+    if (build["source_commit"] != commit or build["self_test_exit"] != 0
+            or build["exe_sha256"] != exe_sha256):
         raise ValueError("录制源码必须与候选 EXE 的构建回执一致")
     output.mkdir(parents=True, exist_ok=False)
     for key in tuple(os.environ):
         if key.upper().startswith(("LAZARUS_", "REVIVER_MODEL_")):
             del os.environ[key]
     os.environ.update(LAZARUS_STORAGE_ROOT=str(output / "storage"), LAZARUS_MIGRATE_LEGACY="0",
+                      REVIVER_PORT=str(port),
                       REVIVER_MODEL_URL="http://127.0.0.1:1", REVIVER_MODEL="recorded-tools",
                       REVIVER_MODEL_KEY="offline-placeholder")
     sys.path.insert(0, str(source))
@@ -156,7 +161,8 @@ def capture(source, output, port):
                 raise ValueError("设备截图与已验收 APK 不符")
             screenshot = output / "device-final.png"
             screenshot.write_bytes(shot.stdout)
-            save("capture.json", {"app_version": APP_VERSION, "source_commit": commit, "mode": "recorded-tools",
+            save("capture.json", {"app_version": APP_VERSION, "source_commit": commit, "exe_sha256": exe_sha256,
+                 "mode": "recorded-tools",
                  "network_model_calls": 0, "replayed_tool_calls": index, "job_id": job,
                  "candidate_sha256": candidate["sha256"], "input_sha256": candidate["source_sha256"],
                  "trace_sha256": digest_file(ROOT / "docs/validation/recorded-edit-fixtures/P01.json"), "frames": frames,

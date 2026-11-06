@@ -13,10 +13,10 @@ sys.path.insert(0, str(ROOT))
 from agent_acceptance import verified_for
 from tools.package_agent_review import FILE_CHECK_SCRIPT, digest, read
 from tools.run_f01_p1 import plan
-from tools.verify_review_package import OFFLINE_WINDOWS_FILES, verify
+from tools.verify_review_package import COLD_WINDOWS_FILE, OFFLINE_WINDOWS_FILES, verify
 
 
-def build(source, results, exe, output, windows_evidence=None):
+def build(source, results, exe, output, windows_evidence=None, cold_runtime_evidence=None):
     if output.exists() or not results or any(not path.is_relative_to(source / "build") for path in results):
         raise ValueError("请选择新的输出包及候选检出目录内的复测结果")
     commit = subprocess.check_output(["git", "-C", str(source), "rev-parse", "HEAD"], text=True).strip()
@@ -102,6 +102,11 @@ def build(source, results, exe, output, windows_evidence=None):
         status["offline_windows"] = "fresh-install-inputs-and-desktop"
         windows_note = ("\nWindows 证据目录附新装系统回执、桌面截图与当时实际核验的原始 ZIP。"
                         "干净系统上的 Android 环境准备与设备步骤需另行验收。\n")
+    if cold_runtime_evidence:
+        files[COLD_WINDOWS_FILE] = cold_runtime_evidence.read_bytes()
+        status["offline_cold_runtime"] = "same-exe-empty-storage-runtime"
+        windows_note += ("\nWindows 证据目录附同一份 EXE 从空目录下载、复用及隔离安装回执。"
+                         "虚拟机的交互桌面启动与 Android 行为另行验收。\n")
     negative_note = ""
     if counterexamples:
         negative_note = fr"""
@@ -143,9 +148,11 @@ if __name__ == "__main__":
     for field in ("source", "exe", "output"):
         parser.add_argument("--" + field, type=Path, required=True)
     parser.add_argument("--results", type=Path, action="append", required=True)
-    parser.add_argument("--windows-evidence", type=Path)
+    windows_input = parser.add_mutually_exclusive_group()
+    windows_input.add_argument("--windows-evidence", type=Path)
+    windows_input.add_argument("--cold-runtime-evidence", type=Path)
     args = parser.parse_args()
     windows = args.windows_evidence.resolve() if args.windows_evidence else None
     receipt = build(args.source.resolve(), [path.resolve() for path in args.results],
-                    args.exe.resolve(), args.output.resolve(), windows)
+                    args.exe.resolve(), args.output.resolve(), windows, args.cold_runtime_evidence)
     print(json.dumps(receipt, ensure_ascii=False, indent=2))

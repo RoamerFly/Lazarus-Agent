@@ -21,6 +21,8 @@ OFFLINE_WINDOWS_FILES = {
     "Windows复核/工作台.png": "干净 Windows 工作台.png",
     "Windows复核/当时复测样本.zip": "v{version}-离线编辑设备复测包.zip",
 }
+COLD_WINDOWS_FILE = "Windows复核/同版空目录准备回执.json"
+COLD_COMPONENTS = {"platform-tools", "emulator", "build-tools", "system-image", "java"}
 
 
 def check_local_links(archive, names):
@@ -309,6 +311,42 @@ def check_offline_windows(archive, checksums, status, samples):
     return {"status": evidence, "os": baseline["product"], "checked_inputs": checked_cases}
 
 
+def check_offline_cold_runtime(archive, checksums, status):
+    scope = status.get("offline_cold_runtime")
+    if scope is None and COLD_WINDOWS_FILE not in checksums:
+        return None
+    if scope != "same-exe-empty-storage-runtime" or COLD_WINDOWS_FILE not in checksums:
+        raise ValueError("离线复测包缺少同版空目录准备回执")
+    receipt = json.loads(archive.read(COLD_WINDOWS_FILE))
+    build = json.loads(archive.read("本地构建回执.json"))
+    started, prepared, install = (receipt[key] for key in ("preparation", "runtime", "install"))
+    downloaded = {key.split(";")[0] for key, value in started["downloads"].items()
+                  if value["current"] == value["total"] and value["total"] > 0}
+    if (receipt["schema"] != 1 or receipt["status"] != scope or status["mode"] != "offline-trace-development-samples"
+            or any(receipt[key] != status[key] or receipt[key] != build[key] or receipt[key] != install[key]
+                   for key in ("version", "source_commit", "exe_sha256"))
+            or build["self_test_exit"] != 0 or receipt["api"] != 36 or receipt["network_model_calls"] != 0
+            or started["request_started"] is not True or started["status"] != "ready" or started["missing"]
+            or started["ready"] is not True or started["reuse_without_download"] is not True
+            or len(started["invalid_requests"]) != 7
+            or {row["value"] for row in started["invalid_requests"]} !=
+                {'false', '"false"', '"true"', '1', '[true]', '{"checked":true}', 'null'}
+            or any(row["http"] != 400 for row in started["invalid_requests"])
+            or set(started["before_missing"]) != COLD_COMPONENTS or downloaded != COLD_COMPONENTS
+            or {name.split(";")[0] for name in started["verified"]} != COLD_COMPONENTS
+            or set(prepared["components"]) != COLD_COMPONENTS
+            or any(value is not True for value in prepared["components"].values())
+            or prepared["version"] != status["version"] or prepared["api"] != 36 or prepared["terms_accepted"] is not True
+            or prepared["status"] != "ready" or prepared["missing"] or prepared["reuse_without_download"] is not True
+            or install["installed_exe_sha256"] != status["exe_sha256"]
+            or any(install[key] != 0 for key in ("install_exit", "installed_self_test_exit", "uninstall_exit"))
+            or install["isolated_registration_removed"] is not True or install["exported_output_preserved"] is not True
+            or receipt["interactive_desktop_verified"] is not False or receipt["device_steps_on_guest"] != 0):
+        raise ValueError("同版首次准备、组件复用或隔离安装证据不一致")
+    return {"status": scope, "os": receipt["windows"], "api": 36,
+            "components": sorted(COLD_COMPONENTS), "interactive_desktop_verified": False}
+
+
 def check_offline_materials(archive, checksums, status, windows):
     scope = status.get("offline_materials")
     if scope is None and "遗留软件复活智能体离线演示.mp4" not in checksums:
@@ -338,6 +376,8 @@ def check_offline_materials(archive, checksums, status, windows):
     if (record["app_version"] != version or record["video_sha256"] != receipt["video_sha256"]
             or record["duration_planned_seconds"] != receipt["video_seconds"]
             or capture["app_version"] != version or capture["source_commit"] != commit
+            or capture.get("exe_sha256", None if status.get("offline_cold_runtime") else status["exe_sha256"])
+                != status["exe_sha256"]
             or capture["mode"] != "recorded-tools" or capture["network_model_calls"] != 0
             or capture["trace_sha256"] != checksums.get("可复跑轨迹/P01.json")
             or capture["input_sha256"] != report["input_sha256"]
@@ -423,7 +463,8 @@ def verify(path):
                     raise ValueError("反例没有对应到指定的行为失败：" + folder)
             counterexamples.append({"sample": folder, "candidate_sha256": candidate, "status": "incomplete"})
         offline_windows = check_offline_windows(archive, checksums, status, samples)
-        offline_materials = check_offline_materials(archive, checksums, status, offline_windows)
+        offline_cold_runtime = check_offline_cold_runtime(archive, checksums, status)
+        offline_materials = check_offline_materials(archive, checksums, status, offline_windows or offline_cold_runtime)
         return {"status": "archive-and-proofs-verified", "file_count": len(names),
                 "local_links_checked": check_local_links(archive, set(names)),
                 "samples": samples, "counterexamples": counterexamples,
@@ -431,7 +472,7 @@ def verify(path):
                 "release_regression": release_regression,
                 "local_regression": local_regression,
                 "local_review": local_review, "offline_windows": offline_windows,
-                "offline_materials": offline_materials,
+                "offline_cold_runtime": offline_cold_runtime, "offline_materials": offline_materials,
                 "scope": "Files, checksums and stored proofs. Device replay is a separate operation."}
 
 

@@ -11,7 +11,7 @@ from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from tools.package_agent_review import digest, read
-from tools.verify_review_package import LOCAL_DEMO, verify
+from tools.verify_review_package import COLD_WINDOWS_FILE, LOCAL_DEMO, verify
 
 
 def build(delivery, materials, capture, output):
@@ -21,7 +21,8 @@ def build(delivery, materials, capture, output):
     samples = delivery / f"v{version}-离线样本与Windows复核包.zip"
     original = verify(samples)
     status = original["package_status"]
-    if (not original["offline_windows"] or original["offline_materials"] or status["version"] != version
+    if (not (original["offline_windows"] or original["offline_cold_runtime"])
+            or original["offline_materials"] or status["version"] != version
             or status["exe_sha256"] != digest(delivery / "Lazarus-Agent.exe")):
         raise ValueError("样本包与交付 EXE 不一致或已包含同版材料")
     with ZipFile(samples) as archive:
@@ -47,6 +48,13 @@ def build(delivery, materials, capture, output):
     status["offline_materials"] = "same-build-offline-review"
     files["复核状态.json"] = json.dumps(status, ensure_ascii=False, indent=2).encode()
     files["同版材料校验回执.json"] = json.dumps(receipt, ensure_ascii=False, indent=2).encode()
+    if original["offline_cold_runtime"]:
+        windows_note = (f"[同版空目录准备回执]({COLD_WINDOWS_FILE})\n\n"
+                        "专用 Windows 虚拟机从空目录完成组件下载与复用，另完成隔离安装、自检及卸载。"
+                        "交互桌面启动和虚拟机内的 Android 行为仍待复核。")
+    else:
+        windows_note = ("[干净 Windows 回执](Windows复核/干净Windows复测回执.json)\n\n"
+                        "干净 Windows 已验证安装、桌面启动和两份样本输入，首次下载 Android 环境和设备步骤仍待同版复核。")
     files["从这里开始.md"] = fr"""# v{version} F01 同版离线评审
 
 [六页方案](遗留软件复活智能体方案说明.pdf) · [工作台演示](遗留软件复活智能体离线演示.mp4) · [构建源码](F01-源代码-v{version}.zip) · [同版回执](同版材料校验回执.json)
@@ -58,9 +66,9 @@ def build(delivery, materials, capture, output):
     powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\校验文件.ps1
     powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\复测样本.ps1 -LocalBuild -App "..\Lazarus-Agent.exe" -Sample 工作台演示 -CheckOnly
 
-准备好 Android 16 后去掉 -CheckOnly 可复跑十步。[其他样本及反例说明](离线样本复测说明.md) · [干净 Windows 回执](Windows复核/干净Windows复测回执.json)
+准备好 Android 16 后去掉 -CheckOnly 可复跑十步。[其他样本及反例说明](离线样本复测说明.md) · {windows_note}
 
-干净 Windows 已验证安装、桌面启动和两份样本输入，首次下载 Android 环境和设备步骤仍待同版复核。v0.6.24 的全组开发回归作为历史证据单列。
+v0.6.24 的全组开发回归作为历史证据单列。
 """.encode()
     files["SHA256SUMS.txt"] = "".join(
         f"{hashlib.sha256(data).hexdigest()}  {name}\n" for name, data in sorted(files.items())

@@ -1,0 +1,91 @@
+{
+  "app_version": "0.6.28",
+  "source_commit": "cbd58ed08345f5c7f61d127d8ba989f8eca4d5ab",
+  "exe_sha256": "058d59a6a90c266129765191a449e1eb02ccdf1ee1c5ea348ae9a349b84e3b08",
+  "source_archive_sha256": "df8bcdfd4c20d64767b730d778609ec50e340c37604ba1a90a91a869a4311161",
+  "proposal_sha256": "ec45b616a015aff72bdb825eabaebbc2c314ae18f46eabd3daf4fb5e58e07b87",
+  "video_sha256": "4c92be3a54223c51a7f1a8fc6404d0cfaade4b85b7ba9c5fb542a0ee028986fd",
+  "video_record_sha256": "a15a3f1fca6de3e977306f74ae1662b3061f0cbdf8e7df353b04319795ea69c7",
+  "video_seconds": 51,
+  "device_screen_sha256": "aee78248896d757d89b814d7d5d5396ea552f11b7b62c338ece51beee500183f",
+  "acceptance_sha256": "3874910cc513cac76fe18f3f83602c88d82d575fd725b4d2cde4aec7ac4b4a96",
+  "archive_sha256": "34abe93769d0a268c0818dd055a2482e64f9d65f201caedcfca0514f3b54c9a6",
+  "bytes": 3120255,
+  "file_count": 45,
+  "offline_materials": {
+    "status": "same-build-offline-review",
+    "version": "0.6.28",
+    "demo_steps": 10,
+    "network_model_calls": 0
+  },
+  "cross_app_replay": {
+    "version": "0.6.28",
+    "source_commit": "cbd58ed08345f5c7f61d127d8ba989f8eca4d5ab",
+    "exe_sha256": "058d59a6a90c266129765191a449e1eb02ccdf1ee1c5ea348ae9a349b84e3b08",
+    "api": 36,
+    "abi": "x86_64",
+    "network_model_calls": 0,
+    "plan_sha256": "e5dfc87596263ae4863a058156136f61148727e86c4845460b512fcd7ae805be",
+    "rows": [
+      {
+        "case": "N03",
+        "candidate_sha256": "fb180169f40a279c6e867bf82516e1cbff13ff319eca2a938ca4945902244507",
+        "steps": 2,
+        "status": "incomplete",
+        "device_report_sha256": "6307e260a54ab549df2a387693bc2364a66aaccc0b0bd9529587c1d6b69da771",
+        "exe_input_check_sha256": "882da57fd71944dcda0733c4b229547c608bf862788f2a19f0fc69dbc8736599"
+      },
+      {
+        "case": "P01",
+        "candidate_sha256": "0759f2a23db781a05eaeb03710e179e922d289ef66ff91151e4119996e64fa3f",
+        "steps": 10,
+        "status": "behavior-verified",
+        "device_report_sha256": "fb56b7cc4d168ee62ed881386053afcd19de3fab5924f9c3a6cc13dea481c508",
+        "exe_input_check_sha256": "7811a69fccc818268b8ae95b051e101ab6601b2dbc2e7bc498888a107991f11b"
+      },
+      {
+        "case": "P03",
+        "candidate_sha256": "cb3aaa79a4be959462ed5a2a504ea511474550ddd888affc07e29d13e7fc0f84",
+        "steps": 4,
+        "status": "behavior-verified",
+        "device_report_sha256": "aacfc7dd1357520e96e2113eb1bc47abab7074aaf79068ddc55faf2da319c32e",
+        "exe_input_check_sha256": "ac98b2234d35b5740be5f770202ed1957e5e5a790278f6b345db32f1a836b78e"
+      },
+      {
+        "case": "P04",
+        "candidate_sha256": "01a54eef2904b6fad61c422161cdaf92b371518411cb94a59642c37a7b9d12da",
+        "steps": 16,
+        "status": "behavior-verified",
+        "device_report_sha256": "ac44da43c81aafb0764003405432659990af51477586dd513f2fc93c0929886e",
+        "exe_input_check_sha256": "6a3a50c65bb9fd995fb1dd4d04fe8a435d19e2c83c4c546460c0a7dc67695dcc"
+      },
+      {
+        "case": "P05",
+        "candidate_sha256": "6ed0b49e7dcca6db56212c5e64f8b7be9b759c83932be2068f4618f3025ac993",
+        "steps": 8,
+        "status": "behavior-verified",
+        "device_report_sha256": "c60ab38b0f24b320e8104461fef9a85894374e03fe8ccf384a0eb6b29e44483a",
+        "exe_input_check_sha256": "bd7908273a7bbafef004db0c8906e7b5f5156c9bbd507b96b5fd1dc7df1f16dc"
+      }
+    ]
+  },
+  "proposal_pages": 6,
+  "device_replay": {
+    "case": "P01-workbench-demo",
+    "status": "behavior-verified",
+    "steps_passed": 10,
+    "api": 36,
+    "abi": "x86_64",
+    "candidate_sha256": "6b886a900c578a83df01b28700de43c1d9d77be747812486436d4cd77c458353",
+    "input_check_sha256": "088a9d4227f74bd918d635174cbacb58fbaa6aa52b19fe21116e14a9567b5611",
+    "report_sha256": "b683db31c251d42a5d779c628493c8966a1b39b0468c1071a0a73c9af0f99924"
+  },
+  "archive_verified": true,
+  "archive_links_checked": 7,
+  "inputs_verified": 6,
+  "tamper_checks": {
+    "partial-java": "同版首次准备、组件复用或隔离安装证据不一致",
+    "different-capture-exe": "离线演示的轨迹、原包、录制或 Android 验收证据不一致"
+  },
+  "network_model_calls": 0
+}

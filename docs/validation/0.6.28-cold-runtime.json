@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "version": "0.6.28",
+  "source_commit": "cbd58ed08345f5c7f61d127d8ba989f8eca4d5ab",
+  "exe_sha256": "058d59a6a90c266129765191a449e1eb02ccdf1ee1c5ea348ae9a349b84e3b08",
+  "status": "same-exe-empty-storage-runtime",
+  "api": 36,
+  "windows": "Windows Server 2022 Standard, dedicated review VM",
+  "preparation": {
+    "request_started": true,
+    "invalid_requests": [
+      {
+        "value": "false",
+        "http": 400
+      },
+      {
+        "value": "\"false\"",
+        "http": 400
+      },
+      {
+        "value": "\"true\"",
+        "http": 400
+      },
+      {
+        "value": "1",
+        "http": 400
+      },
+      {
+        "value": "[true]",
+        "http": 400
+      },
+      {
+        "value": "{\"checked\":true}",
+        "http": 400
+      },
+      {
+        "value": "null",
+        "http": 400
+      }
+    ],
+    "before_missing": [
+      "platform-tools",
+      "emulator",
+      "build-tools",
+      "system-image",
+      "java"
+    ],
+    "downloads": {
+      "platform-tools": {
+        "current": 8044989,
+        "total": 8044989
+      },
+      "emulator": {
+        "current": 455344678,
+        "total": 455344678
+      },
+      "build-tools;36.0.0": {
+        "current": 58699878,
+        "total": 58699878
+      },
+      "system-image": {
+        "current": 844217077,
+        "total": 844217077
+      },
+      "java": {
+        "current": 49106397,
+        "total": 49106397
+      }
+    },
+    "verified": [
+      "platform-tools",
+      "emulator",
+      "build-tools;36.0.0",
+      "system-image",
+      "java"
+    ],
+    "status": "ready",
+    "ready": true,
+    "missing": [],
+    "reuse_without_download": true,
+    "elapsed_seconds": 827.3,
+    "poll_failures": 0
+  },
+  "runtime": {
+    "status": "ready",
+    "version": "0.6.28",
+    "api": 36,
+    "terms_accepted": true,
+    "components": {
+      "platform-tools": true,
+      "emulator": true,
+      "build-tools": true,
+      "system-image": true,
+      "java": true
+    },
+    "missing": [],
+    "reuse_without_download": true,
+    "verification_mode": "bundled candidate runtime code",
+    "network_model_calls": 0
+  },
+  "install": {
+    "scope": "isolated install on existing Windows; no Android device",
+    "version": "0.6.28",
+    "source_commit": "cbd58ed08345f5c7f61d127d8ba989f8eca4d5ab",
+    "installer_script_sha256": "07457811c226d7f56ed231bcd583202b5ed173dfdf9134273005cc0a32aa6944",
+    "nsis_version": "v3.11",
+    "installer_sha256": "169ab479e30834182eea00c0ebcaad99706f9f767b3854e0ba3f50d3db65cdea",
+    "exe_sha256": "058d59a6a90c266129765191a449e1eb02ccdf1ee1c5ea348ae9a349b84e3b08",
+    "installed_exe_sha256": "058d59a6a90c266129765191a449e1eb02ccdf1ee1c5ea348ae9a349b84e3b08",
+    "install_exit": 0,
+    "installed_self_test_exit": 0,
+    "uninstall_exit": 0,
+    "system_only_path_for_self_test": true,
+    "isolated_registration_removed": true,
+    "exported_output_preserved": true
+  },
+  "host_desktop": {
+    "status": "native-window-and-workbench-observed",
+    "scope": "current Windows host with isolated storage",
+    "app_version": "0.6.28",
+    "exe_sha256": "058d59a6a90c266129765191a449e1eb02ccdf1ee1c5ea348ae9a349b84e3b08",
+    "window_title": "Lazarus Agent",
+    "desktop_protocol": 1,
+    "workbench_http": 200,
+    "renderer_processes": 6,
+    "model_enabled": false,
+    "visual_capture": "failed to activate captured window",
+    "network_model_calls": 0
+  },
+  "interactive_desktop_verified": false,
+  "device_steps_on_guest": 0,
+  "adb_version": "Version 37.0.1-15733141",
+  "java_version": "openjdk version \"21.0.13\" 2026-10-20 LTS",
+  "emulator_acceleration_exit": 3,
+  "network_model_calls": 0
+}

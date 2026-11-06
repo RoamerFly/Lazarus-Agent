@@ -1,0 +1,47 @@
+{
+  "source_commit": "cbd58ed08345f5c7f61d127d8ba989f8eca4d5ab",
+  "exe_sha256": "058d59a6a90c266129765191a449e1eb02ccdf1ee1c5ea348ae9a349b84e3b08",
+  "source_sha256": "55ca244e70ab959fbb179a04c757c1974821ff790578e8811a345f31e024d8da",
+  "api": 36,
+  "abi": "x86_64",
+  "network_model_calls": 0,
+  "control_plan_sha256": "7ef9f1183fa4035c6273dd75b7317a98857ba6877fb51b6d2e6dacdc32edae6f",
+  "rows": {
+    "prior-agent-candidate": {
+      "install": "passed",
+      "launch": "passed",
+      "function": "passed",
+      "candidate_sha256": "a6847a793519982ccc2f85b9284e1d5dd2127ab9652da82c1dbd53456ee9fd7d",
+      "device_report_sha256": "bbbe626d90e2b771b4fc767354e19ed2dbbe74817396be2c78ecdb210f648a48",
+      "step_statuses": [
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed"
+      ]
+    },
+    "roundtrip": {
+      "install": "failed",
+      "launch": "not-run",
+      "function": "not-run",
+      "candidate_sha256": "170f3b70802291014f61b2e4cd51c60748f1b973cad64e3f3a6244eae14afbea",
+      "device_report_sha256": "7d786b6070cb8ab6ce27cdd307a28ea8205538d6894eb416f7fef6c6fa7d1b19",
+      "step_statuses": []
+    },
+    "installation-floor": {
+      "install": "passed",
+      "launch": "passed",
+      "function": "failed",
+      "candidate_sha256": "9eaea28d5bec82134461f06a04ee6850168aeecd6c31516fe19a9084e011ca4b",
+      "device_report_sha256": "6879982a80d88eb8163949923428af232cea87c1df1bd76d96e3cbd34d93bd66",
+      "step_statuses": [
+        "passed",
+        "failed"
+      ]
+    }
+  },
+  "archive_sha256": "8fa857cfbc95711a025f54bca3fd75e744b45cccb0bcf13e8bce9dc08c34769f",
+  "archive_bytes": 36923,
+  "earlier_external_uid_evidence_version": "0.6.26"
+}

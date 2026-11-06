@@ -1,0 +1,36 @@
+{
+  "archive": {
+    "mode": "offline-trace-development-samples",
+    "version": "0.6.28",
+    "source_commit": "cbd58ed08345f5c7f61d127d8ba989f8eca4d5ab",
+    "exe_sha256": "058d59a6a90c266129765191a449e1eb02ccdf1ee1c5ea348ae9a349b84e3b08",
+    "network_model_calls": 0,
+    "samples": {
+      "P01": {
+        "candidate_sha256": "0759f2a23db781a05eaeb03710e179e922d289ef66ff91151e4119996e64fa3f",
+        "steps": 10
+      },
+      "P03": {
+        "candidate_sha256": "cb3aaa79a4be959462ed5a2a504ea511474550ddd888affc07e29d13e7fc0f84",
+        "steps": 4
+      },
+      "P04": {
+        "candidate_sha256": "01a54eef2904b6fad61c422161cdaf92b371518411cb94a59642c37a7b9d12da",
+        "steps": 16
+      },
+      "P05": {
+        "candidate_sha256": "6ed0b49e7dcca6db56212c5e64f8b7be9b759c83932be2068f4618f3025ac993",
+        "steps": 8
+      }
+    },
+    "counterexamples": {
+      "N03": {
+        "candidate_sha256": "fb180169f40a279c6e867bf82516e1cbff13ff319eca2a938ca4945902244507",
+        "steps": 2
+      }
+    },
+    "offline_cold_runtime": "same-exe-empty-storage-runtime",
+    "archive_sha256": "d28f0c4a9fb8b4d9b5b09ad3cd049f2c15a11fb1f7d6a42bf277a40a5b5eff8f",
+    "bytes": 100837
+  }
+}

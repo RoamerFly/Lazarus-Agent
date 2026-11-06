@@ -50,6 +50,7 @@ def build(output=OUT, *, local_signed_candidate=False, local_development=False, 
                 or build_receipt["self_test_exit"] != 0):
             raise ValueError("本地方案的回归与 EXE 构建回执不一致")
     offline = None
+    cold_windows = None
     if offline_review:
         source_commit = subprocess.check_output(["git", "-C", str(offline_review), "rev-parse", "HEAD"],
                                                 text=True).strip()
@@ -60,17 +61,36 @@ def build(output=OUT, *, local_signed_candidate=False, local_development=False, 
         APP_VERSION = version.group(1)
         build_receipt = json.loads((validation / f"{APP_VERSION}-local-exe.json").read_text(encoding="utf-8"))
         bundle = json.loads((validation / f"{APP_VERSION}-offline-review-bundle.json").read_text(encoding="utf-8"))
-        clean_windows = json.loads((validation / f"{APP_VERSION}-fresh-windows.json").read_text(encoding="utf-8"))
         offline = bundle["archive"]
-        setup = clean_windows["guest"]["setup"]
         if (offline["version"] != APP_VERSION or offline["source_commit"] != source_commit
                 or build_receipt["self_test_exit"] != 0
-                or any(offline[key] != build_receipt[key] or offline[key] != setup[key]
-                       for key in ("version", "source_commit", "exe_sha256"))
-                or offline["offline_windows"] != "fresh-install-inputs-and-desktop"
-                or clean_windows["desktop"]["status"] != "workbench-started"
-                or clean_windows["desktop"]["android_16_ready"] or offline["network_model_calls"] != 0):
-            raise ValueError("离线方案的 EXE、样本包和 Windows 复核不一致")
+                or any(offline[key] != build_receipt[key] for key in ("version", "source_commit", "exe_sha256"))
+                or offline["network_model_calls"] != 0):
+            raise ValueError("离线方案的 EXE 与样本包不一致")
+        if offline.get("offline_cold_runtime") == "same-exe-empty-storage-runtime":
+            from tools.verify_review_package import COLD_COMPONENTS
+
+            cold_path = validation / f"{APP_VERSION}-cold-runtime.json"
+            cold_windows = json.loads(cold_path.read_text(encoding="utf-8"))
+            runtime = cold_windows["runtime"]
+            install = cold_windows["install"]
+            if (cold_windows["status"] != offline["offline_cold_runtime"]
+                    or any(offline[key] != cold_windows[key] or offline[key] != install[key]
+                           for key in ("version", "source_commit", "exe_sha256"))
+                    or runtime["status"] != "ready" or runtime["missing"]
+                    or set(runtime["components"]) != COLD_COMPONENTS
+                    or not all(runtime["components"].values()) or runtime["reuse_without_download"] is not True
+                    or any(install[key] != 0 for key in ("install_exit", "installed_self_test_exit", "uninstall_exit"))
+                    or cold_windows["interactive_desktop_verified"] or cold_windows["device_steps_on_guest"] != 0):
+                raise ValueError("离线方案与同版空目录准备回执不一致")
+        else:
+            clean_windows = json.loads((validation / f"{APP_VERSION}-fresh-windows.json").read_text(encoding="utf-8"))
+            setup = clean_windows["guest"]["setup"]
+            if (any(offline[key] != setup[key] for key in ("version", "source_commit", "exe_sha256"))
+                    or offline["offline_windows"] != "fresh-install-inputs-and-desktop"
+                    or clean_windows["desktop"]["status"] != "workbench-started"
+                    or clean_windows["desktop"]["android_16_ready"]):
+                raise ValueError("离线方案与干净 Windows 桌面复核不一致")
 
     def para(text, style=body):
         return Paragraph(text, style)
@@ -310,7 +330,13 @@ def build(output=OUT, *, local_signed_candidate=False, local_development=False, 
                 raise ValueError("本地归档阅读器设备回执与方案不一致")
             local_rule_note = (f"归档阅读器候选另有同版 EXE 的 Android "
                                f"{ANDROID_NAMES[archive_replay['target_api']]} {archive_replay['steps_passed']} 步复测记录。")
-    if offline:
+    if cold_windows:
+        installer_note = "专用 Windows Server 2022 测试机通过隔离安装、自检和卸载，卸载后保留导出文件。"
+        replay_note = ("同一份 EXE 从空目录准备 Android 16 的五项组件，再次准备直接复用。"
+                       "Android 行为报告来自宿主机的独立专用模拟器。")
+        outbound_note = ""
+        local_rule_note = "虚拟机内的交互桌面启动与设备行为仍待复核。"
+    elif offline:
         installer_note = "新装 Windows Server 2022 在无网络、无预装 Android 工具时通过安装、自检、卸载和桌面启动。"
         replay_note = (f"干净系统核对 {clean_windows['verified_archive_files']} 个文件及两份样本输入。"
                        f"现有 Windows 另核对合并包的 {bundle['extracted']['verified_files']} 个文件并实际重跑反例。")
