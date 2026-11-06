@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "role": "offline-replay-of-seen-development-cases",
+  "app_version": "0.6.26",
+  "source_commit": "dbfc625027a995fa091308f6dbcb1269d49a4223",
+  "exe_sha256": "371bd684b4c192e82ab188e24049743ebcf28b8178d5525378b6cf5a239fa870",
+  "protocol_sha256": "aa7f164a5247d363a792d59e47c5fee88400e88da94fcf2c37100d11303368f9",
+  "api": 36,
+  "abi": "x86_64",
+  "network_model_calls": 0,
+  "cases": {
+    "N03": "incomplete",
+    "P01": "behavior-verified",
+    "P03": "behavior-verified",
+    "P04": "behavior-verified",
+    "P05": "behavior-verified"
+  }
+}

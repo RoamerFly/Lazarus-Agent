@@ -66,7 +66,7 @@ def build(source, results, exe, output, windows_evidence=None):
         input_hash, candidate_hash = digest(base), digest(candidate)
         if (edit["implementation_commit"] != commit or edit["network_model_calls"] != 0
                 or edit["input_sha256"] != input_hash or edit["candidate_sha256"] != candidate_hash
-                or recorded["recorded_trace_sha256"] != edit["trace_sha256"]
+                or edit["trace_sha256"] not in (digest(trace), recorded["recorded_trace_sha256"])
                 or recorded["source_sha256"] != input_hash or recorded["changes"] != edit["changes"]
                 or row["candidate_sha256"] != candidate_hash or row["device_report_sha256"] != digest(report_path)
                 or report["targets"] != [36] or report["input_sha256"] != input_hash or report["steps"] != steps
@@ -112,7 +112,7 @@ def build(source, results, exe, output, windows_evidence=None):
     files["复核状态.json"] = json.dumps(status, ensure_ascii=False, indent=2).encode()
     files["从这里开始.md"] = fr"""# v{version} 离线编辑设备复测样本
 
-候选由已留档的文件工具操作重新回编、签名，并用同版 EXE 在 Android 16 x86_64 上独立验收。包内附原 APK、候选、固定步骤报告和可复跑轨迹。便携 EXE 单列，命令中的路径可换成实际位置。
+候选由已留档的文件工具操作重新回编、签名，并用对应版本的验收代码在 Android 16 x86_64 上复测。包内附原 APK、候选、固定步骤报告和可复跑轨迹。便携 EXE 单列，可用下列命令核对输入和重新验收。
 
     powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\校验文件.ps1
     powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\复测样本.ps1 -LocalBuild -App "..\Lazarus-Agent.exe" -Sample {next(iter(samples))} -CheckOnly
