@@ -1,0 +1,48 @@
+{
+  "api": 36,
+  "abis": [
+    "x86_64"
+  ],
+  "candidate_and_installed_sha256": "6a6c87eb115b07761bf36abd1c76a1e7b6f357a77985ec2f8d93a8111cd6c13a",
+  "caller_apk_sha256": "585e35ce60f940ab040ed9ff5d07cca4ebf13a310b54c2deca1bb9d0845f54f9",
+  "uids": {
+    "org.ggbond.archivereader": 10150,
+    "org.ggbond.recordcaller": 10151
+  },
+  "observed": [
+    [
+      "org.ggbond.archivereader",
+      "android:id/decor_content_parent"
+    ],
+    [
+      "org.ggbond.archivereader",
+      "android:id/action_bar_container"
+    ],
+    [
+      "org.ggbond.archivereader",
+      "android:id/action_bar"
+    ],
+    [
+      "org.ggbond.archivereader",
+      "Archive Reader"
+    ],
+    [
+      "org.ggbond.archivereader",
+      "android:id/content"
+    ],
+    [
+      "org.ggbond.archivereader",
+      "Shared"
+    ],
+    [
+      "org.ggbond.archivereader",
+      "android:id/statusBarBackground"
+    ],
+    [
+      "org.ggbond.archivereader",
+      "android:id/navigationBarBackground"
+    ]
+  ],
+  "outcome": "external-record-status",
+  "input": "known-record-uri-after-share"
+}

@@ -29,8 +29,7 @@ LABEL = "Intent Boundary Probe"
 DENIED_READS = {"PROBE_ACCESS_DENIED", "PROBE_DATA_UNAVAILABLE"}
 
 
-def build_probe(out):
-    fixture = ROOT / "tools/fixtures/intent-boundary"
+def build_probe(out, fixture=ROOT / "tools/fixtures/intent-boundary"):
     platform = sorted(bench.SDK.glob("platforms/android-*/android.jar"), reverse=True)[0]
     environment = java_environment(os.environ.copy())
     key = test_key(environment)

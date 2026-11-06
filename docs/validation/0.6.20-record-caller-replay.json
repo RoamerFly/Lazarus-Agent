@@ -1,0 +1,48 @@
+{
+  "api": 36,
+  "abis": [
+    "x86_64"
+  ],
+  "candidate_and_installed_sha256": "2743bf6a5dd3219beb3d756a79cb8f97c30f8cd18ed64dde791b7c1d68744180",
+  "caller_apk_sha256": "e62d80606f42443a8cdbc2cd14ea5b6d679a35ae261f44d0b095f1d0d150f5f7",
+  "uids": {
+    "org.ggbond.archivereader": 10150,
+    "org.ggbond.recordcaller": 10151
+  },
+  "observed": [
+    [
+      "org.ggbond.archivereader",
+      "android:id/decor_content_parent"
+    ],
+    [
+      "org.ggbond.archivereader",
+      "android:id/action_bar_container"
+    ],
+    [
+      "org.ggbond.archivereader",
+      "android:id/action_bar"
+    ],
+    [
+      "org.ggbond.archivereader",
+      "Archive Reader"
+    ],
+    [
+      "org.ggbond.archivereader",
+      "android:id/content"
+    ],
+    [
+      "org.ggbond.archivereader",
+      "Shared"
+    ],
+    [
+      "org.ggbond.archivereader",
+      "android:id/statusBarBackground"
+    ],
+    [
+      "org.ggbond.archivereader",
+      "android:id/navigationBarBackground"
+    ]
+  ],
+  "outcome": "forged-success",
+  "input": "external-bytes-before-share"
+}

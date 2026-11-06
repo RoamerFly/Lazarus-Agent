@@ -1,0 +1,10 @@
+{
+  "app_version": "0.6.22",
+  "planned_trials": 42,
+  "source_protocol_freeze_commit": "a28bea979d0b9d8ae6f5074028e8c64d1547ac60",
+  "implementation_commit": "f24d5a583586785d388ae5133e4141f538456686",
+  "build_run": "local:1d9be043acd87b01df62067f0b6c65e0e6ccb239f29d79b8de26626ef8641cef",
+  "started_at": "2026-11-06T03:37:46.2358141Z",
+  "purpose": "development-regression-on-seen-cases",
+  "protocol_sha256": "aa7f164a5247d363a792d59e47c5fee88400e88da94fcf2c37100d11303368f9"
+}

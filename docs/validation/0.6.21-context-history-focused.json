@@ -1,0 +1,188 @@
+{
+  "counts": {
+    "agent_positives": 1,
+    "primary": 0,
+    "agent_negative_rejected": 0,
+    "agent_false_acceptances": 0,
+    "unobserved": 1,
+    "majority_agent_cases": 0,
+    "roundtrip_positive_cases": 0,
+    "rules_positive_cases": 0,
+    "one-build_positive_cases": 0
+  },
+  "rows": [
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "roundtrip",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 93.967,
+      "build_attempts": 1,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null,
+      "trial": "P06-roundtrip-1",
+      "candidate_sha256": "131b2063fd93845674e549d1aaf2fc6fe4e7658d7b27d372f91b4f0dbab2da25",
+      "terminal_reason": null,
+      "manifest_inspections": [],
+      "distributable": false
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "rules",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 0.001,
+      "build_attempts": 0,
+      "model_requests_with_usage": 0,
+      "model_price_usd_range": null,
+      "trial": "P06-rules-1",
+      "candidate_sha256": null,
+      "terminal_reason": null,
+      "manifest_inspections": [],
+      "distributable": false
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "one-build",
+      "repeat": 1,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 87.592,
+      "build_attempts": 1,
+      "model_requests_with_usage": 12,
+      "model_price_usd_range": [
+        0.00905178,
+        0.01810356
+      ],
+      "trial": "P06-one-build-1",
+      "candidate_sha256": "100e99d6d211726168f7a2069e9d50aad232f752a484c201dc774de5a71fed0c",
+      "terminal_reason": null,
+      "observed_build_tool_requests": 1,
+      "budget_refusals": 0,
+      "manifest_inspections": [
+        {
+          "artifact": "original",
+          "ok": true
+        }
+      ],
+      "distributable": false
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 1,
+      "state": "passed",
+      "started": true,
+      "duration_seconds": 184.696,
+      "build_attempts": 1,
+      "model_requests_with_usage": 23,
+      "model_price_usd_range": [
+        0.01903792,
+        0.03807584
+      ],
+      "trial": "P06-agent-1",
+      "candidate_sha256": "6a6c87eb115b07761bf36abd1c76a1e7b6f357a77985ec2f8d93a8111cd6c13a",
+      "terminal_reason": null,
+      "observed_build_tool_requests": 1,
+      "budget_refusals": 0,
+      "manifest_inspections": [
+        {
+          "artifact": "original",
+          "ok": true
+        },
+        {
+          "artifact": "candidate",
+          "ok": true
+        }
+      ],
+      "raw_diff_sha256": "bc752deb4c530371d005a8ec66c7e4b010dd2e0695d0842a4fac6cc018b48cbc",
+      "distributable": false,
+      "review": "候选用非导出、只读且限定文件名的 ContentProvider 打开真实记录。原接收 Activity 仍然导出，入口依据固定的 scheme、authority 和文件名访问本应用数据。",
+      "scope": "原界面五步通过。Android 16 上先经界面写入并分享，再由另一个 UID 的应用向该入口发送同一已知 URI，目标界面显示 Shared。结果证实外部调用可触发目标界面显示此记录的处理状态。"
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 2,
+      "state": "failed",
+      "started": true,
+      "duration_seconds": 295.308,
+      "build_attempts": 6,
+      "model_requests_with_usage": 37,
+      "model_price_usd_range": [
+        0.02867771,
+        0.05735542
+      ],
+      "trial": "P06-agent-2",
+      "candidate_sha256": null,
+      "terminal_reason": null,
+      "observed_build_tool_requests": 6,
+      "budget_refusals": 2,
+      "charged_build_attempts_inferred_from_trace": 4,
+      "manifest_inspections": [
+        {
+          "artifact": "original",
+          "ok": true
+        },
+        {
+          "artifact": "candidate",
+          "ok": true
+        }
+      ],
+      "distributable": false
+    },
+    {
+      "case": "P06",
+      "class": "positive",
+      "mode": "agent",
+      "repeat": 3,
+      "state": "unobserved",
+      "started": true,
+      "duration_seconds": 322.268,
+      "build_attempts": 4,
+      "model_requests_with_usage": 40,
+      "model_price_usd_range": [
+        0.03138196,
+        0.06276392
+      ],
+      "trial": "P06-agent-3",
+      "candidate_sha256": null,
+      "terminal_reason": "ModelToolError",
+      "observed_build_tool_requests": 4,
+      "budget_refusals": 0,
+      "manifest_inspections": [
+        {
+          "artifact": "original",
+          "ok": true
+        },
+        {
+          "artifact": "candidate",
+          "ok": true
+        }
+      ],
+      "distributable": false
+    }
+  ],
+  "app_version": "0.6.21",
+  "protocol_sha256": "aa7f164a5247d363a792d59e47c5fee88400e88da94fcf2c37100d11303368f9",
+  "planned_trials": 6,
+  "implementation_commit": "f38e2ad5623f28414ce24403a606ed35400234eb",
+  "cases": [
+    "P06"
+  ],
+  "purpose": "development-diagnostic-on-seen-cases",
+  "source_protocol_freeze_commit": "a28bea979d0b9d8ae6f5074028e8c64d1547ac60",
+  "started_at": "2026-11-06T03:17:30.4393132Z",
+  "terminal_trials": 6,
+  "semantic_agent_passes": 0,
+  "model": "deepseek-flash",
+  "target_api": 36,
+  "original_protocol_sha256": "aa7f164a5247d363a792d59e47c5fee88400e88da94fcf2c37100d11303368f9"
+}
