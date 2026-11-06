@@ -75,7 +75,21 @@ Section "Uninstall"
   DeleteRegKey HKCU "${APP_REG_KEY}"
   Delete "$INSTDIR\${APP_EXE}"
   Delete "$INSTDIR\.lazarus-install-complete"
+  ; The default NSIS launcher can still hold its original image while the
+  ; temporary uninstaller is cleaning up. Retry only this installed file.
+  StrCpy $0 0
+un_remove_launcher:
+  ClearErrors
   Delete "$INSTDIR\Uninstall.exe"
+  IfFileExists "$INSTDIR\Uninstall.exe" 0 un_launcher_removed
+  IntOp $0 $0 + 1
+  IntCmp $0 16 un_launcher_cleanup_failed un_wait_for_launcher un_launcher_cleanup_failed
+un_wait_for_launcher:
+  Sleep 200
+  Goto un_remove_launcher
+un_launcher_cleanup_failed:
+  SetErrorLevel 2
+un_launcher_removed:
   ; Default uninstall never touches local jobs, models or exported APKs.
   ; `/CLEARCACHE` only removes regenerable runtime cache. `/DELOUTPUT` is a
   ; separate explicit request because output may be user-deliverable evidence.
