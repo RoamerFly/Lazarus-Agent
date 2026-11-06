@@ -11,20 +11,28 @@ import android.widget.TextView;
 public class BoundaryActivity extends Activity {
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
+        TextView status = new TextView(this);
+        status.setText("Caller started");
+        setContentView(status);
+        String recordUri = getIntent().getStringExtra("record_uri");
+        boolean probeBytes = getIntent().getBooleanExtra("probe_bytes", false);
+        if (recordUri == null && !probeBytes) {
+            return;
+        }
         Intent handoff = new Intent("org.ggbond.archivereader.OPEN_RECORD");
         handoff.setClassName("org.ggbond.archivereader", "org.ggbond.archivereader.ShareActivity");
         String type = "application/vnd.ggbond.record";
-        if (getIntent().getBooleanExtra("probe_record_uri", false)) {
-            String requestedPath = getIntent().getStringExtra("record_path");
-            String path = "/record".equals(requestedPath) ? "/record" : "/record.txt";
-            handoff.setDataAndType(Uri.parse("content://org.ggbond.archivereader.records" + path), type);
+        if (recordUri != null) {
+            Uri uri = Uri.parse(recordUri);
+            if (!"content".equals(uri.getScheme()) || uri.getAuthority() == null) {
+                status.setText("Invalid probe input");
+                return;
+            }
+            handoff.setDataAndType(uri, type);
         } else {
             handoff.setType(type);
             handoff.putExtra("org.ggbond.archivereader.EXTRA_RECORD", new byte[]{42});
         }
-        TextView status = new TextView(this);
-        status.setText("Caller started");
-        setContentView(status);
         try {
             startActivity(handoff);
         } catch (ActivityNotFoundException | SecurityException denied) {

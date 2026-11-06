@@ -28,9 +28,25 @@ class RecordCallerProbeTests(unittest.TestCase):
                                   compare_uri=True, record_path="/record")
         self.assertEqual([call[0] for call in timeline.mock_calls], ["external", "step", "step", "step", "external"])
         self.assertEqual(timeline.external.call_args_list[0], timeline.external.call_args_list[1])
-        timeline.external.assert_called_with(caller, "/record")
+        timeline.external.assert_called_with(caller, "content://org.ggbond.archivereader.records/record")
         self.assertEqual(result["before_share"], before)
         self.assertEqual(result["outcome"], after["outcome"])
         self.assertEqual(result["observed"], after["observed"])
         self.assertEqual(result["record_uri"], "content://org.ggbond.archivereader.records/record")
         self.assertEqual([step["action"] for step in result["in_app_share"]], ["cold_start", "tap", "expect"])
+
+    def test_known_uri_passes_exact_authority_and_path_to_the_separate_app(self):
+        caller = Mock()
+        caller.serial = "emulator-5578"
+        uri = "content://org.ggbond.archivereader.share/private/entry.txt"
+        with (patch.object(probe.bench, "shell") as adb,
+              patch.object(probe, "observe_outcome", return_value={"outcome": "forged-success"})):
+            result = probe.send_known_uri(caller, uri)
+        adb.assert_called_with(caller.serial, "am", "start", "-W", "-n", probe.CALLER + "/.BoundaryActivity",
+                               "--es", "record_uri", uri)
+        self.assertEqual(result["outcome"], "external-record-status")
+
+    def test_rejects_shell_significant_characters_in_a_record_uri(self):
+        with self.assertRaisesRegex(ValueError, "literal authority and path"):
+            probe.replay(Mock(), Path("candidate.apk"), "a" * 64, Path("caller.apk"),
+                         compare_uri=True, record_uri="content://archive/record;echo")

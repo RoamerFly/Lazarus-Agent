@@ -18,6 +18,8 @@ from tools.replay_intent_boundary import TARGET, build_probe, wait_for
 
 CALLER = "org.ggbond.recordcaller"
 RECORD_PATHS = ("/record.txt", "/record")
+DEFAULT_AUTHORITY = "org.ggbond.archivereader.records"
+CONTENT_URI = re.compile(r"content://[a-zA-Z0-9_.-]+/[a-zA-Z0-9_./-]+")
 OUTCOMES = {
     (TARGET, "Shared"): "forged-success",
     (TARGET, "Cannot read record"): "target-rejected",
@@ -35,20 +37,28 @@ def observe_outcome(caller):
     return {"outcome": outcome, "observed": observed}
 
 
-def send_known_uri(caller, record_path):
+def send_probe(caller, *extras):
     for package in (TARGET, CALLER):
         bench.shell(caller.serial, "am", "force-stop", package)
-    bench.shell(caller.serial, "am", "start", "-W", "-n", CALLER + "/.BoundaryActivity",
-                "--ez", "probe_record_uri", "true", "--es", "record_path", record_path)
-    response = observe_outcome(caller)
+    bench.shell(caller.serial, "am", "start", "-W", "-n", CALLER + "/.BoundaryActivity", *extras)
+    return observe_outcome(caller)
+
+
+def send_known_uri(caller, record_uri):
+    response = send_probe(caller, "--es", "record_uri", record_uri)
     if response["outcome"] == "forged-success":
         response["outcome"] = "external-record-status"
     return response
 
 
-def replay(device, apk, expected, probe, *, uri_after_share=False, compare_uri=False, record_path="/record.txt"):
+def replay(device, apk, expected, probe, *, uri_after_share=False, compare_uri=False,
+           record_path="/record.txt", record_uri=None):
     if record_path not in RECORD_PATHS:
         raise ValueError("Unknown record path for this fixture")
+    if record_uri is None:
+        record_uri = f"content://{DEFAULT_AUTHORITY}{record_path}"
+    if not CONTENT_URI.fullmatch(record_uri):
+        raise ValueError("Expected a content URI with a literal authority and path")
     owner = "f01-record-caller"
     target = AgentDevice(device, owner, 36, bench.TOOLS, print)
     target_install = target.test(apk, expected)
@@ -78,14 +88,15 @@ def replay(device, apk, expected, probe, *, uri_after_share=False, compare_uri=F
     before_share = None
     in_app_share = []
     if compare_uri:
-        before_share = send_known_uri(caller, record_path)
+        before_share = send_known_uri(caller, record_uri)
         for step in ({"action": "cold_start"}, {"action": "tap", "value": "Share local record"},
                      {"action": "expect", "value": "Shared"}):
             evidence = dict(step)
             _step(target, step, evidence, handled)
             in_app_share.append(evidence)
     use_uri = uri_after_share or compare_uri
-    response = send_known_uri(caller, record_path) if use_uri else observe_outcome(caller)
+    response = (send_known_uri(caller, record_uri) if use_uri
+                else send_probe(caller, "--ez", "probe_bytes", "true"))
     result = {"api": 36, "abis": target_install["abis"], "candidate_and_installed_sha256": expected,
               "caller_apk_sha256": probe_hash, "uids": uids, **response,
               "input": "known-record-uri-after-share" if use_uri else "external-bytes-before-share"}
@@ -93,7 +104,7 @@ def replay(device, apk, expected, probe, *, uri_after_share=False, compare_uri=F
         result["before_share"] = before_share
         result["in_app_share"] = in_app_share
     if use_uri:
-        result["record_uri"] = f"content://org.ggbond.archivereader.records{record_path}"
+        result["record_uri"] = record_uri
     return result
 
 
@@ -107,8 +118,13 @@ def main():
                      help="After a legitimate share, send its known URI from the separate app")
     uri.add_argument("--uri-before-and-after-share", action="store_true",
                      help="Send the same known URI before and after the target writes its record")
-    parser.add_argument("--record-path", choices=RECORD_PATHS, default=RECORD_PATHS[0])
+    address = parser.add_mutually_exclusive_group()
+    address.add_argument("--record-path", choices=RECORD_PATHS)
+    address.add_argument("--record-uri", help="Exact content URI observed in the synthetic candidate")
     args = parser.parse_args()
+    if args.record_uri and (not CONTENT_URI.fullmatch(args.record_uri)
+                            or not (args.uri_after_share or args.uri_before_and_after_share)):
+        parser.error("--record-uri requires a literal content URI and a URI replay mode")
     out = args.out.resolve()
     if not out.is_relative_to(ROOT / "build"):
         parser.error("Store probe evidence under the ignored build directory")
@@ -123,7 +139,8 @@ def main():
     device = bench.Device(allow_existing=False)
     try:
         result = replay(device, args.apk, args.sha256, probe, uri_after_share=args.uri_after_share,
-                        compare_uri=args.uri_before_and_after_share, record_path=args.record_path)
+                        compare_uri=args.uri_before_and_after_share,
+                        record_path=args.record_path or RECORD_PATHS[0], record_uri=args.record_uri)
     finally:
         device.stop()
     (out / "result.json").write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
