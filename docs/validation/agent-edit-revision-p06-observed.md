@@ -7,4 +7,4 @@
 | P06-agent-1 | 显式发送自定义 URI，接收页依据 scheme、host、path 读取固定记录文件。清单保留导出的接收页。 | 使用 `ggbond-record://local/record.txt` 比较同一外部 UID 在写入前后的结果。 |
 | P06-agent-2 | 显式发送内容 URI，新增只读 Provider，接收页按 authority 和路径筛选。接收页仍导出。 | 使用 `content://org.ggbond.archivereader.records/record` 进行相同对照。 |
 
-应用内五步覆盖冷启动前后的合法交接。外部探针将另行核对已导出接收页能否被独立 UID 触发，两份候选暂保留在审查区。[候选和设备哈希](agent-edit-revision-p06-observed.json) · [完整十二轮专项](agent-edit-revision-focused.md)
+应用内五步覆盖冷启动前后的合法交接。独立 UID 探针已确认两份均可被外部地址触发成功状态，均排除出分发。[外部调用复核](agent-edit-revision-p06-boundary.md)[候选和设备哈希](agent-edit-revision-p06-observed.json) · [完整十二轮专项](agent-edit-revision-focused.md)

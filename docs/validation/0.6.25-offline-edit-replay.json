@@ -41,5 +41,45 @@
       "case": "P05"
     }
   ],
-  "wrong_input_rejected_before_export": true
+  "wrong_input_rejected_before_export": true,
+  "portable_traces": [
+    {
+      "case": "P03",
+      "implementation_commit": "c5f9799c748d700250a5b27d666bae00609acb50",
+      "input_sha256": "1476a30063a68f27a2e3c10d3d99383aeee0afbf5177e09fbc44f36cc6f237da",
+      "trace_sha256": "e5b30ad7745e93bd6175e8a390bc63d8798b7e451989f4db36968debfd0d43e7",
+      "candidate_sha256": "aee265fe5824dc4889e627adcb8c867d0e44e40b4f11c8145a2bd0da71e0d4ce",
+      "api": 36,
+      "replayed_calls": 13,
+      "network_model_calls": 0,
+      "verified": "recorded-changes-rebuilt-and-signed",
+      "device": "not-run",
+      "changes": [
+        {
+          "path": "res/values/strings.xml",
+          "before_sha256": "11bc3be44135ab0b8a6df50882d82de92be65b1842c374d98573342689fd7d39",
+          "after_sha256": "fd12fcbfcddaff331d61ed7491057ae7001b8dca33e505e3c68e1a3edfdd4daf"
+        }
+      ]
+    },
+    {
+      "case": "P05",
+      "implementation_commit": "c5f9799c748d700250a5b27d666bae00609acb50",
+      "input_sha256": "4049359b01c7c7348d7d2bc4c4efdb27a7844975f3dc147a1cef0996632de9ac",
+      "trace_sha256": "d73a857413b882db2a49039b7e9f466b645d63b397b8ff1b8f2a5ff2ab3e76bd",
+      "candidate_sha256": "17bbacc321f02a6dd619e1a5d241c1d3156242177e4cca8c5fa4eabb8eb37b02",
+      "api": 36,
+      "replayed_calls": 19,
+      "network_model_calls": 0,
+      "verified": "recorded-changes-rebuilt-and-signed",
+      "device": "not-run",
+      "changes": [
+        {
+          "path": "smali/org/ggbond/filereader/FileReaderActivity.smali",
+          "before_sha256": "b486319218761632f922d0331dbaaeaf2566b86a677308c38c45dccc4de03fde",
+          "after_sha256": "0f46ea068e2636c1b40ea5f4d6a3ad59d1630f62bb9e89212d0d05a329cd94e9"
+        }
+      ]
+    }
+  ]
 }

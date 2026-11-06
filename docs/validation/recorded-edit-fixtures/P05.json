@@ -1,0 +1,168 @@
+{
+  "schema": 1,
+  "case": "P05",
+  "apk": "fixtures/file-reader/file-reader-forgets-selection.apk",
+  "source_sha256": "4049359b01c7c7348d7d2bc4c4efdb27a7844975f3dc147a1cef0996632de9ac",
+  "recorded_trace_sha256": "167d72b9a8b452ca0828534eb01cba869a1d7acef013fb3262c5387f66abf14d",
+  "outcome": {
+    "outcome": "candidate"
+  },
+  "tools": [
+    {
+      "tool": "list_files",
+      "arguments": {
+        "pattern": "**/*.smali"
+      },
+      "ok": true
+    },
+    {
+      "tool": "inspect_manifest",
+      "arguments": {
+        "artifact": "original"
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "smali/org/ggbond/filereader/FileReaderActivity.smali"
+      },
+      "ok": true
+    },
+    {
+      "tool": "list_files",
+      "arguments": {
+        "pattern": "**/*"
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "smali/org/ggbond/filereader/FileReaderActivity.smali",
+        "start_line": 100,
+        "line_count": 130
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "assets/record-a.txt"
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "assets/record-b.txt"
+      },
+      "ok": true
+    },
+    {
+      "tool": "replace_text",
+      "arguments": {
+        "path": "smali/org/ggbond/filereader/FileReaderActivity.smali",
+        "sha256": "b486319218761632f922d0331dbaaeaf2566b86a677308c38c45dccc4de03fde",
+        "old": ".method private openRecord(Ljava/lang/String;)V\n    .locals 3",
+        "new": ".method private openRecord(Ljava/lang/String;)V\n    .locals 4"
+      },
+      "ok": true
+    },
+    {
+      "tool": "replace_text",
+      "arguments": {
+        "new": "    invoke-virtual {v2, p1}, Landroid/content/res/AssetManager;->open(Ljava/lang/String;)Ljava/io/InputStream;\n\n    move-result-object v3\n\n    const-string v2, \"UTF-8\"\n\n    invoke-direct {v1, v3, v2}, Ljava/io/InputStreamReader;-><init>(Ljava/io/InputStream;Ljava/lang/String;)V",
+        "old": "    invoke-virtual {v2, p1}, Landroid/content/res/AssetManager;->open(Ljava/lang/String;)Ljava/io/InputStream;\n\n    move-result-object p1\n\n    const-string v2, \"UTF-8\"\n\n    invoke-direct {v1, p1, v2}, Ljava/io/InputStreamReader;-><init>(Ljava/io/InputStream;Ljava/lang/String;)V",
+        "path": "smali/org/ggbond/filereader/FileReaderActivity.smali",
+        "sha256": "6c1177887fcab9b8e14ce4df28983d1fa94f4c153a797703c1be0c4d6ff9c171"
+      },
+      "ok": true
+    },
+    {
+      "tool": "replace_text",
+      "arguments": {
+        "new": "    .line 64\n    invoke-virtual {v0}, Ljava/io/BufferedReader;->close()V\n\n    const-string v0, \"reader_state\"\n\n    const/4 v1, 0x0\n\n    invoke-virtual {p0, v0, v1}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;\n\n    move-result-object v0\n\n    invoke-interface {v0}, Landroid/content/SharedPreferences;->edit()Landroid/content/SharedPreferences$Editor;\n\n    move-result-object v0\n\n    const-string v1, \"last_record\"\n\n    invoke-interface {v0, v1, p1}, Landroid/content/SharedPreferences$Editor;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/content/SharedPreferences$Editor;\n\n    move-result-object v0\n\n    invoke-interface {v0}, Landroid/content/SharedPreferences$Editor;->apply()V\n    :try_end_0",
+        "old": "    .line 64\n    invoke-virtual {v0}, Ljava/io/BufferedReader;->close()V\n    :try_end_0",
+        "path": "smali/org/ggbond/filereader/FileReaderActivity.smali",
+        "sha256": "83379c39d2fc42126c9776def4801ebc63553a93fe386b9c54b9a4febad148f3"
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "smali/org/ggbond/filereader/FileReaderActivity.smali",
+        "start_line": 225,
+        "line_count": 30
+      },
+      "ok": true
+    },
+    {
+      "tool": "replace_text",
+      "arguments": {
+        "new": "    .line 42\n    const-string v0, \"reader_state\"\n\n    const/4 v2, 0x0\n\n    invoke-virtual {p0, v0, v2}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;\n\n    move-result-object v0\n\n    const-string v2, \"last_record\"\n\n    invoke-interface {v0, v2, v1}, Landroid/content/SharedPreferences;->getString(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;\n\n    move-result-object v0\n\n    invoke-direct {p0, v0}, Lorg/ggbond/filereader/FileReaderActivity;->openRecord(Ljava/lang/String;)V",
+        "old": "    .line 42\n    invoke-direct {p0, v1}, Lorg/ggbond/filereader/FileReaderActivity;->openRecord(Ljava/lang/String;)V",
+        "path": "smali/org/ggbond/filereader/FileReaderActivity.smali",
+        "sha256": "8a8e24c682c31743b8b3925447095a1b046d9ece35e2077575a44f98ca573b56"
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "smali/org/ggbond/filereader/FileReaderActivity.smali",
+        "start_line": 54,
+        "line_count": 115
+      },
+      "ok": true
+    },
+    {
+      "tool": "replace_text",
+      "arguments": {
+        "new": ".method private openRecord(Ljava/lang/String;)V\n    .locals 5",
+        "old": ".method private openRecord(Ljava/lang/String;)V\n    .locals 4",
+        "path": "smali/org/ggbond/filereader/FileReaderActivity.smali",
+        "sha256": "562aecef3039ca5dcd90c5a89c9d69cca4ae0646aecf52449e3f6fd80e31ecb3"
+      },
+      "ok": true
+    },
+    {
+      "tool": "replace_text",
+      "arguments": {
+        "new": "    :try_start_0\n    move-object v3, p1\n\n    new-instance v0, Ljava/io/BufferedReader;",
+        "old": "    :try_start_0\n    new-instance v0, Ljava/io/BufferedReader;",
+        "path": "smali/org/ggbond/filereader/FileReaderActivity.smali",
+        "sha256": "c36a9cc6151a8b086d309232f994c0e67b52c5a6db01d09d0ac7dbb91d9d1608"
+      },
+      "ok": true
+    },
+    {
+      "tool": "replace_text",
+      "arguments": {
+        "new": "    invoke-virtual {v2, p1}, Landroid/content/res/AssetManager;->open(Ljava/lang/String;)Ljava/io/InputStream;\n\n    move-result-object v4\n\n    const-string v2, \"UTF-8\"\n\n    invoke-direct {v1, v4, v2}, Ljava/io/InputStreamReader;-><init>(Ljava/io/InputStream;Ljava/lang/String;)V",
+        "old": "    invoke-virtual {v2, p1}, Landroid/content/res/AssetManager;->open(Ljava/lang/String;)Ljava/io/InputStream;\n\n    move-result-object v3\n\n    const-string v2, \"UTF-8\"\n\n    invoke-direct {v1, v3, v2}, Ljava/io/InputStreamReader;-><init>(Ljava/io/InputStream;Ljava/lang/String;)V",
+        "path": "smali/org/ggbond/filereader/FileReaderActivity.smali",
+        "sha256": "ff3d0f65455a6932adfc40100f1ac93e818913a59fd53a1e781b1434fed150c6"
+      },
+      "ok": true
+    },
+    {
+      "tool": "replace_text",
+      "arguments": {
+        "new": "    invoke-interface {v0, v1, v3}, Landroid/content/SharedPreferences$Editor;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/content/SharedPreferences$Editor;",
+        "old": "    invoke-interface {v0, v1, p1}, Landroid/content/SharedPreferences$Editor;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/content/SharedPreferences$Editor;",
+        "path": "smali/org/ggbond/filereader/FileReaderActivity.smali",
+        "sha256": "9091169825f386dd92955e2e61725407bc5e65bfaacbe7784ef8aac50f4c5bf7"
+      },
+      "ok": true
+    }
+  ],
+  "changes": [
+    {
+      "path": "smali/org/ggbond/filereader/FileReaderActivity.smali",
+      "before_sha256": "b486319218761632f922d0331dbaaeaf2566b86a677308c38c45dccc4de03fde",
+      "after_sha256": "0f46ea068e2636c1b40ea5f4d6a3ad59d1630f62bb9e89212d0d05a329cd94e9"
+    }
+  ]
+}

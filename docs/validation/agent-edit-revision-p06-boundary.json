@@ -1,0 +1,38 @@
+{
+  "source_commit": "9149285f01e1708ff69aa83c51fccf66b06c2258",
+  "probe_commit": "242bc3fb814a3629098db7a4c427209122c2e78c",
+  "target_api": 36,
+  "abi": "x86_64",
+  "scope": "Target UI status after external Intent; no direct byte-read observation",
+  "network_model_calls": 0,
+  "rows": [
+    {
+      "trial": "P06-agent-1",
+      "uri": "ggbond-record://local/record.txt",
+      "candidate_and_installed_sha256": "760618588da691ac2c06f849fc1ebba29d361c51767d2171a5c345302537b1fe",
+      "caller_apk_sha256": "d1ad047fdf57298c8375c5d5307d0dc60f555a88ec737c417d9a30e19a419741",
+      "uids": {
+        "org.ggbond.archivereader": 10150,
+        "org.ggbond.recordcaller": 10151
+      },
+      "before_share": "Cannot read record",
+      "after_share": "Shared",
+      "raw_probe_sha256": "be7792acc0fd3af66c09a498a772a5e7ec7f20b52c04c75d8551086a371c11f0",
+      "distributable": false
+    },
+    {
+      "trial": "P06-agent-2",
+      "uri": "content://org.ggbond.archivereader.records/record",
+      "candidate_and_installed_sha256": "442c1201a406e6ca76105a5a40ec500a6a220e1c0efa3775c2cbd4fad3ee0dbd",
+      "caller_apk_sha256": "b58657c332496476d7bd649a57aeda5d0e587ee054f87f8e404208b222ab342e",
+      "uids": {
+        "org.ggbond.archivereader": 10150,
+        "org.ggbond.recordcaller": 10151
+      },
+      "before_share": "Cannot read record",
+      "after_share": "Shared",
+      "raw_probe_sha256": "336053fc4efd7c9ced1a7040ccaddef13ed2ef703674a74b2a871334eb988667",
+      "distributable": false
+    }
+  ]
+}

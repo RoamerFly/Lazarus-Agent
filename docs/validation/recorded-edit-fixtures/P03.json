@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "case": "P03",
+  "apk": "fixtures/tea-timer/tea-timer-en.apk",
+  "source_sha256": "1476a30063a68f27a2e3c10d3d99383aeee0afbf5177e09fbc44f36cc6f237da",
+  "recorded_trace_sha256": "2096626e23249d55c01b0949dd7c7f02ca4637e586e899b7ec13d859dff6be2d",
+  "outcome": {
+    "outcome": "candidate"
+  },
+  "tools": [
+    {
+      "tool": "inspect_manifest",
+      "arguments": {
+        "artifact": "original"
+      },
+      "ok": true
+    },
+    {
+      "tool": "list_files",
+      "arguments": {
+        "pattern": "**/*.xml"
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "res/values/strings.xml"
+      },
+      "ok": true
+    },
+    {
+      "tool": "list_files",
+      "arguments": {
+        "pattern": "**/*.smali"
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "smali/org/ggbond/teatimer/MainActivity.smali"
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "smali/org/ggbond/teatimer/MainActivity$$ExternalSyntheticLambda0.smali"
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "smali/org/ggbond/teatimer/MainActivity.smali",
+        "start_line": 100
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "smali/org/ggbond/teatimer/R$string.smali"
+      },
+      "ok": true
+    },
+    {
+      "tool": "replace_text",
+      "arguments": {
+        "path": "res/values/strings.xml",
+        "sha256": "11bc3be44135ab0b8a6df50882d82de92be65b1842c374d98573342689fd7d39",
+        "old": "    <string name=\"active_message\">Brew %1$d started</string>",
+        "new": "    <string name=\"active_message\">第%1$d次计时已启动</string>"
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "res/values/strings.xml"
+      },
+      "ok": true
+    },
+    {
+      "tool": "replace_text",
+      "arguments": {
+        "new": "    <string name=\"start_brew\">开始计时</string>",
+        "old": "    <string name=\"start_brew\">Start timer</string>",
+        "path": "res/values/strings.xml",
+        "sha256": "d4ec3678895af50127a3e490fd3f8cb9f341a408e555db846a9ca591c20a37fc"
+      },
+      "ok": true
+    }
+  ],
+  "changes": [
+    {
+      "path": "res/values/strings.xml",
+      "before_sha256": "11bc3be44135ab0b8a6df50882d82de92be65b1842c374d98573342689fd7d39",
+      "after_sha256": "fd12fcbfcddaff331d61ed7491057ae7001b8dca33e505e3c68e1a3edfdd4daf"
+    }
+  ]
+}
