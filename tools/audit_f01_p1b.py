@@ -78,15 +78,16 @@ def audit(root, *, partial=False, batch=P1B):
     return audit_records(root, batch, frozen_protocol(root, batch), partial=partial)
 
 
-def audit_records(root, batch, protocol, *, partial=False, expected_trials=42):
+def audit_records(root, batch, protocol, *, partial=False, expected_trials=42,
+                  summarize_trials=summarize, sidecar_directories=()):
     results = root / batch.results
     if not partial and (results / "running.lock").exists():
         raise ValueError("请在进程结束后生成正式汇总")
-    summary = summarize(results, protocol)
+    summary = summarize_trials(results, protocol)
     trials = list(trial_schedule(protocol))
     source_hashes = {case["id"]: digest_file(root / case["apk"]) for case in protocol["cases"]}
     trial_ids = {f"{case['id']}-{mode}-{repeat}" for case, mode, repeat in trials}
-    if {path.name for path in results.iterdir() if path.is_dir()} - trial_ids:
+    if {path.name for path in results.iterdir() if path.is_dir()} - trial_ids - set(sidecar_directories):
         raise ValueError("结果目录含有固定日程之外的轮次")
     if len(trials) != expected_trials or not partial and any(not (results / trial).is_dir() for trial in trial_ids):
         raise ValueError("固定日程尚未全部尝试")
