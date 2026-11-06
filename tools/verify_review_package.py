@@ -309,6 +309,47 @@ def check_offline_windows(archive, checksums, status, samples):
     return {"status": evidence, "os": baseline["product"], "checked_inputs": checked_cases}
 
 
+def check_offline_materials(archive, checksums, status, windows):
+    scope = status.get("offline_materials")
+    if scope is None and "遗留软件复活智能体离线演示.mp4" not in checksums:
+        return None
+    if scope != "same-build-offline-review" or windows is None:
+        raise ValueError("同版材料缺少离线复核范围或 Windows 证据")
+    version, commit = status["version"], status["source_commit"]
+    receipt = json.loads(archive.read("同版材料校验回执.json"))
+    source_name = f"F01-源代码-v{version}.zip"
+    files = {source_name: "source_archive_sha256", "遗留软件复活智能体方案说明.pdf": "proposal_sha256",
+             "遗留软件复活智能体离线演示.mp4": "video_sha256", "演示记录.json": "video_record_sha256",
+             "演示设备画面.png": "device_screen_sha256", LOCAL_DEMO + "agent-acceptance.json": "acceptance_sha256"}
+    if (receipt["app_version"] != version or receipt["source_commit"] != commit
+            or receipt["exe_sha256"] != status["exe_sha256"]
+            or any(checksums.get(name) != receipt[key] for name, key in files.items())):
+        raise ValueError("同版方案、视频、设备证据或源码与回执不一致")
+    with ZipFile(BytesIO(archive.read(source_name))) as code:
+        if (code.comment.decode("ascii") != commit
+                or f'APP_VERSION = "{version}"'.encode("ascii") not in code.read("app_version.py").splitlines()):
+            raise ValueError("离线方案源码与构建提交不一致")
+    record = json.loads(archive.read("演示记录.json"))
+    capture = record["capture"]
+    screen = capture["device_screen"]
+    report = json.loads(archive.read(LOCAL_DEMO + "agent-acceptance.json"))
+    prior = json.loads(archive.read("可分发样本/P01/agent-acceptance.json"))
+    candidate = checksums.get(LOCAL_DEMO + "candidate.apk")
+    if (record["app_version"] != version or record["video_sha256"] != receipt["video_sha256"]
+            or record["duration_planned_seconds"] != receipt["video_seconds"]
+            or capture["app_version"] != version or capture["source_commit"] != commit
+            or capture["mode"] != "recorded-tools" or capture["network_model_calls"] != 0
+            or capture["trace_sha256"] != checksums.get("可复跑轨迹/P01.json")
+            or capture["input_sha256"] != report["input_sha256"]
+            or prior["input_sha256"] != report["input_sha256"] or prior["steps"] != report["steps"]
+            or capture["candidate_sha256"] != candidate or screen["apk_sha256"] != candidate
+            or screen["sha256"] != receipt["device_screen_sha256"]
+            or screen["api"] != 36 or report["targets"] != [36]
+            or report["rows"][0]["baseline"]["install"] != "failed" or not verified_for(report, candidate)):
+        raise ValueError("离线演示的轨迹、原包、录制或 Android 验收证据不一致")
+    return {"status": scope, "version": version, "demo_steps": len(report["steps"]), "network_model_calls": 0}
+
+
 def verify(path):
     with ZipFile(path) as archive:
         names = archive.namelist()
@@ -382,6 +423,7 @@ def verify(path):
                     raise ValueError("反例没有对应到指定的行为失败：" + folder)
             counterexamples.append({"sample": folder, "candidate_sha256": candidate, "status": "incomplete"})
         offline_windows = check_offline_windows(archive, checksums, status, samples)
+        offline_materials = check_offline_materials(archive, checksums, status, offline_windows)
         return {"status": "archive-and-proofs-verified", "file_count": len(names),
                 "local_links_checked": check_local_links(archive, set(names)),
                 "samples": samples, "counterexamples": counterexamples,
@@ -389,6 +431,7 @@ def verify(path):
                 "release_regression": release_regression,
                 "local_regression": local_regression,
                 "local_review": local_review, "offline_windows": offline_windows,
+                "offline_materials": offline_materials,
                 "scope": "Files, checksums and stored proofs. Device replay is a separate operation."}
 
 

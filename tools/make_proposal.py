@@ -2,6 +2,8 @@
 from argparse import ArgumentParser
 from pathlib import Path
 import json
+import re
+import subprocess
 
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_LEFT
@@ -21,7 +23,7 @@ PAGE_WIDTH, PAGE_HEIGHT = A4
 CONTENT_WIDTH = PAGE_WIDTH - 104
 
 
-def build(output=OUT, *, local_signed_candidate=False, local_development=False):
+def build(output=OUT, *, local_signed_candidate=False, local_development=False, offline_review=False):
     from app_version import APP_VERSION
     from assistant_chat import ANDROID_NAMES
 
@@ -47,6 +49,28 @@ def build(output=OUT, *, local_signed_candidate=False, local_development=False):
                 or regression["source_build_run"] != "local:" + build_receipt["exe_sha256"]
                 or build_receipt["self_test_exit"] != 0):
             raise ValueError("本地方案的回归与 EXE 构建回执不一致")
+    offline = None
+    if offline_review:
+        source_commit = subprocess.check_output(["git", "-C", str(offline_review), "rev-parse", "HEAD"],
+                                                text=True).strip()
+        version_source = (offline_review / "app_version.py").read_text(encoding="utf-8")
+        version = re.search(r'^APP_VERSION = "(\d+\.\d+\.\d+)"$', version_source, re.MULTILINE)
+        if not version:
+            raise ValueError("候选源码缺少程序版本")
+        APP_VERSION = version.group(1)
+        build_receipt = json.loads((validation / f"{APP_VERSION}-local-exe.json").read_text(encoding="utf-8"))
+        bundle = json.loads((validation / f"{APP_VERSION}-offline-review-bundle.json").read_text(encoding="utf-8"))
+        clean_windows = json.loads((validation / f"{APP_VERSION}-fresh-windows.json").read_text(encoding="utf-8"))
+        offline = bundle["archive"]
+        setup = clean_windows["guest"]["setup"]
+        if (offline["version"] != APP_VERSION or offline["source_commit"] != source_commit
+                or build_receipt["self_test_exit"] != 0
+                or any(offline[key] != build_receipt[key] or offline[key] != setup[key]
+                       for key in ("version", "source_commit", "exe_sha256"))
+                or offline["offline_windows"] != "fresh-install-inputs-and-desktop"
+                or clean_windows["desktop"]["status"] != "workbench-started"
+                or clean_windows["desktop"]["android_16_ready"] or offline["network_model_calls"] != 0):
+            raise ValueError("离线方案的 EXE、样本包和 Windows 复核不一致")
 
     def para(text, style=body):
         return Paragraph(text, style)
@@ -74,7 +98,7 @@ def build(output=OUT, *, local_signed_candidate=False, local_development=False):
     windows_proof = validation / f"{APP_VERSION}-windows-proof.json"
     publication = validation / f"{APP_VERSION}-release-publication.json"
     edition = "工程候选稿"
-    if local_development:
+    if local_development or offline:
         edition = f"v{APP_VERSION} 本地工程候选"
     elif windows_proof.is_file() or publication.is_file():
         edition = "工程复核版"
@@ -99,9 +123,9 @@ def build(output=OUT, *, local_signed_candidate=False, local_development=False):
         ["3. 修改与回编", "精确修改代码和资源，也可新增 smali、资源或 assets。Apktool 回编、zipalign 对齐、apksigner 签名并校验。"],
         ["4. 设备诊断与预检", "模型可先运行原包复现故障，按设备证据声明可选系统库。构建后可重放固定步骤，依据首个失败点继续修订。"],
         ["5. 独立验收", "另行安装原包与候选，核对设备回读 SHA-256，按提交时的固定步骤执行。只匹配目标应用自身控件。"],
-        ["6. 交付迭代", "通过所选系统的功能检查后提供已验收 APK。候选、历史版本、报告和差异保留；用户反馈可基于上版继续。"],
+        ["6. 交付迭代", "通过所选系统的功能检查后提供已验收 APK。保留候选、历史版本、报告和差异，用户可基于上版继续反馈。"],
     ], [94, CONTENT_WIDTH - 94])
-    block("三种完成状态", "构建签名通过证明包已生成；安装启动通过证明本次环境能够启动；指定行为通过证明固定操作在该环境达到预期。未指定步骤时只记录启动验证。一个目标失败时，保留试验候选与逐项原因。")
+    block("三种完成状态", "构建签名通过证明包已生成。安装启动通过证明本次环境能够启动。指定行为通过证明固定操作在该环境达到预期。未指定步骤时只记录启动验证。一个目标失败时，保留试验候选与逐项原因。")
     replacement_path = validation / f"{APP_VERSION}-replace-input.json"
     if replacement_path.is_file():
         replacement = json.loads(replacement_path.read_text(encoding="utf-8"))
@@ -123,7 +147,7 @@ def build(output=OUT, *, local_signed_candidate=False, local_development=False):
     story.append(PageBreak())
 
     heading("工程创新与范围", "开放需求、受限执行、独立验收")
-    block("项目自研部分", "需求对话与 APK 工作区的通用编排；有哈希前置校验的精确编辑；构建、试验、回滚与多轮版本关系；模型说明之外的行为断言执行；下载状态与实际安装字节绑定；按需准备环境及桌面交付。")
+    block("项目自研部分", "自研通用需求对话和 APK 工作区，编辑前先核对文件哈希。工作台关联构建、试验、回滚与版本关系，独立执行行为断言，并将下载状态与设备安装字节绑定。桌面版支持按需准备环境。")
     block("采用的基础工具", "外部模型承担分析和代码生成，Apktool、Android SDK 工具与隔离运行环境承担解包、回编、签名和运行。模型可以按需调用已有资源工具。外部模型输出本身不能确定候选是否通过功能验收。")
     library_path = validation / "agent-platform-library-model.json"
     if library_path.is_file():
@@ -168,14 +192,30 @@ def build(output=OUT, *, local_signed_candidate=False, local_development=False):
                            held_out, "达到" if gate else "未达到"])
         control_rows.append(f"{label} {counts['roundtrip_positive_cases']}/6、{counts['rules_positive_cases']}/6、"
                             f"{counts['one-build_positive_cases']}/6")
-    if score_rows:
+    if offline:
+        prior = json.loads((validation / "f01-release-regression/0.6.24/results.json").read_text(encoding="utf-8"))
+        review = json.loads((validation / "f01-release-regression/0.6.24/diff-review.json").read_text(encoding="utf-8"))
+        approved = {row["trial"] for row in review["rows"] if row["distributable"]}
+        accepted = sum(row["mode"] == "agent" and row["trial"] in approved for row in prior["rows"])
+        counts = prior["counts"]
+        table(["证据版本", "范围与结果"], [
+            ["v0.6.24 · 全组开发回归", f"{prior['terminal_trials']}/42 轮终态。设备断言 {counts['agent_positives']}/18，"
+              f"语义复核 {accepted}/18。反例拒绝 {counts['agent_negative_rejected']}/6，误验收 {counts['agent_false_acceptances']}/6。"],
+            [f"v{APP_VERSION} · 离线重放", f"Android 16 x86_64 共 {len(offline['samples'])} 份通过样本，"
+              f"{sum(row['steps'] for row in offline['samples'].values())} 个行为步骤通过。"
+              f"另有 {len(offline['counterexamples'])} 份矛盾断言反例按预期拒绝。真实模型请求 0 次。"],
+        ], [142, CONTENT_WIDTH - 142])
+        story.append(para("v0.6.24 对照按无语义修改回编、原规则、同模型一次构建排序，"
+                          f"分别为 {counts['roundtrip_positive_cases']}/6、{counts['rules_positive_cases']}/6、"
+                          f"{counts['one-build_positive_cases']}/6。v{APP_VERSION} 结果只覆盖留档需求。", tiny))
+    elif score_rows:
         table(["批次", "正例", "主案例", "反例拒绝 / 误验收", "留出", "联合门槛"], score_rows,
               [48, 47, 48, 128, 44, CONTENT_WIDTH-315])
         story.append(para("对照按无语义改动回编、原规则、同模型一次构建排序。"
                           + "。".join(control_rows) + "。第一批一次构建有一轮中断，完整分母保留。", tiny))
     if not any(label == "P1C" for label, _ in batches):
         story.append(para("P1C 已冻结 42 轮并启动，加入仓库温度卡，检查换算与冷启动保留单位。结果待归档。", tiny))
-    if regression:
+    if regression and not offline:
         counts = regression["counts"]
         review_path = regression_path.with_name("diff-review.json")
         decisions = json.loads(review_path.read_text(encoding="utf-8"))["rows"]
@@ -190,14 +230,14 @@ def build(output=OUT, *, local_signed_candidate=False, local_development=False):
             passed_cases = {row["case"] for row in regression["rows"] if row["trial"] in approved and row["mode"] == "agent"}
             if "P06" not in passed_cases:
                 story.append(para("本地文件交接未获分发候选。未观测轮次保留在分母。", tiny))
-    else:
+    elif not offline:
         story.append(para("已见任务另有全组开发回归和主案例回归。同一候选在 Android 14、15、16 上通过固定步骤。OI Notepad 的两轮修改有独立哈希链。", tiny))
     story.append(PageBreak())
 
     heading("部署与试点", "给复核人员一条可重复的路径")
     installer_delivery = ("使用单独交付的安装器和包内校验脚本。" if local_signed_candidate
                           else "提供按用户安装器和便携 ZIP。")
-    if local_development:
+    if local_development or offline:
         installer_delivery = "提供同版便携 EXE、复测 ZIP 和独立的安装检查工具。"
     block("Windows 安装", installer_delivery + "桌面内嵌 WebView2，模型凭据由 Windows DPAPI 加密。程序优先复用工具，首次按所选系统准备缺失的 SDK、Java 与镜像。后续可在已准备环境中断网复测已有候选。")
     replay_path = validation / f"{APP_VERSION}-windows-proof.json"
@@ -270,9 +310,15 @@ def build(output=OUT, *, local_signed_candidate=False, local_development=False):
                 raise ValueError("本地归档阅读器设备回执与方案不一致")
             local_rule_note = (f"归档阅读器候选另有同版 EXE 的 Android "
                                f"{ANDROID_NAMES[archive_replay['target_api']]} {archive_replay['steps_passed']} 步复测记录。")
+    if offline:
+        installer_note = "新装 Windows Server 2022 在无网络、无预装 Android 工具时通过安装、自检、卸载和桌面启动。"
+        replay_note = (f"干净系统核对 {clean_windows['verified_archive_files']} 个文件及两份样本输入。"
+                       f"现有 Windows 另核对合并包的 {bundle['extracted']['verified_files']} 个文件并实际重跑反例。")
+        outbound_note = ""
+        local_rule_note = "同版干净 Windows 上的 Android 工具首次下载与设备验收待复核。"
     block("当前独立机器证据", installer_note + replay_note + outbound_note + local_rule_note +
           "此前的冷启动观察与中文路径失败另有记录。非开发者试用待补充。")
-    block("资源与费用", "系统镜像是主要下载和存储项，默认安装包不随包分发全部镜像。每轮记录耗时、工具与构建请求、模型输入输出和缓存计量；缺少计量时保留空值。模型费用、环境准备耗时与人工复核分别记录，实际现场成本以试点测量为准。")
+    block("资源与费用", "系统镜像是主要下载和存储项，默认安装包不随包分发全部镜像。每轮记录耗时、工具与构建请求、模型输入输出和缓存计量，缺少计量时保留空值。模型费用、环境准备耗时与人工复核分别记录，实际现场成本以试点测量为准。")
     block("拟定试点", "从授权的离线应用和合成业务记录开始，明确维护员、操作员与独立复核员。先完成关键流程及数据备份，再测设备更新、文件迁移与回滚。比较拿到 APK 到通过关键操作的用时、人工次数和失败恢复用时。当前巡检单是模拟场景，尚无企业试点收益数据。")
     table(["路径", "进入下一步的证据"], [
         ["第 1 年 / 可复核原型", "公开用例与拒绝分支，主流程可独立复跑。"],
@@ -285,7 +331,7 @@ def build(output=OUT, *, local_signed_candidate=False, local_development=False):
     heading("交付与团队", "按证据定位每一份成果")
     block("单人团队", "参赛队伍为重邮GGBond，负责人刘飞扬，所在单位重庆邮电大学。由负责人承担场景确定、需求与验收、工具集成及参赛材料整理。代码实现和文档制作使用 AI 辅助，模型服务与开源工具的作用在实现和依赖说明中列出。")
     table(["交付物", "复核重点"], [
-        (["本地 Windows 程序", "构建源码提交、文件 SHA-256、隔离安装和卸载记录。"] if local_development
+        (["本地 Windows 程序", "构建源码提交、文件 SHA-256、隔离安装和卸载记录。"] if local_development or offline
          else ["Windows 程序与签名更新清单", "版本、构建源码提交、文件 SHA-256 与更新清单签名。"]),
         ["源码与自有样本", "可分发输入 APK、构造样本源码、构建入口及使用说明。"],
         ["APK、差异与验收报告", "原包、候选及设备回读哈希，目标 Android/ABI，逐步操作结果。"],
@@ -328,6 +374,7 @@ if __name__ == "__main__":
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--local-signed-candidate", action="store_true")
     mode.add_argument("--local-development", action="store_true")
+    mode.add_argument("--offline-review", type=Path, metavar="SOURCE")
     args = parser.parse_args()
     build(args.output, local_signed_candidate=args.local_signed_candidate,
-          local_development=args.local_development)
+          local_development=args.local_development, offline_review=args.offline_review)

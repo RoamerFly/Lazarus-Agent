@@ -1,0 +1,65 @@
+{
+  "archive": {
+    "app_version": "0.6.25",
+    "source_commit": "c5f9799c748d700250a5b27d666bae00609acb50",
+    "exe_sha256": "a13c8e81a26f73805b3d704b8ac5ecf486e68b4f4adfdf4be8ec8efe32f47cc0",
+    "source_archive_sha256": "6c7189199ac44b66135a00bdd3dc89dcc9614be67fe70863b64203a635719d31",
+    "proposal_sha256": "74a6928ed3ab935daee8d08dda8957a068f21c93375e93efe7ceaa186ac572dd",
+    "video_sha256": "27f7b723a6fdc4ef3b9374256e7c1a228fd9d04081da9e9a23b64c87d24f7dd5",
+    "video_record_sha256": "c0384c486e986fe0e32537382d8bc987d1fb30c999ea96aef302ddc3a8c0da1d",
+    "video_seconds": 54,
+    "device_screen_sha256": "ec720623cac95be07c1cdbc2a0a64be131d7c712c9bfd78f826a92f05644ecbc",
+    "acceptance_sha256": "f5499193ab858875ea9e7cec3988c3c6b84ffbd008d73f29f35fc2b6dc226f48",
+    "archive_sha256": "ebb2bb40822a0379c1d4a5bbf94386e6f034aa2625295604592b7f5202a6d161",
+    "bytes": 3543086,
+    "file_count": 48,
+    "offline_materials": {
+      "status": "same-build-offline-review",
+      "version": "0.6.25",
+      "demo_steps": 10,
+      "network_model_calls": 0
+    }
+  },
+  "visual_review": {
+    "pdf_pages": 6,
+    "video_seconds": 54,
+    "video_frame_size": [
+      1440,
+      1080
+    ],
+    "pdf_rendered_and_checked": true,
+    "video_decoded_and_keyframes_checked": true
+  },
+  "demo": {
+    "input_sha256": "08ed16b9f6a149bd8063bae99dd72aad200dafea7d3a0504af004187bde20deb",
+    "candidate_sha256": "624ab6e00cb63eaf734d3265ee59625203a332563cb032b41e6557fb4a9c19f7",
+    "trace_sha256": "6ac868118521ca6ca47229c556879da148beaf9065917ef33601289a09d8c32c",
+    "tool_calls": 14,
+    "network_model_calls": 0,
+    "api": 36,
+    "abi": "x86_64"
+  },
+  "extracted": {
+    "shell": "Windows PowerShell 5.1",
+    "files_sha256_verified": 47,
+    "replays": [
+      {
+        "status": "inputs-verified",
+        "candidate_sha256": "624ab6e00cb63eaf734d3265ee59625203a332563cb032b41e6557fb4a9c19f7",
+        "steps": 10,
+        "sha256": "74f699ce4f21b418f6ed3a2fdb886f4f97cb0c5ad15bee066b6978e2d734b742"
+      },
+      {
+        "status": "behavior-verified",
+        "candidate_sha256": "624ab6e00cb63eaf734d3265ee59625203a332563cb032b41e6557fb4a9c19f7",
+        "steps": 10,
+        "sha256": "12a54bf78eed931abe82520f0cb0de28aaf5ef9a2be53656515494f95fc56f91"
+      }
+    ]
+  },
+  "tampered_archives_rejected": [
+    "different-source-commit",
+    "device-screen-apk-mismatch",
+    "omitted-offline-review-scope"
+  ]
+}

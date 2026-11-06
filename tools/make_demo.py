@@ -1,4 +1,4 @@
-"""Edit real browser captures from the current live Agent session into an MP4."""
+"""Edit real workbench captures into an MP4."""
 import argparse
 import hashlib
 import json
@@ -29,17 +29,30 @@ def wrapped(text, draw, font, width):
 
 def build(capture, out=OUT):
     metadata = json.loads((capture / "capture.json").read_text(encoding="utf-8"))
-    if metadata["app_version"] != APP_VERSION:
-        raise ValueError("演示捕获与当前程序版本不同")
+    version = metadata["app_version"]
     frames = list(metadata["frames"])
     if len(frames) < 6:
         raise ValueError("缺少实际操作画面")
+    offline = metadata.get("mode") == "recorded-tools"
+    if offline:
+        build_receipt = json.loads((ROOT / "docs/validation" / f"{version}-local-exe.json").read_text(encoding="utf-8"))
+        if (version != build_receipt["version"] or metadata["source_commit"] != build_receipt["source_commit"]
+                or metadata["network_model_calls"] != 0 or not metadata.get("device_screen")):
+            raise ValueError("离线演示缺少模型调用或设备证据")
+        for frame in frames:
+            with (capture / frame["file"]).open("rb") as stream:
+                if hashlib.file_digest(stream, "sha256").hexdigest() != frame["sha256"]:
+                    raise ValueError("工作台画面哈希不符")
+    elif version != APP_VERSION:
+        raise ValueError("演示捕获与当前程序版本不同")
     out = out.resolve()
     out.parent.mkdir(parents=True, exist_ok=True)
     keyframes = [(0, "导入老 APK，选择 Android 16。", 5),
                  (1, "自有巡检单原包 targetSdk 22，Android 16 默认安装被拒绝。", 6),
                  (2, "在发送需求之前，固定路线切换和冷启动的验收步骤。", 7),
                  (3, "用一句需求要求恢复安装，并记住最后打开的路线。", 7)]
+    if offline:
+        keyframes[0] = (0, "离线重放。用留档工具操作执行修改，构建与 Android 16 验收均为实测。", 6)
     middle = list(range(4, len(frames)-1))
     selected = middle if len(middle) <= 12 else [middle[i*(len(middle)-1)//11] for i in range(12)]
     for index in selected:
@@ -50,6 +63,8 @@ def build(capture, out=OUT):
             caption = "Agent 重放事先固定的步骤，预检候选的实际行为。"
         elif label.startswith("独立验收 Android"):
             caption = "独立验收器另行核对原包、候选与设备上的安装字节。"
+        elif offline:
+            caption = "工作台按留档操作调用文件工具和构建工具。本次未请求真实模型。"
         else:
             caption = "DeepSeek Flash 实际执行节选。模型自主读取、修改、构建和测试。"
         keyframes.append((index, caption, 3))
@@ -79,7 +94,8 @@ def build(capture, out=OUT):
             draw = ImageDraw.Draw(image)
             draw.rectangle((0, 0, 1440, 75), fill="#123e41")
             draw.text((32, 20), "遗留软件复活智能体", font=ImageFont.truetype(FONT, 27), fill="white")
-            draw.text((840, 26), f"v{APP_VERSION} · 实测节选 · 等待过程加速", font=ImageFont.truetype(FONT, 19), fill="#cbebe3")
+            mode = "离线重放 · 设备实测" if offline else "实测节选 · 等待过程加速"
+            draw.text((840, 26), f"v{version} · {mode}", font=ImageFont.truetype(FONT, 19), fill="#cbebe3")
             with Image.open(source) as shot:
                 scaled = ImageOps.contain(shot.convert("RGB"), (1410, 875), Image.Resampling.LANCZOS)
             image.paste(scaled, ((1440-scaled.width)//2, 80+(875-scaled.height)//2))
@@ -99,7 +115,7 @@ def build(capture, out=OUT):
                        cwd=temporary, check=True)
     with out.open("rb") as stream:
         checksum = hashlib.file_digest(stream, "sha256").hexdigest()
-    provenance = {"app_version": APP_VERSION, "video_sha256": checksum, "capture": metadata,
+    provenance = {"app_version": version, "video_sha256": checksum, "capture": metadata,
                   "edit": {"method": "real-screenshot-excerpts", "keyframes": keyframes,
                            "voiceover": False}, "duration_planned_seconds": duration_seconds}
     out.with_suffix(".json").write_text(json.dumps(provenance, ensure_ascii=False, indent=2), encoding="utf-8")
