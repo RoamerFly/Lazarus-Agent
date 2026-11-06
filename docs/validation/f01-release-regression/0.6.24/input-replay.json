@@ -1,0 +1,122 @@
+{
+  "app_version": "0.6.24",
+  "source_commit": "b60c33230318c526ec4fb831b870ce2569e2cc40",
+  "archive_sha256": "a35dd9b6a799b4f2d14211e9fc0ecf0ea35a9c78bcb52013f3c609ac6a0da194",
+  "exe_sha256": "c1fe662ec1095eba4395777f3b2259dba89b80435c716addf0100d5bbc7d70b3",
+  "powershell": "Windows PowerShell 5.1",
+  "scope": "Fresh extraction and EXE input check; no Android replay",
+  "rows": [
+    {
+      "sample": "P01-agent-1",
+      "exit": 0,
+      "status": "inputs-verified",
+      "candidate_sha256": "ce8f3b1af26d28f1f25d5b8b5c4e9a788d1d7c4c04c3aa2bc2de25a107d7be98",
+      "report_sha256": "c87610fb1fd9484c2ff16b95334bda1b5b439a223e9c355d0d14234f3a68d157"
+    },
+    {
+      "sample": "P01-agent-2",
+      "exit": 0,
+      "status": "inputs-verified",
+      "candidate_sha256": "54ad29b72887b13b2f25e1b977287534829b8068f2528c34d43ead4f5a1f6c98",
+      "report_sha256": "9146ff3b4917b8e2323f4a00aa74b02a66d6ccee53a57d91b439d6f650cb0583"
+    },
+    {
+      "sample": "P01-agent-3",
+      "exit": 0,
+      "status": "inputs-verified",
+      "candidate_sha256": "51a08713dec465c8a39f2186fd1128fb428409085cd91cea99c8493df72a4011",
+      "report_sha256": "b6b73067180d99720ecf38c14d770003d318b0368911ec107da3075b65e89658"
+    },
+    {
+      "sample": "P02-agent-1",
+      "exit": 0,
+      "status": "inputs-verified",
+      "candidate_sha256": "2a80be808141471537dd5fb27684b76b3cd84a280f665564ae6c56e664fd07e5",
+      "report_sha256": "c7d222e72531b4ca686f84adb6e39073f85492b8a10f349aa6c9b7409a01903d"
+    },
+    {
+      "sample": "P02-agent-2",
+      "exit": 0,
+      "status": "inputs-verified",
+      "candidate_sha256": "878cd70e337ceb5ef3f92c75d1f2f4959f44927a9440cbe5dd96da6058bf27ef",
+      "report_sha256": "9014b98e87f0daed8bc24574958ef73897a273d008f92e4791d8083c7e3d51c5"
+    },
+    {
+      "sample": "P02-agent-3",
+      "exit": 0,
+      "status": "inputs-verified",
+      "candidate_sha256": "e9847607fba9df8ea510994e6ef5dc68d5df732efab56165b757d797d4b222ec",
+      "report_sha256": "21dd9dbae26e1eac287ed34cdf77b4ab5a86d07df3c318742cb977b7cb895900"
+    },
+    {
+      "sample": "P03-agent-1",
+      "exit": 0,
+      "status": "inputs-verified",
+      "candidate_sha256": "4aaa18314017dbbbfc9e19170638461368e29140ce5a6dad6d688784e7e089d3",
+      "report_sha256": "0a7ef66acfd06d2d4d0487603b7f3f2a3e9defda0bcb135d33ab7996a7ddc479"
+    },
+    {
+      "sample": "P03-agent-2",
+      "exit": 0,
+      "status": "inputs-verified",
+      "candidate_sha256": "fff097d74077c522ce10f4f5f7f341d0ce1ca371b45fe0afd05e8ff5c58fc761",
+      "report_sha256": "f2557d524e7b3ac4880c9264900f3bd84bcab27e0e256ae9651baad8939175ee"
+    },
+    {
+      "sample": "P03-agent-3",
+      "exit": 0,
+      "status": "inputs-verified",
+      "candidate_sha256": "39e468b38fec16de63efcd7d2f93be76b40d3c4b2945f8ef93b4880834562444",
+      "report_sha256": "5db00f9f319a00293a3d9c4bfeba237692ed56d372992f1112dff69d75978440"
+    },
+    {
+      "sample": "P04-agent-1",
+      "exit": 0,
+      "status": "inputs-verified",
+      "candidate_sha256": "56c219018466b96a516cba0bbceb16c143dfdecf030f5c93fc58dbeb9e474840",
+      "report_sha256": "3fac7d94caa57d3971d537ab84f28596b7deda483be59852e6ab6a2904c839ff"
+    },
+    {
+      "sample": "P04-agent-2",
+      "exit": 0,
+      "status": "inputs-verified",
+      "candidate_sha256": "5573e1358aeef05533e9ddaaa65fea3a006729d995377137293fe837fd15bfe9",
+      "report_sha256": "55d79037cac667fae4ce5b784922b5d5d71686a7caaaa9192cfded892206dc8d"
+    },
+    {
+      "sample": "P04-agent-3",
+      "exit": 0,
+      "status": "inputs-verified",
+      "candidate_sha256": "9e91f9b8190866ddac8566daa227e9b7f11db34ee37236d88dc18f754c7c71c3",
+      "report_sha256": "b7e86f28e6357fcbc3627d3f83eafc00e0e983ed59a764cc3809a912ad58b485"
+    },
+    {
+      "sample": "P05-agent-1",
+      "exit": 0,
+      "status": "inputs-verified",
+      "candidate_sha256": "59735dd3be711e37c22b658f59356a9dc7e66d562c8f370b0325d668df5c94d7",
+      "report_sha256": "194e655560ba531b13937b73a80cdc29b63f8aa87a3ad3e8ff1dc0004e0f199e"
+    },
+    {
+      "sample": "P05-agent-2",
+      "exit": 0,
+      "status": "inputs-verified",
+      "candidate_sha256": "34b274db5e4da618fd521d998654b039b5c668d313bafeede84a866dca88dd81",
+      "report_sha256": "5478837ee1ca17aa6f2df3c2209738afd12fcf7f4307ff1972b48febdd5cfda7"
+    },
+    {
+      "sample": "P05-agent-3",
+      "exit": 0,
+      "status": "inputs-verified",
+      "candidate_sha256": "b592768dd90b63597c762b7195ea5c626734f6263e958c2d6c533859f761da9b",
+      "report_sha256": "912de64838e1d0a32bfb97fc3d700192f0cdcdbe5ff3b7de0dd63caae1001576"
+    },
+    {
+      "sample": "N03-agent-1",
+      "exit": 0,
+      "status": "inputs-verified",
+      "candidate_sha256": "40b936d5865a6317718ea932a0e2a6e831e7a66cdcf51694212a57ebd10fd3f0",
+      "report_sha256": "670db1a34a5bca09d75cfd6e459d607c1ad89086e0d6fb0312b79a61e8e10ed5"
+    }
+  ]
+}

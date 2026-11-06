@@ -1,0 +1,42 @@
+{
+  "mode": "local-development-replay",
+  "version": "0.6.24",
+  "source_commit": "b60c33230318c526ec4fb831b870ce2569e2cc40",
+  "exe_sha256": "c1fe662ec1095eba4395777f3b2259dba89b80435c716addf0100d5bbc7d70b3",
+  "protocol_sha256": "aa7f164a5247d363a792d59e47c5fee88400e88da94fcf2c37100d11303368f9",
+  "terminal_trials": 42,
+  "counts": {
+    "agent_positives": 15,
+    "primary": 3,
+    "agent_negative_rejected": 6,
+    "agent_false_acceptances": 0,
+    "unobserved": 2,
+    "majority_agent_cases": 5,
+    "roundtrip_positive_cases": 0,
+    "rules_positive_cases": 2,
+    "one-build_positive_cases": 3
+  },
+  "distributable_agent_trials": [
+    "P01-agent-1",
+    "P01-agent-2",
+    "P01-agent-3",
+    "P02-agent-1",
+    "P02-agent-2",
+    "P02-agent-3",
+    "P03-agent-1",
+    "P03-agent-2",
+    "P03-agent-3",
+    "P04-agent-1",
+    "P04-agent-2",
+    "P04-agent-3",
+    "P05-agent-1",
+    "P05-agent-2",
+    "P05-agent-3"
+  ],
+  "counterexamples": [
+    "N03-agent-1"
+  ],
+  "bundle_sha256": "a35dd9b6a799b4f2d14211e9fc0ecf0ea35a9c78bcb52013f3c609ac6a0da194",
+  "bundle_bytes": 275242,
+  "files": 59
+}
