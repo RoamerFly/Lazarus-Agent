@@ -90,6 +90,63 @@ def check_signed_release(archive, checksums, status):
     return {"version": release.version, "source_commit": commit}
 
 
+def check_release_regression(archive, checksums, status):
+    regression = status.get("release_regression")
+    distributed = {name for name in checksums if name.startswith("可分发样本/发布回归-v")}
+    if regression is None and not distributed:
+        return None
+    version = status.get("app_version")
+    if not regression or not isinstance(version, str) or not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version):
+        raise ValueError("缺少发布回归状态或版本")
+
+    prefix = f"v{version} 发布回归/"
+    reports = f"docs/validation/f01-release-regression/{version}/"
+    plan = json.loads(archive.read(prefix + "plan.json"))
+    audited = json.loads(archive.read(reports + "results.json"))
+    review = json.loads(archive.read(reports + "diff-review.json"))
+    plan_fields = {"app_version": "app_version", "implementation_commit": "implementation_commit",
+                   "evaluation_role": "purpose", "source_build_run": "build_run",
+                   "freeze_commit": "source_protocol_freeze_commit", "protocol_sha256": "protocol_sha256",
+                   "planned_trials": "planned_trials"}
+    summary_fields = (*plan_fields, "terminal_trials", "joint_gate", "counts")
+    if (regression["app_version"] != version
+            or any(regression[key] != audited[key] for key in summary_fields)
+            or any(regression[key] != plan[field] for key, field in plan_fields.items())
+            or regression["protocol_sha256"] != checksums.get(prefix + "f01-p1c-cases.json")):
+        raise ValueError("发布回归的状态、方案与审计汇总不一致")
+    rows = {row["trial"]: row for row in audited["rows"]}
+    if (len(rows) != len(audited["rows"]) or len(rows) != regression["planned_trials"]
+            or sum(row["terminal"] is True for row in rows.values()) != regression["terminal_trials"]
+            or regression["terminal_trials"] != regression["planned_trials"]):
+        raise ValueError("发布回归缺少完整且唯一的轮次终态")
+
+    from tools.audit_f01_p1b import require_diff_review
+    require_diff_review(audited, review)
+    if any(type(row.get("distributable")) is not bool for row in review["rows"]):
+        raise ValueError("发布回归的差异审查缺少明确的分发结论")
+    excluded = sorted(row["trial"] for row in review["rows"] if not row["distributable"])
+    if excluded != regression["excluded_from_distribution"]:
+        raise ValueError("发布回归的分发排除清单与差异审查不一致")
+
+    expected = {}
+    for row in review["rows"]:
+        trial = rows[row["trial"]]
+        if not row["distributable"] or trial["mode"] != "agent":
+            continue
+        folder = f"可分发样本/发布回归-v{version}/{row['trial']}/"
+        expected.update({
+            folder + "base.apk": audited["source_apk_sha256"][trial["case"]],
+            folder + "candidate.apk": trial["candidate_sha256"],
+            folder + "agent-acceptance.json": trial["raw_acceptance_sha256"],
+        })
+    if distributed != expected.keys():
+        raise ValueError("发布回归的可分发目录与差异审查批准的样本不一致")
+    if any(checksums[name] != digest for name, digest in expected.items()):
+        raise ValueError("发布回归的可分发 APK 或验收报告与审计哈希不一致")
+    return {"version": version, "trials": len(rows), "distributed": len(expected) // 3,
+            "excluded_from_distribution": excluded}
+
+
 def verify(path):
     with ZipFile(path) as archive:
         names = archive.namelist()
@@ -113,6 +170,7 @@ def verify(path):
                     raise ValueError("文件哈希不一致：" + name)
         status = json.loads(archive.read("复核状态.json"))
         signed_release = check_signed_release(archive, checksums, status)
+        release_regression = check_release_regression(archive, checksums, status)
         samples = []
         for name in names:
             if "可分发样本" in PurePosixPath(name).parts and name.endswith("/agent-acceptance.json"):
@@ -163,6 +221,7 @@ def verify(path):
                 "local_links_checked": check_local_links(archive, set(names)),
                 "samples": samples, "counterexamples": counterexamples,
                 "package_status": status, "signed_release": signed_release,
+                "release_regression": release_regression,
                 "scope": "Files, checksums and stored proofs. Device replay is a separate operation."}
 
 

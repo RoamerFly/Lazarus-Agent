@@ -1,0 +1,71 @@
+{
+  "scope": "Archived review evidence; no new device replay",
+  "previous_verifier_commit": "dd2ed7a",
+  "checks": [
+    {
+      "case": "official-v0.6.18",
+      "archive_sha256": "ba683811039573ef78a9b9fe6560d06c5540b8c3aa5b382ec1b1e27fbfaf23c2",
+      "status": "archive-and-proofs-verified",
+      "release_regression": {
+        "version": "0.6.18",
+        "trials": 42,
+        "distributed": 15,
+        "excluded_from_distribution": [
+          "P06-agent-1",
+          "P06-agent-3",
+          "P06-one-build-1"
+        ]
+      },
+      "status_before": "archive-and-proofs-verified"
+    },
+    {
+      "case": "signed-local-v0.6.19",
+      "archive_sha256": "c030c543ef109d0ea6f03fb8988a21cbd146b210f3597e8455ecc0b718054e42",
+      "status": "archive-and-proofs-verified",
+      "release_regression": null,
+      "status_before": "archive-and-proofs-verified"
+    },
+    {
+      "case": "unsigned-local-v0.6.22",
+      "archive_sha256": "3572f1011d2f46953a627acaeabe269d14bddad32e7759ecf5680735b4bb0e5f",
+      "status": "archive-and-proofs-verified",
+      "release_regression": null,
+      "status_before": "archive-and-proofs-verified"
+    },
+    {
+      "case": "excluded-promoted",
+      "archive_sha256": "7d629f22398b86783974e3dcb1c7fa5cb8e04c124f4dc0726b0e43207e4658d5",
+      "status": "rejected",
+      "diagnostic": "发布回归的可分发目录与差异审查批准的样本不一致",
+      "status_before": "archive-and-proofs-verified"
+    },
+    {
+      "case": "excluded-swap",
+      "archive_sha256": "6c55ee85eecb6147a9c9119aa27f37e44211fd38583854d63ef206128f0c9c11",
+      "status": "rejected",
+      "diagnostic": "发布回归的可分发 APK 或验收报告与审计哈希不一致",
+      "status_before": "archive-and-proofs-verified"
+    },
+    {
+      "case": "approved-removed",
+      "archive_sha256": "ef4e968929d75fbd5f5c5a8669a9c653fc65a4e7031ec078dc8e2c8b93c1b43e",
+      "status": "rejected",
+      "diagnostic": "发布回归的可分发目录与差异审查批准的样本不一致",
+      "status_before": "archive-and-proofs-verified"
+    },
+    {
+      "case": "review-inconsistent",
+      "archive_sha256": "e3ca483368a4a273847179ce19bc7a76c2f60f6bf9af9224e9ba62327b55cd24",
+      "status": "rejected",
+      "diagnostic": "发布回归的分发排除清单与差异审查不一致",
+      "status_before": "archive-and-proofs-verified"
+    },
+    {
+      "case": "summary-inflated",
+      "archive_sha256": "52ed0eb446a84e6d22522ad13fb8410031266e4a1e40e0cde89d10b06b81ce8a",
+      "status": "rejected",
+      "diagnostic": "发布回归的状态、方案与审计汇总不一致",
+      "status_before": "archive-and-proofs-verified"
+    }
+  ]
+}

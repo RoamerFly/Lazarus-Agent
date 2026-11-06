@@ -12,6 +12,47 @@ from tools.verify_review_package import verify
 
 
 class ReviewPackageTests(unittest.TestCase):
+    def test_regression_distribution_binds_approved_trial_and_archive_hashes(self):
+        version = "0.6.18"
+        implementation, freeze = "a" * 40, "b" * 40
+        input_hash, candidate_hash, proof_hash, diff_hash = ("c" * 64, "d" * 64, "e" * 64, "f" * 64)
+        prefix = f"v{version} 发布回归/"
+        reports = f"docs/validation/f01-release-regression/{version}/"
+        protocol = b"{}"
+        plan = {"app_version": version, "implementation_commit": implementation,
+                "purpose": "development-regression-on-seen-cases", "build_run": "run",
+                "source_protocol_freeze_commit": freeze, "protocol_sha256": sha256(protocol).hexdigest(),
+                "planned_trials": 2}
+        regression = {"app_version": version, "implementation_commit": implementation,
+                      "evaluation_role": plan["purpose"], "source_build_run": plan["build_run"],
+                      "freeze_commit": freeze, "protocol_sha256": plan["protocol_sha256"],
+                      "planned_trials": 2, "terminal_trials": 2, "joint_gate": False, "counts": {}}
+        rows = [{"case": "P01", "trial": f"P01-agent-{i}", "mode": "agent", "terminal": True,
+                 "state": "passed", "candidate_sha256": candidate_hash, "raw_diff_sha256": diff_hash,
+                 "raw_acceptance_sha256": proof_hash} for i in (1, 2)]
+        review = {"rows": [{**row, "scope": "tested", "review": "checked", "distributable": i == 0}
+                           for i, row in enumerate(rows)]}
+        status = {"app_version": version, "release_regression": {
+            **regression, "excluded_from_distribution": ["P01-agent-2"],
+        }}
+        approved = f"可分发样本/发布回归-v{version}/P01-agent-1/"
+        files = {approved + "base.apk": input_hash, approved + "candidate.apk": candidate_hash,
+                 approved + "agent-acceptance.json": proof_hash,
+                 prefix + "f01-p1c-cases.json": plan["protocol_sha256"]}
+        with ZipFile(BytesIO(), "w") as archive:
+            archive.writestr(prefix + "plan.json", json.dumps(plan))
+            archive.writestr(reports + "results.json", json.dumps({
+                **regression, "source_apk_sha256": {"P01": input_hash}, "rows": rows,
+            }))
+            archive.writestr(reports + "diff-review.json", json.dumps(review))
+            check = verify_review_package.check_release_regression
+            self.assertEqual(check(archive, files, status)["distributed"], 1)
+            with self.assertRaisesRegex(ValueError, "批准的样本"):
+                check(archive, {**files, approved.replace("-1/", "-2/") + "candidate.apk": candidate_hash},
+                      status)
+            with self.assertRaisesRegex(ValueError, "审计哈希"):
+                check(archive, {**files, approved + "agent-acceptance.json": "0" * 64}, status)
+
     def test_release_uses_distinct_source_archive_and_implementation_commits(self):
         source_commit, implementation = "a" * 40, "b" * 40
         release = {"schema": 1, "version": "0.6.18", "assets": {
