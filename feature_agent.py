@@ -13,7 +13,7 @@ from agent_acceptance import rehearse_candidate
 from agent_intent_guard import direct_private_grants
 from agent_workspace import Workspace, digest_file
 from apk_edit_build import build_modified, decoded_apk
-from diagnose import inspect_package
+from diagnose import inspect_package, manifest_surface
 from model_tools import ModelToolError, _arguments, _request
 from reviver import INSTALL_FLOOR, repair
 
@@ -73,6 +73,9 @@ def tool_definitions(device_available, acceptance_steps=()):
         _tool("create_text_file", "在 APK 的资源、assets 或 smali 目录新增文本文件",
               {"path": STRING, "content": STRING}),
         _tool("restore_file", "撤销一个文件在本轮的全部修改", {"path": STRING}),
+        _tool("inspect_manifest", "读取原包或当前候选编译清单中显式的权限、组件、导出和组件权限声明。"
+              "结合相关代码判断外部输入及访问范围。未声明的默认值需另查清单和目标系统规则。",
+              {"artifact": {"type": "string", "enum": ["original", "candidate"]}}),
         _tool("build_apk", "回编、对齐并签名当前修改。构建错误会返回，可继续修改重试", {}),
         _tool("localize_resources", "使用现有批量简体中文工具处理 APK 资源、游戏语言表、字体及图片并构建签名候选。仅当当前没有未提交的文件修改时可用", {}),
         _tool("finish", "结束本轮，说明结论、已做修改、验证和具体阻碍。候选必须与当前修改一致",
@@ -112,6 +115,7 @@ replace_text 的 old 必须来自 read_text 返回的原文件内容，去掉显
 如果运行证据列出 platform_library，可先用 declare_platform_library 恢复系统库可见性，再回编复验。
 若声明后仍失败或需求本身需要改写功能，继续按实际证据分析。
 兼容修复应保留原有权限和安全检查。文件交接保留实际写入、传递和读取，优先采用范围明确的只读内容 URI 或同应用的受限文件入口。检查接收端的 URI、授权范围和规范化后的路径边界。不能关闭进程范围的安全检查，也不能让导出组件接收可由外部指定的私有文件路径。
+新增或修改涉及 Intent、外部输入和私有数据的代码前，调用 inspect_manifest 检查原组件的导出及权限声明。构建后对候选再核对声明。目录边界校验只限制目录，还需确认外部调用者有权访问具体数据。仅供本应用使用的文件交接可新增非导出接收组件，保留原有主入口。需要对外提供的接口应按需求限制文件集合和调用权限。结合代码与设备结果说明已检查的范围。
 交接目标已知时，在发送前用 setPackage、setComponent 或显式 Intent 构造器限定目标。用户确实要求选择其他应用时，使用系统分享面板，由用户选择接收方并仅授予必要权限。
 使用字节数组交接现有文件时，发送的字节必须来自读取同一个实际文件。保留读取失败路径，并由接收端读取和校验实际收到的数据。
 有设备工具时应测试最新候选，基于界面执行与需求有关的操作。安装启动成功只能证明安装启动。
@@ -165,6 +169,19 @@ class Session:
             return getattr(self.workspace, name)(**args)
         if name == "build_apk" and not args:
             return self.build()
+        if name == "inspect_manifest" and set(args) == {"artifact"}:
+            role = args["artifact"]
+            if role == "original":
+                artifact, expected = self.source, self.facts["sha256"]
+            elif role == "candidate":
+                self.require_current_build()
+                artifact, expected = self.artifact, self.build_report["sha256"]
+            else:
+                raise ValueError("请选择原包或当前候选")
+            if digest_file(artifact) != expected:
+                raise ValueError("清单检查的 APK 哈希与本轮记录不一致")
+            return {"artifact": role, "sha256": expected, "scope": "explicit-compiled-declarations",
+                    **manifest_surface(artifact, self.tools)}
         if name == "localize_resources" and not args:
             return self.localize()
         if name == "declare_platform_library" and set(args) == {"name"} and self.tester:

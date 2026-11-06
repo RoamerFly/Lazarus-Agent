@@ -68,6 +68,30 @@ class WorkspaceTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             session.finish("candidate", "Done")
 
+    def test_manifest_inspection_binds_original_and_current_candidate(self):
+        original = self.root / "original.apk"
+        original.write_bytes(b"original")
+        candidate = self.root / "candidate.apk"
+        candidate.write_bytes(b"candidate")
+        session = Session(self.root, original, candidate, self.root, 36,
+                          {"sha256": digest(b"original")}, lambda _: None, None)
+        declarations = {"permissions": [], "components": [{"type": "activity", "exported": "0xffffffff"}]}
+        with patch("feature_agent.manifest_surface", return_value=declarations) as inspect:
+            result = session.dispatch("inspect_manifest", {"artifact": "original"})
+            self.assertEqual(result["sha256"], digest(b"original"))
+            self.assertEqual(result["components"], declarations["components"])
+            inspect.assert_called_once_with(original, self.root)
+            with self.assertRaises(ValueError):
+                session.dispatch("inspect_manifest", {"artifact": "candidate"})
+            session.built(candidate, {"sha256": digest(b"candidate")})
+            result = session.dispatch("inspect_manifest", {"artifact": "candidate"})
+            self.assertEqual(result["artifact"], "candidate")
+            self.assertEqual(result["sha256"], digest(b"candidate"))
+            candidate.write_bytes(b"tampered")
+            with self.assertRaisesRegex(ValueError, "哈希"):
+                session.dispatch("inspect_manifest", {"artifact": "candidate"})
+            self.assertEqual(inspect.call_count, 2)
+
     def test_new_process_bypasses_are_rejected_before_the_build_budget_is_spent(self):
         empty_policy = """
     new-instance v3, Landroid/os/StrictMode$VmPolicy$Builder;
