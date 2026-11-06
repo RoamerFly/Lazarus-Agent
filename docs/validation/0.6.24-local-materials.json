@@ -1,0 +1,43 @@
+{
+  "app_version": "0.6.24",
+  "source_commit": "b60c33230318c526ec4fb831b870ce2569e2cc40",
+  "exe_sha256": "c1fe662ec1095eba4395777f3b2259dba89b80435c716addf0100d5bbc7d70b3",
+  "source_archive_sha256": "0325013ba50e6374b8b08f65832e638fc6993365dac49899ed18bdb793d2920e",
+  "proposal_sha256": "a337ad5641b53d609ac8c8bab871a6a850f44968a3dd97638f39014320b4d757",
+  "proposal_pages": 6,
+  "video_sha256": "d1efdc17dcd69d8b5c21e8edee04de20c0cf7e1080df0bdca17cfa509145d92b",
+  "video_seconds": 74,
+  "capture_mode": "Real browser screenshots from live workbench and Android emulator, edited excerpts",
+  "demo": {
+    "installed_sha256": "e6d12d2a19772f9bfab899fc627bb4109f8f5bb74ecb51f1d15a1c3f627cdf8f",
+    "function": "passed",
+    "input_sha256": "08ed16b9f6a149bd8063bae99dd72aad200dafea7d3a0504af004187bde20deb",
+    "launch": "passed",
+    "install": "passed",
+    "target_api": 36,
+    "passed_steps": 10,
+    "candidate_sha256": "e6d12d2a19772f9bfab899fc627bb4109f8f5bb74ecb51f1d15a1c3f627cdf8f",
+    "acceptance_sha256": "c6f62d8d201cc9dbbe43ad923152e788f9cd454d6dcac18fe6529904a898bfd9",
+    "abi": [
+      "x86_64"
+    ]
+  },
+  "historical_probe_calibration": {
+    "caller_sha256": "dbbb70059835196ce6981738120a15c66584e20c75267c812a4bd735aa65c71b",
+    "record_uri": "content://org.ggbond.archivereader.records/record",
+    "candidate_sha256": "50ead99e8ba4d9bdab7a0015d547c42e740e5bf4d380b398403bee0b1a98b0ed",
+    "result_sha256": "e7fc5f80cc0be49c6a8f974749ffab5d0ebdcf110b336450a669be1c355d8ba1",
+    "uids": {
+      "org.ggbond.archivereader": 10150,
+      "org.ggbond.recordcaller": 10151
+    },
+    "abis": [
+      "x86_64"
+    ],
+    "before": "target-rejected",
+    "source_app_version": "0.6.22",
+    "probe_commit": "0ea499c568af5d016323e6096d801db31595502f",
+    "api": 36,
+    "after": "external-record-status"
+  }
+}

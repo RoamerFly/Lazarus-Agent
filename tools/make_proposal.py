@@ -21,7 +21,7 @@ PAGE_WIDTH, PAGE_HEIGHT = A4
 CONTENT_WIDTH = PAGE_WIDTH - 104
 
 
-def build(output=OUT, *, local_signed_candidate=False):
+def build(output=OUT, *, local_signed_candidate=False, local_development=False):
     from app_version import APP_VERSION
     from assistant_chat import ANDROID_NAMES
 
@@ -38,6 +38,15 @@ def build(output=OUT, *, local_signed_candidate=False):
     validation = ROOT / "docs/validation"
     evidence_path = validation / "f01-p1-results.json"
     evidence = json.loads(evidence_path.read_text(encoding="utf-8")) if evidence_path.is_file() else None
+    regression_path = validation / "f01-release-regression" / APP_VERSION / "results.json"
+    regression = json.loads(regression_path.read_text(encoding="utf-8")) if regression_path.is_file() else None
+    if local_development:
+        build_receipt = json.loads((validation / f"{APP_VERSION}-local-exe.json").read_text(encoding="utf-8"))
+        if (not regression or build_receipt["version"] != APP_VERSION
+                or regression["implementation_commit"] != build_receipt["source_commit"]
+                or regression["source_build_run"] != "local:" + build_receipt["exe_sha256"]
+                or build_receipt["self_test_exit"] != 0):
+            raise ValueError("本地方案的回归与 EXE 构建回执不一致")
 
     def para(text, style=body):
         return Paragraph(text, style)
@@ -65,7 +74,9 @@ def build(output=OUT, *, local_signed_candidate=False):
     windows_proof = validation / f"{APP_VERSION}-windows-proof.json"
     publication = validation / f"{APP_VERSION}-release-publication.json"
     edition = "工程候选稿"
-    if windows_proof.is_file() or publication.is_file():
+    if local_development:
+        edition = f"v{APP_VERSION} 本地工程候选"
+    elif windows_proof.is_file() or publication.is_file():
         edition = "工程复核版"
     elif local_signed_candidate:
         edition = "本地工程复核版"
@@ -117,7 +128,7 @@ def build(output=OUT, *, local_signed_candidate=False):
     library_path = validation / "agent-platform-library-model.json"
     if library_path.is_file():
         trial = json.loads(library_path.read_text(encoding="utf-8"))
-        block("已见应用的设备证据", f"归档阅读器点击后因缺少旧 HTTP 类而崩溃。Agent 自主复现后只添加可选库声明，构建 {trial['build_attempts']} 次，"
+        block("前序归档阅读器试验", f"归档阅读器点击后因缺少旧 HTTP 类而崩溃。Agent 自主复现后只添加可选库声明，构建 {trial['build_attempts']} 次，"
               f"预检和独立验收各通过 {trial['independent_steps_passed']} 步。原包无真实归档文件，验证范围为恢复样本原有操作。")
     table(["对标", "对应能力与本项目侧重"], [
         ["APKLab", "提供 APK 编辑工具链集成。本项目侧重自然语言驱动的自主修改，以及候选版本和独立行为证据的关联。"],
@@ -164,9 +175,7 @@ def build(output=OUT, *, local_signed_candidate=False):
                           + "。".join(control_rows) + "。第一批一次构建有一轮中断，完整分母保留。", tiny))
     if not any(label == "P1C" for label, _ in batches):
         story.append(para("P1C 已冻结 42 轮并启动，加入仓库温度卡，检查换算与冷启动保留单位。结果待归档。", tiny))
-    regression_path = validation / "f01-release-regression" / APP_VERSION / "results.json"
-    if regression_path.is_file():
-        regression = json.loads(regression_path.read_text(encoding="utf-8"))
+    if regression:
         counts = regression["counts"]
         review_path = regression_path.with_name("diff-review.json")
         decisions = json.loads(review_path.read_text(encoding="utf-8"))["rows"]
@@ -177,6 +186,10 @@ def build(output=OUT, *, local_signed_candidate=False):
                           f"反例拒绝 {counts['agent_negative_rejected']}/6，误验收 {counts['agent_false_acceptances']}/6。", tiny))
         if accepted < 15:
             story.append(para("正例语义复核未达到 15/18 的内部门槛，本版保留为工程候选。", tiny))
+        if local_development:
+            passed_cases = {row["case"] for row in regression["rows"] if row["trial"] in approved and row["mode"] == "agent"}
+            if "P06" not in passed_cases:
+                story.append(para("本地文件交接未获分发候选。未观测轮次保留在分母。", tiny))
     else:
         story.append(para("已见任务另有全组开发回归和主案例回归。同一候选在 Android 14、15、16 上通过固定步骤。OI Notepad 的两轮修改有独立哈希链。", tiny))
     story.append(PageBreak())
@@ -184,6 +197,8 @@ def build(output=OUT, *, local_signed_candidate=False):
     heading("部署与试点", "给复核人员一条可重复的路径")
     installer_delivery = ("使用单独交付的安装器和包内校验脚本。" if local_signed_candidate
                           else "提供按用户安装器和便携 ZIP。")
+    if local_development:
+        installer_delivery = "提供同版便携 EXE、复测 ZIP 和独立的安装检查工具。"
     block("Windows 安装", installer_delivery + "桌面内嵌 WebView2，模型凭据由 Windows DPAPI 加密。程序优先复用工具，首次按所选系统准备缺失的 SDK、Java 与镜像。后续可在已准备环境中断网复测已有候选。")
     replay_path = validation / f"{APP_VERSION}-windows-proof.json"
     replay_note = f"v{APP_VERSION} 干净 Windows 候选复测待归档。"
@@ -224,6 +239,37 @@ def build(output=OUT, *, local_signed_candidate=False):
                        f"断网复测通过 {runtime['replay']['behavior_steps']} 步。")
         local_rule_note = "另一轮关闭模型，从原包生成新 APK 并通过指定操作。"
     outbound_note = "复测限制所列程序的 Internet 出站，保留本机通信。" if replay_path.is_file() or candidate_path.is_file() else ""
+    if local_development:
+        install = json.loads((validation / f"{APP_VERSION}-local-windows-install.json").read_text(encoding="utf-8"))
+        replay_inputs = json.loads(regression_path.with_name("input-replay.json").read_text(encoding="utf-8-sig"))
+        bundle = json.loads(regression_path.with_name("bundle-receipt.json").read_text(encoding="utf-8-sig"))
+        samples = bundle["distributable_agent_trials"]
+        counterexamples = bundle["counterexamples"]
+        replay_rows = replay_inputs["rows"]
+        if (install["source_commit"] != build_receipt["source_commit"]
+                or install["installed_exe_sha256"] != build_receipt["exe_sha256"]
+                or any(install[field] != 0 for field in ("install_exit", "installed_self_test_exit", "uninstall_exit"))):
+            raise ValueError("本地安装证据与方案所用 EXE 不一致")
+        if (replay_inputs["source_commit"] != build_receipt["source_commit"]
+                or replay_inputs["exe_sha256"] != build_receipt["exe_sha256"]
+                or replay_inputs["archive_sha256"] != bundle["bundle_sha256"]
+                or len(samples) != accepted
+                or sorted(row["sample"] for row in replay_rows) != sorted(samples + counterexamples)
+                or any(row["status"] != "inputs-verified" or row["exit"] != 0 for row in replay_rows)):
+            raise ValueError("本地复测包的输入校验证据与方案不一致")
+        installer_note = "在现有 Windows 上完成隔离安装、自检和卸载。"
+        replay_note = (f"同版 {len(samples)} 份候选和 {len(counterexamples)} 份反例通过解压后输入校验。"
+                       "干净 Windows 首次部署待验证。")
+        outbound_note = ""
+        archive_replay_path = validation / f"{APP_VERSION}-archive-reader-device-replay.json"
+        if archive_replay_path.is_file():
+            archive_replay = json.loads(archive_replay_path.read_text(encoding="utf-8"))
+            if (archive_replay["exe_sha256"] != build_receipt["exe_sha256"]
+                    or archive_replay["status"] != "behavior-verified"
+                    or archive_replay["candidate_sha256"] != archive_replay["installed_sha256"]):
+                raise ValueError("本地归档阅读器设备回执与方案不一致")
+            local_rule_note = (f"归档阅读器候选另有同版 EXE 的 Android "
+                               f"{ANDROID_NAMES[archive_replay['target_api']]} {archive_replay['steps_passed']} 步复测记录。")
     block("当前独立机器证据", installer_note + replay_note + outbound_note + local_rule_note +
           "此前的冷启动观察与中文路径失败另有记录。非开发者试用待补充。")
     block("资源与费用", "系统镜像是主要下载和存储项，默认安装包不随包分发全部镜像。每轮记录耗时、工具与构建请求、模型输入输出和缓存计量；缺少计量时保留空值。模型费用、环境准备耗时与人工复核分别记录，实际现场成本以试点测量为准。")
@@ -239,7 +285,8 @@ def build(output=OUT, *, local_signed_candidate=False):
     heading("交付与团队", "按证据定位每一份成果")
     block("单人团队", "参赛队伍为重邮GGBond，负责人刘飞扬，所在单位重庆邮电大学。由负责人承担场景确定、需求与验收、工具集成及参赛材料整理。代码实现和文档制作使用 AI 辅助，模型服务与开源工具的作用在实现和依赖说明中列出。")
     table(["交付物", "复核重点"], [
-        ["Windows 程序与签名更新清单", "版本、构建源码提交、文件 SHA-256 与更新清单签名。"],
+        (["本地 Windows 程序", "构建源码提交、文件 SHA-256、隔离安装和卸载记录。"] if local_development
+         else ["Windows 程序与签名更新清单", "版本、构建源码提交、文件 SHA-256 与更新清单签名。"]),
         ["源码与自有样本", "可分发输入 APK、构造样本源码、构建入口及使用说明。"],
         ["APK、差异与验收报告", "原包、候选及设备回读哈希，目标 Android/ABI，逐步操作结果。"],
         ["固定评测与对照", "全部预定轮次、失败及中断、模型响应计量、人工差异审查。"],
@@ -278,6 +325,9 @@ if __name__ == "__main__":
     sys.path.insert(0, str(ROOT))
     parser = ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=OUT)
-    parser.add_argument("--local-signed-candidate", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--local-signed-candidate", action="store_true")
+    mode.add_argument("--local-development", action="store_true")
     args = parser.parse_args()
-    build(args.output, local_signed_candidate=args.local_signed_candidate)
+    build(args.output, local_signed_candidate=args.local_signed_candidate,
+          local_development=args.local_development)

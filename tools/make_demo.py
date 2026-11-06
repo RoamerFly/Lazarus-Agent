@@ -41,9 +41,18 @@ def build(capture, out=OUT):
                  (2, "在发送需求之前，固定路线切换和冷启动的验收步骤。", 7),
                  (3, "用一句需求要求恢复安装，并记住最后打开的路线。", 7)]
     middle = list(range(4, len(frames)-1))
-    selected = middle[::max(1, len(middle)//8)][:8]
+    selected = middle if len(middle) <= 12 else [middle[i*(len(middle)-1)//11] for i in range(12)]
     for index in selected:
-        keyframes.append((index, "DeepSeek Flash 实际执行节选。模型自主读取、修改、构建和测试。", 3))
+        label = frames[index].get("label", "")
+        if label == "调用工具 · build_apk":
+            caption = "Agent 请求回编、对齐和签名。构建成功后继续做设备验证。"
+        elif label == "调用工具 · rehearse_acceptance":
+            caption = "Agent 重放事先固定的步骤，预检候选的实际行为。"
+        elif label.startswith("独立验收 Android"):
+            caption = "独立验收器另行核对原包、候选与设备上的安装字节。"
+        else:
+            caption = "DeepSeek Flash 实际执行节选。模型自主读取、修改、构建和测试。"
+        keyframes.append((index, caption, 3))
     result_caption = "Android 16 专用模拟器独立复测，核对安装包哈希并执行固定的 10 步操作。"
     if frames[-1].get("capture_kind") == "reopened-saved-job":
         if frames[-1]["job_id"] != metadata["job_id"]:
