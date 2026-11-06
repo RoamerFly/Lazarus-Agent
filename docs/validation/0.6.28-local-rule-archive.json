@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "case": "P02",
+  "app_version": "0.6.28",
+  "source_commit": "cbd58ed08345f5c7f61d127d8ba989f8eca4d5ab",
+  "exe_sha256": "058d59a6a90c266129765191a449e1eb02ccdf1ee1c5ea348ae9a349b84e3b08",
+  "target_api": 36,
+  "abi": "x86_64",
+  "model_status": "not-configured",
+  "real_model_calls": 0,
+  "diagnosis_source": "rules",
+  "original": {
+    "sha256": "7b8e200984dee500def40a9684fd2de9ced885ca1d04c63771d1d473b597dcce",
+    "click_result": "failed",
+    "missing_class": "org.apache.http.ProtocolVersion"
+  },
+  "candidate": {
+    "sha256": "132b72702d43ec04996ed3c72a5db5d83cb13890c75a071440df0f8d57189101",
+    "installed_sha256": "132b72702d43ec04996ed3c72a5db5d83cb13890c75a071440df0f8d57189101",
+    "install": "passed",
+    "launch": "passed",
+    "function": "passed",
+    "steps": [
+      {
+        "action": "expect",
+        "status": "passed"
+      },
+      {
+        "action": "tap",
+        "status": "passed"
+      },
+      {
+        "action": "expect",
+        "status": "passed"
+      },
+      {
+        "action": "cold_start",
+        "status": "passed"
+      },
+      {
+        "action": "tap",
+        "status": "passed"
+      },
+      {
+        "action": "expect",
+        "status": "passed"
+      }
+    ]
+  },
+  "diff": {
+    "unchanged_non_manifest_non_signature_files": [
+      "classes.dex",
+      "resources.arsc"
+    ],
+    "manifest": {
+      "permissions": {
+        "removed": [],
+        "added": []
+      },
+      "components": {
+        "removed": [],
+        "added": []
+      },
+      "libraries": {
+        "removed": [],
+        "added": [
+          {
+            "type": "uses-library",
+            "name": "org.apache.http.legacy"
+          }
+        ]
+      }
+    }
+  },
+  "proof_sha256": "720e4d2ee125491829fd17170cda12ec04898b4a6b42d2eba51e8c214fe8423e",
+  "package": {
+    "name": "v0.6.28-无模型归档修复复测包.zip",
+    "bytes": 20859,
+    "sha256": "a06af5714bd8c41b2cf452b15914a9c3ab5181880d4222e1c21fb79176f76b2a",
+    "registered_files": 9
+  }
+}

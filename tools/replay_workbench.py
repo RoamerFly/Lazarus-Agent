@@ -168,7 +168,8 @@ def replay(case, api, port, directory):
                     and report["acceptance"]["steps"]==["01-entered","02-saved","03-reopened"],
                     "Missing install failure or cold-start evidence")
         elif case == "archive":
-            require(first["functional_test"].get("missing_class")=="org/apache/http/ProtocolVersion"
+            missing = first["functional_test"].get("missing_class") or ""
+            require(missing.replace("/", ".") == "org.apache.http.ProtocolVersion"
                     and report["patch"]["added_library"]=="org.apache.http.legacy"
                     and ARCHIVE_TASK["expect"] in report["acceptance"]["message"], "Missing crash or repair evidence")
         else:
