@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "app_version": "0.6.29",
+  "source_commit": "0e95b5f14be122c2d06069db43ddeeeb473ffd6d",
+  "exe_sha256": "0f83908f99e9b2d39e0074bfd8eedb16f70ba1e51349c70f3d3edbec98ad30b8",
+  "source_archive_sha256": "07e1577c3c156320040b7949e7ceaf28405597a0ea6e59ced72d7ccd7b09ada2",
+  "proposal_sha256": "614a509e8e7d1bdf1329adc347125084c3422bd7ae52b64ff0860a0cb294865d",
+  "video_sha256": "aed2a24e6d2011ba7fcc413b6dcedf164cd59e96d5b06344721d65902ec3d8b8",
+  "video_record_sha256": "0d30f6f23258cbdcf6a7abd16dbceeb43909c7a56961aea8523473509f6d4943",
+  "video_seconds": 57,
+  "device_screen_sha256": "4744c3b4a6b34d7c8853499958409607a1fbae27f532dcb7c1c82cf2039f3e74",
+  "acceptance_sha256": "6e6e618c4720fedca82be8044efe74fdf6b623ec159c61e6842360674eb515ee",
+  "reviewer_docs_sha256": {
+    "评审操作与答辩提纲.md": "3fe104e0451c8916cecb7e02e4763297007bb1023e1a1a39cbc164e13efd4c34",
+    "评审样本使用说明.md": "41c3646b6706a2842df0e55ce9928b981df4209580aa14631556cffeb6a6f6e2"
+  },
+  "archive_sha256": "2c8ff76bf616f72d20631673b656c6d95cdf6e11e3132aaa0139c48240c60e5b",
+  "bytes": 3371433,
+  "file_count": 49,
+  "offline_materials": {
+    "status": "same-build-offline-review",
+    "version": "0.6.29",
+    "demo_steps": 10,
+    "network_model_calls": 0,
+    "reviewer_guide": "current-version-guide"
+  },
+  "archive": "v0.6.29-F01-同版离线评审包.zip",
+  "registered_files": 48,
+  "input_checks": 6,
+  "proposal_pages": 6,
+  "windows": {
+    "status": "same-exe-isolated-install",
+    "inputs": [
+      "P01",
+      "P04",
+      "N03"
+    ]
+  },
+  "extracted_demo_replay": {
+    "status": "behavior-verified",
+    "api": 36,
+    "abi": "x86_64",
+    "steps_passed": 10,
+    "installed_sha256": "6c35bbdc64143343d0238467fdbdf7df6628bc02c91a42deda223b9ef5336f49",
+    "report_sha256": "5f047eaeff2cb76a0bc5ed3ef1f5db5080d45a0b02bc8632d1d17d2a78bc2adf"
+  },
+  "tamper_rejections": {
+    "different-installer-script": "同版 Windows 安装、卸载或构建证据不一致",
+    "different-windows-step-count": "Windows 样本字节与评审包不一致"
+  },
+  "network_model_calls": 0
+}

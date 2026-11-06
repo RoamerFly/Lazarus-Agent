@@ -13,25 +13,32 @@ sys.path.insert(0, str(ROOT))
 from tools.package_agent_review import digest, read
 from tools.verify_review_package import (
     COLD_WINDOWS_FILE, DESKTOP_FILE, HANDOFF_FILE, HANDOFF_PAIR, LOCAL_DEMO, REVIEWER_GUIDE, RULE_FILE, RULE_SAMPLE,
-    SAMPLE_NOTICE, verify,
+    SAMPLE_NOTICE, INSTALL_RECHECK, INSTALL_SCRIPT, INSTALL_SAMPLES, verify,
 )
 
 
 def build(delivery, materials, capture, output, reviewer_guide=None, rule_sample=None, evidence_dir=None,
-          negative_evidence=None):
+          negative_evidence=None, sample_archive=None, isolated_install=None, installer_script=None):
     if output.exists():
         raise ValueError("请选择新的同版评审包输出路径")
     version = read(delivery / "本地构建回执.json")["version"]
-    samples = delivery / f"v{version}-离线样本与Windows复核包.zip"
+    samples = sample_archive or delivery / f"v{version}-离线样本与Windows复核包.zip"
     original = verify(samples)
     status = original["package_status"]
-    if (not (original["offline_windows"] or original["offline_cold_runtime"])
+    if (not (original["offline_windows"] or original["offline_cold_runtime"] or isolated_install)
             or original["offline_materials"] or status["version"] != version
             or status["exe_sha256"] != digest(delivery / "Lazarus-Agent.exe")):
         raise ValueError("样本包与交付 EXE 不一致或已包含同版材料")
     with ZipFile(samples) as archive:
         files = {name: archive.read(name) for name in archive.namelist() if name != "SHA256SUMS.txt"}
     files["离线样本复测说明.md"] = files.pop("从这里开始.md")
+    if bool(isolated_install) != bool(installer_script):
+        raise ValueError("隔离安装复核需要回执和安装器脚本")
+    if isolated_install:
+        files[INSTALL_RECHECK] = isolated_install.read_bytes()
+        files[INSTALL_SCRIPT] = installer_script.read_bytes()
+        files[INSTALL_SAMPLES] = samples.read_bytes()
+        status["offline_install_recheck"] = "same-exe-isolated-install"
     proposal = materials / "遗留软件复活智能体方案说明.pdf"
     video = materials / "遗留软件复活智能体离线演示.mp4"
     record = video.with_suffix(".json")
@@ -92,7 +99,11 @@ N01 在安装阶段被拒绝。N02 使用未修改原包验证缺失信息断言
 """
     files["复核状态.json"] = json.dumps(status, ensure_ascii=False, indent=2).encode()
     files["同版材料校验回执.json"] = json.dumps(receipt, ensure_ascii=False, indent=2).encode()
-    if original["offline_cold_runtime"]:
+    if isolated_install:
+        windows_note = (f"[隔离 Windows 安装与卸载复核]({INSTALL_RECHECK})\n\n"
+                        "复用隔离 Windows 来宾，通过同版样本输入、安装、自检和默认卸载。"
+                        "安装器脚本单独记录修订提交。Android 行为在宿主机实测，空白系统首次准备见 v0.6.28。")
+    elif original["offline_cold_runtime"]:
         windows_note = (f"[同版空目录准备回执]({COLD_WINDOWS_FILE})\n\n"
                         "专用 Windows 虚拟机从空目录完成组件下载与复用，另完成隔离安装、自检及卸载。"
                         "交互桌面启动和虚拟机内的 Android 行为仍待复核。")
@@ -150,5 +161,8 @@ if __name__ == "__main__":
     parser.add_argument("--rule-sample", type=Path)
     parser.add_argument("--evidence-dir", type=Path)
     parser.add_argument("--negative-evidence", type=Path)
+    parser.add_argument("--sample-archive", type=Path)
+    parser.add_argument("--isolated-install", type=Path)
+    parser.add_argument("--installer-script", type=Path)
     paths = {name: path.resolve() if path else None for name, path in vars(parser.parse_args()).items()}
     print(json.dumps(build(**paths), ensure_ascii=False, indent=2))

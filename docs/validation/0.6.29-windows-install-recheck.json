@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "version": "0.6.29",
+  "source_commit": "0e95b5f14be122c2d06069db43ddeeeb473ffd6d",
+  "exe_sha256": "0f83908f99e9b2d39e0074bfd8eedb16f70ba1e51349c70f3d3edbec98ad30b8",
+  "scope": "same-exe-isolated-install",
+  "windows_environment": "reused isolated Windows Server 2022 guest",
+  "installer_source_commit": "96c9657ca78d351f97ce8820313a3afc9d22f57e",
+  "android_device_tested_in_guest": false,
+  "network_model_calls": 0,
+  "samples": [
+    {
+      "case": "P01",
+      "status": "inputs-verified",
+      "candidate_sha256": "3dbc0c4543bfa81e084f6f528738349836ac92f30cd67fc7cd0e4d885aed64ac",
+      "steps": 10
+    },
+    {
+      "case": "P04",
+      "status": "inputs-verified",
+      "candidate_sha256": "352a62982f5634b1b334cdf265b2a6490db57ffa27c30b53bdaed9ac32130e58",
+      "steps": 16
+    },
+    {
+      "case": "N03",
+      "status": "inputs-verified",
+      "candidate_sha256": "671605d127dc9356b66bd93b144e0643080efe90d39efbe11ab4c7edf9238481",
+      "steps": 2
+    }
+  ],
+  "sample_archive_sha256": "d5f1ed87dc2731ec7efd0b16ea0a0b13672345035f6fd591cf03895be2ca6eaa",
+  "setup": {
+    "scope": "isolated install on existing Windows; no Android device",
+    "version": "0.6.29",
+    "source_commit": "0e95b5f14be122c2d06069db43ddeeeb473ffd6d",
+    "installer_script_sha256": "a23dbf16329f9ed46cc3da36a9d2be2a66fd1851e95edd22b1645a1cf6fef1b3",
+    "nsis_version": "v3.11",
+    "installer_sha256": "ba034ae9b50579be8d900e1cd4b69ef9501c89b428c094de4b8c8765a8ef51ff",
+    "exe_sha256": "0f83908f99e9b2d39e0074bfd8eedb16f70ba1e51349c70f3d3edbec98ad30b8",
+    "installed_exe_sha256": "0f83908f99e9b2d39e0074bfd8eedb16f70ba1e51349c70f3d3edbec98ad30b8",
+    "install_exit": 0,
+    "installed_self_test_exit": 0,
+    "uninstall_exit": 0,
+    "system_only_path_for_self_test": true,
+    "isolated_registration_removed": true,
+    "exported_output_preserved": true
+  },
+  "previous_default_control": {
+    "directory_exists": true,
+    "files": [
+      "Uninstall.exe"
+    ],
+    "registration": [
+      false,
+      false
+    ],
+    "output_preserved": true,
+    "since_return_ms": 4410
+  },
+  "waited_copy_control": {
+    "directory_exists": false,
+    "files": [],
+    "registration": [
+      false,
+      false
+    ],
+    "output_preserved": true,
+    "since_return_ms": 4286
+  },
+  "previous_installer_sha256": "5fd418c24edc95bf4aa25d6ba90d0535ce2b468c1b2a0c1d4c825145ceeb46e0"
+}

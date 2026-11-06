@@ -1,0 +1,121 @@
+{
+  "schema": 1,
+  "build": {
+    "version": "0.6.29",
+    "source_commit": "0e95b5f14be122c2d06069db43ddeeeb473ffd6d",
+    "exe_sha256": "0f83908f99e9b2d39e0074bfd8eedb16f70ba1e51349c70f3d3edbec98ad30b8",
+    "bytes": 131737386,
+    "self_test_exit": 0,
+    "packager": "6.22.3",
+    "scope": "Local PyInstaller build and executable self-test"
+  },
+  "plan": {
+    "scope": "repeatability-development-audit",
+    "api": 36,
+    "candidate_sha256": "9a49bed37bf238d7bd0827f29839f9ecdd48eba34fc74067097b3bf4ca4300c1",
+    "source_sha256": "08ed16b9f6a149bd8063bae99dd72aad200dafea7d3a0504af004187bde20deb",
+    "historical_failure_report_sha256": "e1902c8b7126d65f6a5749954c8e891c5ee14d97eb98b2c1da5ae7a118826d0e",
+    "fixed_repeats": 3,
+    "diagnostic_repeats": 1,
+    "steps": [
+      {
+        "action": "expect",
+        "value": "Active route: North"
+      },
+      {
+        "action": "tap",
+        "value": "Open south route"
+      },
+      {
+        "action": "expect",
+        "value": "Inspect the pump seal"
+      },
+      {
+        "action": "cold_start"
+      },
+      {
+        "action": "expect",
+        "value": "Active route: South"
+      },
+      {
+        "action": "expect",
+        "value": "Inspect the pump seal"
+      },
+      {
+        "action": "tap",
+        "value": "Open north route"
+      },
+      {
+        "action": "cold_start"
+      },
+      {
+        "action": "expect",
+        "value": "Active route: North"
+      },
+      {
+        "action": "expect",
+        "value": "Check the valve position"
+      }
+    ],
+    "network_model_calls": 0
+  },
+  "rows": [
+    {
+      "trial": 1,
+      "mode": "frozen",
+      "status": "behavior-verified",
+      "steps_passed": 10,
+      "installed_sha256": "9a49bed37bf238d7bd0827f29839f9ecdd48eba34fc74067097b3bf4ca4300c1",
+      "report_sha256": "4bb98ea599b2ab30c0d1c2553cb809e21ed646801427af3ceb16ac1cc9f443ba"
+    },
+    {
+      "trial": 2,
+      "mode": "frozen",
+      "status": "behavior-verified",
+      "steps_passed": 10,
+      "installed_sha256": "9a49bed37bf238d7bd0827f29839f9ecdd48eba34fc74067097b3bf4ca4300c1",
+      "report_sha256": "4785cd9324f64edbf85a7e234da3263f103b4bdd876b3cf243809a8bdd991997"
+    },
+    {
+      "trial": 3,
+      "mode": "frozen",
+      "status": "behavior-verified",
+      "steps_passed": 10,
+      "installed_sha256": "9a49bed37bf238d7bd0827f29839f9ecdd48eba34fc74067097b3bf4ca4300c1",
+      "report_sha256": "500ec765b76c9936019b60c3ab30cb021f07fe4eab0afd3c2e8564b9ca91a0b7"
+    },
+    {
+      "trial": 4,
+      "mode": "post-tap-observation",
+      "status": "behavior-verified",
+      "steps_passed": 10,
+      "installed_sha256": "9a49bed37bf238d7bd0827f29839f9ecdd48eba34fc74067097b3bf4ca4300c1",
+      "report_sha256": "9939512faa9af024c0ec8c1194eac8a50fa5c288b0ed6c182fcb3569a257b428",
+      "observation_adds_time": true,
+      "tap_observations": [
+        {
+          "tap": "Open south route",
+          "route_after_tap": [
+            "Active route: South"
+          ],
+          "elapsed_ms_including_snapshot": 5430
+        },
+        {
+          "tap": "Open north route",
+          "route_after_tap": [
+            "Active route: North"
+          ],
+          "elapsed_ms_including_snapshot": 5350
+        }
+      ]
+    }
+  ],
+  "network_model_calls": 0,
+  "interpretation": {
+    "frozen_passed": 3,
+    "frozen_attempted": 3,
+    "diagnostic_passed": true,
+    "historical_failure_reproduced": false,
+    "original_failure_root_cause": "undetermined"
+  }
+}

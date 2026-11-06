@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "build": {
+    "version": "0.6.29",
+    "source_commit": "0e95b5f14be122c2d06069db43ddeeeb473ffd6d",
+    "exe_sha256": "0f83908f99e9b2d39e0074bfd8eedb16f70ba1e51349c70f3d3edbec98ad30b8",
+    "bytes": 131737386,
+    "self_test_exit": 0,
+    "packager": "6.22.3",
+    "scope": "Local PyInstaller build and executable self-test"
+  },
+  "mode": "recorded-tools",
+  "model_requests": 0,
+  "device_followup": true,
+  "candidate_sha256": "6c35bbdc64143343d0238467fdbdf7df6628bc02c91a42deda223b9ef5336f49",
+  "steps_passed": 10,
+  "video_sha256": "aed2a24e6d2011ba7fcc413b6dcedf164cd59e96d5b06344721d65902ec3d8b8",
+  "video_bytes": 819213,
+  "capture_sha256": "c76f28f0d8b24a4847231bccafb1b828ed7f78733b54750cee012744750f96c6",
+  "device_report_sha256": "6e6e618c4720fedca82be8044efe74fdf6b623ec159c61e6842360674eb515ee",
+  "playback": {
+    "codec_name": "h264",
+    "width": 1440,
+    "height": 1080,
+    "duration": "57.000000"
+  },
+  "previous_failed_attempt_retained": true
+}

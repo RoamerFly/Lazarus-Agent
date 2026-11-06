@@ -31,6 +31,10 @@ HANDOFF_PAIR = "专项复核/文件交接配对对照.zip"
 RULE_FILE = "专项复核/无模型归档修复回执.json"
 RULE_SAMPLE = "可分发样本/P02/"
 
+INSTALL_RECHECK = "Windows复核/隔离安装回执.json"
+INSTALL_SCRIPT = "Windows复核/Lazarus-Agent.nsi"
+INSTALL_SAMPLES = "Windows复核/当时输入包.zip"
+
 
 def check_local_links(archive, names):
     count = 0
@@ -354,6 +358,46 @@ def check_offline_cold_runtime(archive, checksums, status):
             "components": sorted(COLD_COMPONENTS), "interactive_desktop_verified": False}
 
 
+def check_isolated_install(archive, checksums, status, samples, counterexamples):
+    files = {INSTALL_RECHECK, INSTALL_SCRIPT, INSTALL_SAMPLES}
+    scope = status.get("offline_install_recheck")
+    if scope is None and not files.intersection(checksums):
+        return None
+    if (scope != "same-exe-isolated-install" or not files <= checksums.keys()
+            or status["mode"] != "offline-trace-development-samples"):
+        raise ValueError("同版材料缺少 Windows 隔离安装复核")
+    receipt = json.loads(archive.read(INSTALL_RECHECK))
+    setup = receipt["setup"]
+    build = json.loads(archive.read("本地构建回执.json"))
+    if (receipt["scope"] != scope or build["self_test_exit"] != 0
+            or any(receipt[key] != status[key] or receipt[key] != build[key] or receipt[key] != setup[key]
+                   for key in ("version", "source_commit", "exe_sha256"))
+            or setup["installed_exe_sha256"] != status["exe_sha256"]
+            or any(setup[key] != 0 for key in ("install_exit", "installed_self_test_exit", "uninstall_exit"))
+            or setup["exported_output_preserved"] is not True or setup["isolated_registration_removed"] is not True
+            or receipt["network_model_calls"] != 0 or receipt["android_device_tested_in_guest"] is not False
+            or not re.fullmatch("[a-f0-9]{40}", receipt["installer_source_commit"])
+            or setup["installer_script_sha256"] != checksums[INSTALL_SCRIPT]
+            or receipt["sample_archive_sha256"] != checksums[INSTALL_SAMPLES]):
+        raise ValueError("同版 Windows 安装、卸载或构建证据不一致")
+    by_case = {row["sample"].split("/", 1)[1]: row for row in samples + counterexamples}
+    checked = [row["case"] for row in receipt["samples"]]
+    if not checked or len(checked) != len(set(checked)):
+        raise ValueError("Windows 样本输入为空或有重复")
+    with ZipFile(BytesIO(archive.read(INSTALL_SAMPLES))) as original:
+        for row in receipt["samples"]:
+            case = by_case.get(row["case"], {})
+            folder = case.get("sample")
+            if not folder or row["status"] != "inputs-verified" or row["candidate_sha256"] != case["candidate_sha256"]:
+                raise ValueError("Windows 样本身份与评审包不一致")
+            report = json.loads(archive.read(folder + "/agent-acceptance.json"))
+            if (row["steps"] != len(report["steps"])
+                    or any(original.read(folder + "/" + name) != archive.read(folder + "/" + name)
+                           for name in ("base.apk", "candidate.apk", "agent-acceptance.json"))):
+                raise ValueError("Windows 样本字节与评审包不一致")
+    return {"status": scope, "inputs": checked}
+
+
 def check_offline_materials(archive, checksums, status, windows):
     scope = status.get("offline_materials")
     if scope is None and "遗留软件复活智能体离线演示.mp4" not in checksums:
@@ -603,7 +647,9 @@ def verify(path):
             counterexamples.append({"sample": folder, "candidate_sha256": candidate, "status": "incomplete"})
         offline_windows = check_offline_windows(archive, checksums, status, samples)
         offline_cold_runtime = check_offline_cold_runtime(archive, checksums, status)
-        offline_materials = check_offline_materials(archive, checksums, status, offline_windows or offline_cold_runtime)
+        install_recheck = check_isolated_install(archive, checksums, status, samples, counterexamples)
+        offline_materials = check_offline_materials(
+            archive, checksums, status, offline_windows or offline_cold_runtime or install_recheck)
         addendum = check_offline_addendum(archive, checksums, status, offline_materials)
         if ("offline_negative_cases" in status
                 or any(item["sample"] in {"反例样本/N01", "反例样本/N02"} for item in counterexamples)):
@@ -616,7 +662,7 @@ def verify(path):
                 "local_regression": local_regression,
                 "local_review": local_review, "offline_windows": offline_windows,
                 "offline_cold_runtime": offline_cold_runtime, "offline_materials": offline_materials,
-                "offline_addendum": addendum,
+                "offline_addendum": addendum, "offline_install_recheck": install_recheck,
                 "scope": "Files, checksums and stored proofs. Device replay is a separate operation."}
 
 

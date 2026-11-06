@@ -51,6 +51,7 @@ def build(output=OUT, *, local_signed_candidate=False, local_development=False, 
             raise ValueError("本地方案的回归与 EXE 构建回执不一致")
     offline = None
     cold_windows = None
+    install_recheck = None
     if offline_review:
         source_commit = subprocess.check_output(["git", "-C", str(offline_review), "rev-parse", "HEAD"],
                                                 text=True).strip()
@@ -83,6 +84,14 @@ def build(output=OUT, *, local_signed_candidate=False, local_development=False, 
                     or any(install[key] != 0 for key in ("install_exit", "installed_self_test_exit", "uninstall_exit"))
                     or cold_windows["interactive_desktop_verified"] or cold_windows["device_steps_on_guest"] != 0):
                 raise ValueError("离线方案与同版空目录准备回执不一致")
+        elif offline.get("offline_install_recheck") == "same-exe-isolated-install":
+            install_recheck = json.loads((validation / f"{APP_VERSION}-windows-install-recheck.json").read_text(encoding="utf-8"))
+            setup = install_recheck["setup"]
+            if (any(offline[key] != install_recheck[key] or offline[key] != setup[key]
+                    for key in ("version", "source_commit", "exe_sha256"))
+                    or any(setup[key] != 0 for key in ("install_exit", "installed_self_test_exit", "uninstall_exit"))
+                    or not setup["exported_output_preserved"]):
+                raise ValueError("离线方案与同版 Windows 安装复核不一致")
         else:
             clean_windows = json.loads((validation / f"{APP_VERSION}-fresh-windows.json").read_text(encoding="utf-8"))
             setup = clean_windows["guest"]["setup"]
@@ -336,6 +345,11 @@ def build(output=OUT, *, local_signed_candidate=False, local_development=False, 
                        "Android 行为报告来自宿主机的独立专用模拟器。")
         outbound_note = ""
         local_rule_note = "虚拟机内的交互桌面启动与设备行为仍待复核。"
+    elif install_recheck:
+        installer_note = "复用隔离 Windows 来宾完成同版安装、自检及默认卸载。卸载保留导出，安装器脚本独立记录修订。"
+        replay_note = f"同版核对 {len(install_recheck['samples'])} 份样本输入，Android 行为在宿主机专用模拟器验证。"
+        outbound_note = ""
+        local_rule_note = "空白系统首次准备回执属于 v0.6.28。"
     elif offline:
         installer_note = "新装 Windows Server 2022 在无网络、无预装 Android 工具时通过安装、自检、卸载和桌面启动。"
         replay_note = (f"干净系统核对 {clean_windows['verified_archive_files']} 个文件及两份样本输入。"
