@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "status": "windows-runtime-ready-and-reused",
+  "version": "0.6.28",
+  "source_commit": "cbd58ed08345f5c7f61d127d8ba989f8eca4d5ab",
+  "exe_sha256": "058d59a6a90c266129765191a449e1eb02ccdf1ee1c5ea348ae9a349b84e3b08",
+  "windows": "Microsoft Windows Server 2022 Standard",
+  "api": 36,
+  "abi": "x86_64",
+  "preparation": "same initially empty isolated storage across 0.6.26, 0.6.27 and 0.6.28",
+  "preserved_components": [
+    "platform-tools",
+    "emulator",
+    "build-tools",
+    "system-image"
+  ],
+  "completed_component": "java",
+  "components": {
+    "platform-tools": true,
+    "emulator": true,
+    "build-tools": true,
+    "system-image": true,
+    "java": true
+  },
+  "published_component_files": {
+    "adb": {
+      "bytes": 8273560,
+      "path": "lab-sdk\\platform-tools\\adb.exe"
+    },
+    "emulator": {
+      "bytes": 23458968,
+      "path": "lab-sdk\\emulator\\emulator.exe"
+    },
+    "build_tools": {
+      "bytes": 895072,
+      "path": "lab-sdk\\build-tools\\36.0.0\\zipalign.exe"
+    },
+    "image": {
+      "bytes": 1898971136,
+      "path": "lab-sdk\\system-images\\android-36\\default\\x86_64\\system.img"
+    },
+    "java": {
+      "bytes": 50296,
+      "path": "java\\bin\\java.exe"
+    }
+  },
+  "missing": [],
+  "reuse_without_download": true,
+  "readiness_verifier": "bundled candidate runtime code",
+  "java_version": "openjdk version \"21.0.13\" 2026-10-20 LTS",
+  "adb_version": "Version 37.0.1-15733141",
+  "sample_input_verifier": "0.6.28 desktop executable replay CLI",
+  "sample_archive_version": "0.6.26",
+  "sample_archive_sha256": "48cbd36b0c32db567709fd3cc4d5cfb90a054c3fe044b82a684b5ae023853217",
+  "sample_inputs": {
+    "N03": {
+      "status": "inputs-verified",
+      "steps": 2,
+      "candidate_sha256": "648c11dc86d4e010c05d4f2c526bf4cc6a4f97388cb6a05277835a54b7427532"
+    },
+    "P01": {
+      "status": "inputs-verified",
+      "steps": 10,
+      "candidate_sha256": "a38cc4cda923310b883dafcefec408ce77cee73b42862339d9abf54e2fefa1ec"
+    },
+    "P03": {
+      "status": "inputs-verified",
+      "steps": 4,
+      "candidate_sha256": "7882b5ad1bf150904fd98dfd1a4647854aa0c5981b0edb074337568bb1c1665e"
+    },
+    "P04": {
+      "status": "inputs-verified",
+      "steps": 16,
+      "candidate_sha256": "623f07082f1f93faa3e1829a6d61d251a6a73a9b980a39dc68f6a947eb509a13"
+    },
+    "P05": {
+      "status": "inputs-verified",
+      "steps": 8,
+      "candidate_sha256": "27b0f66c230e850c83d8e8ae965a2322e939fee4509b42f7f9bc995b80e365ad"
+    }
+  },
+  "emulator_acceleration_exit": 3,
+  "emulator_acceleration_unavailable_reported": true,
+  "device_steps_on_guest": 0,
+  "interactive_desktop_verified": false,
+  "network_model_calls": 0
+}

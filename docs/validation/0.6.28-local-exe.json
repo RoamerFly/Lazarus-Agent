@@ -1,0 +1,9 @@
+{
+  "version": "0.6.28",
+  "source_commit": "cbd58ed08345f5c7f61d127d8ba989f8eca4d5ab",
+  "exe_sha256": "058d59a6a90c266129765191a449e1eb02ccdf1ee1c5ea348ae9a349b84e3b08",
+  "bytes": 131735858,
+  "self_test_exit": 0,
+  "packager": "6.22.3",
+  "scope": "Local PyInstaller build and executable self-test"
+}
