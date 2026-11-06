@@ -1,0 +1,56 @@
+{
+  "version": "0.6.24",
+  "source_commit": "b60c33230318c526ec4fb831b870ce2569e2cc40",
+  "archive_sha256": "e6733269817140b50b36b36452e84668afef5b819e00ed9d3467bbbf08030690",
+  "exe_sha256": "c1fe662ec1095eba4395777f3b2259dba89b80435c716addf0100d5bbc7d70b3",
+  "windows_build": "22635.5240",
+  "status": "fixed-replays-observed",
+  "scope": "Same-storage wrapper on existing Windows, using a previously prepared runtime",
+  "network_model_calls": 0,
+  "rows": [
+    {
+      "sample": "工作台演示",
+      "api": 36,
+      "abi": [
+        "x86_64"
+      ],
+      "input_sha256": "08ed16b9f6a149bd8063bae99dd72aad200dafea7d3a0504af004187bde20deb",
+      "installed_sha256": "e6d12d2a19772f9bfab899fc627bb4109f8f5bb74ecb51f1d15a1c3f627cdf8f",
+      "install": "passed",
+      "launch": "passed",
+      "function": "passed",
+      "step_statuses": [
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "raw_report": "巡检单十步.json",
+      "raw_report_sha256": "084c32e459e9d6ce6359a56ddf1e09f84b06ff1986cd9573f581bede85cf3920"
+    },
+    {
+      "sample": "N03-agent-1",
+      "api": 36,
+      "abi": [
+        "x86_64"
+      ],
+      "input_sha256": "1476a30063a68f27a2e3c10d3d99383aeee0afbf5177e09fbc44f36cc6f237da",
+      "installed_sha256": "40b936d5865a6317718ea932a0e2a6e831e7a66cdcf51694212a57ebd10fd3f0",
+      "install": "passed",
+      "launch": "passed",
+      "function": "failed",
+      "step_statuses": [
+        "passed",
+        "failed"
+      ],
+      "raw_report": "矛盾断言反例.json",
+      "raw_report_sha256": "193dad117c951f37c375ab6cdd2fd960de7788715ba969c5442a00100ec3caa6"
+    }
+  ]
+}
