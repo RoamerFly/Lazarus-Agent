@@ -1,0 +1,35 @@
+{
+  "scope": "CI verification without publishing",
+  "app_version": "0.6.19",
+  "signed_build_run": "42140825598",
+  "source_commit": "c812e5b6d2da07499c4fce130163d7dda877786e",
+  "independent_workflow_runs": [
+    "42141352738",
+    "42141353477",
+    "42141353543"
+  ],
+  "verification_run": "42142264320",
+  "assets": {
+    "Lazarus-Agent-windows-x64-setup.exe": {
+      "sha256": "aaad535b3fdca6cfa826e7c8004cd78954fa2527c775f903ca4da6bd8814e578",
+      "bytes": 132286629
+    },
+    "Lazarus-Agent-windows-x64-portable.exe": {
+      "sha256": "b4dd0f98b9e6ac36e6990bc35f6072018d218b4496b14ca1c313e3a341744b49",
+      "bytes": 132118270
+    },
+    "Lazarus-Agent-windows-x64-portable.zip": {
+      "sha256": "1a677703da9f5587ee1782ccfa64a12f9a894486273614c720aa181753b46204",
+      "bytes": 131496696
+    },
+    "latest.json": {
+      "sha256": "eede4b8861219a013637a90831ab74d80b4d851aeee67149fe5cd2d8219e8dd1",
+      "bytes": 867
+    },
+    "latest.json.sig": {
+      "sha256": "651780139ed0ba052abb2f8cbbd336bfe33cf8e439c4603e102b846c45af4a74",
+      "bytes": 89
+    }
+  },
+  "public_version_at_check": "0.6.18"
+}

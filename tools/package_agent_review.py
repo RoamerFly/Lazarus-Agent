@@ -379,6 +379,11 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                      "0.6.16-r2-fresh-windows.md", "0.6.16-r2-fresh-windows.json", "0.6.16-r2-handoff-inputs.json",
                      "0.6.17-candidate-windows-runtime.md", "0.6.17-candidate-windows-runtime.json",
                      "0.6.17-candidate-publication-check.json",
+                     "0.6.18-candidate-windows-runtime.md", "0.6.18-candidate-windows-runtime.json",
+                     "0.6.18-candidate-publication-check.json", "0.6.18-release-publication.json",
+                     "0.6.18-live-demo.md", "0.6.18-focused.md", "0.6.18-focused.json",
+                     "0.6.18-fresh-windows-review.md", "0.6.18-fresh-windows-review.json",
+                     "0.6.18-handoff-inputs.json",
                      "0.6.18-intent-boundary.md", "0.6.18-intent-boundary.json",
                      f"{APP_VERSION}-live-demo.md", f"{APP_VERSION}-windows-proof.json",
                      f"{APP_VERSION}-independent-windows.md", f"{APP_VERSION}-installer-check.json",
@@ -460,7 +465,7 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
             current_protocol = read(current_spec)
             copy(current_spec, current_folder / current_spec.name)
             copy(run_plan, current_folder / "plan.json")
-            for version in dict.fromkeys(("0.6.17", APP_VERSION)):
+            for version in dict.fromkeys(("0.6.17", "0.6.18", APP_VERSION)):
                 folder = current_reports.with_name(version)
                 for name in ("results.json", "diff-review.json", "report.md"):
                     path = folder / name

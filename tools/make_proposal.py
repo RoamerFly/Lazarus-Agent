@@ -101,6 +101,9 @@ def build(output=OUT):
         semantic = focused["semantic_counts"]
         block("数据来源和文件访问", "恢复已有内容时检查原包及数据来源。回编前拦截已知的进程级检查绕过。"
               f"专项复测中有 {semantic['agent_positives']}/{semantic['planned_agent_positives']} 个正例通过候选语义复核。")
+    if (validation / f"{APP_VERSION}-receiver-guard-preflight.json").is_file():
+        block("文件交接的接收方", "回编入口识别可静态判定的新增直接 URI 授权，并将所在方法返回给模型。"
+              "首个候选的专项中，独立探针验证了限定接收方后的实际文件读取和授权边界。")
     block("成功候选的保存", "后续试验失败时，只在文件集合与内容哈希精确回到某次成功构建时复用该候选。其安装与行为仍由验收器确认。每轮保留原始工具轨迹，限制目录、文件大小、工具调用与构建次数。")
     story.append(PageBreak())
 
