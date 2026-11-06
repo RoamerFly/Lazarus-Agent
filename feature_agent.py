@@ -131,7 +131,7 @@ replace_text 的 old 必须来自当前文件内容，去掉 read_text 的行号
 交接目标已知时，在发送前用 setPackage、setComponent 或显式 Intent 构造器限定目标。用户确实要求选择其他应用时，使用系统分享面板，由用户选择接收方并仅授予必要权限。
 使用字节数组交接现有文件时，发送的字节必须来自读取同一个实际文件。保留读取失败路径，并由接收端读取和校验实际收到的数据。显式 Intent 只限定发送目标。若接收端仍可被外部应用调用，外部应用也能构造同样的 Extra。仅供本应用使用的接收逻辑应拒绝外部构造的数据，保留原有启动入口。
 有设备工具时应测试最新候选，基于界面执行与需求有关的操作。安装启动成功只能证明安装启动。
-有 rehearse_acceptance 时，构建后直接用它运行固定步骤。只有需要追查具体失败时再用 test_apk 和逐个设备动作；
+有 rehearse_acceptance 时，构建后直接用它运行固定步骤。预检已核对当前候选的安装哈希时，可直接用 device_action 追查失败；安装失败时先检查原因。
 一旦通过就保留该候选。这是当前目标系统的预检，正式交付还要重新做独立验收。
 没有工具能完成、缺少服务/原生库/重要信息或达到限额时，说明已查证的阻碍，finish blocked/needs_input。
 用户也可能只问问题或描述上一轮问题，结合历史分析并回答。无需生成 APK 时 finish analysis。
@@ -210,8 +210,10 @@ class Session:
             sha256 = self.build_report["sha256"]
             if sha256 not in self.rehearsals:
                 self.device_report = None
-                self.rehearsals[sha256] = rehearse_candidate(self.tester, self.artifact, sha256,
-                                                            self.acceptance_steps)
+                result = rehearse_candidate(self.tester, self.artifact, sha256, self.acceptance_steps)
+                self.rehearsals[sha256] = result
+                if result.get("install") == "passed" and result.get("installed_sha256") == sha256:
+                    self.device_report = {**result, "tested_input": "candidate"}
             return self.observe_device_result({**self.rehearsals[sha256], "external_caller": "not-observed"})
         if name in {"test_original", "test_apk"} and not args and self.tester:
             if name == "test_original":
@@ -337,7 +339,8 @@ class Session:
 
     def candidate_verification(self):
         report = self.device_report or {}
-        if report.get("tested_input") == "candidate" and report.get("installed_sha256") == self.build_report["sha256"]:
+        if (report.get("tested_input") == "candidate" and report.get("verification") != "candidate-rehearsal"
+                and report.get("installed_sha256") == self.build_report["sha256"]):
             return report
         return None
 

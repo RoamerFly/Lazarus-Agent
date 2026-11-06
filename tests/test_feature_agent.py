@@ -276,6 +276,33 @@ class WorkspaceTests(unittest.TestCase):
         self.assertIsNone(session.candidate_verification())
         self.assertEqual(session.build_count, 0)
 
+    def test_device_actions_resume_after_a_fresh_rehearsal_only_for_the_installed_candidate(self):
+        tester = Mock()
+        tester.test.return_value = {"installed_sha256": "original"}
+        tester.action.return_value = {"ui": {"nodes": []}}
+        session = Session(self.root, Path("original.apk"), self.root / "out.apk",
+                          Path("tools"), 36, {"sha256": "original"}, lambda _: None, tester,
+                          [{"action": "expect", "value": "Ready"}])
+        session.built(self.root / "built.apk", {"sha256": "candidate"})
+        failed = {"install": "passed", "installed_sha256": "candidate", "function": "failed",
+                  "verification": "candidate-rehearsal"}
+        with patch("feature_agent.rehearse_candidate", return_value=failed) as rehearse:
+            session.dispatch("rehearse_acceptance", {})
+            self.assertEqual(session.dispatch("device_action", {"action": "read"})["tested_input"], "candidate")
+            self.assertIsNone(session.candidate_verification())
+            tester.test.assert_not_called()
+
+            session.dispatch("test_original", {})
+            session.dispatch("rehearse_acceptance", {})
+            self.assertEqual(session.dispatch("device_action", {"action": "read"})["tested_input"], "original")
+            rehearse.assert_called_once()
+
+        session.built(self.root / "another.apk", {"sha256": "another"})
+        with patch("feature_agent.rehearse_candidate", return_value={**failed, "installed_sha256": "wrong"}):
+            session.dispatch("rehearse_acceptance", {})
+            with self.assertRaisesRegex(ValueError, "成功安装"):
+                session.dispatch("device_action", {"action": "read"})
+
     def test_rollback_reuses_the_exact_previous_build_after_a_failed_attempt(self):
         session = Session(self.root, Path("source.apk"), self.root/"candidate.apk",
                           Path("tools"), 36, {}, lambda _: None, None)
