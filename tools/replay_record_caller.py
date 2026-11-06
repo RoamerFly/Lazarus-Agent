@@ -24,6 +24,7 @@ OUTCOMES = {
     (TARGET, "Shared"): "forged-success",
     (TARGET, "Cannot read record"): "target-rejected",
     (TARGET, "Unexpected file"): "target-rejected",
+    (TARGET, "Rejected"): "target-rejected",
     (CALLER, "Caller rejected"): "caller-rejected",
 }
 
@@ -52,7 +53,9 @@ def send_known_uri(caller, record_uri):
 
 
 def replay(device, apk, expected, probe, *, uri_after_share=False, compare_uri=False,
-           record_path="/record.txt", record_uri=None):
+           record_path="/record.txt", record_uri=None, forged_bytes_after_share=False):
+    if forged_bytes_after_share and not compare_uri:
+        raise ValueError("The forged-bytes follow-up requires a before-and-after comparison")
     if record_path not in RECORD_PATHS:
         raise ValueError("Unknown record path for this fixture")
     if record_uri is None:
@@ -105,6 +108,8 @@ def replay(device, apk, expected, probe, *, uri_after_share=False, compare_uri=F
         result["in_app_share"] = in_app_share
     if use_uri:
         result["record_uri"] = record_uri
+    if forged_bytes_after_share:
+        result["forged_bytes_after"] = send_probe(caller, "--ez", "probe_bytes", "true")
     return result
 
 
@@ -118,6 +123,8 @@ def main():
                      help="After a legitimate share, send its known URI from the separate app")
     uri.add_argument("--uri-before-and-after-share", action="store_true",
                      help="Send the same known URI before and after the target writes its record")
+    parser.add_argument("--forged-bytes-after-share", action="store_true",
+                        help="After the URI comparison, send a forged record extra from the same external UID")
     address = parser.add_mutually_exclusive_group()
     address.add_argument("--record-path", choices=RECORD_PATHS)
     address.add_argument("--record-uri", help="Exact content or ggbond-record URI observed in the synthetic candidate")
@@ -125,6 +132,8 @@ def main():
     if args.record_uri and (not RECORD_URI.fullmatch(args.record_uri)
                             or not (args.uri_after_share or args.uri_before_and_after_share)):
         parser.error("--record-uri requires a supported literal record URI and a URI replay mode")
+    if args.forged_bytes_after_share and not args.uri_before_and_after_share:
+        parser.error("--forged-bytes-after-share requires --uri-before-and-after-share")
     out = args.out.resolve()
     if not out.is_relative_to(ROOT / "build"):
         parser.error("Store probe evidence under the ignored build directory")
@@ -140,7 +149,8 @@ def main():
     try:
         result = replay(device, args.apk, args.sha256, probe, uri_after_share=args.uri_after_share,
                         compare_uri=args.uri_before_and_after_share,
-                        record_path=args.record_path or RECORD_PATHS[0], record_uri=args.record_uri)
+                        record_path=args.record_path or RECORD_PATHS[0], record_uri=args.record_uri,
+                        forged_bytes_after_share=args.forged_bytes_after_share)
     finally:
         device.stop()
     (out / "result.json").write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

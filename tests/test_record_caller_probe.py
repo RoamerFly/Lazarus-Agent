@@ -17,16 +17,18 @@ class RecordCallerProbeTests(unittest.TestCase):
         after = {"outcome": "external-record-status", "observed": [(probe.TARGET, "Shared")]}
         timeline = Mock()
         timeline.external.side_effect = [before, after]
+        timeline.forged.return_value = {"outcome": "target-rejected", "observed": [(probe.TARGET, "Rejected")]}
         uid_rows = [f"package:{probe.TARGET} uid:10001", f"package:{probe.CALLER} uid:10002"]
         with (patch.object(probe, "AgentDevice", side_effect=[target, caller]),
               patch.object(probe, "_wait_for_launch_ui", return_value=True),
               patch.object(probe, "digest_file", return_value=caller_hash),
               patch.object(probe.bench, "shell", side_effect=uid_rows),
               patch.object(probe, "send_known_uri", timeline.external),
+              patch.object(probe, "send_probe", timeline.forged),
               patch.object(probe, "_step", timeline.step)):
             result = probe.replay(Mock(), Path("candidate.apk"), expected, Path("caller.apk"),
-                                  compare_uri=True, record_path="/record")
-        self.assertEqual([call[0] for call in timeline.mock_calls], ["external", "step", "step", "step", "external"])
+                                  compare_uri=True, record_path="/record", forged_bytes_after_share=True)
+        self.assertEqual([call[0] for call in timeline.mock_calls], ["external", "step", "step", "step", "external", "forged"])
         self.assertEqual(timeline.external.call_args_list[0], timeline.external.call_args_list[1])
         timeline.external.assert_called_with(caller, "content://org.ggbond.archivereader.records/record")
         self.assertEqual(result["before_share"], before)
@@ -34,6 +36,16 @@ class RecordCallerProbeTests(unittest.TestCase):
         self.assertEqual(result["observed"], after["observed"])
         self.assertEqual(result["record_uri"], "content://org.ggbond.archivereader.records/record")
         self.assertEqual([step["action"] for step in result["in_app_share"]], ["cold_start", "tap", "expect"])
+        timeline.forged.assert_called_once_with(caller, "--ez", "probe_bytes", "true")
+        self.assertEqual(result["forged_bytes_after"], timeline.forged.return_value)
+
+    def test_rejection_text_is_bound_to_target_package(self):
+        nodes = [(probe.TARGET, "Rejected")]
+        with patch.object(probe, "wait_for", return_value=nodes):
+            self.assertEqual(probe.observe_outcome(Mock())["outcome"], "target-rejected")
+        with patch.object(probe, "wait_for", return_value=[(probe.CALLER, "Rejected")]):
+            with self.assertRaises(ValueError):
+                probe.observe_outcome(Mock())
 
     def test_synthetic_application_scheme_is_accepted(self):
         self.assertIsNotNone(probe.RECORD_URI.fullmatch("ggbond-record://local/record.txt"))

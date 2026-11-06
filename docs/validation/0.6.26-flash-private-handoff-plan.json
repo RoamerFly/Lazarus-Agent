@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "role": "focused-development-case-on-a-previously-seen-fixture",
+  "implementation_commit": "dbfc625027a995fa091308f6dbcb1269d49a4223",
+  "model": "deepseek-flash",
+  "api": 36,
+  "abi": "x86_64",
+  "attempts": 1,
+  "max_model_requests": 20,
+  "max_output_tokens_per_request": 2048,
+  "case": {
+    "id": "P06-private-handoff",
+    "class": "positive",
+    "apk": "fixtures/archive-reader/archive-reader-file-share.apk",
+    "request": "旧版离线归档阅读器点击 Share local record 后闪退。请恢复应用内交接，让原有接收页面实际读到本次记录后才显示 Shared。外部应用向原有页面发送 OPEN_RECORD 交接请求时，即使携带有效的记录地址，也必须拒绝这次交接。保留原有失败提示、启动入口、按钮和接收页面，冷启动后仍能完成应用内操作。",
+    "steps": [["tap", "Share local record"], ["expect", "Shared"], ["cold_start"], ["tap", "Share local record"], ["expect", "Shared"]]
+  },
+  "independent_acceptance": {
+    "receiver": "org.ggbond.archivereader.ShareActivity",
+    "check_receiver_manifest": true,
+    "caller_package": "org.ggbond.recordcaller",
+    "fallback_input_uri": "content://org.ggbond.archivereader.records/record.txt",
+    "uri_selection": "If the candidate uses a different record URI, use the URI derived from the candidate declarations or edits and retain its origin.",
+    "before_and_after_expected": ["caller-rejected", "target-rejected"],
+    "positive_steps_passed": 5
+  }
+}
