@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "scope": "one-shot-development-continuation-on-a-seen-owned-fixture",
+  "implementation_commit": "0e95b5f14be122c2d06069db43ddeeeb473ffd6d",
+  "exe_sha256": "0f83908f99e9b2d39e0074bfd8eedb16f70ba1e51349c70f3d3edbec98ad30b8",
+  "case": "P06",
+  "api": 36,
+  "abi": "x86_64",
+  "attempts": 1,
+  "protocol_sha256": "aa7f164a5247d363a792d59e47c5fee88400e88da94fcf2c37100d11303368f9",
+  "source_sha256": "55ca244e70ab959fbb179a04c757c1974821ff790578e8811a345f31e024d8da",
+  "recorded_input_sha256": "f556d1e5f20a650b076618e98a219f39e13e89c3c595ffd59d6fc9235380ee39",
+  "prefix_trial": "P06-agent-1",
+  "prefix_tools": 11,
+  "prefix_sha256": "049c448e29b2b4c55161b47c0ad37a3dbe80e9b2b67791a3a1c27872f1813b0b",
+  "expected_build_rejection_text": "接收方未限定",
+  "model": "deepseek-flash",
+  "model_url": "https://api.deepseek.com",
+  "thinking": "disabled",
+  "max_model_requests": 8,
+  "max_output_tokens_per_request": 1536,
+  "max_total_output_tokens": 6144,
+  "max_total_request_body_bytes": 640000,
+  "success": [
+    "recorded prefix reaches the real build rejection before any provider request",
+    "model-generated edits lead to a new build",
+    "current workbench returns its independently verified download",
+    "same-build EXE rechecks installation hash and all five device steps"
+  ]
+}
