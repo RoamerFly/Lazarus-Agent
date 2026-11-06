@@ -379,6 +379,7 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                      "0.6.16-r2-fresh-windows.md", "0.6.16-r2-fresh-windows.json", "0.6.16-r2-handoff-inputs.json",
                      "0.6.17-candidate-windows-runtime.md", "0.6.17-candidate-windows-runtime.json",
                      "0.6.17-candidate-publication-check.json",
+                     "0.6.18-intent-boundary.md", "0.6.18-intent-boundary.json",
                      f"{APP_VERSION}-live-demo.md", f"{APP_VERSION}-windows-proof.json",
                      f"{APP_VERSION}-independent-windows.md", f"{APP_VERSION}-installer-check.json",
                      f"{APP_VERSION}-installer-check.md", f"{APP_VERSION}-local-rule-windows.json",
@@ -390,6 +391,7 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                      f"{APP_VERSION}-candidate-publication-check.json", f"{APP_VERSION}-candidate-replay-inputs.json",
                      f"{APP_VERSION}-replace-input.md", f"{APP_VERSION}-replace-input.json",
                      f"{APP_VERSION}-focused.md", f"{APP_VERSION}-focused.json",
+                     f"{APP_VERSION}-receiver-guard-preflight.md", f"{APP_VERSION}-receiver-guard-preflight.json",
                      f"{APP_VERSION}-source-replay.md", f"{APP_VERSION}-source-replay.json"):
             path = ROOT / "docs/validation" / name
             if path.is_file():
