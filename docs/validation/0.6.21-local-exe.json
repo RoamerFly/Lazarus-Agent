@@ -1,0 +1,8 @@
+{
+  "source_commit": "f38e2ad5623f28414ce24403a606ed35400234eb",
+  "version": "0.6.21",
+  "self_test_exit": 0,
+  "exe_sha256": "f257d723e8c546048eefaab232553ae3b56c330da90671deedf48611467089fb",
+  "bytes": 131704538,
+  "scope": "local PyInstaller build and executable self-test"
+}

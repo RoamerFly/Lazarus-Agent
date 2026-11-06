@@ -1,0 +1,21 @@
+{
+  "source_commit": "b71c39d6d7d8d083936f31b51dec196433541cbd",
+  "exe_sha256": "c3be05f8094cae793a8b2822eb858ea56f471e967bbdffd9fc20067a434f6891",
+  "scope": "local EXE Android 16 x86_64 replay with previously prepared components and no model",
+  "cases": {
+    "route": {
+      "status": "behavior-verified",
+      "steps": 10,
+      "exe_exit": 0,
+      "report_sha256": "386c7e9ef83a20aaf82daeaa3b84ee3863f98733329bb071061079d270e3d867",
+      "candidate_and_installed_sha256": "5bb47faab494d5167cce9f47b4205c6e3bee75824c67da3ca83098016790e8e6"
+    },
+    "contradiction": {
+      "status": "incomplete",
+      "steps": 2,
+      "exe_exit": 1,
+      "report_sha256": "433a07ba7691af2b9b81cbaead7fa14e5ed81793d0293ce89f345833a2737898",
+      "candidate_and_installed_sha256": "f860b2f55de10e46e30f22aa3ced169a74fff159696050f72bad812517e879fa"
+    }
+  }
+}
