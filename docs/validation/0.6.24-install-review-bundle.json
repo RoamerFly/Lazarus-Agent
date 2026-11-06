@@ -1,0 +1,60 @@
+{
+  "version": "0.6.24",
+  "source_commit": "b60c33230318c526ec4fb831b870ce2569e2cc40",
+  "exe_sha256": "c1fe662ec1095eba4395777f3b2259dba89b80435c716addf0100d5bbc7d70b3",
+  "bundle_sha256": "3f5e8fc32e8b308f63c65ea69ce42f51e18f67acf2b1b40f9d5d343263f593e3",
+  "bytes": 142449,
+  "files": {
+    "SHA256SUMS.txt": "588e1b34aa0d2f4e30bd335c2241636064ebbc89cfdf209bd82a87bad7d24cb6",
+    "installer/Lazarus-Agent.nsi": "07457811c226d7f56ed231bcd583202b5ed173dfdf9134273005cc0a32aa6944",
+    "tools/test_local_windows_install.ps1": "52894d42886692a76e112822d363c311e68e2d7f19f98159d16500344013d98d",
+    "web/assets/lazarus.ico": "1d508682df259100389f03af312410423747be2a848968ddf82ba05c0a6fd0b3",
+    "复核安装.ps1": "607add103d8a82ba1849bf0127fea9bae14661e9f67ba381b957201ad7368bfa",
+    "复核说明.md": "514cfd2d2e04299922d24d93663c3ed39c8a8cdf68e58d02c3de9a3d693c34f0",
+    "本地构建回执.json": "cae30edc29dcf05191e896bef491d457e2c92bb5f742c0b059e21d3a06328a47",
+    "校验文件.ps1": "ad4e4a8803ce57bad103ae118bb9b80b9cc976dbe952797a67b2876d9d80fee1"
+  },
+  "unpacked_test": {
+    "version": "0.6.24",
+    "source_commit": "b60c33230318c526ec4fb831b870ce2569e2cc40",
+    "exe_sha256": "c1fe662ec1095eba4395777f3b2259dba89b80435c716addf0100d5bbc7d70b3",
+    "nsis_zip_sha256": "c7d27f780ddb6cffb4730138cd1591e841f4b7edb155856901cdf5f214394fa1",
+    "setup_receipt_sha256": "6b02ddfcd078f699b2041b2f7138ca963558903129cb4e24d6e8009d94cff7ab",
+    "windows_edition": "CoreCountrySpecific",
+    "windows_release": "23H2",
+    "windows_build": "22635.5240",
+    "status": "isolated-install-and-uninstall-verified",
+    "scope": "Windows installation, executable self-test, uninstall and output retention"
+  },
+  "isolated_install": {
+    "scope": "isolated install on existing Windows; no Android device",
+    "version": "0.6.24",
+    "source_commit": "b60c33230318c526ec4fb831b870ce2569e2cc40",
+    "installer_script_sha256": "07457811c226d7f56ed231bcd583202b5ed173dfdf9134273005cc0a32aa6944",
+    "nsis_version": "v3.11",
+    "installer_sha256": "e489499d28b27629bed4ced72b03eb47ca39b156b5f9eef0e747b6f009ce1a3f",
+    "exe_sha256": "c1fe662ec1095eba4395777f3b2259dba89b80435c716addf0100d5bbc7d70b3",
+    "installed_exe_sha256": "c1fe662ec1095eba4395777f3b2259dba89b80435c716addf0100d5bbc7d70b3",
+    "install_exit": 0,
+    "installed_self_test_exit": 0,
+    "uninstall_exit": 0,
+    "system_only_path_for_self_test": true,
+    "isolated_registration_removed": true,
+    "exported_output_preserved": true
+  },
+  "invalid_inputs": [
+    {
+      "case": "wrong-exe",
+      "exit_code": 1,
+      "created_evidence_directory": false,
+      "diagnostic": "程序与本地构建回执的哈希不符"
+    },
+    {
+      "case": "wrong-compiler",
+      "exit_code": 1,
+      "created_evidence_directory": false,
+      "diagnostic": "NSIS 3.11 便携 ZIP 的 SHA-256 不符"
+    }
+  ],
+  "scope": "unpacked standalone kit on existing Windows; no clean-system or Android device result"
+}
