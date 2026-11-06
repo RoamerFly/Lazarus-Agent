@@ -1,0 +1,121 @@
+{
+  "schema": 1,
+  "status": "first-use-consent-and-partial-download-verified",
+  "version": "0.6.26",
+  "source_commit": "dbfc625027a995fa091308f6dbcb1269d49a4223",
+  "exe_sha256": "371bd684b4c192e82ab188e24049743ebcf28b8178d5525378b6cf5a239fa870",
+  "windows": "Windows Server 2022",
+  "environment": "dedicated VM with NAT and a fresh application storage directory",
+  "api": 36,
+  "first_use_consent": {
+    "missing_components": [
+      "platform-tools",
+      "emulator",
+      "build-tools",
+      "system-image",
+      "java"
+    ],
+    "invalid_requests": [
+      {
+        "input": "boolean-false",
+        "http_status": 400,
+        "active": null,
+        "terms_accepted": false
+      },
+      {
+        "input": "string-false",
+        "http_status": 400,
+        "active": null,
+        "terms_accepted": false
+      },
+      {
+        "input": "string-true",
+        "http_status": 400,
+        "active": null,
+        "terms_accepted": false
+      },
+      {
+        "input": "numeric-one",
+        "http_status": 400,
+        "active": null,
+        "terms_accepted": false
+      },
+      {
+        "input": "array",
+        "http_status": 400,
+        "active": null,
+        "terms_accepted": false
+      },
+      {
+        "input": "object",
+        "http_status": 400,
+        "active": null,
+        "terms_accepted": false
+      },
+      {
+        "input": "null",
+        "http_status": 400,
+        "active": null,
+        "terms_accepted": false
+      }
+    ],
+    "invalid_saved_states": [
+      {
+        "state": "non-object",
+        "terms_accepted": false,
+        "active": null
+      },
+      {
+        "state": "string",
+        "terms_accepted": false,
+        "active": null
+      },
+      {
+        "state": "number",
+        "terms_accepted": false,
+        "active": null
+      }
+    ],
+    "downloads_started_before_consent": false
+  },
+  "first_attempt": {
+    "status": "error",
+    "error": "SSL_CERTIFICATE_VERIFY_FAILED"
+  },
+  "certificate_diagnostics": {
+    "host": "dl.google.com",
+    "windows_https": 200,
+    "bundled_python_https": 200,
+    "certificate_validation_bypassed": false
+  },
+  "same_exe_in_new_storage": {
+    "installed": [
+      "platform-tools",
+      "emulator"
+    ],
+    "remaining": [
+      "build-tools",
+      "system-image",
+      "java"
+    ],
+    "build_tools_attempt_errors": [
+      "WinError 10061",
+      "WinError 10060"
+    ],
+    "verified_routes": [
+      {
+        "route": "direct",
+        "exit": 0,
+        "http": "200",
+        "effective_host": "dl.google.com"
+      },
+      {
+        "route": "redirector",
+        "exit": 28,
+        "http": "302",
+        "effective_host": "rr2---sn-j5o76n7e.gvt1-cn.com"
+      }
+    ]
+  },
+  "network_model_calls": 0
+}

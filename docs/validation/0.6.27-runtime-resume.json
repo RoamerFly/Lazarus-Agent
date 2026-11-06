@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "version": "0.6.27",
+  "source_commit": "56c8641edf799c6d9a2ec228b9bca5d2f4074a03",
+  "exe_sha256": "4b4a540b5f9b8c0b8fbd0dd69867070f249ffdc441079fe798adfc4c9893b85c",
+  "api": 36,
+  "status": "windows-runtime-partially-prepared",
+  "preserved_components": [
+    "platform-tools",
+    "emulator"
+  ],
+  "new_components": [
+    "build-tools",
+    "system-image"
+  ],
+  "remaining": [
+    "java"
+  ],
+  "temurin_release_tls": {
+    "default": "CERTIFICATE_VERIFY_FAILED",
+    "windows_native_http": 200,
+    "windows_native_requires_cert": true,
+    "windows_native_checks_hostname": true
+  },
+  "network_model_calls": 0
+}
