@@ -4,6 +4,7 @@
 )
 
 $ErrorActionPreference = 'Stop'
+Import-Module (Join-Path $PSHOME 'Modules/Microsoft.PowerShell.Utility/Microsoft.PowerShell.Utility.psd1') -ErrorAction Stop
 $root = [IO.Path]::GetFullPath($PSScriptRoot)
 $exe = (Resolve-Path -LiteralPath $App).ProviderPath
 
@@ -68,7 +69,13 @@ if ($Mode -eq 'CheckOnly') { $start.Arguments += ' --check-only' }
 $process = [Diagnostics.Process]::Start($start)
 Write-Output "复测目录 $output"
 $process.WaitForExit()
-if ($process.ExitCode -ne 0) { throw "复测退出码 $($process.ExitCode)，请查看 $log" }
+if ($process.ExitCode -ne 0) {
+    [Console]::Error.WriteLine("复测退出码 $($process.ExitCode)，请查看 $log")
+    if (Test-Path -LiteralPath $log -PathType Leaf) {
+        [Console]::Error.WriteLine((Get-Content -LiteralPath $log -Tail 1 -Encoding UTF8))
+    }
+    exit $process.ExitCode
+}
 $actual = Get-Content -LiteralPath $result -Raw -Encoding UTF8 | ConvertFrom-Json
 if ($actual.input_sha256 -cne $plan.input_sha256 -or $actual.candidate_sha256 -cne $plan.candidate_sha256 -or
     ($actual.targets -join ',') -ne '36' -or @($actual.steps).Count -ne @($plan.steps).Count) {

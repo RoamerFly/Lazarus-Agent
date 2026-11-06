@@ -1,0 +1,61 @@
+{
+  "actual_exe_missing_tools": {
+    "version": "0.6.24",
+    "source_commit": "b60c33230318c526ec4fb831b870ce2569e2cc40",
+    "exe_sha256": "c1fe662ec1095eba4395777f3b2259dba89b80435c716addf0100d5bbc7d70b3",
+    "scope": "actual EXE; isolated SDK fixture with Android build tools missing; no emulator",
+    "rows": [
+      {
+        "mode": "check-only",
+        "exit_code": 0,
+        "report_created": true,
+        "message": "inputs-verified"
+      },
+      {
+        "mode": "device",
+        "exit_code": 2,
+        "report_created": false,
+        "message": "无法完成复测：请先在工作台的运行环境中准备 Android 验证组件"
+      }
+    ]
+  },
+  "bundle_revision_2": {
+    "version": "0.6.24",
+    "source_commit": "b60c33230318c526ec4fb831b870ce2569e2cc40",
+    "exe_sha256": "c1fe662ec1095eba4395777f3b2259dba89b80435c716addf0100d5bbc7d70b3",
+    "bundle_sha256": "22d5fef8f69c7474d3708cf6e625d2f34c0530166be29ecf30842802a05a5569",
+    "bundle_bytes": 18208,
+    "files": {
+      "SHA256SUMS.txt": "74156e440039fa98d52391685043457be212616b0820baf4ebba53e6bb2231ab",
+      "base.apk": "7b8e200984dee500def40a9684fd2de9ced885ca1d04c63771d1d473b597dcce",
+      "build-receipt.json": "cae30edc29dcf05191e896bef491d457e2c92bb5f742c0b059e21d3a06328a47",
+      "candidate.apk": "785ec43f4f7fe1b1b564e80c5a1e11f03e5f99b3a3d018dd268a842cad48d595",
+      "manifest-readback.json": "a5d2e06764d0bed8c0e91670828b901be2ad153ebcbcaf7a46f044c3477de8e7",
+      "replay-plan.json": "3ad65644bddaa8559c79390a853aec0a4a56b2bf258df1f925b76e5885df5e80",
+      "复测归档阅读器.ps1": "99d1f5057daef7986f6c2e7f1cdcc25be9a61b6f74a7504ac0878a385f41acdc",
+      "复测说明.md": "11b49dccc6b7a964f2b5178a0645de09c508058d6412e9b6b85611572e6c72e9"
+    },
+    "scope": "standalone local inputs for P02; prior device replay archived separately",
+    "check_only": {
+      "exit_code": 0,
+      "status": "inputs-verified",
+      "step_count": 6,
+      "report_sha256": "796a2e60d85dabe60d86ebb5d186e4f05445417a7c0d0063553b8c35ec48a37f"
+    },
+    "wrapper_exit_contract": [
+      {
+        "exe_exit_code": 1,
+        "script_exit_code": 1,
+        "report_preserved": true,
+        "diagnostic": "incomplete"
+      },
+      {
+        "exe_exit_code": 2,
+        "script_exit_code": 2,
+        "report_preserved": false,
+        "diagnostic": "无法完成复测：请先在工作台的运行环境中准备 Android 验证组件"
+      }
+    ],
+    "wrapper_contract_scope": "controlled executable substitutes; no device"
+  }
+}
