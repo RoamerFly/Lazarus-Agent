@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import hashlib
+from io import BytesIO
 import os
 import shutil
 import tempfile
@@ -9,6 +10,7 @@ import sys
 import types
 import unittest
 from unittest.mock import patch
+from urllib.error import URLError
 from zipfile import ZipFile
 
 from tools import prepare_lab
@@ -109,6 +111,26 @@ class PrepareLabSafetyTests(unittest.TestCase):
         with self.assertRaises(InterruptedError):
             prepare_lab._download(spec, downloads, None, "emulator", None, cancel=lambda: True)
         self.assertEqual(partial.read_bytes(), b"partial")
+
+    def test_google_download_fallback_keeps_range_and_checks_digest(self) -> None:
+        archive = b"partremaining"
+        downloads = self.root / "downloads"
+        downloads.mkdir()
+        partial = downloads / "component.zip.part"
+        partial.write_bytes(archive[:4])
+        spec = {"name": "component.zip", "url": prepare_lab.BASE + "component.zip",
+                "fallback_url": "https://redirector.gvt1.com/edgedl/android/repository/component.zip",
+                "size": len(archive), "digest": hashlib.sha1(archive).hexdigest(), "algorithm": "sha1"}
+        with patch.object(prepare_lab.urllib.request, "urlopen") as request:
+            response = BytesIO(archive[4:])
+            response.status = 206
+            request.side_effect = [URLError("connection refused"), response]
+            downloaded = prepare_lab._download(spec, downloads, None, "build-tools", 36)
+        self.assertEqual(downloaded.read_bytes(), archive)
+        self.assertFalse(partial.exists())
+        requests = [call.args[0] for call in request.call_args_list]
+        self.assertEqual([item.full_url for item in requests], [spec["url"], spec["fallback_url"]])
+        self.assertEqual([item.get_header("Range") for item in requests], ["bytes=4-", "bytes=4-"])
 
     def test_missing_component_requires_terms_before_network_download(self) -> None:
         with patch.object(prepare_lab, "_source_sdks", return_value=[]), \

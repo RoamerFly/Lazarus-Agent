@@ -15,6 +15,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
 from zipfile import ZipFile
@@ -154,7 +155,8 @@ def _google_spec(component: str, api: int | None = None) -> dict[str, object]:
     size = archive.findtext(".//{*}complete/{*}size")
     if not url or not digest or not size:
         raise ValueError(f"Official catalog has incomplete checksum data: {package_id}")
-    return {"name": url, "url": BASE.replace("dl.google.com", "redirector.gvt1.com/edgedl") + prefix + url,
+    return {"name": url, "url": BASE + prefix + url,
+            "fallback_url": BASE.replace("dl.google.com", "redirector.gvt1.com/edgedl") + prefix + url,
             "size": int(size), "digest": digest, "algorithm": "sha1"}
 
 
@@ -207,7 +209,17 @@ def _download(spec: dict[str, object], downloads: Path, progress: Progress | Non
     if current:
         headers["Range"] = f"bytes={current}-"
     request = urllib.request.Request(str(spec["url"]), headers=headers)
-    with urllib.request.urlopen(request, timeout=90) as source:
+    try:
+        response = urllib.request.urlopen(request, timeout=90)
+    except (urllib.error.URLError, TimeoutError, ConnectionError):
+        fallback = spec.get("fallback_url")
+        if not fallback:
+            raise
+        _check_continue(cancel, deadline)
+        _event(progress, "download", component, "主下载地址不可用，正在尝试官方备用地址",
+               api, current=current, total=expected_size)
+        response = urllib.request.urlopen(urllib.request.Request(str(fallback), headers=headers), timeout=90)
+    with response as source:
         # Some mirrors ignore Range. Avoid appending a full archive to a partial.
         append = current > 0 and getattr(source, "status", None) == 206
         if current and not append:
