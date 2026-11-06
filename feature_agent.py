@@ -236,7 +236,10 @@ class Session:
             dir=self.output.parent, prefix=f"build-{self.build_count}-")))
 
     def build(self):
-        for change in self.changes():
+        changes = self.changes()
+        if not changes:
+            raise ValueError("工作区没有修改。先进行有效修改，再请求回编。")
+        for change in changes:
             path = change["path"]
             if not path.endswith(".smali"):
                 continue
@@ -343,6 +346,7 @@ def run(source, output, tools, api, expected_hash, request, config, progress, *,
         try:
             _loop(session, messages, definitions, allowed, config, progress)
             result = {**session.outcome, "model": config["model"], "kind": "agent-patch",
+                      "charged_build_attempts": session.build_count,
                       "tool_trace": [{"tool": row["tool"], "ok": row["ok"]} for row in session.trace],
                       "source_sha256": expected_hash}
             if session.outcome["outcome"] == "candidate":

@@ -68,6 +68,14 @@ class WorkspaceTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             session.finish("candidate", "Done")
 
+    def test_empty_edit_does_not_spend_build_budget(self):
+        session = Session(self.root, Path("source.apk"), self.root / "candidate.apk",
+                          Path("tools"), 36, {}, lambda _: None, None)
+        for _ in range(5):
+            with self.assertRaisesRegex(ValueError, "工作区没有修改"):
+                session.dispatch("build_apk", {})
+        self.assertEqual(session.build_count, 0)
+
     def test_manifest_inspection_binds_original_and_current_candidate(self):
         original = self.root / "original.apk"
         original.write_bytes(b"original")
@@ -371,6 +379,7 @@ class WorkspaceTests(unittest.TestCase):
                          {"url": "https://api.deepseek.com", "model": "deepseek-flash", "key": ""},
                          lambda _: None)
         self.assertEqual(result["outcome"], "candidate")
+        self.assertEqual(result["charged_build_attempts"], 2)
         self.assertEqual((self.root/"out/candidate.apk").read_bytes(), b"signed")
         self.assertEqual(len(build_calls), 2)
         self.assertFalse(result["tool_trace"][2]["ok"])
