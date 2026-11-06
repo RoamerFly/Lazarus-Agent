@@ -9,6 +9,7 @@ import tempfile
 from urllib.parse import urlsplit
 
 from agent_acceptance import rehearse_candidate
+from agent_intent_guard import direct_private_grants
 from agent_workspace import Workspace, digest_file
 from apk_edit_build import build_modified, decoded_apk
 from diagnose import inspect_package
@@ -110,6 +111,7 @@ replace_text 的 old 必须来自 read_text 返回的原文件内容，去掉显
 如果运行证据列出 platform_library，可先用 declare_platform_library 恢复系统库可见性，再回编复验。
 若声明后仍失败或需求本身需要改写功能，继续按实际证据分析。
 兼容修复应保留原有权限和安全检查。文件交接保留实际写入、传递和读取，优先采用范围明确的只读内容 URI 或同应用的受限文件入口。检查接收端的 URI、授权范围和规范化后的路径边界。不能关闭进程范围的安全检查，也不能让导出组件接收可由外部指定的私有文件路径。
+交接目标已知时，在发送前用 setPackage、setComponent 或显式 Intent 构造器限定目标。用户确实要求选择其他应用时，使用系统分享面板，由用户选择接收方并仅授予必要权限。
 有设备工具时应测试最新候选，基于界面执行与需求有关的操作。安装启动成功只能证明安装启动。
 有 rehearse_acceptance 时，构建后直接用它运行固定步骤。只有需要追查具体失败时再用 test_apk 和逐个设备动作；
 一旦通过就保留该候选。这是当前目标系统的预检，正式交付还要重新做独立验收。
@@ -219,6 +221,13 @@ class Session:
                    for check in _PROCESS_BYPASSES):
                 raise ValueError(f"{path} 新增了进程范围的 StrictMode 检查绕过。"
                                  "请保留原安全策略并限制文件交接的访问范围。")
+            if package := self.facts.get("package"):
+                added_grants = direct_private_grants(after, package) - direct_private_grants(before, package)
+                if added_grants:
+                    method = next(iter(added_grants))
+                    raise ValueError(f"{path} 的 {method} 新增了应用命名空间内 URI 的直接授权，接收方未限定。"
+                                     "请在 startActivity 前用 setPackage 或显式组件限定原接收方，"
+                                     "保留实际文件交接，并重新构建和验收。")
         attempt = self.start_build()
         edited = attempt / "edited.apk"
         report = build_modified(self.source, edited, self.api, self.tools, self.workspace.copy_changes)
