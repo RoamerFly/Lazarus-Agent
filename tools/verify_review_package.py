@@ -23,6 +23,8 @@ OFFLINE_WINDOWS_FILES = {
 }
 COLD_WINDOWS_FILE = "Windows复核/同版空目录准备回执.json"
 COLD_COMPONENTS = {"platform-tools", "emulator", "build-tools", "system-image", "java"}
+REVIEWER_GUIDE = "评审操作与答辩提纲.md"
+SAMPLE_NOTICE = "评审样本使用说明.md"
 
 
 def check_local_links(archive, names):
@@ -363,10 +365,19 @@ def check_offline_materials(archive, checksums, status, windows):
             or receipt["exe_sha256"] != status["exe_sha256"]
             or any(checksums.get(name) != receipt[key] for name, key in files.items())):
         raise ValueError("同版方案、视频、设备证据或源码与回执不一致")
+    guide = status.get("offline_review_guide")
+    guide_files = {REVIEWER_GUIDE, SAMPLE_NOTICE}
+    if guide is not None or guide_files & checksums.keys() or "reviewer_docs_sha256" in receipt:
+        recorded = receipt.get("reviewer_docs_sha256", {})
+        if (guide != "current-version-guide" or set(recorded) != guide_files
+                or any(checksums.get(name) != recorded[name] for name in guide_files)):
+            raise ValueError("同版评审提纲或样本使用说明缺少完整校验")
     with ZipFile(BytesIO(archive.read(source_name))) as code:
         if (code.comment.decode("ascii") != commit
                 or f'APP_VERSION = "{version}"'.encode("ascii") not in code.read("app_version.py").splitlines()):
             raise ValueError("离线方案源码与构建提交不一致")
+        if guide and code.read(f"fixtures/{SAMPLE_NOTICE}") != archive.read(SAMPLE_NOTICE):
+            raise ValueError("样本使用说明与同版源码不一致")
     record = json.loads(archive.read("演示记录.json"))
     capture = record["capture"]
     screen = capture["device_screen"]
@@ -387,7 +398,10 @@ def check_offline_materials(archive, checksums, status, windows):
             or screen["api"] != 36 or report["targets"] != [36]
             or report["rows"][0]["baseline"]["install"] != "failed" or not verified_for(report, candidate)):
         raise ValueError("离线演示的轨迹、原包、录制或 Android 验收证据不一致")
-    return {"status": scope, "version": version, "demo_steps": len(report["steps"]), "network_model_calls": 0}
+    result = {"status": scope, "version": version, "demo_steps": len(report["steps"]), "network_model_calls": 0}
+    if guide:
+        result["reviewer_guide"] = guide
+    return result
 
 
 def verify(path):

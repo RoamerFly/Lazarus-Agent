@@ -11,10 +11,10 @@ from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from tools.package_agent_review import digest, read
-from tools.verify_review_package import COLD_WINDOWS_FILE, LOCAL_DEMO, verify
+from tools.verify_review_package import COLD_WINDOWS_FILE, LOCAL_DEMO, REVIEWER_GUIDE, SAMPLE_NOTICE, verify
 
 
-def build(delivery, materials, capture, output):
+def build(delivery, materials, capture, output, reviewer_guide=None):
     if output.exists():
         raise ValueError("请选择新的同版评审包输出路径")
     version = read(delivery / "本地构建回执.json")["version"]
@@ -46,6 +46,16 @@ def build(delivery, materials, capture, output):
                "device_screen_sha256": digest(capture / "device-final.png"),
                "acceptance_sha256": digest(capture / "agent-acceptance.json")}
     status["offline_materials"] = "same-build-offline-review"
+    guide_note = ""
+    if reviewer_guide:
+        files[REVIEWER_GUIDE] = reviewer_guide.read_bytes()
+        with ZipFile(source) as code:
+            files[SAMPLE_NOTICE] = code.read(f"fixtures/{SAMPLE_NOTICE}")
+        receipt["reviewer_docs_sha256"] = {
+            name: hashlib.sha256(files[name]).hexdigest() for name in (REVIEWER_GUIDE, SAMPLE_NOTICE)
+        }
+        status["offline_review_guide"] = "current-version-guide"
+        guide_note = f"[评审操作与答辩提纲]({REVIEWER_GUIDE}) · [评审样本使用范围]({SAMPLE_NOTICE})\n\n"
     files["复核状态.json"] = json.dumps(status, ensure_ascii=False, indent=2).encode()
     files["同版材料校验回执.json"] = json.dumps(receipt, ensure_ascii=False, indent=2).encode()
     if original["offline_cold_runtime"]:
@@ -59,7 +69,7 @@ def build(delivery, materials, capture, output):
 
 [六页方案](遗留软件复活智能体方案说明.pdf) · [工作台演示](遗留软件复活智能体离线演示.mp4) · [构建源码](F01-源代码-v{version}.zip) · [同版回执](同版材料校验回执.json)
 
-演示录制使用同版源码工作台。导入巡检 APK 并从对话提交需求后，重放留档工具操作，实际回编、签名并通过 Android 16 的十步独立验收。没有调用真实模型。原包、候选、报告和模拟器画面均可核对。
+{guide_note}演示录制使用同版源码工作台。导入巡检 APK 并从对话提交需求后，重放留档工具操作，实际回编、签名并通过 Android 16 的十步独立验收。没有调用真实模型。原包、候选、报告和模拟器画面均可核对。
 
 解压后核对文件与演示输入。便携 EXE 单列，命令中使用其实际路径。
 
@@ -92,5 +102,6 @@ if __name__ == "__main__":
     parser = ArgumentParser(description=__doc__)
     for name in ("delivery", "materials", "capture", "output"):
         parser.add_argument("--" + name, type=Path, required=True)
-    paths = {name: path.resolve() for name, path in vars(parser.parse_args()).items()}
+    parser.add_argument("--reviewer-guide", type=Path)
+    paths = {name: path.resolve() if path else None for name, path in vars(parser.parse_args()).items()}
     print(json.dumps(build(**paths), ensure_ascii=False, indent=2))
