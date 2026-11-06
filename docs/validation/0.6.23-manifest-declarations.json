@@ -1,0 +1,97 @@
+{
+  "scope": "explicit compiled declarations only",
+  "case": "P06-agent-1-v0.6.21",
+  "original_sha256": "55ca244e70ab959fbb179a04c757c1974821ff790578e8811a345f31e024d8da",
+  "candidate_sha256": "6a6c87eb115b07761bf36abd1c76a1e7b6f357a77985ec2f8d93a8111cd6c13a",
+  "original": {
+    "permissions": [],
+    "components": [
+      {
+        "type": "activity",
+        "name": ".ShareActivity",
+        "exported": "(type 0x12)0xffffffff",
+        "children": [
+          {
+            "type": "intent-filter",
+            "children": [
+              {
+                "type": "action",
+                "name": "android.intent.action.MAIN"
+              },
+              {
+                "type": "category",
+                "name": "android.intent.category.LAUNCHER"
+              }
+            ]
+          },
+          {
+            "type": "intent-filter",
+            "children": [
+              {
+                "type": "action",
+                "name": "org.ggbond.archivereader.OPEN_RECORD"
+              },
+              {
+                "type": "category",
+                "name": "android.intent.category.DEFAULT"
+              },
+              {
+                "type": "data",
+                "mimeType": "application/vnd.ggbond.record"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "candidate": {
+    "permissions": [],
+    "components": [
+      {
+        "type": "activity",
+        "name": ".ShareActivity",
+        "exported": "(type 0x12)0xffffffff",
+        "children": [
+          {
+            "type": "intent-filter",
+            "children": [
+              {
+                "type": "action",
+                "name": "android.intent.action.MAIN"
+              },
+              {
+                "type": "category",
+                "name": "android.intent.category.LAUNCHER"
+              }
+            ]
+          },
+          {
+            "type": "intent-filter",
+            "children": [
+              {
+                "type": "action",
+                "name": "org.ggbond.archivereader.OPEN_RECORD"
+              },
+              {
+                "type": "category",
+                "name": "android.intent.category.DEFAULT"
+              },
+              {
+                "type": "data",
+                "mimeType": "application/vnd.ggbond.record"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "provider",
+        "name": ".RecordProvider",
+        "exported": "(type 0x12)0x0",
+        "authorities": "org.ggbond.archivereader.records",
+        "grantUriPermissions": "(type 0x12)0x0"
+      }
+    ]
+  }
+}

@@ -48,10 +48,20 @@ def inspect_package(apk, tools):
 
 
 def manifest_surface(apk, tools):
-    """Record explicit permission/component declarations from the compiled manifest."""
+    """Record explicit permission, component, and routing declarations from the APK."""
     with tempfile.TemporaryDirectory(dir=_tool_temp_root(),prefix="manifest-") as temp:
         shutil.copyfile(apk, Path(temp) / "input.apk")
         text = run([(tools / "aapt.exe").resolve(), "dump", "xmltree", "input.apk", "AndroidManifest.xml"], cwd=temp)
+    return _manifest_declarations(text)
+
+
+def _manifest_declarations(text):
+    component_tags = {"activity", "activity-alias", "service", "receiver", "provider"}
+    permission_tags = {"uses-permission", "uses-permission-sdk-23", "uses-permission-sdk-m"}
+    component_attributes = {
+        "name", "exported", "enabled", "permission", "readPermission", "writePermission",
+        "authorities", "targetActivity", "grantUriPermissions",
+    }
     permissions, components = [], []
     stack = []
     for line in text.splitlines():
@@ -61,19 +71,36 @@ def manifest_surface(apk, tools):
             while stack and stack[-1][0] >= indent:
                 stack.pop()
             tag = element[1]
-            parent = stack[-1][1] if stack else None
+            _, parent, parent_record = stack[-1] if stack else (None, None, None)
             record = None
-            if parent == "manifest" and tag in {"uses-permission", "uses-permission-sdk-23", "uses-permission-sdk-m"}:
+            if parent == "manifest" and tag in permission_tags:
                 record = {"type": tag}
                 permissions.append(record)
-            elif parent == "application" and tag in {"activity", "activity-alias", "service", "receiver", "provider"}:
+            elif parent == "application" and tag in component_tags:
                 record = {"type": tag}
                 components.append(record)
+            elif parent_record is not None and (
+                (parent in component_tags and tag == "intent-filter")
+                or (parent == "provider" and tag in {"grant-uri-permission", "path-permission"})
+                or (parent == "intent-filter" and tag in {"action", "category", "data", "uri-relative-filter-group"})
+                or (parent == "uri-relative-filter-group" and tag == "data")
+            ):
+                record = {"type": tag}
+                parent_record.setdefault("children", []).append(record)
             stack.append((indent, tag, record))
         elif stack and stack[-1][2] is not None:
-            attr = re.match(r"\s*A: [\w.-]+:(name|exported|enabled|permission|readPermission|writePermission|authorities|targetActivity|maxSdkVersion)\(0x[\da-f]+\)=(.+)", line)
-            if attr:
-                stack[-1][2][attr[1]] = attr[2].split(" (Raw:", 1)[0].strip('"')
+            _, tag, record = stack[-1]
+            attr = re.match(r"\s*A: [\w.-]+:([\w.-]+)\(0x01[\da-f]{6}\)=(.+)", line)
+            if not attr:
+                continue
+            name, value = attr.groups()
+            if name in {"type", "children"}:
+                continue
+            if tag in component_tags and name not in component_attributes:
+                continue
+            if tag in permission_tags and name not in {"name", "maxSdkVersion"}:
+                continue
+            record[name] = value.split(" (Raw:", 1)[0].strip('"')
     return {"permissions": permissions, "components": components}
 
 
