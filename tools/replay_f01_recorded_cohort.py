@@ -1,7 +1,7 @@
 """Replay the fixed historical F01 tool decisions through a current checkout."""
 from argparse import ArgumentParser
 from collections import Counter
-from hashlib import file_digest
+from hashlib import file_digest, sha256
 import json
 import os
 from pathlib import Path
@@ -12,6 +12,8 @@ from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 HISTORICAL = ROOT / "docs/validation/f01-p1c/results.json"
+RECORDED_INPUT = HISTORICAL.with_name("replay-input.json")
+RECORDED_INPUT_SHA256 = "f556d1e5f20a650b076618e98a219f39e13e89c3c595ffd59d6fc9235380ee39"
 
 
 def read(path):
@@ -80,7 +82,56 @@ def summary(protocol, rows):
     }
 
 
-def replay(checkout, historical_trials, output):
+def plan_inputs(checkout, benchmark, build, historical_trials=None, recorded_input=RECORDED_INPUT):
+    protocol_path = checkout / "tools/f01-p1c-cases.json"
+    protocol = read(protocol_path)
+    protocol_hash = digest(protocol_path)
+    original = read(HISTORICAL)
+    original_hash = digest(HISTORICAL)
+    schedule = list(benchmark.trial_schedule(protocol))
+    archived = {row["trial"]: row for row in original["rows"]}
+    if len(schedule) != original["planned_trials"] or protocol_hash != original["protocol_sha256"]:
+        raise ValueError("冻结协议与历史批次不一致")
+    if historical_trials is None:
+        bundle = recorded_input.read_bytes().replace(b"\r\n", b"\n")
+        if sha256(bundle).hexdigest() != RECORDED_INPUT_SHA256:
+            raise ValueError("公开工具轨迹的 SHA-256 不匹配")
+        recorded = json.loads(bundle)
+        if recorded["historical_results_sha256"] != original_hash or recorded["protocol_sha256"] != protocol_hash:
+            raise ValueError("公开工具轨迹对应不同的冻结批次")
+        traces = recorded["traces"]
+    else:
+        traces = {}
+    planned = {}
+    for case, mode, repeat in schedule:
+        label = f"{case['id']}-{mode}-{repeat}"
+        source_hash = original["source_apk_sha256"][case["id"]]
+        if digest(checkout / case["apk"]) != source_hash:
+            raise ValueError(f"原包身份不符 {label}")
+        if historical_trials is not None:
+            raw = historical_trials / label
+            if digest(raw / "result.json") != archived[label]["raw_result_sha256"]:
+                raise ValueError(f"历史试验身份不符 {label}")
+        row = {"case": case["id"], "class": case["class"], "mode": mode, "repeat": repeat,
+               "source_sha256": source_hash, "historical_state": archived[label]["state"]}
+        if mode in {"agent", "one-build"}:
+            if historical_trials is not None:
+                path = raw / "agent-trace.json"
+                trace = read(path)
+                result = read(raw / "result.json")["result"]
+                if (trace["source_sha256"] != source_hash or trace["outcome"]["outcome"] != result["outcome"]
+                        or [{k: item[k] for k in ("tool", "ok")} for item in trace["tools"]] != result["tool_trace"]):
+                    raise ValueError(f"历史轨迹与已归档试验不一致 {label}")
+                traces[label] = {"trace_sha256": digest(path), "tools": trace["tools"]}
+            row["historical_trace_sha256"] = traces[label]["trace_sha256"]
+        planned[label] = row
+    plan = {"schema": 1, "scope": "offline-replay-of-historical-tool-decisions", "build": build,
+            "historical_results_sha256": original_hash, "protocol_sha256": protocol_hash,
+            "api": protocol["target"], "replay_tools_per_response": 2, "network_model_calls": 0, "trials": planned}
+    return protocol, schedule, plan, traces
+
+
+def replay(checkout, historical_trials, output, recorded_input=RECORDED_INPUT, *, check_only=False):
     if not output.is_relative_to(checkout / "build"):
         raise ValueError("复跑输出必须位于候选检出目录的 build 下")
     commit = subprocess.check_output(["git", "-C", str(checkout), "rev-parse", "HEAD"], text=True).strip()
@@ -100,34 +151,11 @@ def replay(checkout, historical_trials, output):
     import feature_agent
     from model_tools import ModelToolError
 
-    protocol_path = checkout / "tools/f01-p1c-cases.json"
-    protocol = read(protocol_path)
-    original = read(HISTORICAL)
-    schedule = list(benchmark.trial_schedule(protocol))
-    archived = {row["trial"]: row for row in original["rows"]}
-    if len(schedule) != original["planned_trials"] or digest(protocol_path) != original["protocol_sha256"]:
-        raise ValueError("冻结协议与历史批次不一致")
-    planned = {}
-    for case, mode, repeat in schedule:
-        label = f"{case['id']}-{mode}-{repeat}"
-        source_hash = original["source_apk_sha256"][case["id"]]
-        raw = historical_trials / label
-        if (digest(checkout / case["apk"]) != source_hash
-                or digest(raw / "result.json") != archived[label]["raw_result_sha256"]):
-            raise ValueError(f"历史试验或原包身份不符 {label}")
-        row = {"case": case["id"], "class": case["class"], "mode": mode, "repeat": repeat,
-               "source_sha256": source_hash, "historical_state": archived[label]["state"]}
-        if mode in {"agent", "one-build"}:
-            trace = read(raw / "agent-trace.json")
-            result = read(raw / "result.json")["result"]
-            if (trace["source_sha256"] != source_hash or trace["outcome"]["outcome"] != result["outcome"]
-                    or [{k: item[k] for k in ("tool", "ok")} for item in trace["tools"]] != result["tool_trace"]):
-                raise ValueError(f"历史轨迹与已归档试验不一致 {label}")
-            row["historical_trace_sha256"] = digest(raw / "agent-trace.json")
-        planned[label] = row
-    plan = {"schema": 1, "scope": "offline-replay-of-historical-tool-decisions", "build": build,
-            "historical_results_sha256": digest(HISTORICAL), "protocol_sha256": digest(protocol_path),
-            "api": protocol["target"], "replay_tools_per_response": 2, "network_model_calls": 0, "trials": planned}
+    protocol, schedule, plan, traces = plan_inputs(checkout, benchmark, build, historical_trials, recorded_input)
+    planned = plan["trials"]
+    if check_only:
+        print(json.dumps(plan, ensure_ascii=False, indent=2))
+        return
     output.mkdir(parents=True, exist_ok=True)
     plan_path = output / "plan.json"
     if plan_path.exists() and read(plan_path) != plan:
@@ -164,8 +192,7 @@ def replay(checkout, historical_trials, output):
                 raise ValueError(f"上一轮留下未完成的试验目录 {label}")
             trial.mkdir()
             print("start", label, flush=True)
-            original_trace = (read(historical_trials / label / "agent-trace.json")["tools"]
-                              if mode in {"agent", "one-build"} else [])
+            original_trace = traces[label]["tools"] if label in traces else []
             calls = tool_sequence(original_trace)
             index = 0
 
@@ -210,7 +237,13 @@ def replay(checkout, historical_trials, output):
 
 if __name__ == "__main__":
     parser = ArgumentParser(description=__doc__)
-    for field in ("checkout", "historical-trials", "output"):
+    for field in ("checkout", "output"):
         parser.add_argument("--" + field, type=Path, required=True)
+    inputs = parser.add_mutually_exclusive_group()
+    inputs.add_argument("--historical-trials", type=Path)
+    inputs.add_argument("--recorded-input", type=Path, default=RECORDED_INPUT)
+    parser.add_argument("--check-only", action="store_true")
     opts = parser.parse_args()
-    replay(opts.checkout.resolve(), opts.historical_trials.resolve(), opts.output.resolve())
+    historical = opts.historical_trials.resolve() if opts.historical_trials else None
+    replay(opts.checkout.resolve(), historical, opts.output.resolve(), opts.recorded_input.resolve(),
+           check_only=opts.check_only)
