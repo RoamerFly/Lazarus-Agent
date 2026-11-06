@@ -21,7 +21,7 @@ def sha256(path):
         return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
-def replay(checkout, apk, trace_path, api, output):
+def replay(checkout, apk, trace_path, api, output, *, allow_unfinished=False):
     sys.path.insert(0, str(checkout))
     from bench_device import TOOLS
     import feature_agent
@@ -32,8 +32,12 @@ def replay(checkout, apk, trace_path, api, output):
     if output.exists() or not output.is_relative_to(checkout / "build"):
         raise ValueError("请选择实现目录 build 下的新输出目录")
     trace = json.loads(trace_path.read_text(encoding="utf-8-sig"))
-    if sha256(apk) != trace["source_sha256"] or (trace.get("outcome") or {}).get("outcome") != "candidate":
-        raise ValueError("轨迹应对应同一输入 APK 及已完成的候选")
+    if sha256(apk) != trace["source_sha256"]:
+        raise ValueError("轨迹应对应同一输入 APK")
+    outcome = trace.get("outcome")
+    unfinished = "outcome" in trace and outcome is None and bool(trace.get("changes"))
+    if (outcome or {}).get("outcome") != "candidate" and not (allow_unfinished and unfinished):
+        raise ValueError("请选择已生成候选的轨迹，或显式指定重放未完成编辑")
     calls = []
     for row in trace["tools"]:
         if not row["ok"]:
@@ -79,6 +83,8 @@ def replay(checkout, apk, trace_path, api, output):
                    "replayed_calls": len(calls), "network_model_calls": 0,
                    "verified": "recorded-changes-rebuilt-and-signed", "device": "not-run",
                    "changes": result["changes"]}
+        if unfinished:
+            receipt["input_trace_state"] = "unfinished-edits"
         (stage / "receipt.json").write_text(json.dumps(receipt, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         stage.rename(output)
     return receipt
@@ -91,6 +97,9 @@ if __name__ == "__main__":
     parser.add_argument("trace", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--api", type=int, default=36)
+    parser.add_argument("--allow-unfinished", action="store_true",
+                        help="Build recorded edits from a trace that stopped before producing a candidate")
     args = parser.parse_args()
     print(json.dumps(replay(args.checkout.resolve(), args.apk.resolve(), args.trace.resolve(),
-                            args.api, args.output.resolve()), ensure_ascii=False, indent=2))
+                            args.api, args.output.resolve(), allow_unfinished=args.allow_unfinished),
+                     ensure_ascii=False, indent=2))

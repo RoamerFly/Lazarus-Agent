@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "source_commit": "0e95b5f14be122c2d06069db43ddeeeb473ffd6d",
+  "exe_sha256": "0f83908f99e9b2d39e0074bfd8eedb16f70ba1e51349c70f3d3edbec98ad30b8",
+  "plan_sha256": "425a5904361ee14926f31605c53779a133cde5ef031e29b3452da138aca6b0b2",
+  "input_sha256": "55ca244e70ab959fbb179a04c757c1974821ff790578e8811a345f31e024d8da",
+  "scope": "one-shot-development-continuation-on-a-seen-owned-fixture",
+  "transport": {
+    "initial_request_error": "HTTPError",
+    "replayed_tool_type_corrected": true,
+    "total_requests": 8,
+    "provider_responses": 7,
+    "model": "deepseek-flash",
+    "request_body_bytes": 392905,
+    "tokens": {
+      "prompt_tokens": 87238,
+      "prompt_cache_hit_tokens": 71936,
+      "prompt_cache_miss_tokens": 15302,
+      "completion_tokens": 741
+    }
+  },
+  "guard": {
+    "observed": true,
+    "recorded_prefix_tools": 11,
+    "network_before_guard": 0
+  },
+  "live": {
+    "first_build_sha256": "5133d71808483a49887c81d17dcd1b0ef0348bde5bb0d90a46761a19e833a351",
+    "install": "passed",
+    "launch": "failed",
+    "observed_exception_types": [
+      "java.lang.VerifyError"
+    ],
+    "last_edit_recorded": true,
+    "verified_download": false,
+    "tools": [
+      {
+        "tool": "replace_text",
+        "ok": true
+      },
+      {
+        "tool": "build_apk",
+        "ok": true
+      },
+      {
+        "tool": "rehearse_acceptance",
+        "ok": true
+      },
+      {
+        "tool": "device_action",
+        "ok": true
+      },
+      {
+        "tool": "device_action",
+        "ok": true
+      },
+      {
+        "tool": "read_text",
+        "ok": true
+      },
+      {
+        "tool": "replace_text",
+        "ok": true
+      }
+    ],
+    "trace_sha256": "b8919207b3f6b114ccad70928dac514100d09c51cbdef1021021b6297e0bb19a"
+  },
+  "offline": {
+    "published_trace_sha256": "a83688e3787c960ddce2ecd76ffccdf4a5581dad9ccebc82a0501b26a1139398",
+    "rebuilt_apk_sha256": "882f2f01c6aab793b87ac479cc6aa7d4d2afd05f38e3b260d79553a6ca3e8690",
+    "build_receipt_sha256": "9572a8f0cd74e059c7fdefb46c40154386aeda0c52a6b339a500ee5a9e6d9f99",
+    "same_edit_hashes": true,
+    "exe_report_sha256": "456db27767fd5c8b37c858acc141ad33153de4b7030fec319a73f928d3083919",
+    "abi": "x86_64",
+    "api": 36,
+    "passed_steps": 5,
+    "installed_sha256": "882f2f01c6aab793b87ac479cc6aa7d4d2afd05f38e3b260d79553a6ca3e8690",
+    "network_model_calls": 0
+  },
+  "foreign_provider": {
+    "api": 36,
+    "abi": "x86_64",
+    "cases": [
+      {
+        "case": "explicit-control",
+        "candidate_and_installed_sha256": "a854a06bd86ec8ed677b81268ccae8df1a5c33d1877e4f0629c67ea1bdd101f3",
+        "caller_apk_sha256": "baabc9796740cdf6c73e05ae96834d82409896abf01a38a72dbb1ed17177d8ec",
+        "separate_uids": true,
+        "in_app_handoff": "Shared",
+        "foreign_byte_42_before": "Shared",
+        "foreign_byte_42_after": "Shared",
+        "foreign_byte_41_after": "Unexpected file",
+        "result_sha256": "f3d65ab379cc4b542501416d91156f3ecaf0c64bcf413a3e84dbceda5cd6960c"
+      },
+      {
+        "case": "guard-continuation",
+        "candidate_and_installed_sha256": "882f2f01c6aab793b87ac479cc6aa7d4d2afd05f38e3b260d79553a6ca3e8690",
+        "caller_apk_sha256": "ef31e0bca9e5074f363919523e5013e5038b542688d062a1bfec959a1a1c77ce",
+        "separate_uids": true,
+        "in_app_handoff": "Shared",
+        "foreign_byte_42_before": "Shared",
+        "foreign_byte_42_after": "Shared",
+        "foreign_byte_41_after": "Unexpected file",
+        "result_sha256": "e6f133028efe2a4cd8fa79d644d29e56a78b6fcb40bc1b2b9166d45455702281"
+      },
+      {
+        "case": "private-control",
+        "candidate_and_installed_sha256": "a6847a793519982ccc2f85b9284e1d5dd2127ab9652da82c1dbd53456ee9fd7d",
+        "caller_apk_sha256": "a405cdbeeb13d15db9064a39ad5d4c19b737cd814505275c1cc48f2199d23a27",
+        "separate_uids": true,
+        "in_app_handoff": "Shared",
+        "foreign_byte_42_before": "Rejected",
+        "foreign_byte_42_after": "Rejected",
+        "foreign_byte_41_after": "Rejected",
+        "result_sha256": "f3cb1f5b6661d2b018101435adbee4a132f296a8c078e8b9e6ac5928d0a5fd96"
+      }
+    ],
+    "continuation_receiver_boundary_passed": false
+  }
+}

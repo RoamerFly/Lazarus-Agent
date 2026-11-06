@@ -2,6 +2,9 @@
     <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="35"/>
     <queries><package android:name="org.ggbond.archivereader"/></queries>
     <application android:label="Record caller">
+        <provider android:name=".BoundaryActivity$SyntheticRecordProvider"
+                  android:authorities="org.ggbond.recordcaller.records"
+                  android:exported="true"/>
         <activity android:name=".BoundaryActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

@@ -19,6 +19,7 @@ from tools.replay_intent_boundary import TARGET, build_probe, wait_for
 CALLER = "org.ggbond.recordcaller"
 RECORD_PATHS = ("/record.txt", "/record")
 DEFAULT_AUTHORITY = "org.ggbond.archivereader.records"
+FOREIGN_PROVIDER = "content://org.ggbond.recordcaller.records"
 RECORD_URI = re.compile(r"(?:content|ggbond-record)://[a-zA-Z0-9_.-]+/[a-zA-Z0-9_./-]+")
 OUTCOMES = {
     (TARGET, "Shared"): "forged-success",
@@ -96,6 +97,7 @@ def replay(device, apk, expected, probe, *, uri_after_share=False, compare_uri=F
                      {"action": "expect", "value": "Shared"}):
             evidence = dict(step)
             _step(target, step, evidence, handled)
+            evidence["status"] = "passed"
             in_app_share.append(evidence)
     use_uri = uri_after_share or compare_uri
     response = (send_known_uri(caller, record_uri) if use_uri
@@ -123,6 +125,8 @@ def main():
                      help="After a legitimate share, send its known URI from the separate app")
     uri.add_argument("--uri-before-and-after-share", action="store_true",
                      help="Send the same known URI before and after the target writes its record")
+    uri.add_argument("--foreign-provider", action="store_true",
+                     help="Replay two single-byte records, with values 42 and 41, from a separate app's provider")
     parser.add_argument("--forged-bytes-after-share", action="store_true",
                         help="After the URI comparison, send a forged record extra from the same external UID")
     address = parser.add_mutually_exclusive_group()
@@ -134,6 +138,8 @@ def main():
         parser.error("--record-uri requires a supported literal record URI and a URI replay mode")
     if args.forged_bytes_after_share and not args.uri_before_and_after_share:
         parser.error("--forged-bytes-after-share requires --uri-before-and-after-share")
+    if args.foreign_provider and args.record_path:
+        parser.error("--foreign-provider uses its own fixed paths")
     out = args.out.resolve()
     if not out.is_relative_to(ROOT / "build"):
         parser.error("Store probe evidence under the ignored build directory")
@@ -147,10 +153,17 @@ def main():
     build_probe(probe, ROOT / "tools/fixtures/record-caller")
     device = bench.Device(allow_existing=False)
     try:
+        record_uri = FOREIGN_PROVIDER + "/record" if args.foreign_provider else args.record_uri
         result = replay(device, args.apk, args.sha256, probe, uri_after_share=args.uri_after_share,
-                        compare_uri=args.uri_before_and_after_share,
-                        record_path=args.record_path or RECORD_PATHS[0], record_uri=args.record_uri,
+                        compare_uri=args.uri_before_and_after_share or args.foreign_provider,
+                        record_path=args.record_path or RECORD_PATHS[0], record_uri=record_uri,
                         forged_bytes_after_share=args.forged_bytes_after_share)
+        if args.foreign_provider:
+            caller = AgentDevice(device, "f01-record-caller", 36, bench.TOOLS, print)
+            caller.serial = device.serial
+            result["alternate_foreign_uri"] = FOREIGN_PROVIDER + "/other"
+            result["alternate_foreign_value"] = send_known_uri(caller, result["alternate_foreign_uri"])
+            result["input"] = "foreign-provider-byte-42-before-and-after-share"
     finally:
         device.stop()
     (out / "result.json").write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

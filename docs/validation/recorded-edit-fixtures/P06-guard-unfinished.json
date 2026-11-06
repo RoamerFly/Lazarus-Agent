@@ -1,0 +1,159 @@
+{
+  "source_sha256": "55ca244e70ab959fbb179a04c757c1974821ff790578e8811a345f31e024d8da",
+  "outcome": null,
+  "changes": [
+    {
+      "path": "smali/org/ggbond/archivereader/RecordProvider.smali",
+      "before_sha256": null,
+      "after_sha256": "9254f53a468a443138bcf9ba4650a5240140642df7d02f61ed7b118f64e9b350"
+    },
+    {
+      "path": "AndroidManifest.xml",
+      "before_sha256": "524282f51bec075cf13da587936fd2137d1103877fdd49e9271e85483b04f22f",
+      "after_sha256": "8781c4516d2fab6f50885d0c70768a510c30ff7e77f588d74780b0b6e897555a"
+    },
+    {
+      "path": "smali/org/ggbond/archivereader/ShareActivity.smali",
+      "before_sha256": "a81a7b6a12f6f6009de40e2e5b0a052c481d901b5678108a4b3abd7a1fa08123",
+      "after_sha256": "5d67d431626297cfcb8c0fd9c1704263eba62203afbf012a6523d748c5ac55de"
+    }
+  ],
+  "recorded_trace_sha256": "b8919207b3f6b114ccad70928dac514100d09c51cbdef1021021b6297e0bb19a",
+  "tools": [
+    {
+      "tool": "list_files",
+      "arguments": {
+        "pattern": "**/*.xml"
+      },
+      "ok": true
+    },
+    {
+      "tool": "search_text",
+      "arguments": {
+        "query": "ShareActivity"
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "smali/org/ggbond/archivereader/ShareActivity.smali"
+      },
+      "ok": true
+    },
+    {
+      "tool": "list_files",
+      "arguments": {
+        "pattern": "smali/**/*.smali"
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "smali/org/ggbond/archivereader/ShareActivity.smali",
+        "start_line": 100,
+        "line_count": 175
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "AndroidManifest.xml"
+      },
+      "ok": true
+    },
+    {
+      "tool": "test_original",
+      "arguments": {},
+      "ok": true
+    },
+    {
+      "tool": "create_text_file",
+      "arguments": {
+        "path": "smali/org/ggbond/archivereader/RecordProvider.smali",
+        "content": ".class public Lorg/ggbond/archivereader/RecordProvider;\n.super Landroid/content/ContentProvider;\n.source \"RecordProvider.java\"\n\n\n# direct methods\n.method public constructor <init>()V\n    .locals 0\n\n    invoke-direct {p0}, Landroid/content/ContentProvider;-><init>()V\n\n    return-void\n.end method\n\n\n# virtual methods\n.method public delete(Landroid/net/Uri;Ljava/lang/String;[Ljava/lang/String;)I\n    .locals 1\n\n    const/4 v0, 0x0\n\n    return v0\n.end method\n\n.method public getType(Landroid/net/Uri;)Ljava/lang/String;\n    .locals 1\n\n    const-string v0, \"application/vnd.ggbond.record\"\n\n    return-object v0\n.end method\n\n.method public insert(Landroid/net/Uri;Landroid/content/ContentValues;)Landroid/net/Uri;\n    .locals 1\n\n    const/4 v0, 0x0\n\n    return-object v0\n.end method\n\n.method public onCreate()Z\n    .locals 1\n\n    const/4 v0, 0x1\n\n    return v0\n.end method\n\n.method public openFile(Landroid/net/Uri;Ljava/lang/String;)Landroid/os/ParcelFileDescriptor;\n    .locals 4\n    .annotation system Ldalvik/annotation/Throws;\n        value = {\n            Ljava/io/FileNotFoundException;\n        }\n    .end annotation\n\n    invoke-virtual {p1}, Landroid/net/Uri;->getLastPathSegment()Ljava/lang/String;\n\n    move-result-object v0\n\n    if-eqz v0, :cond_0\n\n    const-string v1, \"record.txt\"\n\n    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z\n\n    move-result v1\n\n    if-nez v1, :cond_1\n\n    :cond_0\n    new-instance v1, Ljava/io/FileNotFoundException;\n\n    new-instance v2, Ljava/lang/StringBuilder;\n\n    invoke-direct {v2}, Ljava/lang/StringBuilder;-><init>()V\n\n    const-string v3, \"Unknown record: \"\n\n    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;\n\n    invoke-virtual {v2, p1}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;\n\n    invoke-virtual {v2}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;\n\n    move-result-object v2\n\n    invoke-direct {v1, v2}, Ljava/io/FileNotFoundException;-><init>(Ljava/lang/String;)V\n\n    throw v1\n\n    :cond_1\n    new-instance v1, Ljava/io/File;\n\n    invoke-virtual {p0}, Lorg/ggbond/archivereader/RecordProvider;->getContext()Landroid/content/Context;\n\n    move-result-object v2\n\n    invoke-virtual {v2}, Landroid/content/Context;->getFilesDir()Ljava/io/File;\n\n    move-result-object v2\n\n    const-string v3, \"record.txt\"\n\n    invoke-direct {v1, v2, v3}, Ljava/io/File;-><init>(Ljava/io/File;Ljava/lang/String;)V\n\n    const/high16 v2, 0x10000000\n\n    invoke-static {v1, v2}, Landroid/os/ParcelFileDescriptor;->open(Ljava/io/File;I)Landroid/os/ParcelFileDescriptor;\n\n    move-result-object v1\n\n    return-object v1\n.end method\n\n.method public query(Landroid/net/Uri;[Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor;\n    .locals 1\n\n    const/4 v0, 0x0\n\n    return-object v0\n.end method\n\n.method public update(Landroid/net/Uri;Landroid/content/ContentValues;Ljava/lang/String;[Ljava/lang/String;)I\n    .locals 1\n\n    const/4 v0, 0x0\n\n    return v0\n.end method\n"
+      },
+      "ok": true
+    },
+    {
+      "tool": "replace_text",
+      "arguments": {
+        "path": "AndroidManifest.xml",
+        "sha256": "524282f51bec075cf13da587936fd2137d1103877fdd49e9271e85483b04f22f",
+        "old": "        </activity>\n    </application>",
+        "new": "        </activity>\n        <provider android:exported=\"false\" android:grantUriPermissions=\"true\" android:name=\".RecordProvider\" android:authorities=\"org.ggbond.archivereader.records\"/>\n    </application>"
+      },
+      "ok": true
+    },
+    {
+      "tool": "replace_text",
+      "arguments": {
+        "path": "smali/org/ggbond/archivereader/ShareActivity.smali",
+        "sha256": "a81a7b6a12f6f6009de40e2e5b0a052c481d901b5678108a4b3abd7a1fa08123",
+        "old": "    .line 42\n    invoke-static {p2}, Landroid/net/Uri;->fromFile(Ljava/io/File;)Landroid/net/Uri;\n\n    move-result-object p2\n\n    const-string v0, \"application/vnd.ggbond.record\"\n\n    invoke-virtual {p1, p2, v0}, Landroid/content/Intent;->setDataAndType(Landroid/net/Uri;Ljava/lang/String;)Landroid/content/Intent;\n\n    .line 43\n    invoke-virtual {p0, p1}, Lorg/ggbond/archivereader/ShareActivity;->startActivity(Landroid/content/Intent;)V",
+        "new": "    .line 42\n    const-string p2, \"content://org.ggbond.archivereader.records/record.txt\"\n\n    invoke-static {p2}, Landroid/net/Uri;->parse(Ljava/lang/String;)Landroid/net/Uri;\n\n    move-result-object p2\n\n    const-string v0, \"application/vnd.ggbond.record\"\n\n    invoke-virtual {p1, p2, v0}, Landroid/content/Intent;->setDataAndType(Landroid/net/Uri;Ljava/lang/String;)Landroid/content/Intent;\n\n    const/4 v0, 0x1\n\n    invoke-virtual {p1, v0}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;\n\n    .line 43\n    invoke-virtual {p0, p1}, Lorg/ggbond/archivereader/ShareActivity;->startActivity(Landroid/content/Intent;)V"
+      },
+      "ok": true
+    },
+    {
+      "tool": "build_apk",
+      "arguments": {},
+      "ok": false
+    },
+    {
+      "tool": "replace_text",
+      "arguments": {
+        "new": "    invoke-virtual {p1, v0}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;\n\n    new-instance v0, Landroid/content/ComponentName;\n\n    const-string v1, \"org.ggbond.archivereader\"\n\n    const-string v2, \"org.ggbond.archivereader.ShareActivity\"\n\n    invoke-direct {v0, v1, v2}, Landroid/content/ComponentName;-><init>(Ljava/lang/String;Ljava/lang/String;)V\n\n    invoke-virtual {p1, v0}, Landroid/content/Intent;->setComponent(Landroid/content/ComponentName;)Landroid/content/Intent;\n\n    .line 43",
+        "old": "    invoke-virtual {p1, v0}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;\n\n    .line 43",
+        "path": "smali/org/ggbond/archivereader/ShareActivity.smali",
+        "sha256": "6447e291348a5b34c403dc6e5d6b17eb9beae2845f588c49cb82acf61b88efd7"
+      },
+      "ok": true
+    },
+    {
+      "tool": "build_apk",
+      "arguments": {},
+      "ok": true
+    },
+    {
+      "tool": "rehearse_acceptance",
+      "arguments": {},
+      "ok": true
+    },
+    {
+      "tool": "device_action",
+      "arguments": {
+        "action": "read"
+      },
+      "ok": true
+    },
+    {
+      "tool": "device_action",
+      "arguments": {
+        "action": "cold_start"
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "smali/org/ggbond/archivereader/ShareActivity.smali",
+        "start_line": 20,
+        "line_count": 100
+      },
+      "ok": true
+    },
+    {
+      "tool": "replace_text",
+      "arguments": {
+        "path": "smali/org/ggbond/archivereader/ShareActivity.smali",
+        "sha256": "5f68ab6b93dc8272b07b8cd8e166dc9b0a51aa93ee83eec3437432f983e364b4",
+        "old": ".method synthetic lambda$onCreate$0$org-ggbond-archivereader-ShareActivity(Landroid/widget/Button;Landroid/view/View;)V\n    .locals 2",
+        "new": ".method synthetic lambda$onCreate$0$org-ggbond-archivereader-ShareActivity(Landroid/widget/Button;Landroid/view/View;)V\n    .locals 3"
+      },
+      "ok": true
+    }
+  ]
+}
