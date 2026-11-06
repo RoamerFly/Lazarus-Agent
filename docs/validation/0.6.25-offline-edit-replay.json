@@ -1,0 +1,45 @@
+{
+  "version": "0.6.25",
+  "scope": "Offline recorded tool replay and APK signing; no live model",
+  "rows": [
+    {
+      "implementation_commit": "c5f9799c748d700250a5b27d666bae00609acb50",
+      "input_sha256": "1476a30063a68f27a2e3c10d3d99383aeee0afbf5177e09fbc44f36cc6f237da",
+      "trace_sha256": "2096626e23249d55c01b0949dd7c7f02ca4637e586e899b7ec13d859dff6be2d",
+      "candidate_sha256": "5ac5b547bf64215a9ef48159a1c2f7801e43e93e730e0a58eb4d5f37c6b2f578",
+      "api": 36,
+      "replayed_calls": 13,
+      "network_model_calls": 0,
+      "verified": "recorded-changes-rebuilt-and-signed",
+      "device": "not-run",
+      "changes": [
+        {
+          "path": "res/values/strings.xml",
+          "before_sha256": "11bc3be44135ab0b8a6df50882d82de92be65b1842c374d98573342689fd7d39",
+          "after_sha256": "fd12fcbfcddaff331d61ed7491057ae7001b8dca33e505e3c68e1a3edfdd4daf"
+        }
+      ],
+      "case": "P03"
+    },
+    {
+      "implementation_commit": "c5f9799c748d700250a5b27d666bae00609acb50",
+      "input_sha256": "4049359b01c7c7348d7d2bc4c4efdb27a7844975f3dc147a1cef0996632de9ac",
+      "trace_sha256": "167d72b9a8b452ca0828534eb01cba869a1d7acef013fb3262c5387f66abf14d",
+      "candidate_sha256": "617d2160b12bbe9bd5b134e63337d155cf169f7cb253786cb86555facd5806df",
+      "api": 36,
+      "replayed_calls": 19,
+      "network_model_calls": 0,
+      "verified": "recorded-changes-rebuilt-and-signed",
+      "device": "not-run",
+      "changes": [
+        {
+          "path": "smali/org/ggbond/filereader/FileReaderActivity.smali",
+          "before_sha256": "b486319218761632f922d0331dbaaeaf2566b86a677308c38c45dccc4de03fde",
+          "after_sha256": "0f46ea068e2636c1b40ea5f4d6a3ad59d1630f62bb9e89212d0d05a329cd94e9"
+        }
+      ],
+      "case": "P05"
+    }
+  ],
+  "wrong_input_rejected_before_export": true
+}
