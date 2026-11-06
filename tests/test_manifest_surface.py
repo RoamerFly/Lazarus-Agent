@@ -41,6 +41,9 @@ XMLTREE = """+N: a=http://schemas.android.com/apk/res/android
       E: service (line=18)
         A: a:name(0x01010003)=".Service"
         A: app:exported(0x7f010001)="unrelated"
+      E: uses-library (line=19)
+        A: a:name(0x01010003)="example.legacy"
+        A: a:required(0x0101028e)=(type 0x12)0x0
 """
 
 
@@ -65,6 +68,9 @@ class ManifestSurfaceTests(unittest.TestCase):
         self.assertEqual(service, {"type": "service", "name": ".Service"})
         self.assertEqual(declarations["permissions"], [{
             "type": "uses-permission-sdk-23", "name": "example.PERMISSION", "maxSdkVersion": "(type 0x10)0x20",
+        }])
+        self.assertEqual(declarations["libraries"], [{
+            "type": "uses-library", "name": "example.legacy", "required": "(type 0x12)0x0",
         }])
 
     def test_manifest_diff_detects_changes_to_child_declarations(self):

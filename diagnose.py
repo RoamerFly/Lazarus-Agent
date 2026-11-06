@@ -62,7 +62,7 @@ def _manifest_declarations(text):
         "name", "exported", "enabled", "permission", "readPermission", "writePermission",
         "authorities", "targetActivity", "grantUriPermissions",
     }
-    permissions, components = [], []
+    permissions, components, libraries = [], [], []
     stack = []
     for line in text.splitlines():
         indent = len(line) - len(line.lstrip())
@@ -79,6 +79,9 @@ def _manifest_declarations(text):
             elif parent == "application" and tag in component_tags:
                 record = {"type": tag}
                 components.append(record)
+            elif parent == "application" and tag == "uses-library":
+                record = {"type": tag}
+                libraries.append(record)
             elif parent_record is not None and (
                 (parent in component_tags and tag == "intent-filter")
                 or (parent == "provider" and tag in {"grant-uri-permission", "path-permission"})
@@ -101,7 +104,7 @@ def _manifest_declarations(text):
             if tag in permission_tags and name not in {"name", "maxSdkVersion"}:
                 continue
             record[name] = value.split(" (Raw:", 1)[0].strip('"')
-    return {"permissions": permissions, "components": components}
+    return {"permissions": permissions, "components": components, "libraries": libraries}
 
 
 def manifest_changes(source, candidate, tools):

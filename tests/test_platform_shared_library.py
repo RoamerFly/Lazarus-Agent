@@ -6,7 +6,7 @@ from zipfile import ZipFile
 
 from function_probe import discover_shared_library, resolve_platform_library
 from function_probe import extract_missing_class
-from runtime_patch import declare_shared_library
+from runtime_patch import declare_shared_library, strings_and_append
 from reviver import update_manifest
 
 
@@ -89,6 +89,28 @@ class PlatformSharedLibraryTests(unittest.TestCase):
             declare_shared_library(manifest, "arbitrary.library")
         extended = declare_shared_library(manifest, "legacy.compat", ["legacy.compat"])
         self.assertNotEqual(manifest, extended)
+
+    def test_added_library_has_matching_raw_and_typed_string_indices(self):
+        fixture = ROOT / "fixtures/archive-reader/archive-reader-broken.apk"
+        with ZipFile(fixture) as archive:
+            manifest = declare_shared_library(archive.read("AndroidManifest.xml"), "org.apache.http.legacy")
+        offset = 8
+        strings = []
+        while offset < len(manifest):
+            kind, header, size = struct.unpack_from("<HHI", manifest, offset)
+            if kind == 1:
+                strings, _, _ = strings_and_append(manifest[offset:offset + size], [])
+            if kind == 0x102:
+                name = struct.unpack_from("<I", manifest, offset + header + 4)[0]
+                if strings[name] == "uses-library":
+                    first = struct.unpack_from("<H", manifest, offset + header + 8)[0]
+                    _, _, raw, _, _, value_type, typed = struct.unpack_from(
+                        "<IIIHBBI", manifest, offset + header + first)
+                    self.assertEqual((raw, value_type), (typed, 3))
+                    self.assertEqual(strings[typed], "org.apache.http.legacy")
+                    return
+            offset += size
+        self.fail("Patched manifest has no uses-library declaration")
 
     def test_manifest_composition_keeps_target_sdk_and_library(self):
         fixture = ROOT / "fixtures/archive-reader/archive-reader-control.apk"

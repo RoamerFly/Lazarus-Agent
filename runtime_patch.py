@@ -96,7 +96,9 @@ def declare_shared_library(data, library, discovered_libraries=()):
             elem=values.index("uses-library")
             ns=values.index("http://schemas.android.com/apk/res/android")
             name=ids.index(0x01010003)
-            attr=struct.pack("<IIIHBBI",ns,name,NO_INDEX,8,0,3,values.index(library))
+            library_index = values.index(library)
+            # String readers may use the raw index instead of the typed value.
+            attr=struct.pack("<IIIHBBI",ns,name,library_index,8,0,3,library_index)
             line=struct.unpack_from("<I",chunk,8)[0]
             out+=struct.pack("<HHIIIIIHHHHHH",0x102,16,56,line,NO_INDEX,NO_INDEX,elem,20,20,1,0,0,0)+attr
             out+=struct.pack("<HHIIIII",0x103,16,24,line,NO_INDEX,NO_INDEX,elem)

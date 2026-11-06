@@ -74,7 +74,7 @@ def tool_definitions(device_available, acceptance_steps=()):
         _tool("create_text_file", "在 APK 的资源、assets 或 smali 目录新增文本文件",
               {"path": STRING, "content": STRING}),
         _tool("restore_file", "撤销一个文件在本轮的全部修改", {"path": STRING}),
-        _tool("inspect_manifest", "读取原包或当前候选编译清单中显式的权限、组件、导出、Intent 过滤器和 URI 授权声明。"
+        _tool("inspect_manifest", "读取原包或当前候选编译清单中显式的权限、组件、导出、Intent 过滤器、URI 授权和共享库声明。"
               "结合相关代码判断外部输入及访问范围。未声明的默认值需另查清单和目标系统规则。",
               {"artifact": {"type": "string", "enum": ["original", "candidate"]}}),
         _tool("build_apk", "回编、对齐并签名当前修改。构建错误会返回，可继续修改重试", {}),
