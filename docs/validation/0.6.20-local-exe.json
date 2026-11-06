@@ -1,0 +1,33 @@
+{
+  "source_commit": "b71c39d6d7d8d083936f31b51dec196433541cbd",
+  "version": "0.6.20",
+  "self_test_exit": 0,
+  "exe_sha256": "c3be05f8094cae793a8b2822eb858ea56f471e967bbdffd9fc20067a434f6891",
+  "bytes": 131704315,
+  "agent_tools": [
+    "list_files",
+    "search_text",
+    "read_text",
+    "read_method",
+    "replace_text",
+    "replace_lines",
+    "create_text_file",
+    "restore_file",
+    "inspect_manifest",
+    "build_apk",
+    "localize_resources",
+    "finish",
+    "test_original",
+    "test_apk",
+    "device_action",
+    "declare_platform_library",
+    "rehearse_acceptance"
+  ],
+  "input_check": {
+    "status": "inputs-verified",
+    "steps": 10,
+    "target_api": 36,
+    "receipt_sha256": "953191b2bbfc3cc900e5fe1744a0e58c029b88e8c915a470d15c21d50f11c641"
+  },
+  "scope": "local Windows PyInstaller candidate, self-test and replay input check"
+}
