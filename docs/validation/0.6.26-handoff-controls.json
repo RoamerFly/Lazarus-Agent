@@ -1,0 +1,93 @@
+{
+  "bundle": {
+    "archive_sha256": "3adf74ec73d5c848854218cdd26f2fa987d90ae9a2d4e8dd2afa5dc2677982d5",
+    "bytes": 52142,
+    "base_archive_sha256": "9d64f4e0fddb2becc8287c42839581ba1875b7dc8478cf358bf400330c59f1ee",
+    "file_count": 21,
+    "build": {
+      "source_commit": "dbfc625027a995fa091308f6dbcb1269d49a4223",
+      "api": 36,
+      "network_model_calls": 0,
+      "control_plan_sha256": "bfb9b738d03166fc2951ab21d17667fee3b0b1ac2d5cd344c40fd184d3b448f3",
+      "reference_plan_sha256": "e02c5c4c9f10b6eb35e7cc0cedc9e3336143471001a6ed48a1d9039e2a97050b",
+      "source_sha256": "55ca244e70ab959fbb179a04c757c1974821ff790578e8811a345f31e024d8da",
+      "controls": {
+        "roundtrip": {
+          "target_sdk": 22,
+          "sha256": "d2a3e9879d7d23051629feb459543d8ee951fad3c5fe4ea6d09a5294dd255caa"
+        },
+        "installation-floor": {
+          "target_sdk": 24,
+          "sha256": "d5b3177f8f21e0ba52bcf509777ca02f5a4fa9c074dd038f7128630dc389e287"
+        }
+      },
+      "roundtrip_smali_files_unchanged": 2,
+      "floor_payload_files_unchanged": 2,
+      "roundtrip_build_kind": "roundtrip-control",
+      "floor_rule": {
+        "rule": "installation-floor",
+        "before": 22,
+        "after": 24
+      }
+    },
+    "device": {
+      "source_commit": "dbfc625027a995fa091308f6dbcb1269d49a4223",
+      "api": 36,
+      "abi": "x86_64",
+      "network_model_calls": 0,
+      "control_plan_sha256": "bfb9b738d03166fc2951ab21d17667fee3b0b1ac2d5cd344c40fd184d3b448f3",
+      "rows": {
+        "roundtrip": {
+          "install": "failed",
+          "launch": "not-run",
+          "function": "not-run",
+          "target_sdk": 22,
+          "sha256": "d2a3e9879d7d23051629feb459543d8ee951fad3c5fe4ea6d09a5294dd255caa",
+          "device_report_sha256": "525df95aa555535eb8d5c11278d3d3741d1a06aebe19ff62421a2750cd989b15",
+          "steps": []
+        },
+        "installation-floor": {
+          "install": "passed",
+          "launch": "passed",
+          "function": "failed",
+          "target_sdk": 24,
+          "sha256": "d5b3177f8f21e0ba52bcf509777ca02f5a4fa9c074dd038f7128630dc389e287",
+          "device_report_sha256": "a185c773458c2de8d0460801ea6d0590f520959a1f780b3df05c3653afa6d4c6",
+          "steps": [
+            {
+              "action": "tap",
+              "status": "passed"
+            },
+            {
+              "action": "expect",
+              "status": "failed"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "flash_candidate": {
+    "candidate_sha256": "a6847a793519982ccc2f85b9284e1d5dd2127ab9652da82c1dbd53456ee9fd7d",
+    "app_steps_passed": 5,
+    "device_replay_report_sha256": "fdfcbea52616c39f08b5ff7cecc5ff3a162b128bf0ef8bcfeb4446598ee8604d"
+  },
+  "extraction": {
+    "shell": "Windows PowerShell 5.1",
+    "files_sha256_verified": 20,
+    "inputs": [
+      {
+        "case": "roundtrip",
+        "status": "inputs-verified",
+        "candidate_sha256": "d2a3e9879d7d23051629feb459543d8ee951fad3c5fe4ea6d09a5294dd255caa",
+        "report_sha256": "f6436f00bdba848feaab356bcae7ccd3f31d36305fd298433f82b5d019a1716e"
+      },
+      {
+        "case": "installation-floor",
+        "status": "inputs-verified",
+        "candidate_sha256": "d5b3177f8f21e0ba52bcf509777ca02f5a4fa9c074dd038f7128630dc389e287",
+        "report_sha256": "0dbc85622953c5477430a307ea108a16f1b04d42bcdca42429ada693a8d823c7"
+      }
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "role": "offline-controls-for-the-focused-development-case",
+  "implementation_commit": "dbfc625027a995fa091308f6dbcb1269d49a4223",
+  "reference_plan_sha256": "e02c5c4c9f10b6eb35e7cc0cedc9e3336143471001a6ed48a1d9039e2a97050b",
+  "api": 36,
+  "abi": "x86_64",
+  "network_model_calls": 0,
+  "controls": {
+    "roundtrip": {"target_sdk": 22, "install": "failed", "launch": "not-run", "function": "not-run"},
+    "installation-floor": {"target_sdk": 24, "install": "passed", "launch": "passed", "function": "failed"}
+  }
+}
