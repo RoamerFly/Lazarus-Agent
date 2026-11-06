@@ -1,0 +1,73 @@
+{
+  "version": "0.6.22",
+  "source_commit": "f24d5a583586785d388ae5133e4141f538456686",
+  "exe_sha256": "1d9be043acd87b01df62067f0b6c65e0e6ccb239f29d79b8de26626ef8641cef",
+  "review_zip_version": "0.6.18",
+  "review_zip_sha256": "ba683811039573ef78a9b9fe6560d06c5540b8c3aa5b382ec1b1e27fbfaf23c2",
+  "started_at": "2026-11-06T03:42:02.805476+00:00",
+  "scope": {
+    "host": "existing local Windows",
+    "mode": "check-only",
+    "fresh_storage": true,
+    "system_only_path": true,
+    "cleared_model_and_sdk_overrides": true,
+    "unicode_storage_and_temp": true,
+    "device_used": false
+  },
+  "cases": [
+    {
+      "case": "route",
+      "exit_code": 0,
+      "log": "inputs-verified",
+      "produced_report": true,
+      "supplied_sha256": {
+        "report": "2087dfe85ff3d842db0b11bc870d62ade1fb797432f69e83ebd599b53d22f936",
+        "base": "08ed16b9f6a149bd8063bae99dd72aad200dafea7d3a0504af004187bde20deb",
+        "candidate": "572e16c931f2334f56cccc38bc35f45e6b4732fec946403da73d1a26e530e5cb"
+      },
+      "targets": [
+        36
+      ],
+      "step_count": 10,
+      "status": "inputs-verified"
+    },
+    {
+      "case": "contradiction",
+      "exit_code": 0,
+      "log": "inputs-verified",
+      "produced_report": true,
+      "supplied_sha256": {
+        "report": "5b68520defb0e947e899f1c739699aa657e8ad25049b20b9a3dbaab5377fdbef",
+        "base": "1476a30063a68f27a2e3c10d3d99383aeee0afbf5177e09fbc44f36cc6f237da",
+        "candidate": "4a9f89bfa7497fd7703f5bda63c9d5e6f96c50cf8c47d900715e3c0041bc892f"
+      },
+      "targets": [
+        36
+      ],
+      "step_count": 2,
+      "status": "inputs-verified"
+    },
+    {
+      "case": "tampered-base",
+      "exit_code": 2,
+      "log": "无法完成复测：基准或候选 APK 与原验收报告的哈希不符",
+      "produced_report": false,
+      "supplied_sha256": {
+        "report": "2087dfe85ff3d842db0b11bc870d62ade1fb797432f69e83ebd599b53d22f936",
+        "base": "084c9b4b024a11138532ec6587187900b2c15421dfee2465cd3e633ecb143abc",
+        "candidate": "572e16c931f2334f56cccc38bc35f45e6b4732fec946403da73d1a26e530e5cb"
+      }
+    },
+    {
+      "case": "tampered-candidate",
+      "exit_code": 2,
+      "log": "无法完成复测：基准或候选 APK 与原验收报告的哈希不符",
+      "produced_report": false,
+      "supplied_sha256": {
+        "report": "2087dfe85ff3d842db0b11bc870d62ade1fb797432f69e83ebd599b53d22f936",
+        "base": "08ed16b9f6a149bd8063bae99dd72aad200dafea7d3a0504af004187bde20deb",
+        "candidate": "757764d7ba656b68e469778602fb35584ee04b003244c50065e57b6bc7563a8b"
+      }
+    }
+  ]
+}
