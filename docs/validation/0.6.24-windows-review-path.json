@@ -1,0 +1,54 @@
+{
+  "version": "0.6.24",
+  "source_commit": "b60c33230318c526ec4fb831b870ce2569e2cc40",
+  "archive_sha256": "e6733269817140b50b36b36452e84668afef5b819e00ed9d3467bbbf08030690",
+  "exe_sha256": "c1fe662ec1095eba4395777f3b2259dba89b80435c716addf0100d5bbc7d70b3",
+  "runner_sha256": "da9e4c0713245e20af0b3ec90b710f4dc61c29928113463671314687ac046bf4",
+  "windows_build": "22635.5240",
+  "windows_powershell": "5.1",
+  "scope": "Current Windows host; prepared state reused from pre-existing components; no new device replay through this wrapper",
+  "inputs": {
+    "exit_code": 0,
+    "samples": [
+      "工作台演示",
+      "N03-agent-1"
+    ],
+    "status": "inputs-verified",
+    "report_sha256": "771cd1664a549fcc1bbccf1c5ef4c05e225db2b08fdfadf17f86d16d222c0003"
+  },
+  "runtime_missing": {
+    "exit_code": 2,
+    "missing": [
+      "platform-tools",
+      "emulator",
+      "build-tools",
+      "system-image",
+      "java"
+    ],
+    "status": "runtime-not-ready",
+    "report_sha256": "558e93be7f49c176bd00d1612d4773265023bf1abf28a9b75962bfff16c8408b"
+  },
+  "runtime_reuse": {
+    "exit_code": 0,
+    "source": "Five junctions to existing local SDK and Java",
+    "status": "runtime-already-ready",
+    "report_sha256": "2e1d3022927e65cee1907d8c10e4bab0ba86e35b27c32ce9c5bd15aea45fcbf6"
+  },
+  "rejections": [
+    {
+      "exit_code": 1,
+      "created_result_directory": false,
+      "case": "wrong-executable"
+    },
+    {
+      "exit_code": 1,
+      "case": "tampered-extracted-checker",
+      "tampered_script_executed": false
+    },
+    {
+      "exit_code": 1,
+      "device_run_started": false,
+      "case": "device-with-runtime-not-ready"
+    }
+  ]
+}
