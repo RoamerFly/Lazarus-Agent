@@ -133,16 +133,24 @@ Write-Output "已核对 $count 个登记文件的 SHA-256。应用功能请继�
 '''
 
 
-def download_script(manifest):
+def download_script(manifest, *, local_only=False):
     asset = manifest.assets["windows-x64-installer"]
     if not re.fullmatch(r"[a-f0-9]{64}", asset.sha256):
         raise ValueError("发布包哈希无效")
     url = f"https://github.com/RoamerFly/Lazarus-Agent/releases/download/v{APP_VERSION}/Lazarus-Agent-windows-x64-setup.exe"
     if asset.url != url:
         raise ValueError("更新清单的发布地址与版本不一致")
-    return f'''$ErrorActionPreference = 'Stop'
+    script = '''$ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSHOME 'Modules/Microsoft.PowerShell.Utility/Microsoft.PowerShell.Utility.psd1') -ErrorAction Stop
 $target = Join-Path $PSScriptRoot 'Lazarus-Agent-windows-x64-setup.exe'
+'''
+    if local_only:
+        script += '''if (!(Test-Path -LiteralPath $target -PathType Leaf)) {
+    throw '请将单独交付的 Lazarus-Agent-windows-x64-setup.exe 放入此目录，再运行校验。'
+}
+'''
+    else:
+        script += f'''\
 if (!(Test-Path -LiteralPath $target -PathType Leaf)) {{
     $partial = $target + '.' + [Guid]::NewGuid().ToString('N') + '.partial'
     try {{
@@ -164,6 +172,8 @@ if (!(Test-Path -LiteralPath $target -PathType Leaf)) {{
         }}
     }}
 }}
+'''
+    return script + f'''\
 if ((Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash.ToLowerInvariant() -ne '{asset.sha256}') {{
     throw '已有安装包的 SHA-256 与固定版本不符。请移出该文件，再重新运行校验脚本。'
 }}
@@ -173,7 +183,7 @@ Write-Output "校验通过。请打开 $target 安装 Lazarus Agent {APP_VERSION
 
 def build(results, release_dir, output, capture_dir, regression_results=None, regression_summary=None,
           primary_results=None, primary_summary=None, materials_dir=ROOT / "交付", p1b_checkout=None,
-          p1c_checkout=None, release_regression=None, focused_results=None):
+          p1c_checkout=None, release_regression=None, focused_results=None, *, local_signed_candidate=False):
     results = results.resolve()
     if not results.is_relative_to(ROOT / "build") or not results.is_dir():
         raise ValueError("请指定 build 目录内的原始评测结果")
@@ -188,6 +198,9 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
         raise ValueError("发布版本与当前程序版本不同")
     publication_path = ROOT / "docs/validation" / f"{APP_VERSION}-release-publication.json"
     publication = read(publication_path) if publication_path.is_file() else None
+    if publication and local_signed_candidate:
+        raise ValueError("当前版本已有正式发布记录，请使用正式复核包入口")
+    local_candidate = None
     if publication:
         windows = read(publication_path.with_name(f"{APP_VERSION}-candidate-windows-runtime.json"))
         checked_assets = verify_signed_candidate(release_dir, windows, APP_VERSION, publication["signed_build_run"],
@@ -198,6 +211,13 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
                 publication["status"] != "public-release-assets-match-tested-signed-build" or
                 not publication["published_at"]):
             raise ValueError("正式发布与已验证的签名构建不一致")
+    elif local_signed_candidate:
+        local_candidate = read(publication_path.with_name(f"{APP_VERSION}-candidate-publication-check.json"))
+        windows = read(publication_path.with_name(f"{APP_VERSION}-candidate-windows-runtime.json"))
+        assets = verify_signed_candidate(release_dir, windows, APP_VERSION, local_candidate["signed_build_run"],
+                                         local_candidate["source_commit"])
+        if local_candidate["app_version"] != APP_VERSION or assets != local_candidate["assets"]:
+            raise ValueError("本地安装器与签名候选预检记录不一致")
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT).decode().strip()
     protocol = read(PROTOCOL)
     summary = summarize(results, protocol)
@@ -227,10 +247,11 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
         current_review = read(current_reports / "diff-review.json")
         require_diff_review(current, current_review)
         distributable = {row["trial"] for row in current_review["rows"] if row.get("distributable") is True}
-    if publication and tuple(map(int, APP_VERSION.split("."))) >= (0, 6, 17):
-        require_p1c(APP_VERSION, publication["signed_build_run"], publication["source_commit"])
+    signed_delivery = publication or local_candidate
+    if signed_delivery and tuple(map(int, APP_VERSION.split("."))) >= (0, 6, 17):
+        require_p1c(APP_VERSION, signed_delivery["signed_build_run"], signed_delivery["source_commit"])
         if current is None:
-            raise ValueError("正式复核包缺少当前版本的发布回归原始记录")
+            raise ValueError("签名复核包缺少当前版本的发布回归原始记录")
     focused_samples = []
     if focused_results:
         focused_results = focused_results.resolve()
@@ -412,7 +433,8 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
         desktop.mkdir()
         copy(release_dir / "latest.json", desktop / "latest.json")
         copy(release_dir / "latest.json.sig", desktop / "latest.json.sig")
-        (desktop / "下载并校验安装包.ps1").write_text(download_script(manifest), encoding="utf-8-sig")
+        script_name = "校验本地安装包.ps1" if local_candidate else "下载并校验安装包.ps1"
+        (desktop / script_name).write_text(download_script(manifest, local_only=bool(local_candidate)), encoding="utf-8-sig")
         (kit / "复测样本.ps1").write_text(
             (ROOT / "tools/review_replay.ps1").read_text(encoding="utf-8-sig"), encoding="utf-8-sig")
         for case in protocol["cases"]:
@@ -539,6 +561,14 @@ def build(results, release_dir, output, capture_dir, regression_results=None, re
             package_status["release_source_commit"] = publication["source_commit"]
             package_status["release_url"] = publication["release_url"]
             package_status["independent_windows_workflows"] = publication["independent_workflow_runs"]
+        elif local_candidate:
+            package_status["windows_delivery"] = {
+                "mode": "separate-local-installer",
+                "source_commit": local_candidate["source_commit"],
+                "signed_build_run": local_candidate["signed_build_run"],
+                "installer": local_candidate["assets"]["Lazarus-Agent-windows-x64-setup.exe"],
+                "independent_windows_workflows": local_candidate["independent_workflow_runs"],
+            }
         else:
             if not (ROOT / "docs/validation" / f"{APP_VERSION}-installer-check.json").is_file():
                 package_status["pending"].append("正式版安装器的独立核验")
@@ -586,12 +616,14 @@ def main():
     parser.add_argument("--release-regression", type=Path, nargs=3, metavar=("CHECKOUT", "RESULTS", "PLAN"),
                         help="Current version checkout, raw trial directory and run plan")
     parser.add_argument("--focused-results", type=Path, help="Raw records for reviewed supplemental samples")
+    parser.add_argument("--local-signed-candidate", action="store_true", help="Verify a separately supplied local installer")
     parser.add_argument("--materials-dir", type=Path, default=ROOT / "交付", help="方案 PDF、演示视频和捕获记录的目录")
     parser.add_argument("--output", type=Path, default=ROOT / "交付/重邮GGBond-F01-工程复核包.zip")
     args = parser.parse_args()
     build(args.results, args.release_dir, args.output, args.capture_dir,
           args.regression_results, args.regression_summary, args.primary_results, args.primary_summary, args.materials_dir,
-          args.p1b_checkout, args.p1c_checkout, args.release_regression, args.focused_results)
+          args.p1b_checkout, args.p1c_checkout, args.release_regression, args.focused_results,
+          local_signed_candidate=args.local_signed_candidate)
 
 
 if __name__ == "__main__":

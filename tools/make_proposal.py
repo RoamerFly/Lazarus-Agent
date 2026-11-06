@@ -21,7 +21,7 @@ PAGE_WIDTH, PAGE_HEIGHT = A4
 CONTENT_WIDTH = PAGE_WIDTH - 104
 
 
-def build(output=OUT):
+def build(output=OUT, *, local_signed_candidate=False):
     from app_version import APP_VERSION
     from assistant_chat import ANDROID_NAMES
 
@@ -64,8 +64,12 @@ def build(output=OUT):
 
     windows_proof = validation / f"{APP_VERSION}-windows-proof.json"
     publication = validation / f"{APP_VERSION}-release-publication.json"
-    heading("F01 数智创意 / 工程复核版" if windows_proof.is_file() or publication.is_file() else "F01 数智创意 / 工程候选稿",
-            "遗留软件复活智能体")
+    edition = "工程候选稿"
+    if windows_proof.is_file() or publication.is_file():
+        edition = "工程复核版"
+    elif local_signed_candidate:
+        edition = "本地工程复核版"
+    heading(f"F01 数智创意 / {edition}", "遗留软件复活智能体")
     story.append(para("从一份旧 APK 和一句需求开始，交付能在目标 Android 上复测的应用。", sub))
     story.append(para("面向接手遗留安卓工具的维护人员。用户导入 APK，指定目标系统和需要完成的操作，Agent 自主分析包内代码、资源与界面，修改并回编签名。在独立环境中，用预先提交的步骤验证原包与候选，保留每轮差异、哈希和失败原因。"))
     block("拟解决的问题", "换新终端后，旧应用可能无法安装，也可能在某个业务操作后崩溃。原工程暂不可用时，维护人员仍有安装包、业务经验和操作规程。兼容调整之后，班组还可能需要记住上次工作位置、调整流程或修改显示。仅交付一个可打开的包，无法覆盖这些操作。")
@@ -178,7 +182,9 @@ def build(output=OUT):
     story.append(PageBreak())
 
     heading("部署与试点", "给复核人员一条可重复的路径")
-    block("Windows 安装", "提供按用户安装器和便携 ZIP。桌面内嵌 WebView2，模型凭据由 Windows DPAPI 加密。程序优先复用工具，首次按所选系统准备缺失的 SDK、Java 与镜像。后续可在已准备环境中断网复测已有候选。")
+    installer_delivery = ("使用单独交付的安装器和包内校验脚本。" if local_signed_candidate
+                          else "提供按用户安装器和便携 ZIP。")
+    block("Windows 安装", installer_delivery + "桌面内嵌 WebView2，模型凭据由 Windows DPAPI 加密。程序优先复用工具，首次按所选系统准备缺失的 SDK、Java 与镜像。后续可在已准备环境中断网复测已有候选。")
     replay_path = validation / f"{APP_VERSION}-windows-proof.json"
     replay_note = f"v{APP_VERSION} 干净 Windows 候选复测待归档。"
     if replay_path.is_file():
@@ -233,7 +239,7 @@ def build(output=OUT):
     heading("交付与团队", "按证据定位每一份成果")
     block("单人团队", "参赛队伍为重邮GGBond，负责人刘飞扬，所在单位重庆邮电大学。由负责人承担场景确定、需求与验收、工具集成及参赛材料整理。代码实现和文档制作使用 AI 辅助，模型服务与开源工具的作用在实现和依赖说明中列出。")
     table(["交付物", "复核重点"], [
-        ["Windows 程序与签名更新清单", "版本、发布提交、文件 SHA-256 与更新清单签名。"],
+        ["Windows 程序与签名更新清单", "版本、构建源码提交、文件 SHA-256 与更新清单签名。"],
         ["源码与自有样本", "可分发输入 APK、构造样本源码、构建入口及使用说明。"],
         ["APK、差异与验收报告", "原包、候选及设备回读哈希，目标 Android/ABI，逐步操作结果。"],
         ["固定评测与对照", "全部预定轮次、失败及中断、模型响应计量、人工差异审查。"],
@@ -272,4 +278,6 @@ if __name__ == "__main__":
     sys.path.insert(0, str(ROOT))
     parser = ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=OUT)
-    build(parser.parse_args().output)
+    parser.add_argument("--local-signed-candidate", action="store_true")
+    args = parser.parse_args()
+    build(args.output, local_signed_candidate=args.local_signed_candidate)

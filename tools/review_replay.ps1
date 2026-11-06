@@ -23,7 +23,7 @@ if ((Get-FileHash -LiteralPath $base).Hash.ToLowerInvariant() -ne $proof.input_s
     throw '样本与验收报告的 APK 哈希不符'
 }
 if (!(Test-Path -LiteralPath $App -PathType Leaf)) {
-    throw '请先在 Windows桌面版目录下载并安装程序，或用 -App 指定同版程序路径'
+    throw '请先按复核说明校验并安装程序，或用 -App 指定同版程序路径'
 }
 $manifest = Get-Content -LiteralPath (Join-Path $root 'Windows桌面版/latest.json') -Raw -Encoding utf8 | ConvertFrom-Json
 if ((Get-FileHash -LiteralPath $App).Hash.ToLowerInvariant() -ne $manifest.assets.'windows-x64-portable-exe'.sha256) {
