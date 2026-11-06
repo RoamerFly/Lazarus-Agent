@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "case": "N03",
+  "apk": "fixtures/tea-timer/tea-timer-en.apk",
+  "source_sha256": "1476a30063a68f27a2e3c10d3d99383aeee0afbf5177e09fbc44f36cc6f237da",
+  "recorded_trace_sha256": "a989756d159676ee16ebc9597058a1e6d5dbe8bb9e655ec0ba9034150379fd71",
+  "outcome": {
+    "outcome": "candidate"
+  },
+  "tools": [
+    {
+      "tool": "list_files",
+      "arguments": {
+        "pattern": "**/*"
+      },
+      "ok": true
+    },
+    {
+      "tool": "search_text",
+      "arguments": {
+        "query": "Tea timer"
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "res/values/strings.xml"
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "res/values/public.xml"
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "smali/org/ggbond/teatimer/MainActivity.smali"
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "smali/org/ggbond/teatimer/MainActivity.smali",
+        "start_line": 96,
+        "line_count": 30
+      },
+      "ok": true
+    },
+    {
+      "tool": "replace_text",
+      "arguments": {
+        "path": "res/values/strings.xml",
+        "sha256": "11bc3be44135ab0b8a6df50882d82de92be65b1842c374d98573342689fd7d39",
+        "old": "    <string name=\"screen_name\">Tea timer</string>",
+        "new": "    <string name=\"screen_name\">Field batch card</string>"
+      },
+      "ok": true
+    }
+  ],
+  "changes": [
+    {
+      "path": "res/values/strings.xml",
+      "before_sha256": "11bc3be44135ab0b8a6df50882d82de92be65b1842c374d98573342689fd7d39",
+      "after_sha256": "445776ff00dc2820b13406333b46c950d0e70ee6133dee2d9565774c968e50f4"
+    }
+  ]
+}

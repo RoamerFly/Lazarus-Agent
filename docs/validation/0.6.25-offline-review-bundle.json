@@ -1,0 +1,162 @@
+{
+  "archive": {
+    "mode": "offline-trace-development-samples",
+    "version": "0.6.25",
+    "source_commit": "c5f9799c748d700250a5b27d666bae00609acb50",
+    "exe_sha256": "a13c8e81a26f73805b3d704b8ac5ecf486e68b4f4adfdf4be8ec8efe32f47cc0",
+    "network_model_calls": 0,
+    "samples": {
+      "P03": {
+        "candidate_sha256": "5ac5b547bf64215a9ef48159a1c2f7801e43e93e730e0a58eb4d5f37c6b2f578",
+        "steps": 4
+      },
+      "P05": {
+        "candidate_sha256": "617d2160b12bbe9bd5b134e63337d155cf169f7cb253786cb86555facd5806df",
+        "steps": 8
+      },
+      "P01": {
+        "candidate_sha256": "adac0f17e380278340875a002f490280ce15f266487fc6d75c95b0df17876c9b",
+        "steps": 10
+      },
+      "P04": {
+        "candidate_sha256": "a93957c916300b81e35138b0bfee90f6502f9ab36fbc6f949bb3efbd14c51a0b",
+        "steps": 16
+      }
+    },
+    "counterexamples": {
+      "N03": {
+        "candidate_sha256": "0e59d60f160e27be5cc4e4d8c59cedc56982f40585761b49c2807028dad7a5b6",
+        "steps": 2
+      }
+    },
+    "offline_windows": "fresh-install-inputs-and-desktop",
+    "archive_sha256": "9af911fd5ee613811b2d6303a34c3081b74bc5ce4a2f3a2095763017241051ad",
+    "bytes": 430148
+  },
+  "source": {
+    "sha256": "6c7189199ac44b66135a00bdd3dc89dcc9614be67fe70863b64203a635719d31",
+    "files_and_directories": 499,
+    "source_commit": "c5f9799c748d700250a5b27d666bae00609acb50"
+  },
+  "device_extension": {
+    "version": "0.6.25",
+    "source_commit": "c5f9799c748d700250a5b27d666bae00609acb50",
+    "exe_sha256": "a13c8e81a26f73805b3d704b8ac5ecf486e68b4f4adfdf4be8ec8efe32f47cc0",
+    "network_model_calls": 0,
+    "api": 36,
+    "abi": "x86_64",
+    "rows": [
+      {
+        "case": "N03",
+        "status": "incomplete",
+        "candidate_sha256": "0e59d60f160e27be5cc4e4d8c59cedc56982f40585761b49c2807028dad7a5b6",
+        "device_report_sha256": "08ec22dc269e12742c9cda5ac421d0351ec8f7718150e117519a75def6871c6e",
+        "steps": 2
+      },
+      {
+        "case": "P01",
+        "status": "behavior-verified",
+        "candidate_sha256": "adac0f17e380278340875a002f490280ce15f266487fc6d75c95b0df17876c9b",
+        "device_report_sha256": "a8e29470d8bc5a8019b6f435effdc7dfb8081d3648ce05057af52d8cdb59b8bd",
+        "steps": 10
+      },
+      {
+        "case": "P04",
+        "status": "behavior-verified",
+        "candidate_sha256": "a93957c916300b81e35138b0bfee90f6502f9ab36fbc6f949bb3efbd14c51a0b",
+        "device_report_sha256": "1f5baf4ff0480d5649751793531fb10f5bd5e5bc8c44483e390e42929ca7081c",
+        "steps": 16
+      }
+    ]
+  },
+  "extracted": {
+    "shell": "Windows PowerShell 5.1",
+    "verified_files": 37,
+    "rows": [
+      {
+        "status": "inputs-verified",
+        "candidate_sha256": "adac0f17e380278340875a002f490280ce15f266487fc6d75c95b0df17876c9b",
+        "steps": 10,
+        "sha256": "6c515485cd224118a5fb966455e9290006318c97ba9fdda8b9c59e00a6d062f2"
+      },
+      {
+        "status": "inputs-verified",
+        "candidate_sha256": "5ac5b547bf64215a9ef48159a1c2f7801e43e93e730e0a58eb4d5f37c6b2f578",
+        "steps": 4,
+        "sha256": "67df6a0a7a35623e538605d55462875a3643a1734c0b1c1bf21f8bcee5e0f39d"
+      },
+      {
+        "status": "inputs-verified",
+        "candidate_sha256": "a93957c916300b81e35138b0bfee90f6502f9ab36fbc6f949bb3efbd14c51a0b",
+        "steps": 16,
+        "sha256": "547f6e5a01e84559a906b499003396dbad53182c62428f6745187b1af45d50a3"
+      },
+      {
+        "status": "inputs-verified",
+        "candidate_sha256": "617d2160b12bbe9bd5b134e63337d155cf169f7cb253786cb86555facd5806df",
+        "steps": 8,
+        "sha256": "f8655587db44e579684b6573a34afc79b025a7c320a36b652467c1e1f112869c"
+      },
+      {
+        "status": "inputs-verified",
+        "candidate_sha256": "0e59d60f160e27be5cc4e4d8c59cedc56982f40585761b49c2807028dad7a5b6",
+        "steps": 2,
+        "sha256": "22dfe26bc78fb7abf4dd75694180fcd9862b3ca7c613923895a0c0a163c49f52"
+      },
+      {
+        "status": "incomplete",
+        "candidate_sha256": "0e59d60f160e27be5cc4e4d8c59cedc56982f40585761b49c2807028dad7a5b6",
+        "steps": 2,
+        "sha256": "bfee839a4f00a07ef9f5ab0474fc48789395c575e059f7fbb834c54b39f9191f"
+      }
+    ]
+  },
+  "replayed_edits": [
+    {
+      "case": "N03",
+      "trace_sha256": "ac931f8ae1c67bf06eb07719a6175ba1fd0e8e303da96ad4f172eab08ede2df1",
+      "rebuilt_apk_sha256": "b707e6e9d229ef25fffac3d285aa610d6fcb07524c434eba4c2ffcacf6c010ff",
+      "changes": [
+        {
+          "path": "res/values/strings.xml",
+          "before_sha256": "11bc3be44135ab0b8a6df50882d82de92be65b1842c374d98573342689fd7d39",
+          "after_sha256": "445776ff00dc2820b13406333b46c950d0e70ee6133dee2d9565774c968e50f4"
+        }
+      ]
+    },
+    {
+      "case": "P01",
+      "trace_sha256": "6ac868118521ca6ca47229c556879da148beaf9065917ef33601289a09d8c32c",
+      "rebuilt_apk_sha256": "857b80205274eb0e898b52aa44c8940f1379bdbd8694dac51cef4d3a4ccf3272",
+      "changes": [
+        {
+          "path": "smali/org/ggbond/fieldroute/RouteActivity.smali",
+          "before_sha256": "56e6b505611aecdbcabc56c748e0ce3e2203cbd61bb9b29e90f71525c9650f58",
+          "after_sha256": "09639c46369fee4ad6cb518149722ad3d9c0e9ab4ce7bed39f740a3f38ae0e73"
+        }
+      ]
+    },
+    {
+      "case": "P04",
+      "trace_sha256": "b5f9faabee4c8836a597c4b1c7ddaef7734120b7ae26d019d07afe050fda0fe0",
+      "rebuilt_apk_sha256": "928876fe8c5ac74100a6d5851dd54e39fa87f25ca574761fa326261903722336",
+      "changes": [
+        {
+          "path": "smali/org/ggbond/temperaturecard/TemperatureActivity.smali",
+          "before_sha256": "f9f8832abe1304706790487f4b3b2b8509868983796a77faf027948223d4cb57",
+          "after_sha256": "e49421a85303acd3c4fef97c9e114b58d3afceb446b2f264f3ae01aafceb97ab"
+        },
+        {
+          "path": "smali/org/ggbond/temperaturecard/TemperatureUnitToggleListener.smali",
+          "before_sha256": null,
+          "after_sha256": "976fc24da602b1f080a25c58765b266f3fac663ce18676ce3eeaee1ff460a111"
+        }
+      ]
+    }
+  ],
+  "tampered_archives_rejected": [
+    "windows-screenshot",
+    "windows-executable-receipt",
+    "counterexample-function-result"
+  ]
+}

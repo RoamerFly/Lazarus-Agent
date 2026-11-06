@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "case": "P01",
+  "apk": "fixtures/field-route/field-route-legacy.apk",
+  "source_sha256": "08ed16b9f6a149bd8063bae99dd72aad200dafea7d3a0504af004187bde20deb",
+  "recorded_trace_sha256": "7786f684a40fe8479ca2068962a17e62ca1a7eeb0d0bf8b51af28b135165edeb",
+  "outcome": {
+    "outcome": "candidate"
+  },
+  "tools": [
+    {
+      "tool": "inspect_manifest",
+      "arguments": {
+        "artifact": "original"
+      },
+      "ok": true
+    },
+    {
+      "tool": "list_files",
+      "arguments": {
+        "pattern": "**/*"
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "smali/org/ggbond/fieldroute/RouteActivity.smali"
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "smali/org/ggbond/fieldroute/RouteActivity.smali",
+        "start_line": 96,
+        "line_count": 100
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "smali/org/ggbond/fieldroute/RouteActivity$$ExternalSyntheticLambda0.smali"
+      },
+      "ok": true
+    },
+    {
+      "tool": "list_files",
+      "arguments": {
+        "pattern": "**/AndroidManifest.xml"
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "res/values/public.xml"
+      },
+      "ok": true
+    },
+    {
+      "tool": "search_text",
+      "arguments": {
+        "query": "targetSdk"
+      },
+      "ok": true
+    },
+    {
+      "tool": "replace_text",
+      "arguments": {
+        "path": "smali/org/ggbond/fieldroute/RouteActivity.smali",
+        "sha256": "56e6b505611aecdbcabc56c748e0ce3e2203cbd61bb9b29e90f71525c9650f58",
+        "old": ".method private showRoute(Ljava/lang/String;)V\n    .locals 2\n\n    .line 44\n    const-string v0, \"south\"\n\n    invoke-virtual {v0, p1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z\n\n    move-result p1\n\n    .line 45\n    iget-object v0, p0, Lorg/ggbond/fieldroute/RouteActivity;->current:Landroid/widget/TextView;\n\n    if-eqz p1, :cond_0\n\n    const-string v1, \"Active route: South\"\n\n    goto :goto_0\n\n    :cond_0\n    const-string v1, \"Active route: North\"\n\n    :goto_0\n    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V\n\n    .line 46\n    iget-object v0, p0, Lorg/ggbond/fieldroute/RouteActivity;->instructions:Landroid/widget/TextView;\n\n    if-eqz p1, :cond_1\n\n    const-string p1, \"Inspect the pump seal\"\n\n    goto :goto_1\n\n    :cond_1\n    const-string p1, \"Check the valve position\"\n\n    :goto_1\n    invoke-virtual {v0, p1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V\n\n    .line 47\n    return-void\n.end method",
+        "new": ".method private showRoute(Ljava/lang/String;)V\n    .locals 3\n\n    .line 44\n    const-string v0, \"field_route\"\n\n    const/4 v1, 0x0\n\n    invoke-virtual {p0, v0, v1}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;\n\n    move-result-object v0\n\n    invoke-interface {v0}, Landroid/content/SharedPreferences;->edit()Landroid/content/SharedPreferences$Editor;\n\n    move-result-object v0\n\n    const-string v1, \"last_route\"\n\n    invoke-interface {v0, v1, p1}, Landroid/content/SharedPreferences$Editor;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/content/SharedPreferences$Editor;\n\n    move-result-object v0\n\n    invoke-interface {v0}, Landroid/content/SharedPreferences$Editor;->apply()V\n\n    .line 45\n    const-string v0, \"south\"\n\n    invoke-virtual {v0, p1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z\n\n    move-result v2\n\n    iget-object v0, p0, Lorg/ggbond/fieldroute/RouteActivity;->current:Landroid/widget/TextView;\n\n    if-eqz v2, :cond_0\n\n    const-string v1, \"Active route: South\"\n\n    goto :goto_0\n\n    :cond_0\n    const-string v1, \"Active route: North\"\n\n    :goto_0\n    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V\n\n    .line 46\n    iget-object v0, p0, Lorg/ggbond/fieldroute/RouteActivity;->instructions:Landroid/widget/TextView;\n\n    if-eqz v2, :cond_1\n\n    const-string v1, \"Inspect the pump seal\"\n\n    goto :goto_1\n\n    :cond_1\n    const-string v1, \"Check the valve position\"\n\n    :goto_1\n    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V\n\n    .line 47\n    return-void\n.end method"
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "smali/org/ggbond/fieldroute/RouteActivity.smali",
+        "start_line": 180,
+        "line_count": 20
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "smali/org/ggbond/fieldroute/RouteActivity.smali",
+        "start_line": 199,
+        "line_count": 14
+      },
+      "ok": true
+    },
+    {
+      "tool": "replace_lines",
+      "arguments": {
+        "path": "smali/org/ggbond/fieldroute/RouteActivity.smali",
+        "sha256": "c23dbbd984750d6415e8d53560a930e7b0c4f852580f78ca7b958584e4ad76e8",
+        "start_line": 207,
+        "end_line": 208,
+        "content": "    .line 32\n    const-string v0, \"field_route\"\n\n    const/4 v2, 0x0\n\n    invoke-virtual {p0, v0, v2}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;\n\n    move-result-object v0\n\n    const-string v2, \"last_route\"\n\n    invoke-interface {v0, v2, v1}, Landroid/content/SharedPreferences;->getString(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;\n\n    move-result-object v0\n\n    invoke-direct {p0, v0}, Lorg/ggbond/fieldroute/RouteActivity;->showRoute(Ljava/lang/String;)V"
+      },
+      "ok": true
+    }
+  ],
+  "changes": [
+    {
+      "path": "smali/org/ggbond/fieldroute/RouteActivity.smali",
+      "before_sha256": "56e6b505611aecdbcabc56c748e0ce3e2203cbd61bb9b29e90f71525c9650f58",
+      "after_sha256": "09639c46369fee4ad6cb518149722ad3d9c0e9ab4ce7bed39f740a3f38ae0e73"
+    }
+  ]
+}

@@ -16,6 +16,11 @@ from agent_acceptance import verified_for
 from updater import parse_manifest, verify_manifest
 
 LOCAL_DEMO = "可分发样本/工作台演示/"
+OFFLINE_WINDOWS_FILES = {
+    "Windows复核/干净Windows复测回执.json": "干净 Windows 复测回执.json",
+    "Windows复核/工作台.png": "干净 Windows 工作台.png",
+    "Windows复核/当时复测样本.zip": "v{version}-离线编辑设备复测包.zip",
+}
 
 
 def check_local_links(archive, names):
@@ -258,6 +263,52 @@ def check_local_review(archive, checksums, status, regression):
     return {"version": version, "source_commit": commit, "demo_steps": demo["passed_steps"], **edition}
 
 
+def check_offline_windows(archive, checksums, status, samples):
+    evidence = status.get("offline_windows")
+    if evidence is None and not OFFLINE_WINDOWS_FILES.keys() & checksums.keys():
+        return None
+    if (status.get("mode") != "offline-trace-development-samples"
+            or evidence != "fresh-install-inputs-and-desktop"
+            or not OFFLINE_WINDOWS_FILES.keys() <= checksums.keys()):
+        raise ValueError("离线复测包缺少完整的 Windows 证据")
+    report = json.loads(archive.read("Windows复核/干净Windows复测回执.json"))
+    guest, desktop = report["guest"], report["desktop"]
+    setup, baseline = guest["setup"], guest["baseline"]
+    build = json.loads(archive.read("本地构建回执.json"))
+    for key in ("version", "source_commit", "exe_sha256"):
+        if status[key] != setup[key] or status[key] != build[key]:
+            raise ValueError("Windows 复测与本地 EXE 回执不一致")
+    if (build["self_test_exit"] != 0 or setup["installed_exe_sha256"] != status["exe_sha256"]
+            or any(setup[key] != 0 for key in ("install_exit", "installed_self_test_exit", "uninstall_exit"))
+            or not setup["isolated_registration_removed"] or not setup["exported_output_preserved"]
+            or guest["status"] != "passed" or report["blank_virtual_disk"] is not True
+            or baseline["tool_commands"] or baseline["override_names"] or baseline["android_local_sdk"]
+            or baseline["active_hardware_networks"] != 0 or guest["network_model_calls"] != 0
+            or desktop["network_model_calls"] != 0 or desktop["android_16_ready"] or desktop["model_enabled"]
+            or desktop["status"] != "workbench-started" or desktop["workbench_http"] != 200
+            or desktop["portable_sha256"] != status["exe_sha256"]
+            or desktop["renderer_processes"] < 1 or report["missing_webview2"]["status"] != "webview2-missing-prompt"
+            or report["missing_webview2"]["renderer_processes"] != 0 or report["webview2"]["signature"] != "Valid"
+            or guest["sample_zip_sha256"] != checksums["Windows复核/当时复测样本.zip"]
+            or report["desktop_screenshot_sha256"] != checksums["Windows复核/工作台.png"]):
+        raise ValueError("Windows 安装、桌面或历史样本包与回执不一致")
+    with ZipFile(BytesIO(archive.read("Windows复核/当时复测样本.zip"))) as original:
+        if len(original.namelist()) - 1 != report["verified_archive_files"] or "SHA256SUMS.txt" not in original.namelist():
+            raise ValueError("干净 Windows 校验的文件数量与历史样本包不一致")
+    by_case = {entry["sample"].removeprefix("可分发样本/"): entry for entry in samples}
+    checked_cases = [row["case"] for row in guest["samples"]]
+    if not checked_cases or len(set(checked_cases)) != len(checked_cases):
+        raise ValueError("干净 Windows 复测样本与当前包内样本不一致")
+    for row in guest["samples"]:
+        case = by_case.get(row["case"])
+        if not case or row["status"] != "inputs-verified" or case["candidate_sha256"] != row["candidate_sha256"]:
+            raise ValueError("干净 Windows 复测样本与当前包内样本不一致")
+        proof = json.loads(archive.read(case["sample"] + "/agent-acceptance.json"))
+        if len(proof["steps"]) != row["steps"]:
+            raise ValueError("干净 Windows 复测步骤数与当前设备报告不一致")
+    return {"status": evidence, "os": baseline["product"], "checked_inputs": checked_cases}
+
+
 def verify(path):
     with ZipFile(path) as archive:
         names = archive.namelist()
@@ -330,13 +381,14 @@ def verify(path):
                         observed != expected["steps"]):
                     raise ValueError("反例没有对应到指定的行为失败：" + folder)
             counterexamples.append({"sample": folder, "candidate_sha256": candidate, "status": "incomplete"})
+        offline_windows = check_offline_windows(archive, checksums, status, samples)
         return {"status": "archive-and-proofs-verified", "file_count": len(names),
                 "local_links_checked": check_local_links(archive, set(names)),
                 "samples": samples, "counterexamples": counterexamples,
                 "package_status": status, "signed_release": signed_release,
                 "release_regression": release_regression,
                 "local_regression": local_regression,
-                "local_review": local_review,
+                "local_review": local_review, "offline_windows": offline_windows,
                 "scope": "Files, checksums and stored proofs. Device replay is a separate operation."}
 
 
