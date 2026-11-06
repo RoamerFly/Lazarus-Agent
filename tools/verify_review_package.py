@@ -13,6 +13,7 @@ from zipfile import ZipFile
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from agent_acceptance import verified_for
+from tools.review_evidence import verify_extension
 from updater import parse_manifest, verify_manifest
 
 LOCAL_DEMO = "可分发样本/工作台演示/"
@@ -651,6 +652,7 @@ def verify(path):
         offline_materials = check_offline_materials(
             archive, checksums, status, offline_windows or offline_cold_runtime or install_recheck)
         addendum = check_offline_addendum(archive, checksums, status, offline_materials)
+        same_build_evidence = verify_extension(archive, checksums, status)
         if ("offline_negative_cases" in status
                 or any(item["sample"] in {"反例样本/N01", "反例样本/N02"} for item in counterexamples)):
             verify_frozen_counterexamples(archive, checksums, status, addendum, counterexamples)
@@ -663,6 +665,7 @@ def verify(path):
                 "local_review": local_review, "offline_windows": offline_windows,
                 "offline_cold_runtime": offline_cold_runtime, "offline_materials": offline_materials,
                 "offline_addendum": addendum, "offline_install_recheck": install_recheck,
+                "same_build_evidence": same_build_evidence,
                 "scope": "Files, checksums and stored proofs. Device replay is a separate operation."}
 
 

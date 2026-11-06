@@ -7,11 +7,31 @@ import unittest
 from unittest.mock import patch
 from zipfile import ZipFile
 
-from tools import verify_review_package
+from tools import review_evidence, verify_review_package
 from tools.verify_review_package import verify
 
 
 class ReviewPackageTests(unittest.TestCase):
+    def test_supplemental_windows_receipt_rejects_a_different_executable(self):
+        path = Path(__file__).resolve().parents[1] / "docs/validation/0.6.29-cold-runtime.json"
+        receipt = json.loads(path.read_bytes())
+        build = {key: receipt[key] for key in ("version", "source_commit", "exe_sha256")}
+        self.assertEqual(review_evidence.verify_runtime(receipt, build)["components"], 5)
+        receipt["exe_sha256"] = "a" * 64
+        with self.assertRaisesRegex(ValueError, "Windows 首次下载"):
+            review_evidence.verify_runtime(receipt, build)
+
+    def test_supplemental_report_checks_device_readback(self):
+        case = {"id": "P01", "steps": [["expect", "expected text"]]}
+        row = {"trial": "P01-agent-1", "source_sha256": "a" * 64, "candidate_sha256": "b" * 64}
+        observed = {"api": 36, "baseline": {"install": "failed"}, "candidate": {
+            "install": "passed", "device": {"api": 36, "abis": ["x86_64"], "installed_sha256": "c" * 64},
+        }}
+        report = {"input_sha256": row["source_sha256"], "candidate_sha256": row["candidate_sha256"],
+                  "targets": [36], "steps": [{"action": "expect", "value": "expected text"}], "rows": [observed]}
+        with self.assertRaisesRegex(ValueError, "设备安装回读"):
+            review_evidence.verify_device_report(report, case, row, 36)
+
     def test_empty_storage_preparation_requires_current_binary_and_all_downloads(self):
         identity = {"version": "0.6.28", "source_commit": "a" * 40, "exe_sha256": "b" * 64}
         scope = "same-exe-empty-storage-runtime"

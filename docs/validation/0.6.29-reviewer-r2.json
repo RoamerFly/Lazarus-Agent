@@ -1,0 +1,91 @@
+{
+  "archive": "v0.6.29-F01-同版离线评审包-r2.zip",
+  "archive_sha256": "ea5978768bef41f447a50f4737a64f954bb6724982422d41002f979cfc1c7546",
+  "bytes": 3498855,
+  "registered_files": 91,
+  "windows": {
+    "components": 5,
+    "downloaded_bytes": 1415413019,
+    "elapsed_seconds": 309.3,
+    "guest_device_steps_run": false
+  },
+  "cohort": {
+    "terminal": 42,
+    "unobserved": 1,
+    "positive_passed": 17,
+    "positive_planned": 18,
+    "primary_passed": 3,
+    "historical_holdout_passed": 3,
+    "negative_rejected": 6,
+    "negative_false_acceptances": 0,
+    "negative_planned": 6,
+    "controls": {
+      "roundtrip": {
+        "failed": 6
+      },
+      "rules": {
+        "failed": 4,
+        "passed": 2
+      },
+      "one-build": {
+        "failed": 4,
+        "passed": 2
+      }
+    }
+  },
+  "device_reports": 32,
+  "network_model_calls": 0,
+  "schema": 1,
+  "base_archive_sha256": "2c8ff76bf616f72d20631673b656c6d95cdf6e11e3132aaa0139c48240c60e5b",
+  "preserved_base_payloads": 46,
+  "windows_powershell_inputs_verified": 6,
+  "deterministic_build": true,
+  "extracted_plan_matches": true,
+  "extracted_device_replays": [
+    {
+      "status": "behavior-verified",
+      "candidate_sha256": "352a62982f5634b1b334cdf265b2a6490db57ffa27c30b53bdaed9ac32130e58",
+      "installed_sha256": "352a62982f5634b1b334cdf265b2a6490db57ffa27c30b53bdaed9ac32130e58",
+      "api": 36,
+      "abi": "x86_64",
+      "steps": [
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "report_sha256": "ca96e701fe01c483159758578419ae5b059e8032e32d18246b27b3b24368d769",
+      "case": "P04"
+    },
+    {
+      "status": "incomplete",
+      "candidate_sha256": "671605d127dc9356b66bd93b144e0643080efe90d39efbe11ab4c7edf9238481",
+      "installed_sha256": "671605d127dc9356b66bd93b144e0643080efe90d39efbe11ab4c7edf9238481",
+      "api": 36,
+      "abi": "x86_64",
+      "steps": [
+        "passed",
+        "failed"
+      ],
+      "report_sha256": "3ebda7dd7ececd0caeaf5b849e9e769a4e1584e79f806db5cc20a5be4e527ca3",
+      "case": "N03"
+    }
+  ],
+  "rehashed_tamper_rejections": [
+    "different-windows-exe",
+    "different-installed-sha256",
+    "duplicate-trial"
+  ]
+}
