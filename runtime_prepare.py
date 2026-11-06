@@ -52,9 +52,10 @@ class RuntimePreparation:
 
     def _terms_accepted(self) -> bool:
         try:
-            return bool(json.loads(self.state_file.read_text(encoding="utf-8")).get("terms_accepted"))
+            state = json.loads(self.state_file.read_text(encoding="utf-8"))
         except (OSError, ValueError, TypeError):
             return False
+        return isinstance(state, dict) and state.get("terms_accepted") is True
 
     def _accept_terms(self) -> None:
         self.state_file.parent.mkdir(parents=True, exist_ok=True)
@@ -84,7 +85,7 @@ class RuntimePreparation:
             if not missing:
                 return {"started": False, "ready": True, "message": "所选运行环境已完整可用，不会联网下载"}
             if not self._terms_accepted():
-                if not accept_terms:
+                if accept_terms is not True:
                     raise PermissionError("下载前需要由本机用户明确同意 Android SDK 与 Temurin 发布方条款")
                 self._accept_terms()
             if not self.operation_lock.acquire(blocking=False):

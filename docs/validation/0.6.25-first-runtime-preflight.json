@@ -1,0 +1,46 @@
+{
+  "scope": "Fresh Windows VM first-use runtime gate and Android Emulator acceleration preflight",
+  "version": "0.6.25",
+  "source_commit": "c5f9799c748d700250a5b27d666bae00609acb50",
+  "network_model_calls": 0,
+  "runtime_gate": {
+    "status": "explicit-download-consent-required",
+    "http_status": 400,
+    "api": 36,
+    "ready": false,
+    "missing": [
+      "platform-tools",
+      "emulator",
+      "build-tools",
+      "system-image",
+      "java"
+    ],
+    "downloads_started": false,
+    "active": null,
+    "terms_accepted": false,
+    "model_enabled": false,
+    "physical_networks": 0,
+    "exe_sha256": "a13c8e81a26f73805b3d704b8ac5ecf486e68b4f4adfdf4be8ec8efe32f47cc0"
+  },
+  "emulator_probe": {
+    "version": "36.6.11",
+    "probe_sha256": "65158528b739a7e5dbedbea7dae70ca892985861bd3cdb978f35288ca936fee1",
+    "guest": {
+      "probe_sha256": "65158528b739a7e5dbedbea7dae70ca892985861bd3cdb978f35288ca936fee1",
+      "exit": 3,
+      "output": "accel:\r\n3\r\nAndroid Emulator requires an Intel/AMD processor with virtualization extension support.  (Virtualization extension is not supported)\r\naccel",
+      "cpu": {
+        "VirtualizationFirmwareEnabled": false,
+        "SecondLevelAddressTranslationExtensions": false,
+        "VMMonitorModeExtensions": false
+      }
+    },
+    "host": {
+      "exit": 0,
+      "output": "accel:\r\n0\r\nWHPX(10.0.22635) is installed and usable.\r\naccel"
+    },
+    "vmware_monitor_mode": "ULM"
+  },
+  "device_acceptance_in_guest": "not-run",
+  "first_download_in_guest": "not-run"
+}

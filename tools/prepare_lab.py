@@ -415,7 +415,7 @@ def prepare_runtime(api: int, progress: Progress | None = None, runtime_root: Pa
             _event(progress, "ready", label, "已复用本机组件（只读链接）", api)
             continue
         component = {"platform-tools": "platform-tools", "emulator": "emulator", "build-tools": f"build-tools;{BUILD_TOOLS_VERSION}", "system-image": "system-image"}[label]
-        if not terms_accepted:
+        if terms_accepted is not True:
             raise PermissionError("必须由本机用户先确认 Android SDK 条款，才允许下载缺失组件")
         _check_continue(cancel, deadline)
         _install_google_component(component, api if label == "system-image" else None, sdk, downloads, progress, cancel, deadline)
@@ -431,7 +431,7 @@ def prepare_runtime(api: int, progress: Progress | None = None, runtime_root: Pa
             reused.append("java")
             _event(progress, "ready", "java", "已复用本机 Java（只读链接）", api)
         else:
-            if not terms_accepted:
+            if terms_accepted is not True:
                 raise PermissionError("必须由本机用户先确认 Temurin 下载条款，才允许下载缺失 Java")
             _install_temurin(java, downloads, progress, cancel, deadline)
             installed.append("java")

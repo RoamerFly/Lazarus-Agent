@@ -113,8 +113,12 @@ class PrepareLabSafetyTests(unittest.TestCase):
     def test_missing_component_requires_terms_before_network_download(self) -> None:
         with patch.object(prepare_lab, "_source_sdks", return_value=[]), \
              patch.object(prepare_lab, "discover_java_home", return_value=None), \
-             self.assertRaises(PermissionError):
-            prepare_lab.prepare_runtime(36, runtime_root=self.root / "empty-runtime", timeout_seconds=1)
+             patch.object(prepare_lab, "_install_google_component") as download:
+            for consent in (False, "false", "true", 1):
+                with self.subTest(consent=consent), self.assertRaises(PermissionError):
+                    prepare_lab.prepare_runtime(36, runtime_root=self.root / "empty-runtime",
+                                                timeout_seconds=1, terms_accepted=consent)
+            download.assert_not_called()
 
     def test_refresh_updates_modules_that_imported_tool_constants(self) -> None:
         import bench_device
