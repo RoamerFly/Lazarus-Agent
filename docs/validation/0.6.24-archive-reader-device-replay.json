@@ -1,0 +1,14 @@
+{
+  "source_commit": "b60c33230318c526ec4fb831b870ce2569e2cc40",
+  "candidate_sha256": "785ec43f4f7fe1b1b564e80c5a1e11f03e5f99b3a3d018dd268a842cad48d595",
+  "abis": [
+    "x86_64"
+  ],
+  "input_sha256": "7b8e200984dee500def40a9684fd2de9ced885ca1d04c63771d1d473b597dcce",
+  "raw_report_sha256": "b9f5d674bb16e2df36c85fba2e083c1539377c8205a0664f872835b365561aa3",
+  "installed_sha256": "785ec43f4f7fe1b1b564e80c5a1e11f03e5f99b3a3d018dd268a842cad48d595",
+  "steps_passed": 6,
+  "target_api": 36,
+  "status": "behavior-verified",
+  "exe_sha256": "c1fe662ec1095eba4395777f3b2259dba89b80435c716addf0100d5bbc7d70b3"
+}
