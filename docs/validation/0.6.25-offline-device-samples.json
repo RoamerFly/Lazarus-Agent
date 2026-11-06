@@ -1,0 +1,64 @@
+{
+  "archive": {
+    "mode": "offline-trace-development-samples",
+    "version": "0.6.25",
+    "source_commit": "c5f9799c748d700250a5b27d666bae00609acb50",
+    "exe_sha256": "a13c8e81a26f73805b3d704b8ac5ecf486e68b4f4adfdf4be8ec8efe32f47cc0",
+    "network_model_calls": 0,
+    "samples": {
+      "P03": {
+        "candidate_sha256": "5ac5b547bf64215a9ef48159a1c2f7801e43e93e730e0a58eb4d5f37c6b2f578",
+        "steps": 4
+      },
+      "P05": {
+        "candidate_sha256": "617d2160b12bbe9bd5b134e63337d155cf169f7cb253786cb86555facd5806df",
+        "steps": 8
+      }
+    },
+    "archive_sha256": "d3cd6538d7ae35db5d4fe99e43440292f9f74806e196d8d4a675822224c54b3e",
+    "bytes": 41198
+  },
+  "device": {
+    "version": "0.6.25",
+    "source_commit": "c5f9799c748d700250a5b27d666bae00609acb50",
+    "exe_sha256": "a13c8e81a26f73805b3d704b8ac5ecf486e68b4f4adfdf4be8ec8efe32f47cc0",
+    "network_model_calls": 0,
+    "api": 36,
+    "abi": "x86_64",
+    "scope": "Existing Windows and Android emulator; fixed APK behavior replay",
+    "rows": [
+      {
+        "case": "P03",
+        "candidate_sha256": "5ac5b547bf64215a9ef48159a1c2f7801e43e93e730e0a58eb4d5f37c6b2f578",
+        "steps": 4,
+        "status": "behavior-verified",
+        "device_report_sha256": "f55fb69259e259202426142aba7b831c362244d26e2d72eef13720eac91b35d5"
+      },
+      {
+        "case": "P05",
+        "candidate_sha256": "617d2160b12bbe9bd5b134e63337d155cf169f7cb253786cb86555facd5806df",
+        "steps": 8,
+        "status": "behavior-verified",
+        "device_report_sha256": "360fbaf2ac725406437e4e9a0555e3eccf89f6c11395a89c25446b408abe0f08"
+      }
+    ]
+  },
+  "extraction": {
+    "shell": "Windows PowerShell 5.1",
+    "files_sha256_verified": 16,
+    "replay_inputs": [
+      {
+        "status": "inputs-verified",
+        "candidate_sha256": "5ac5b547bf64215a9ef48159a1c2f7801e43e93e730e0a58eb4d5f37c6b2f578",
+        "steps": 4
+      },
+      {
+        "status": "inputs-verified",
+        "candidate_sha256": "617d2160b12bbe9bd5b134e63337d155cf169f7cb253786cb86555facd5806df",
+        "steps": 8
+      }
+    ],
+    "wrong_exe_version": "0.6.24",
+    "wrong_exe_rejected": true
+  }
+}
