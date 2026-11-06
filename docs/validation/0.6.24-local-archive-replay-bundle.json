@@ -1,0 +1,38 @@
+{
+  "version": "0.6.24",
+  "source_commit": "b60c33230318c526ec4fb831b870ce2569e2cc40",
+  "exe_sha256": "c1fe662ec1095eba4395777f3b2259dba89b80435c716addf0100d5bbc7d70b3",
+  "bundle_sha256": "3cbe0d612eb5ce7c614b96cb84a8804e00cfa4b7eceba3659444add1f521bf5d",
+  "bundle_bytes": 17952,
+  "files": {
+    "SHA256SUMS.txt": "9b421fd0ee8cc0238c40938b4aea885ada7b7907eb8d8b274a2dae551dbb1106",
+    "base.apk": "7b8e200984dee500def40a9684fd2de9ced885ca1d04c63771d1d473b597dcce",
+    "build-receipt.json": "cae30edc29dcf05191e896bef491d457e2c92bb5f742c0b059e21d3a06328a47",
+    "candidate.apk": "785ec43f4f7fe1b1b564e80c5a1e11f03e5f99b3a3d018dd268a842cad48d595",
+    "manifest-readback.json": "a5d2e06764d0bed8c0e91670828b901be2ad153ebcbcaf7a46f044c3477de8e7",
+    "replay-plan.json": "3ad65644bddaa8559c79390a853aec0a4a56b2bf258df1f925b76e5885df5e80",
+    "复测归档阅读器.ps1": "2dfe467fa6638eed2722e4d1222541ea89268873e6edd372bf2f1c33abb5bfd7",
+    "复测说明.md": "7d6d80b28f4a5c3110230cbc579ce6e4f97c7c712a8a43f4abdc413e7c726bf7"
+  },
+  "scope": "standalone local inputs for P02; Android device outcome pending",
+  "check_only": {
+    "exit_code": 0,
+    "steps": 6,
+    "target_api": 36,
+    "report_sha256": "796a2e60d85dabe60d86ebb5d186e4f05445417a7c0d0063553b8c35ec48a37f",
+    "status": "inputs-verified"
+  },
+  "other_exe": {
+    "version": "0.6.22",
+    "exit_code": 1,
+    "replay_report_created": false
+  },
+  "tampered_candidate": {
+    "replay_report_created": false,
+    "exit_code": 1
+  },
+  "tampered_plan": {
+    "replay_report_created": false,
+    "exit_code": 1
+  }
+}
