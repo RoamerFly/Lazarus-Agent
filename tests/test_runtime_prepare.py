@@ -1,3 +1,4 @@
+import json
 import tempfile
 from pathlib import Path
 import threading
@@ -47,6 +48,24 @@ class RuntimePreparationTests(unittest.TestCase):
                 time.sleep(.01)
             self.assertEqual(calls,[34,36])
             self.assertTrue(manager.status()["terms_accepted"])
+
+    def test_truthy_non_boolean_consent_never_starts_preparation(self):
+        from unittest.mock import Mock
+
+        with tempfile.TemporaryDirectory() as directory:
+            consent = Path(directory) / "consent.json"
+            prepare = Mock()
+            manager = RuntimePreparation(inspect=lambda api: {"ready": False}, prepare=prepare, state_file=consent)
+            for saved in (None, [], {"terms_accepted": "false"}, {"terms_accepted": 1}):
+                consent.write_text(json.dumps(saved), encoding="utf-8")
+                for supplied in (False, "false", "true", 1, [True]):
+                    with self.subTest(saved=saved, supplied=supplied):
+                        self.assertFalse(manager.status()["terms_accepted"])
+                        with self.assertRaises(PermissionError):
+                            manager.start([36], supplied)
+                        self.assertIsNone(manager.status()["active"])
+                        self.assertEqual(json.loads(consent.read_text(encoding="utf-8")), saved)
+            prepare.assert_not_called()
 
     def test_cancel_sets_event_for_prepare(self):
         started=threading.Event()
