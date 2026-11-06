@@ -12,6 +12,34 @@ from tools.verify_review_package import verify
 
 
 class ReviewPackageTests(unittest.TestCase):
+    def test_local_regression_binds_build_and_counterexample_report(self):
+        version, commit, exe_hash = "0.6.22", "a" * 40, "b" * 64
+        audited = {"app_version": version, "implementation_commit": commit,
+                   "source_build_run": "local:" + exe_hash, "protocol_sha256": "c" * 64,
+                   "terminal_trials": 42, "counts": {}, "source_apk_sha256": {"N03": "d" * 64}}
+        status = {"mode": "local-development-replay", "version": version, "source_commit": commit,
+                  "exe_sha256": exe_hash, "protocol_sha256": audited["protocol_sha256"],
+                  "terminal_trials": 42, "counts": {}, "distributable_agent_trials": ["P01-agent-1"],
+                  "counterexamples": ["N03-agent-1"]}
+        receipt = {"version": version, "source_commit": commit, "exe_sha256": exe_hash, "self_test_exit": 0}
+        row = {"case": "N03", "state": "rejected", "candidate_sha256": "e" * 64,
+               "raw_acceptance_sha256": "f" * 64}
+        prefix = "反例样本/N03-agent-1/"
+        files = {prefix + "base.apk": "d" * 64, prefix + "candidate.apk": "e" * 64,
+                 prefix + "agent-acceptance.json": "f" * 64, prefix + "expected-outcome.json": "0" * 64}
+        with (ZipFile(BytesIO(), "w") as archive,
+              patch.object(verify_review_package, "check_regression_distribution",
+                           return_value=({"N03-agent-1": row}, ["P01-agent-1"], []))):
+            archive.writestr("本地构建回执.json", json.dumps(receipt))
+            archive.writestr("results.json", json.dumps(audited))
+            archive.writestr("diff-review.json", "{}")
+            check = verify_review_package.check_local_regression
+            self.assertEqual(check(archive, files, status)["distributed"], 1)
+            with self.assertRaisesRegex(ValueError, "反例"):
+                check(archive, {**files, prefix + "agent-acceptance.json": "0" * 64}, status)
+            with self.assertRaisesRegex(ValueError, "EXE 回执"):
+                check(archive, files, {**status, "exe_sha256": "0" * 64})
+
     def test_regression_distribution_binds_approved_trial_and_archive_hashes(self):
         version = "0.6.18"
         implementation, freeze = "a" * 40, "b" * 40

@@ -90,6 +90,44 @@ def check_signed_release(archive, checksums, status):
     return {"version": release.version, "source_commit": commit}
 
 
+PLAN_FIELDS = {"app_version": "app_version", "implementation_commit": "implementation_commit",
+               "evaluation_role": "purpose", "source_build_run": "build_run",
+               "freeze_commit": "source_protocol_freeze_commit", "protocol_sha256": "protocol_sha256",
+               "planned_trials": "planned_trials"}
+
+
+def regression_sample_hashes(audited, trial, folder):
+    return {
+        folder + "base.apk": audited["source_apk_sha256"][trial["case"]],
+        folder + "candidate.apk": trial["candidate_sha256"],
+        folder + "agent-acceptance.json": trial["raw_acceptance_sha256"],
+    }
+
+
+def check_regression_distribution(audited, review, checksums, prefix, distributed):
+    rows = {row["trial"]: row for row in audited["rows"]}
+    if (len(rows) != len(audited["rows"]) or len(rows) != audited["planned_trials"]
+            or sum(row["terminal"] is True for row in rows.values()) != audited["terminal_trials"]
+            or audited["terminal_trials"] != audited["planned_trials"]):
+        raise ValueError("发布回归缺少完整且唯一的轮次终态")
+
+    from tools.audit_f01_p1b import require_diff_review
+    require_diff_review(audited, review)
+    if any(type(row.get("distributable")) is not bool for row in review["rows"]):
+        raise ValueError("发布回归的差异审查缺少明确的分发结论")
+    excluded = sorted(row["trial"] for row in review["rows"] if not row["distributable"])
+    approved = sorted(row["trial"] for row in review["rows"]
+                      if row["distributable"] and rows[row["trial"]]["mode"] == "agent")
+    expected = {}
+    for trial in approved:
+        expected.update(regression_sample_hashes(audited, rows[trial], f"{prefix}{trial}/"))
+    if distributed != expected.keys():
+        raise ValueError("发布回归的可分发目录与差异审查批准的样本不一致")
+    if any(checksums[name] != digest for name, digest in expected.items()):
+        raise ValueError("发布回归的可分发 APK 或验收报告与审计哈希不一致")
+    return rows, approved, excluded
+
+
 def check_release_regression(archive, checksums, status):
     regression = status.get("release_regression")
     distributed = {name for name in checksums if name.startswith("可分发样本/发布回归-v")}
@@ -104,46 +142,56 @@ def check_release_regression(archive, checksums, status):
     plan = json.loads(archive.read(prefix + "plan.json"))
     audited = json.loads(archive.read(reports + "results.json"))
     review = json.loads(archive.read(reports + "diff-review.json"))
-    plan_fields = {"app_version": "app_version", "implementation_commit": "implementation_commit",
-                   "evaluation_role": "purpose", "source_build_run": "build_run",
-                   "freeze_commit": "source_protocol_freeze_commit", "protocol_sha256": "protocol_sha256",
-                   "planned_trials": "planned_trials"}
-    summary_fields = (*plan_fields, "terminal_trials", "joint_gate", "counts")
+    summary_fields = (*PLAN_FIELDS, "terminal_trials", "joint_gate", "counts")
     if (regression["app_version"] != version
             or any(regression[key] != audited[key] for key in summary_fields)
-            or any(regression[key] != plan[field] for key, field in plan_fields.items())
+            or any(regression[key] != plan[field] for key, field in PLAN_FIELDS.items())
             or regression["protocol_sha256"] != checksums.get(prefix + "f01-p1c-cases.json")):
         raise ValueError("发布回归的状态、方案与审计汇总不一致")
-    rows = {row["trial"]: row for row in audited["rows"]}
-    if (len(rows) != len(audited["rows"]) or len(rows) != regression["planned_trials"]
-            or sum(row["terminal"] is True for row in rows.values()) != regression["terminal_trials"]
-            or regression["terminal_trials"] != regression["planned_trials"]):
-        raise ValueError("发布回归缺少完整且唯一的轮次终态")
-
-    from tools.audit_f01_p1b import require_diff_review
-    require_diff_review(audited, review)
-    if any(type(row.get("distributable")) is not bool for row in review["rows"]):
-        raise ValueError("发布回归的差异审查缺少明确的分发结论")
-    excluded = sorted(row["trial"] for row in review["rows"] if not row["distributable"])
-    if excluded != regression["excluded_from_distribution"]:
+    # Check the declared exclusion list before comparing the distributed files.
+    excluded_review = sorted(row["trial"] for row in review["rows"] if row.get("distributable") is False)
+    if excluded_review != regression["excluded_from_distribution"]:
         raise ValueError("发布回归的分发排除清单与差异审查不一致")
+    rows, approved, excluded = check_regression_distribution(
+        audited, review, checksums, f"可分发样本/发布回归-v{version}/", distributed)
+    return {"version": version, "trials": len(rows), "distributed": len(approved),
+            "excluded_from_distribution": excluded}
 
-    expected = {}
-    for row in review["rows"]:
-        trial = rows[row["trial"]]
-        if not row["distributable"] or trial["mode"] != "agent":
-            continue
-        folder = f"可分发样本/发布回归-v{version}/{row['trial']}/"
-        expected.update({
-            folder + "base.apk": audited["source_apk_sha256"][trial["case"]],
-            folder + "candidate.apk": trial["candidate_sha256"],
-            folder + "agent-acceptance.json": trial["raw_acceptance_sha256"],
-        })
-    if distributed != expected.keys():
-        raise ValueError("发布回归的可分发目录与差异审查批准的样本不一致")
-    if any(checksums[name] != digest for name, digest in expected.items()):
-        raise ValueError("发布回归的可分发 APK 或验收报告与审计哈希不一致")
-    return {"version": version, "trials": len(rows), "distributed": len(expected) // 3,
+
+def check_local_regression(archive, checksums, status):
+    names = {"本地构建回执.json", "results.json", "diff-review.json"}
+    if status.get("mode") != "local-development-replay" and not names <= checksums.keys():
+        return None
+    receipt = json.loads(archive.read("本地构建回执.json"))
+    audited = json.loads(archive.read("results.json"))
+    review = json.loads(archive.read("diff-review.json"))
+    version, commit, exe_hash = status["version"], status["source_commit"], status["exe_sha256"]
+    if (status.get("mode") != "local-development-replay" or version != receipt["version"]
+            or version != audited["app_version"] or commit != receipt["source_commit"]
+            or commit != audited["implementation_commit"] or exe_hash != receipt["exe_sha256"]
+            or audited["source_build_run"] != "local:" + exe_hash or receipt["self_test_exit"] != 0
+            or any(status[key] != audited[key] for key in ("protocol_sha256", "terminal_trials", "counts"))):
+        raise ValueError("本地复测的 EXE 回执、版本或审计汇总不一致")
+    if "plan.json" in checksums or "f01-p1c-cases.json" in checksums:
+        plan = json.loads(archive.read("plan.json"))
+        if (any(audited[key] != plan[field] for key, field in PLAN_FIELDS.items())
+                or audited["protocol_sha256"] != checksums.get("f01-p1c-cases.json")):
+            raise ValueError("本地复测的计划或冻结协议与审计汇总不一致")
+
+    prefix = "可分发样本/"
+    rows, approved, excluded = check_regression_distribution(
+        audited, review, checksums, prefix, {name for name in checksums if name.startswith(prefix)})
+    if approved != sorted(status["distributable_agent_trials"]):
+        raise ValueError("本地复测的可分发清单与差异审查不一致")
+    counterexample = "N03-agent-1"
+    prefix = f"反例样本/{counterexample}/"
+    expected = regression_sample_hashes(audited, rows[counterexample], prefix)
+    if (status["counterexamples"] != [counterexample] or rows[counterexample]["state"] != "rejected"
+            or {name for name in checksums if name.startswith("反例样本/")} !=
+            expected.keys() | {prefix + "expected-outcome.json"}
+            or any(checksums[name] != digest for name, digest in expected.items())):
+        raise ValueError("本地复测的反例与审计轮次或哈希不一致")
+    return {"version": version, "trials": len(rows), "distributed": len(approved),
             "excluded_from_distribution": excluded}
 
 
@@ -171,6 +219,7 @@ def verify(path):
         status = json.loads(archive.read("复核状态.json"))
         signed_release = check_signed_release(archive, checksums, status)
         release_regression = check_release_regression(archive, checksums, status)
+        local_regression = check_local_regression(archive, checksums, status)
         samples = []
         for name in names:
             if "可分发样本" in PurePosixPath(name).parts and name.endswith("/agent-acceptance.json"):
@@ -222,6 +271,7 @@ def verify(path):
                 "samples": samples, "counterexamples": counterexamples,
                 "package_status": status, "signed_release": signed_release,
                 "release_regression": release_regression,
+                "local_regression": local_regression,
                 "scope": "Files, checksums and stored proofs. Device replay is a separate operation."}
 
 

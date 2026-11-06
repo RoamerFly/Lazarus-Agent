@@ -67,6 +67,8 @@ def build(source, results, plan, archive, exe, receipt, output):
         (folder / "expected-outcome.json").write_text(json.dumps(expected, ensure_ascii=False), encoding="utf-8")
         for name in ("results.json", "diff-review.json"):
             copy(archive / name, kit / name)
+        copy(plan, kit / "plan.json")
+        copy(source / "tools/f01-p1c-cases.json", kit / "f01-p1c-cases.json")
         copy(receipt, kit / "本地构建回执.json")
         (kit / "校验文件.ps1").write_text(FILE_CHECK_SCRIPT, encoding="utf-8-sig")
         (kit / "复测样本.ps1").write_text(
@@ -100,7 +102,8 @@ def build(source, results, plan, archive, exe, receipt, output):
                 zipped.writestr(ZipInfo(name), path.read_bytes(), compress_type=ZIP_DEFLATED)
             zipped.writestr(ZipInfo("SHA256SUMS.txt"), checksums.encode("utf-8"), compress_type=ZIP_DEFLATED)
         validated = verify(staged)
-        if len(validated["samples"]) != len(candidates) or len(validated["counterexamples"]) != 1:
+        if (validated["local_regression"]["distributed"] != len(candidates)
+                or len(validated["samples"]) != len(candidates) or len(validated["counterexamples"]) != 1):
             raise ValueError("复核 ZIP 的样本范围与审核结论不一致")
         staged.rename(output)
     return {**metadata, "bundle_sha256": digest(output), "bundle_bytes": output.stat().st_size,

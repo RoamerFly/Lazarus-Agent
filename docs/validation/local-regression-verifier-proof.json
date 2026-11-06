@@ -1,0 +1,68 @@
+{
+  "scope": "Archive validation against existing v0.6.22 data; no device replay",
+  "previous_verifier_commit": "0ea499c",
+  "checks": [
+    {
+      "case": "historical-v0.6.22",
+      "archive_sha256": "3572f1011d2f46953a627acaeabe269d14bddad32e7759ecf5680735b4bb0e5f",
+      "before": "archive-and-proofs-verified",
+      "after": "archive-and-proofs-verified",
+      "local_regression": {
+        "version": "0.6.22",
+        "trials": 42,
+        "distributed": 15,
+        "excluded_from_distribution": [
+          "P02-rules-1",
+          "P06-agent-1",
+          "P06-agent-2",
+          "P06-agent-3"
+        ]
+      }
+    },
+    {
+      "case": "repacked-v0.6.22",
+      "archive_sha256": "8f50daed1ac8b372c8855429deabab334957a6535af3ad63e0768cd147fac5f7",
+      "before": "archive-and-proofs-verified",
+      "after": "archive-and-proofs-verified",
+      "local_regression": {
+        "version": "0.6.22",
+        "trials": 42,
+        "distributed": 15,
+        "excluded_from_distribution": [
+          "P02-rules-1",
+          "P06-agent-1",
+          "P06-agent-2",
+          "P06-agent-3"
+        ]
+      }
+    },
+    {
+      "case": "candidate-and-proof-substitution",
+      "archive_sha256": "61b465a4091759ff539cb5ddbda2ddcceb9bdfa56b060abd402c5cc7a4628710",
+      "before": "archive-and-proofs-verified",
+      "after": "rejected",
+      "diagnostic": "发布回归的可分发 APK 或验收报告与审计哈希不一致"
+    },
+    {
+      "case": "negative-report-rewritten",
+      "archive_sha256": "a7c24dabf3eb7c97642bdaf0b405221a1175ecb151f9190dfe87d96e89c87c06",
+      "before": "archive-and-proofs-verified",
+      "after": "rejected",
+      "diagnostic": "本地复测的反例与审计轮次或哈希不一致"
+    },
+    {
+      "case": "freeze-commit-mismatch",
+      "archive_sha256": "39a002f6d9f1e9e8a5e81511be54d4d8523cc880b10ca13801972639a188abd3",
+      "before": "archive-and-proofs-verified",
+      "after": "rejected",
+      "diagnostic": "本地复测的计划或冻结协议与审计汇总不一致"
+    },
+    {
+      "case": "build-receipt-mismatch",
+      "archive_sha256": "9eb524638da75e89b4bcac970af0ce58ca3e6c826904bce75cef426c4172b627",
+      "before": "archive-and-proofs-verified",
+      "after": "rejected",
+      "diagnostic": "本地复测的 EXE 回执、版本或审计汇总不一致"
+    }
+  ]
+}
