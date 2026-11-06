@@ -2,12 +2,13 @@
 from contextlib import nullcontext
 import json
 from pathlib import Path
+from subprocess import TimeoutExpired
 import tempfile
 import unittest
 from unittest.mock import Mock, patch
 
 from agent_workspace import Workspace, digest
-from feature_agent import Session, run, tool_definitions
+from feature_agent import Session, _loop, run, tool_definitions
 
 
 class WorkspaceTests(unittest.TestCase):
@@ -232,6 +233,39 @@ class WorkspaceTests(unittest.TestCase):
             self.assertEqual(session.artifact, artifact)
             self.assertEqual(session.build_count, 2)
             self.assertIsNone(session.device_report)
+
+    def test_device_timeout_returns_to_model_and_invalidates_observation(self):
+        tester = Mock()
+        tester.test.return_value = {"installed_sha256": "source"}
+        tester.action.side_effect = [TimeoutExpired(["adb", "shell"], 30), {"ui": {"nodes": []}}]
+        session = Session(self.root, Path("source.apk"), self.root / "candidate.apk",
+                          Path("tools"), 36, {"sha256": "source"}, lambda _: None, tester)
+        steps = [
+            ("test_original", {}),
+            ("device_action", {"action": "cold_start"}),
+            ("device_action", {"action": "read"}),
+            ("test_original", {}),
+            ("device_action", {"action": "read"}),
+            ("finish", {"outcome": "analysis", "summary": "Recovered observation"}),
+        ]
+        responses = iter(enumerate(steps))
+
+        def model(url, payload, key, **kwargs):
+            index, (name, args) = next(responses)
+            if index == 2:
+                error = json.loads(payload["messages"][-1]["content"])
+                self.assertFalse(error["ok"])
+                self.assertIn("30", error["error"])
+                self.assertNotIn("adb", error["error"])
+            return {"content": None, "tool_calls": [{"id": f"call-{index}", "type": "function",
+                    "function": {"name": name, "arguments": json.dumps(args)}}]}
+
+        with patch("feature_agent._request", side_effect=model):
+            _loop(session, [], [], {name for name, _ in steps},
+                  {"url": "https://example.test", "model": "example", "key": ""}, lambda _: None)
+        self.assertEqual([row["ok"] for row in session.trace], [True, False, False, True, True, True])
+        self.assertEqual(tester.test.call_count, 2)
+        self.assertEqual(tester.action.call_count, 2)
 
     def test_build_failure_is_returned_to_model_for_repair(self):
         def call(name, **args):
