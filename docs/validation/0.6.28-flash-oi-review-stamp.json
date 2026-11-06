@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "app_version": "0.6.28",
+  "planned_user_jobs": 1,
+  "started_user_jobs": 1,
+  "live_probe": {
+    "source_commit": "cbd58ed08345f5c7f61d127d8ba989f8eca4d5ab",
+    "plan_sha256": "567a0c4c1c936c54fb461663c9a565dc00d23c66b2b171e36104a41a305e960f",
+    "scope": "one-shot-engineering-probe",
+    "requests": 20,
+    "provider_responses": 20,
+    "model": "deepseek-flash",
+    "tokens": {
+      "completion_tokens": 9956,
+      "prompt_cache_hit_tokens": 490880,
+      "prompt_cache_miss_tokens": 26675,
+      "prompt_tokens": 517555
+    },
+    "job_status": "ready",
+    "verified_endpoint_http": null,
+    "verified_candidate": false,
+    "input_sha256": "3c5f3ebcbbae199a403304e195b63f29198729467d7900f85c28a18be9695539",
+    "acceptance_status": "no-published-candidate",
+    "rehearsal": {
+      "build": "hash-matched",
+      "install": "passed",
+      "launch": "passed",
+      "function": "failed",
+      "api": 36,
+      "candidate_sha256": "ca91d9d56ee513fa43f860d476edc0f35a934425610d53ca46643d1e35a4c522",
+      "installed_sha256": "ca91d9d56ee513fa43f860d476edc0f35a934425610d53ca46643d1e35a4c522",
+      "verification": "candidate-rehearsal",
+      "expected_steps": 16,
+      "passed_steps": 0,
+      "failure": "点击控件必须在目标应用页面唯一匹配",
+      "failed_step": {
+        "action": "tap",
+        "value": "Add note",
+        "match_count": 0,
+        "index": 1,
+        "observed": [
+          {},
+          {
+            "resource-id": "android:id/decor_content_parent"
+          },
+          {
+            "resource-id": "android:id/action_bar_container"
+          },
+          {
+            "resource-id": "android:id/action_bar"
+          },
+          {
+            "text": "OI Notepad"
+          },
+          {
+            "resource-id": "android:id/content"
+          },
+          {},
+          {
+            "text": "OI Notepad EULA",
+            "resource-id": "org.openintents.notepad:id/text1"
+          },
+          {},
+          {
+            "resource-id": "org.openintents.notepad:id/container1"
+          },
+          {
+            "resource-id": "org.openintents.notepad:id/imageview"
+          },
+          {
+            "text": "Please read and accept the following End User License Agreement (EULA) for OI Notepad.",
+            "resource-id": "org.openintents.notepad:id/text2"
+          }
+        ]
+      },
+      "external_caller": "not-observed"
+    },
+    "failed_followup": {
+      "tool": "device_action",
+      "error": "请先成功安装要操作的原 APK 或最新候选"
+    },
+    "modified_files": [
+      "res/layout/note_editor.xml",
+      "smali/org/openintents/notepad/NoteEditor.smali"
+    ],
+    "agent_trace_sha256": "82849bd23d1b33f9ed1a8d6ee825a5cfa2fb7e54d24502324c361e61dd7b2803"
+  },
+  "offline_fix_replay": {
+    "scope": "recorded-tool-replay",
+    "network_model_calls": 0,
+    "tool_calls": 27,
+    "build_attempts": 1,
+    "rehearsal": {
+      "build": "hash-matched",
+      "install": "passed",
+      "launch": "passed",
+      "function": "failed",
+      "api": 36,
+      "candidate_sha256": "be5a6cdfedf17709902151bbca4b50b1f0c2327c5744d3e59d118973f49ec534",
+      "installed_sha256": "be5a6cdfedf17709902151bbca4b50b1f0c2327c5744d3e59d118973f49ec534",
+      "verification": "candidate-rehearsal",
+      "expected_steps": 16,
+      "passed_steps": 0,
+      "failure": "点击控件必须在目标应用页面唯一匹配",
+      "failed_step": {
+        "action": "tap",
+        "value": "Add note",
+        "match_count": 0,
+        "index": 1,
+        "observed": [
+          {},
+          {
+            "resource-id": "android:id/decor_content_parent"
+          },
+          {
+            "resource-id": "android:id/action_bar_container"
+          },
+          {
+            "resource-id": "android:id/action_bar"
+          },
+          {
+            "text": "OI Notepad"
+          },
+          {
+            "resource-id": "android:id/content"
+          },
+          {},
+          {
+            "text": "OI Notepad EULA",
+            "resource-id": "org.openintents.notepad:id/text1"
+          },
+          {},
+          {
+            "resource-id": "org.openintents.notepad:id/container1"
+          },
+          {
+            "resource-id": "org.openintents.notepad:id/imageview"
+          },
+          {
+            "text": "Please read and accept the following End User License Agreement (EULA) for OI Notepad.",
+            "resource-id": "org.openintents.notepad:id/text2"
+          }
+        ]
+      },
+      "external_caller": "not-observed"
+    },
+    "followup": {
+      "action": "read",
+      "tested_input": "candidate",
+      "foreground": "OI Notepad EULA"
+    },
+    "published_candidate": false,
+    "outcome": "analysis",
+    "feature_agent_source_sha256": "76c712ce4f88e78709d3eb23e3996d74bec6e54c8872c8b8f0ab75d3f136cb39",
+    "agent_trace_sha256": "b1579bdf2e77a31fdc883d3553d9b3213ccce1d9a2e4a1c5ad2da4b452ce153f",
+    "fix_source_commit": "152ed18f54e1378d4bd3cc9aaeb3ebca27e56a46"
+  }
+}
