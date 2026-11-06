@@ -1,10 +1,10 @@
 # -*- mode: python ; coding: utf-8 -*-
 from pathlib import Path
-from PyInstaller.utils.hooks import collect_data_files, collect_dynamic_libs, collect_submodules
+from PyInstaller.utils.hooks import collect_data_files, collect_dynamic_libs, collect_submodules, copy_metadata
 root = Path(SPECPATH)
 a = Analysis([str(root/"desktop.py")], pathex=[str(root)],
     binaries=collect_dynamic_libs("ctranslate2"),
-    datas=collect_data_files("rapidocr_onnxruntime")+collect_data_files("opencc")+collect_data_files("UnityPy")+[(str(root/"web"),"web"),(str(root/"tools/start_lab.ps1"),"tools"),
+    datas=collect_data_files("rapidocr_onnxruntime")+collect_data_files("opencc")+collect_data_files("UnityPy")+copy_metadata("truststore")+[(str(root/"web"),"web"),(str(root/"tools/start_lab.ps1"),"tools"),
            (str(root/"update/lazarus-update-public.pem"),"update"),
            (str(root/"fixtures/archive-reader/archive-reader-broken.apk"),"fixtures/archive-reader")],
     hiddenimports=collect_submodules("rapidocr_onnxruntime")+["uvicorn.logging","uvicorn.loops.asyncio","uvicorn.protocols.http.h11_impl",

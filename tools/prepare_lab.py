@@ -11,6 +11,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import ssl
 import subprocess
 import sys
 import tempfile
@@ -134,12 +135,22 @@ def _event(progress: Progress | None, phase: str, component: str, message: str, 
         progress({"phase": phase, "component": component, "message": message, "api": api, **extra})
 
 
+def _open_publisher(request: urllib.request.Request | str, timeout: int):
+    if sys.platform == "win32":
+        import truststore
+
+        # Ask Windows to build and verify the chain, including uncached intermediates.
+        context = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+        return urllib.request.urlopen(request, timeout=timeout, context=context)
+    return urllib.request.urlopen(request, timeout=timeout)
+
+
 def _google_spec(component: str, api: int | None = None) -> dict[str, object]:
     image = component == "system-image"
     prefix = "sys-img/android/" if image else ""
     index = prefix + "sys-img2-1.xml" if image else "repository2-1.xml"
     package_id = f"system-images;android-{api};default;x86_64" if image else component
-    with urllib.request.urlopen(urllib.request.Request(BASE + index, headers=HTTP_HEADERS), timeout=30) as response:
+    with _open_publisher(urllib.request.Request(BASE + index, headers=HTTP_HEADERS), timeout=30) as response:
         catalog = ET.parse(response)
     packages = [entry for entry in catalog.getroot().iter()
                 if entry.tag.endswith("remotePackage") and entry.get("path") == package_id]
@@ -163,7 +174,7 @@ def _google_spec(component: str, api: int | None = None) -> dict[str, object]:
 def _temurin_spec() -> dict[str, object]:
     """Get a publisher-provided SHA-256 for the current Temurin 21 Windows JRE."""
     url = "https://api.adoptium.net/v3/assets/latest/21/hotspot?os=windows&architecture=x64&image_type=jre&jvm_impl=hotspot&vendor=eclipse"
-    with urllib.request.urlopen(urllib.request.Request(url, headers=HTTP_HEADERS), timeout=30) as response:
+    with _open_publisher(urllib.request.Request(url, headers=HTTP_HEADERS), timeout=30) as response:
         assets = json.load(response)
     if not isinstance(assets, list) or not assets:
         raise ValueError("Temurin catalog returned no Windows x64 JRE")
@@ -210,7 +221,7 @@ def _download(spec: dict[str, object], downloads: Path, progress: Progress | Non
         headers["Range"] = f"bytes={current}-"
     request = urllib.request.Request(str(spec["url"]), headers=headers)
     try:
-        response = urllib.request.urlopen(request, timeout=90)
+        response = _open_publisher(request, timeout=90)
     except (urllib.error.URLError, TimeoutError, ConnectionError):
         fallback = spec.get("fallback_url")
         if not fallback:
@@ -218,7 +229,7 @@ def _download(spec: dict[str, object], downloads: Path, progress: Progress | Non
         _check_continue(cancel, deadline)
         _event(progress, "download", component, "主下载地址不可用，正在尝试官方备用地址",
                api, current=current, total=expected_size)
-        response = urllib.request.urlopen(urllib.request.Request(str(fallback), headers=headers), timeout=90)
+        response = _open_publisher(urllib.request.Request(str(fallback), headers=headers), timeout=90)
     with response as source:
         # Some mirrors ignore Range. Avoid appending a full archive to a partial.
         append = current > 0 and getattr(source, "status", None) == 206
@@ -240,7 +251,7 @@ def fetch_component(component: str) -> Path:
     image = component != "emulator"
     prefix = "sys-img/android/" if image else ""
     index = prefix + "sys-img2-1.xml" if image else "repository2-1.xml"
-    with urllib.request.urlopen(BASE + index, timeout=30) as response:
+    with _open_publisher(BASE + index, timeout=30) as response:
         catalog = ET.parse(response)
     package_id = f"system-images;android-{component};default;x86_64" if image else "emulator"
     pkg = next(p for p in catalog.getroot() if p.get("path") == package_id and
@@ -255,7 +266,7 @@ def fetch_component(component: str) -> Path:
         with tempfile.NamedTemporaryFile(dir=out.parent, suffix=".part", delete=False) as tmp:
             tmp_path = Path(tmp.name)
         try:
-            with urllib.request.urlopen(BASE.replace("dl.google.com", "redirector.gvt1.com/edgedl") + prefix + name, timeout=90) as src, tmp_path.open("wb") as dst:
+            with _open_publisher(BASE.replace("dl.google.com", "redirector.gvt1.com/edgedl") + prefix + name, timeout=90) as src, tmp_path.open("wb") as dst:
                 shutil.copyfileobj(src, dst, length=1024*1024)
             _verify_archive(tmp_path, size, digest)
             tmp_path.replace(out)

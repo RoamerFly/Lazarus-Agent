@@ -5,6 +5,7 @@ import hashlib
 from io import BytesIO
 import os
 import shutil
+import ssl
 import tempfile
 import sys
 import types
@@ -131,6 +132,17 @@ class PrepareLabSafetyTests(unittest.TestCase):
         requests = [call.args[0] for call in request.call_args_list]
         self.assertEqual([item.full_url for item in requests], [spec["url"], spec["fallback_url"]])
         self.assertEqual([item.get_header("Range") for item in requests], ["bytes=4-", "bytes=4-"])
+
+    @unittest.skipUnless(sys.platform == "win32", "Windows certificate validation")
+    def test_publisher_download_uses_windows_trust_with_hostname_validation(self) -> None:
+        import truststore
+
+        with patch.object(prepare_lab.urllib.request, "urlopen") as request:
+            prepare_lab._open_publisher(prepare_lab.BASE, timeout=30)
+        context = request.call_args.kwargs["context"]
+        self.assertIsInstance(context, truststore.SSLContext)
+        self.assertEqual(context.verify_mode, ssl.CERT_REQUIRED)
+        self.assertTrue(context.check_hostname)
 
     def test_missing_component_requires_terms_before_network_download(self) -> None:
         with patch.object(prepare_lab, "_source_sdks", return_value=[]), \
