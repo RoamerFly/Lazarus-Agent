@@ -1,0 +1,15 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="org.ggbond.intentboundaryprobe">
+    <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="35"/>
+    <queries>
+        <provider android:authorities="org.ggbond.archivereader.records"/>
+    </queries>
+    <application android:label="Intent Boundary Probe" android:theme="@android:style/Theme.Material.Light">
+        <activity android:name=".BoundaryActivity" android:exported="true">
+            <intent-filter>
+                <action android:name="org.ggbond.archivereader.OPEN_RECORD"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="application/vnd.ggbond.record"/>
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

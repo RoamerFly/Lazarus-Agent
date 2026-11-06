@@ -1,0 +1,304 @@
+{
+  "scope": "two-case development device diagnostic on team-owned synthetic data",
+  "review_zip_sha256": "ba683811039573ef78a9b9fe6560d06c5540b8c3aa5b382ec1b1e27fbfaf23c2",
+  "api": 36,
+  "abi": "x86_64",
+  "cases": {
+    "implicit": {
+      "zip_entry": "v0.6.18 发布回归/评测记录/P06-agent-1/candidate.apk",
+      "raw_capture_sha256": "7f1c3c793a81b783a6cf3d9ee388f42c45a98880c8de011093e505b82d0e72fa",
+      "api": 36,
+      "probe_sha256": "f8b3e83b627c5241ebbc6f4fc45dd62a6649ba6dbf9fa70e961b19a5f04fe417",
+      "candidate_sha256": "4ddfa115491c57c227f8f0d59f4f618abf0da3dc6b4ee73f7d7e5b021cadf5a3",
+      "installed_sha256": "4ddfa115491c57c227f8f0d59f4f618abf0da3dc6b4ee73f7d7e5b021cadf5a3",
+      "uids": {
+        "org.ggbond.archivereader": 10151,
+        "org.ggbond.intentboundaryprobe": 10150
+      },
+      "abis": [
+        "x86_64"
+      ],
+      "implicit_handlers": "2 activities found:\r\n  Activity #0:\r\n    priority=0 preferredOrder=0 match=0x608000 specificIndex=-1 isDefault=true\r\n    org.ggbond.archivereader/.ShareActivity\r\n  Activity #1:\r\n    priority=0 preferredOrder=0 match=0x608000 specificIndex=-1 isDefault=true\r\n    org.ggbond.intentboundaryprobe/.BoundaryActivity",
+      "direct_probe": [
+        [
+          "org.ggbond.intentboundaryprobe",
+          "android:id/decor_content_parent"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "android:id/content"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "PROBE_DATA_UNAVAILABLE"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "PROBE_GRANT_DENIED"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "android:id/action_bar_container"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "android:id/action_bar"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "Intent Boundary Probe"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "android:id/navigationBarBackground"
+        ]
+      ],
+      "launch_observations": [
+        {
+          "target_nodes": 0,
+          "window_owners": {
+            "android": 15
+          },
+          "system_dialog": "legacy-target-notice",
+          "dialog_action": "acknowledge"
+        },
+        {
+          "target_nodes": 9
+        }
+      ],
+      "chooser": [
+        [
+          "android",
+          "android:id/content"
+        ],
+        [
+          "android",
+          "android:id/contentPanel"
+        ],
+        [
+          "android",
+          "android:id/title_container"
+        ],
+        [
+          "android",
+          "Complete action using"
+        ],
+        [
+          "android",
+          "android:id/divider"
+        ],
+        [
+          "android",
+          "android:id/profile_tabhost"
+        ],
+        [
+          "android",
+          "android:id/tabcontent"
+        ],
+        [
+          "android",
+          "android:id/profile_pager"
+        ],
+        [
+          "android",
+          "android:id/resolver_list"
+        ],
+        [
+          "android",
+          "android:id/icon"
+        ],
+        [
+          "android",
+          "Archive Reader"
+        ],
+        [
+          "android",
+          "android:id/icon"
+        ],
+        [
+          "android",
+          "Intent Boundary Probe"
+        ],
+        [
+          "android",
+          "android:id/button_bar_container"
+        ],
+        [
+          "android",
+          "android:id/resolver_button_bar_divider"
+        ],
+        [
+          "android",
+          "android:id/button_bar"
+        ],
+        [
+          "android",
+          "Just once"
+        ],
+        [
+          "android",
+          "Always"
+        ],
+        [
+          "android",
+          "android:id/navigationBarBackground"
+        ]
+      ],
+      "after_share": [
+        [
+          "org.ggbond.intentboundaryprobe",
+          "android:id/decor_content_parent"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "android:id/content"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "PROBE_READ_42"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "PROBE_GRANT_ALLOWED"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "android:id/action_bar_container"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "android:id/action_bar"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "Intent Boundary Probe"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "android:id/navigationBarBackground"
+        ]
+      ],
+      "after_scoped_direct": null
+    },
+    "scoped": {
+      "zip_entry": "可分发样本/专项复测-v0.6.18/P06-agent-1/candidate.apk",
+      "raw_capture_sha256": "259a8ff73b339bc6e353a8f45a219b2b2747751f5e25a6a6046e2fcf7e1a9dd4",
+      "api": 36,
+      "probe_sha256": "f8b3e83b627c5241ebbc6f4fc45dd62a6649ba6dbf9fa70e961b19a5f04fe417",
+      "candidate_sha256": "c45668391edfc1fe9f70c1bb11919fc51a1e2ad1187985896ba29ca75e211cf9",
+      "installed_sha256": "c45668391edfc1fe9f70c1bb11919fc51a1e2ad1187985896ba29ca75e211cf9",
+      "uids": {
+        "org.ggbond.archivereader": 10151,
+        "org.ggbond.intentboundaryprobe": 10150
+      },
+      "abis": [
+        "x86_64"
+      ],
+      "implicit_handlers": "2 activities found:\r\n  Activity #0:\r\n    priority=0 preferredOrder=0 match=0x608000 specificIndex=-1 isDefault=true\r\n    org.ggbond.archivereader/.ShareActivity\r\n  Activity #1:\r\n    priority=0 preferredOrder=0 match=0x608000 specificIndex=-1 isDefault=true\r\n    org.ggbond.intentboundaryprobe/.BoundaryActivity",
+      "direct_probe": [
+        [
+          "org.ggbond.intentboundaryprobe",
+          "android:id/decor_content_parent"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "android:id/content"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "PROBE_DATA_UNAVAILABLE"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "PROBE_GRANT_DENIED"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "android:id/action_bar_container"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "android:id/action_bar"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "Intent Boundary Probe"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "android:id/navigationBarBackground"
+        ]
+      ],
+      "launch_observations": [
+        {
+          "target_nodes": 8
+        }
+      ],
+      "chooser": [],
+      "after_share": [
+        [
+          "org.ggbond.archivereader",
+          "android:id/decor_content_parent"
+        ],
+        [
+          "org.ggbond.archivereader",
+          "android:id/content"
+        ],
+        [
+          "org.ggbond.archivereader",
+          "Shared"
+        ],
+        [
+          "org.ggbond.archivereader",
+          "android:id/action_bar_container"
+        ],
+        [
+          "org.ggbond.archivereader",
+          "android:id/action_bar"
+        ],
+        [
+          "org.ggbond.archivereader",
+          "Archive Reader"
+        ],
+        [
+          "org.ggbond.archivereader",
+          "android:id/navigationBarBackground"
+        ]
+      ],
+      "after_scoped_direct": [
+        [
+          "org.ggbond.intentboundaryprobe",
+          "android:id/decor_content_parent"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "android:id/content"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "PROBE_DATA_UNAVAILABLE"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "PROBE_GRANT_DENIED"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "android:id/action_bar_container"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "android:id/action_bar"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "Intent Boundary Probe"
+        ],
+        [
+          "org.ggbond.intentboundaryprobe",
+          "android:id/navigationBarBackground"
+        ]
+      ]
+    }
+  }
+}
