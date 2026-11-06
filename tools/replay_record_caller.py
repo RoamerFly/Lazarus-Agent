@@ -25,7 +25,27 @@ OUTCOMES = {
 }
 
 
-def replay(device, apk, expected, probe, *, uri_after_share=False):
+def observe_outcome(caller):
+    observed = wait_for(caller, {text for _, text in OUTCOMES})
+    outcomes = {OUTCOMES[node] for node in observed if node in OUTCOMES}
+    if len(outcomes) != 1:
+        raise ValueError("The observed response has ambiguous or unexpected ownership")
+    outcome, = outcomes
+    return {"outcome": outcome, "observed": observed}
+
+
+def send_known_uri(caller):
+    for package in (TARGET, CALLER):
+        bench.shell(caller.serial, "am", "force-stop", package)
+    bench.shell(caller.serial, "am", "start", "-W", "-n", CALLER + "/.BoundaryActivity",
+                "--ez", "probe_record_uri", "true")
+    response = observe_outcome(caller)
+    if response["outcome"] == "forged-success":
+        response["outcome"] = "external-record-status"
+    return response
+
+
+def replay(device, apk, expected, probe, *, uri_after_share=False, compare_uri=False):
     owner = "f01-record-caller"
     target = AgentDevice(device, owner, 36, bench.TOOLS, print)
     target_install = target.test(apk, expected)
@@ -52,21 +72,24 @@ def replay(device, apk, expected, probe, *, uri_after_share=False):
     if len(set(uids.values())) != 2:
         raise ValueError("The probe must run with its own UID")
 
-    if uri_after_share:
-        for package in (TARGET, CALLER):
-            bench.shell(caller.serial, "am", "force-stop", package)
-        bench.shell(caller.serial, "am", "start", "-W", "-n", CALLER + "/.BoundaryActivity",
-                    "--ez", "probe_record_uri", "true")
-    observed = wait_for(caller, {text for _, text in OUTCOMES})
-    outcomes = {OUTCOMES[node] for node in observed if node in OUTCOMES}
-    if len(outcomes) != 1:
-        raise ValueError("The observed response has ambiguous or unexpected ownership")
-    outcome, = outcomes
-    if uri_after_share and outcome == "forged-success":
-        outcome = "external-record-status"
-    return {"api": 36, "abis": target_install["abis"], "candidate_and_installed_sha256": expected,
-            "caller_apk_sha256": probe_hash, "uids": uids, "observed": observed, "outcome": outcome,
-            "input": "known-record-uri-after-share" if uri_after_share else "external-bytes-before-share"}
+    before_share = None
+    in_app_share = []
+    if compare_uri:
+        before_share = send_known_uri(caller)
+        for step in ({"action": "cold_start"}, {"action": "tap", "value": "Share local record"},
+                     {"action": "expect", "value": "Shared"}):
+            evidence = dict(step)
+            _step(target, step, evidence, handled)
+            in_app_share.append(evidence)
+    use_uri = uri_after_share or compare_uri
+    response = send_known_uri(caller) if use_uri else observe_outcome(caller)
+    result = {"api": 36, "abis": target_install["abis"], "candidate_and_installed_sha256": expected,
+              "caller_apk_sha256": probe_hash, "uids": uids, **response,
+              "input": "known-record-uri-after-share" if use_uri else "external-bytes-before-share"}
+    if before_share is not None:
+        result["before_share"] = before_share
+        result["in_app_share"] = in_app_share
+    return result
 
 
 def main():
@@ -74,8 +97,11 @@ def main():
     parser.add_argument("--apk", type=Path, required=True)
     parser.add_argument("--sha256", required=True)
     parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--uri-after-share", action="store_true",
-                        help="After a legitimate share, send its known URI from the separate app")
+    uri = parser.add_mutually_exclusive_group()
+    uri.add_argument("--uri-after-share", action="store_true",
+                     help="After a legitimate share, send its known URI from the separate app")
+    uri.add_argument("--uri-before-and-after-share", action="store_true",
+                     help="Send the same known URI before and after the target writes its record")
     args = parser.parse_args()
     out = args.out.resolve()
     if not out.is_relative_to(ROOT / "build"):
@@ -90,7 +116,8 @@ def main():
     build_probe(probe, ROOT / "tools/fixtures/record-caller")
     device = bench.Device(allow_existing=False)
     try:
-        result = replay(device, args.apk, args.sha256, probe, uri_after_share=args.uri_after_share)
+        result = replay(device, args.apk, args.sha256, probe, uri_after_share=args.uri_after_share,
+                        compare_uri=args.uri_before_and_after_share)
     finally:
         device.stop()
     (out / "result.json").write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
