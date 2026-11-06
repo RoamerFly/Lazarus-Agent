@@ -26,6 +26,7 @@ class Workspace:
     def __init__(self, root):
         self.root = root.resolve(strict=True)
         self.read_hashes = {}
+        self.write_hashes = {}
         self.originals = {}
         self.revision = 0
 
@@ -143,8 +144,8 @@ class Workspace:
             raise ValueError("该文件不属于可编辑的 APK 代码或资源")
         raw, text = self._text(path)
         current = digest(raw)
-        if self.read_hashes.get(path) != current or sha256 != current:
-            raise ValueError("请先读取当前文件并使用返回的 SHA-256")
+        if sha256 != current or current not in (self.read_hashes.get(path), self.write_hashes.get(path)):
+            raise ValueError("请使用本轮读取或成功编辑该文件时返回的最新 SHA-256")
         if (not isinstance(old, str) or not old or not isinstance(new, str) or old == new or
                 len(old.encode("utf-8"))+len(new.encode("utf-8")) > MAX_PATCH_BYTES or "\0" in new):
             raise ValueError("替换内容无效或过长")
@@ -222,7 +223,9 @@ class Workspace:
         self.path(path).write_bytes(updated)
         self.revision += 1
         self.read_hashes.pop(path, None)
-        return {"path": path, "sha256": digest(updated), "revision": self.revision}
+        sha256 = digest(updated)
+        self.write_hashes[path] = sha256
+        return {"path": path, "sha256": sha256, "revision": self.revision}
 
     def create_text_file(self, path, content):
         if not self.editable(path) or not isinstance(content, str) or "\0" in content:
@@ -239,7 +242,9 @@ class Workspace:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(raw)
         self.revision += 1
-        return {"path": path, "sha256": digest(raw), "revision": self.revision}
+        sha256 = digest(raw)
+        self.write_hashes[path] = sha256
+        return {"path": path, "sha256": sha256, "revision": self.revision}
 
     def restore_file(self, path):
         if path not in self.originals:
@@ -252,6 +257,7 @@ class Workspace:
             target.write_bytes(original)
         del self.originals[path]
         self.read_hashes.pop(path, None)
+        self.write_hashes.pop(path, None)
         self.revision += 1
         return {"restored": path, "revision": self.revision}
 
