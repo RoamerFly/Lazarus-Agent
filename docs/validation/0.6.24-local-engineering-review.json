@@ -1,0 +1,63 @@
+{
+  "archive_sha256": "e6733269817140b50b36b36452e84668afef5b819e00ed9d3467bbbf08030690",
+  "bytes": 3766422,
+  "file_count": 73,
+  "local_review": {
+    "version": "0.6.24",
+    "source_commit": "b60c33230318c526ec4fb831b870ce2569e2cc40",
+    "demo_steps": 10,
+    "scope": "local-engineering-review",
+    "clean_windows": "pending",
+    "non_developer_trial": "pending"
+  },
+  "regression_samples": 15,
+  "counterexamples": 1,
+  "exe_sha256": "c1fe662ec1095eba4395777f3b2259dba89b80435c716addf0100d5bbc7d70b3",
+  "extraction_check": {
+    "checked_files": 72,
+    "input_reports": [
+      {
+        "sample": "工作台演示",
+        "steps": 10,
+        "status": "inputs-verified",
+        "candidate_sha256": "e6d12d2a19772f9bfab899fc627bb4109f8f5bb74ecb51f1d15a1c3f627cdf8f",
+        "report_sha256": "e1cd423cb5dc7e42df40b7a35c51f71c9532a39b3f95962a24bd0c92b07b09a9"
+      },
+      {
+        "sample": "N03-agent-1",
+        "steps": 2,
+        "status": "inputs-verified",
+        "candidate_sha256": "40b936d5865a6317718ea932a0e2a6e831e7a66cdcf51694212a57ebd10fd3f0",
+        "report_sha256": "670db1a34a5bca09d75cfd6e459d607c1ad89086e0d6fb0312b79a61e8e10ed5"
+      }
+    ],
+    "windows_powershell": "5.1",
+    "scope": "File and input checks only"
+  },
+  "modified_archive_checks": [
+    {
+      "case": "source-archive-from-another-commit",
+      "archive_sha256": "7f1f2844421a3e8c3245a9456d9b9d2f6df7aada1be2a0bf33b72bfbe30e6766",
+      "status": "rejected",
+      "diagnostic": "本地评审包源码的提交或程序版本不一致"
+    },
+    {
+      "case": "wrong-demo-candidate",
+      "archive_sha256": "54beab2e3722e28876510a133b9d222c097119c57d7f297ed6245a6fdf381e3e",
+      "status": "rejected",
+      "diagnostic": "本地评审包的演示录制或设备验收证据不一致"
+    },
+    {
+      "case": "wrong-device-frame",
+      "archive_sha256": "38f16176376c44634af2b164873b71e0ec3413900271f95343d166f44aa4afad",
+      "status": "rejected",
+      "diagnostic": "本地评审包的演示录制或设备验收证据不一致"
+    },
+    {
+      "case": "wrong-windows-executable",
+      "archive_sha256": "ea95633645ebcecaeb1504d501ac61f52dfc8940d1106f798b842c310036dc8d",
+      "status": "rejected",
+      "diagnostic": "本地评审包的 Windows 复核输入与回执不一致"
+    }
+  ]
+}

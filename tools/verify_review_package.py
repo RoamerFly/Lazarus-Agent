@@ -15,6 +15,8 @@ sys.path.insert(0, str(ROOT))
 from agent_acceptance import verified_for
 from updater import parse_manifest, verify_manifest
 
+LOCAL_DEMO = "可分发样本/工作台演示/"
+
 
 def check_local_links(archive, names):
     count = 0
@@ -179,8 +181,10 @@ def check_local_regression(archive, checksums, status):
             raise ValueError("本地复测的计划或冻结协议与审计汇总不一致")
 
     prefix = "可分发样本/"
+    distributed = {name for name in checksums if name.startswith(prefix)
+                   and not (status.get("local_review") and name.startswith(LOCAL_DEMO))}
     rows, approved, excluded = check_regression_distribution(
-        audited, review, checksums, prefix, {name for name in checksums if name.startswith(prefix)})
+        audited, review, checksums, prefix, distributed)
     if approved != sorted(status["distributable_agent_trials"]):
         raise ValueError("本地复测的可分发清单与差异审查不一致")
     counterexample = "N03-agent-1"
@@ -193,6 +197,65 @@ def check_local_regression(archive, checksums, status):
         raise ValueError("本地复测的反例与审计轮次或哈希不一致")
     return {"version": version, "trials": len(rows), "distributed": len(approved),
             "excluded_from_distribution": excluded}
+
+
+def check_local_review(archive, checksums, status, regression):
+    edition = status.get("local_review")
+    if edition is None:
+        return None
+    if (regression is None or edition != {"scope": "local-engineering-review",
+                                          "clean_windows": "pending", "non_developer_trial": "pending"}):
+        raise ValueError("本地评审包的范围、评测或独立复核状态不符")
+    version, commit, exe_hash = status["version"], status["source_commit"], status["exe_sha256"]
+    receipt = json.loads(archive.read("同版材料校验回执.json"))
+    source_name = f"F01-源代码-v{version}.zip"
+    material_hashes = {
+        source_name: receipt["source_archive_sha256"],
+        "遗留软件复活智能体方案说明.pdf": receipt["proposal_sha256"],
+        "遗留软件复活智能体演示.mp4": receipt["video_sha256"],
+    }
+    if (receipt["app_version"] != version or receipt["source_commit"] != commit
+            or receipt["exe_sha256"] != exe_hash
+            or any(checksums.get(name) != digest for name, digest in material_hashes.items())):
+        raise ValueError("本地评审包的方案、演示或源码与同版回执不一致")
+    with ZipFile(BytesIO(archive.read(source_name))) as code:
+        if (code.comment.decode("ascii") != commit
+                or f'APP_VERSION = "{version}"'.encode("ascii") not in code.read("app_version.py").splitlines()):
+            raise ValueError("本地评审包源码的提交或程序版本不一致")
+
+    record = json.loads(archive.read("演示记录.json"))
+    capture, demo = record["capture"], receipt["demo"]
+    report = json.loads(archive.read(LOCAL_DEMO + "agent-acceptance.json"))
+    screen = capture["device_screen"]
+    demo_hashes = {
+        LOCAL_DEMO + "base.apk": demo["input_sha256"],
+        LOCAL_DEMO + "candidate.apk": demo["candidate_sha256"],
+        LOCAL_DEMO + "agent-acceptance.json": demo["acceptance_sha256"],
+        "演示设备画面.png": screen["sha256"],
+    }
+    if (record["app_version"] != version or record["video_sha256"] != receipt["video_sha256"]
+            or record["duration_planned_seconds"] != receipt["video_seconds"]
+            or capture["app_version"] != version or capture["source_commit"] != commit
+            or demo["candidate_sha256"] != capture["candidate_sha256"]
+            or demo["input_sha256"] != capture["input_sha256"]
+            or demo["candidate_sha256"] != demo["installed_sha256"]
+            or demo["candidate_sha256"] != screen["apk_sha256"] or demo["target_api"] != screen["api"]
+            or demo["input_sha256"] != report["input_sha256"]
+            or demo["passed_steps"] != len(report["steps"]) or report["targets"] != [demo["target_api"]]
+            or {name for name in checksums if name.startswith(LOCAL_DEMO)} != demo_hashes.keys() - {"演示设备画面.png"}
+            or any(checksums.get(name) != digest for name, digest in demo_hashes.items())
+            or not verified_for(report, demo["candidate_sha256"])):
+        raise ValueError("本地评审包的演示录制或设备验收证据不一致")
+
+    for bundle_name, receipt_name in (
+        (f"v{version}-Windows隔离安装复核工具.zip", "Windows安装复核工具回执.json"),
+        (f"v{version}-归档阅读器专项复测输入-r3.zip", "归档复测环境回执.json"),
+    ):
+        windows = json.loads(archive.read(receipt_name))
+        if (windows["version"] != version or windows["source_commit"] != commit
+                or windows["exe_sha256"] != exe_hash or windows["bundle_sha256"] != checksums.get(bundle_name)):
+            raise ValueError("本地评审包的 Windows 复核输入与回执不一致")
+    return {"version": version, "source_commit": commit, "demo_steps": demo["passed_steps"], **edition}
 
 
 def verify(path):
@@ -220,6 +283,7 @@ def verify(path):
         signed_release = check_signed_release(archive, checksums, status)
         release_regression = check_release_regression(archive, checksums, status)
         local_regression = check_local_regression(archive, checksums, status)
+        local_review = check_local_review(archive, checksums, status, local_regression)
         samples = []
         for name in names:
             if "可分发样本" in PurePosixPath(name).parts and name.endswith("/agent-acceptance.json"):
@@ -272,6 +336,7 @@ def verify(path):
                 "package_status": status, "signed_release": signed_release,
                 "release_regression": release_regression,
                 "local_regression": local_regression,
+                "local_review": local_review,
                 "scope": "Files, checksums and stored proofs. Device replay is a separate operation."}
 
 
