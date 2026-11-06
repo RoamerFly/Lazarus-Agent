@@ -1,0 +1,28 @@
+{
+  "scope": "official review ZIP scripts on existing Windows; check-only",
+  "package_sha256": "ba683811039573ef78a9b9fe6560d06c5540b8c3aa5b382ec1b1e27fbfaf23c2",
+  "exe_sha256": "ec9143fb4066c1360df4b95d25cb95e4bee6069fb2f53032cbf9033e579008ce",
+  "rows": [
+    {
+      "case": "route",
+      "exit_code": 0,
+      "steps": 10,
+      "output_sha256": "2f4868ae094181678ca66a8adbc25e488f01b58dcebb4ee80b08648d00e79ef6"
+    },
+    {
+      "case": "temperature",
+      "exit_code": 0,
+      "steps": 16,
+      "output_sha256": "26f401044bbd7f1e893d4a7bbd23a4703b35fa50360efeeeab229bfba6a3abf4"
+    },
+    {
+      "case": "counterexample",
+      "exit_code": 0,
+      "steps": 2,
+      "output_sha256": "97543bf9cc59a3323831efcf4a13c457b9af1a029067f03b6abff2a2724dccde"
+    }
+  ],
+  "files": 1698,
+  "samples": 89,
+  "counterexamples": 1
+}
