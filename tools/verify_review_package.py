@@ -82,8 +82,13 @@ def verify(path):
                     report["status"] != "incomplete" or expected["exit_code"] != 1 or
                     len(report["rows"]) != len(report["targets"]) or not report["targets"]):
                 raise ValueError("反例身份、目标或未通过状态无效：" + folder)
-            for row in report["rows"]:
+            targets = report["targets"]
+            if any(type(api) is not int for api in targets) or len(targets) != len(set(targets)):
+                raise ValueError("反例目标版本无效：" + folder)
+            for api, row in zip(targets, report["rows"]):
                 proof = row["candidate"]
+                if row["api"] != api or proof["device"]["api"] != api:
+                    raise ValueError("反例设备版本与复测目标不一致：" + folder)
                 observed = [{k: step[k] for k in ("action", "value", "status", "match_count")}
                             for step in proof["steps"]]
                 if (row["status"] != "failed" or proof["install"] != "passed" or proof["launch"] != "passed" or

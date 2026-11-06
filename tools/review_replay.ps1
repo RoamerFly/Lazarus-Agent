@@ -59,8 +59,11 @@ if ($CheckOnly) {
         $actual.candidate_sha256 -ne $proof.candidate_sha256 -or
         (@($actual.targets) -join ',') -ne (@($proof.targets) -join ',') -or
         @($actual.rows).Count -ne @($proof.targets).Count) { throw '反例报告的身份、范围或状态不符合预期' }
-    foreach ($row in $actual.rows) {
+    for ($targetIndex = 0; $targetIndex -lt @($actual.targets).Count; $targetIndex++) {
+        $row = $actual.rows[$targetIndex]
         $candidateResult = $row.candidate
+        $api = $actual.targets[$targetIndex]
+        if ($row.api -ne $api -or $candidateResult.device.api -ne $api) { throw '反例设备版本与复测目标不一致' }
         if ($row.status -ne 'failed' -or $candidateResult.install -ne 'passed' -or
             $candidateResult.launch -ne 'passed' -or $candidateResult.function -ne 'failed' -or
             $candidateResult.device.installed_sha256 -ne $proof.candidate_sha256 -or
