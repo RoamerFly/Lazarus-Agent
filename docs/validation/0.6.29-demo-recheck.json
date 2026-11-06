@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "build": {
+    "version": "0.6.29",
+    "source_commit": "0e95b5f14be122c2d06069db43ddeeeb473ffd6d",
+    "exe_sha256": "0f83908f99e9b2d39e0074bfd8eedb16f70ba1e51349c70f3d3edbec98ad30b8",
+    "bytes": 131737386,
+    "self_test_exit": 0,
+    "packager": "6.22.3",
+    "scope": "Local PyInstaller build and executable self-test"
+  },
+  "target_api": 36,
+  "abi": "x86_64",
+  "candidate_sha256": "9a49bed37bf238d7bd0827f29839f9ecdd48eba34fc74067097b3bf4ca4300c1",
+  "preflight_steps_passed": 10,
+  "network_model_calls": 0,
+  "recording": {
+    "status": "incomplete",
+    "failed_step": 9,
+    "expected": "Active route: North",
+    "observed": "Active route: South",
+    "report_sha256": "e1902c8b7126d65f6a5749954c8e891c5ee14d97eb98b2c1da5ae7a118826d0e",
+    "video_created": false
+  },
+  "same_apk_replay": {
+    "status": "behavior-verified",
+    "steps_passed": 10,
+    "report_sha256": "36e792076b6da905435399cd27d506483419a29878dfa6f820365c51d36d93d7"
+  }
+}

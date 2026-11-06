@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "version": "0.6.29",
+  "source_commit": "0e95b5f14be122c2d06069db43ddeeeb473ffd6d",
+  "exe_sha256": "0f83908f99e9b2d39e0074bfd8eedb16f70ba1e51349c70f3d3edbec98ad30b8",
+  "installer_sha256": "5fd418c24edc95bf4aa25d6ba90d0535ce2b468c1b2a0c1d4c825145ceeb46e0",
+  "scope": "reused isolated Windows guest, fresh application data and installation",
+  "samples": [
+    {
+      "case": "P01",
+      "status": "inputs-verified",
+      "candidate_sha256": "3dbc0c4543bfa81e084f6f528738349836ac92f30cd67fc7cd0e4d885aed64ac",
+      "steps": 10
+    },
+    {
+      "case": "P04",
+      "status": "inputs-verified",
+      "candidate_sha256": "352a62982f5634b1b334cdf265b2a6490db57ffa27c30b53bdaed9ac32130e58",
+      "steps": 16
+    },
+    {
+      "case": "N03",
+      "status": "inputs-verified",
+      "candidate_sha256": "671605d127dc9356b66bd93b144e0643080efe90d39efbe11ab4c7edf9238481",
+      "steps": 2
+    }
+  ],
+  "sample_archive_sha256": "d5f1ed87dc2731ec7efd0b16ea0a0b13672345035f6fd591cf03895be2ca6eaa",
+  "install": "passed",
+  "installed_self_test": "passed",
+  "uninstall_check": "failed",
+  "residual_installation_files": [
+    "Uninstall.exe"
+  ],
+  "exported_output_preserved": true,
+  "android_device_tested_in_guest": false,
+  "network_model_calls": 0
+}

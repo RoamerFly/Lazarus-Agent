@@ -1,0 +1,53 @@
+{
+  "version": "0.6.29",
+  "source_commit": "0e95b5f14be122c2d06069db43ddeeeb473ffd6d",
+  "exe_sha256": "0f83908f99e9b2d39e0074bfd8eedb16f70ba1e51349c70f3d3edbec98ad30b8",
+  "api": 36,
+  "abi": "x86_64",
+  "network_model_calls": 0,
+  "plan_sha256": "3e4d3a8ca62fea36a50e6862df111233438da6ee3b7da5c8f6e09da3fb53ddf5",
+  "rows": [
+    {
+      "case": "N03",
+      "candidate_sha256": "671605d127dc9356b66bd93b144e0643080efe90d39efbe11ab4c7edf9238481",
+      "steps": 2,
+      "status": "incomplete",
+      "device_report_sha256": "b6a0b9baa011c7c529183d2e650f7d073ee5177396d75a074a54fc72085a603f"
+    },
+    {
+      "case": "P01",
+      "candidate_sha256": "3dbc0c4543bfa81e084f6f528738349836ac92f30cd67fc7cd0e4d885aed64ac",
+      "steps": 10,
+      "status": "behavior-verified",
+      "device_report_sha256": "920ee010dffbd821c8aa9f3821b2338d5270c31ce031e1311dae63dc260b423b"
+    },
+    {
+      "case": "P03",
+      "candidate_sha256": "e116e8e3acc29364ea4279989e98435c4405825c5689b89d8605ef5e2917f8ad",
+      "steps": 4,
+      "status": "behavior-verified",
+      "device_report_sha256": "ebfa7bb67eeb41bfcabc73c1ab14573c295c5d17ec125abb3376a9b97169f0c9"
+    },
+    {
+      "case": "P04",
+      "candidate_sha256": "352a62982f5634b1b334cdf265b2a6490db57ffa27c30b53bdaed9ac32130e58",
+      "steps": 16,
+      "status": "behavior-verified",
+      "device_report_sha256": "cd9500a5eb42490d5e6b894645f66c04585217a6d4ec3d8b433a2852de3add4f"
+    },
+    {
+      "case": "P05",
+      "candidate_sha256": "9326290370be413cf597fda8a5feac89ac9e6b2163d4161c39036d90e172e82b",
+      "steps": 8,
+      "status": "behavior-verified",
+      "device_report_sha256": "bb7a1d43f732304afbbe10d960bf33f0aa0c916d4d5674d07c4cd2a4c6041192"
+    }
+  ],
+  "archive": {
+    "name": "v0.6.29-F01-离线设备复测样本.zip",
+    "sha256": "d5f1ed87dc2731ec7efd0b16ea0a0b13672345035f6fd591cf03895be2ca6eaa",
+    "bytes": 99509,
+    "files": 34
+  },
+  "source_archive_sha256": "07e1577c3c156320040b7949e7ceaf28405597a0ea6e59ced72d7ccd7b09ada2"
+}

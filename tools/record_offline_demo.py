@@ -15,7 +15,7 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def capture(source, output, port):
+def capture(source, output, port, device_followup=False):
     recorded = json.loads((ROOT / "docs/validation/recorded-edit-fixtures/P01.json").read_text(encoding="utf-8"))
     commit = subprocess.check_output(["git", "-C", str(source), "rev-parse", "HEAD"], text=True).strip()
     if subprocess.check_output(["git", "-C", str(source), "status", "--porcelain"]):
@@ -51,7 +51,10 @@ def capture(source, output, port):
             or "emulator-5578" in subprocess.check_output([bench_device.ADB, "devices"], text=True)):
         raise ValueError("原 APK、程序版本或专用模拟器状态不符合录制条件")
     calls = [(row["tool"], row["arguments"]) for row in recorded["tools"]]
-    calls += [("build_apk", {}), ("finish", {"outcome": "candidate", "summary": "已重放留档编辑。候选进入独立设备验收。"})]
+    calls.append(("build_apk", {}))
+    if device_followup:
+        calls.extend([("rehearse_acceptance", {}), ("device_action", {"action": "read"})])
+    calls.append(("finish", {"outcome": "candidate", "summary": "已重放留档编辑。候选进入独立设备验收。"}))
     index = 0
 
     def recorded_reply(_url, payload, _key, *, timeout):
@@ -138,6 +141,16 @@ def capture(source, output, port):
             if (errors or index != len(calls) or candidate["changes"] != recorded["changes"]
                     or report["targets"] != [36] or not verified_for(report, candidate["sha256"])):
                 raise ValueError("录制的编辑、工作台或独立设备验收未通过")
+            if device_followup:
+                trace_path = (workbench.STORAGE / job / "feature-candidates"
+                              / state["latest_feature_candidate"] / "agent-trace.json")
+                tool_calls = json.loads(trace_path.read_text(encoding="utf-8"))["tools"]
+                rehearsal, followup = tool_calls[-3:-1]
+                if (rehearsal["tool"] != "rehearse_acceptance" or not rehearsal["ok"]
+                        or rehearsal["result"]["function"] != "passed"
+                        or followup["tool"] != "device_action" or not followup["ok"]
+                        or followup["result"]["tested_input"] != "candidate"):
+                    raise ValueError("录制未验证预检后的候选前台读取")
             with page.expect_download() as download:
                 page.get_by_role("link", name="下载已验收 APK").last.click()
             download.value.save_as(output / "candidate.apk")
@@ -164,6 +177,7 @@ def capture(source, output, port):
             save("capture.json", {"app_version": APP_VERSION, "source_commit": commit, "exe_sha256": exe_sha256,
                  "mode": "recorded-tools",
                  "network_model_calls": 0, "replayed_tool_calls": index, "job_id": job,
+                 "device_followup": device_followup,
                  "candidate_sha256": candidate["sha256"], "input_sha256": candidate["source_sha256"],
                  "trace_sha256": digest_file(ROOT / "docs/validation/recorded-edit-fixtures/P01.json"), "frames": frames,
                  "device_screen": {"file": screenshot.name, "sha256": digest_file(screenshot), "apk_sha256": installed,
@@ -181,5 +195,6 @@ if __name__ == "__main__":
     parser.add_argument("source", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--port", type=int, default=18825)
+    parser.add_argument("--device-followup", action="store_true")
     args = parser.parse_args()
-    capture(args.source.resolve(), args.output.resolve(), args.port)
+    capture(args.source.resolve(), args.output.resolve(), args.port, args.device_followup)

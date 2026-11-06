@@ -1,0 +1,118 @@
+{
+  "schema": 1,
+  "build": {
+    "version": "0.6.29",
+    "source_commit": "0e95b5f14be122c2d06069db43ddeeeb473ffd6d",
+    "exe_sha256": "0f83908f99e9b2d39e0074bfd8eedb16f70ba1e51349c70f3d3edbec98ad30b8",
+    "bytes": 131737386,
+    "self_test_exit": 0,
+    "packager": "6.22.3",
+    "scope": "Local PyInstaller build and executable self-test"
+  },
+  "network_model_calls": 0,
+  "cases": [
+    {
+      "label": "P01",
+      "network_model_calls": 0,
+      "local_recorded_calls": 16,
+      "input_sha256": "08ed16b9f6a149bd8063bae99dd72aad200dafea7d3a0504af004187bde20deb",
+      "rehearsal": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "passed",
+        "api": 36,
+        "candidate_sha256": "15ff4734534c815d57656f688d38b514d99a41ea70d7c945bca4d1c98dd4f0a7",
+        "installed_sha256": "15ff4734534c815d57656f688d38b514d99a41ea70d7c945bca4d1c98dd4f0a7",
+        "verification": "candidate-rehearsal",
+        "expected_steps": 10,
+        "passed_steps": 10,
+        "external_caller": "not-observed"
+      },
+      "device_followup": "candidate-read",
+      "outcome": "candidate",
+      "trace_sha256": "96b31e36737ee22b62557c876f88666f4817208463c0187901c56ba346ad3b4b",
+      "verified_endpoint_http": 200,
+      "steps_passed": 10,
+      "candidate_sha256": "15ff4734534c815d57656f688d38b514d99a41ea70d7c945bca4d1c98dd4f0a7"
+    },
+    {
+      "label": "OI",
+      "network_model_calls": 0,
+      "local_recorded_calls": 27,
+      "input_sha256": "3c5f3ebcbbae199a403304e195b63f29198729467d7900f85c28a18be9695539",
+      "rehearsal": {
+        "build": "hash-matched",
+        "install": "passed",
+        "launch": "passed",
+        "function": "failed",
+        "api": 36,
+        "candidate_sha256": "65773b3df2578f4d42ba181c60a205dae0d78bfbb9e8a0407b3f36237cced9e6",
+        "installed_sha256": "65773b3df2578f4d42ba181c60a205dae0d78bfbb9e8a0407b3f36237cced9e6",
+        "verification": "candidate-rehearsal",
+        "expected_steps": 16,
+        "passed_steps": 0,
+        "failure": "点击控件必须在目标应用页面唯一匹配",
+        "failed_step": {
+          "action": "tap",
+          "value": "Add note",
+          "match_count": 0,
+          "index": 1,
+          "observed": [
+            {},
+            {
+              "resource-id": "android:id/decor_content_parent"
+            },
+            {
+              "resource-id": "android:id/action_bar_container"
+            },
+            {
+              "resource-id": "android:id/action_bar"
+            },
+            {
+              "text": "OI Notepad"
+            },
+            {
+              "resource-id": "android:id/content"
+            },
+            {},
+            {
+              "text": "OI Notepad EULA",
+              "resource-id": "org.openintents.notepad:id/text1"
+            },
+            {},
+            {
+              "resource-id": "org.openintents.notepad:id/container1"
+            },
+            {
+              "resource-id": "org.openintents.notepad:id/imageview"
+            },
+            {
+              "text": "Please read and accept the following End User License Agreement (EULA) for OI Notepad.",
+              "resource-id": "org.openintents.notepad:id/text2"
+            }
+          ]
+        },
+        "external_caller": "not-observed"
+      },
+      "device_followup": "candidate-read",
+      "outcome": "analysis",
+      "trace_sha256": "64e0f672490a7ed507304c0cb054064f459088148581edf5e1389df060e3c948",
+      "verified_endpoint_http": null,
+      "steps_passed": 0,
+      "foreground": "OI Notepad EULA"
+    }
+  ],
+  "independent": {
+    "api": 36,
+    "abi": "x86_64",
+    "steps_passed": 10,
+    "candidate_sha256": "15ff4734534c815d57656f688d38b514d99a41ea70d7c945bca4d1c98dd4f0a7",
+    "device_report_sha256": "68b4df9eed77d1cfcde952130514eb9d6675ac2313a88467563700be541d5b00"
+  },
+  "archive": {
+    "name": "v0.6.29-巡检单与预检续接复测包.zip",
+    "sha256": "c7e35e0d2f66616756bd6e4ade42b28adedf2ede3286eea0b566bfe00570afc1",
+    "bytes": 22258
+  }
+}

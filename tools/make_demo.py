@@ -61,6 +61,8 @@ def build(capture, out=OUT):
             caption = "Agent 请求回编、对齐和签名。构建成功后继续做设备验证。"
         elif label == "调用工具 · rehearse_acceptance":
             caption = "Agent 重放事先固定的步骤，预检候选的实际行为。"
+        elif label == "调用工具 · device_action" and metadata.get("device_followup"):
+            caption = "预检结束后，Agent 直接读取同一候选的设备界面，再进入独立验收。"
         elif label.startswith("独立验收 Android"):
             caption = "独立验收器另行核对原包、候选与设备上的安装字节。"
         elif offline:
