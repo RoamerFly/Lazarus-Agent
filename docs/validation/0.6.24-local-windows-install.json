@@ -1,0 +1,16 @@
+{
+    "scope":  "isolated install on existing Windows; no Android device",
+    "version":  "0.6.24",
+    "source_commit":  "b60c33230318c526ec4fb831b870ce2569e2cc40",
+    "installer_script_sha256":  "07457811c226d7f56ed231bcd583202b5ed173dfdf9134273005cc0a32aa6944",
+    "nsis_version":  "v3.11",
+    "installer_sha256":  "edd83a87840b6a40fd2f52e87fc78043c51d209869acddfb16bccccb6cc9d4ac",
+    "exe_sha256":  "c1fe662ec1095eba4395777f3b2259dba89b80435c716addf0100d5bbc7d70b3",
+    "installed_exe_sha256":  "c1fe662ec1095eba4395777f3b2259dba89b80435c716addf0100d5bbc7d70b3",
+    "install_exit":  0,
+    "installed_self_test_exit":  0,
+    "uninstall_exit":  0,
+    "system_only_path_for_self_test":  true,
+    "isolated_registration_removed":  true,
+    "exported_output_preserved":  true
+}
