@@ -11,6 +11,11 @@ PACKAGE = "org.ggbond.example"
 TASK = {"tap": "Open route", "expect": "Route ready"}
 BEFORE = b'<hierarchy><node package="org.ggbond.example" text="Open route" bounds="[0,0][40,20]"/></hierarchy>'
 AFTER = b'<hierarchy><node package="org.ggbond.example" text="Route ready"/></hierarchy>'
+LEGACY_TARGET = (
+    b'<hierarchy><node package="android" resource-id="android:id/message" '
+    b'text="This app was built for an older version of Android."/>'
+    b'<node package="android" resource-id="android:id/button1" text="OK" bounds="[0,60][40,80]"/></hierarchy>'
+)
 
 
 def android_anr(title):
@@ -59,3 +64,16 @@ class FunctionProbeTests(unittest.TestCase):
         result, taps, _ = self.exercise([BEFORE, notice, notice])
         self.assertEqual(result["result"], "insufficient")
         self.assertEqual(taps, [("20", "10"), ("20", "50")])
+
+    def test_late_legacy_notice_is_acknowledged_then_requires_new_target_observation(self):
+        system_ui = android_anr("System UI isn't responding")
+        result, taps, captures = self.exercise([BEFORE, system_ui, LEGACY_TARGET, AFTER])
+        self.assertEqual(result["result"], "passed")
+        self.assertEqual(taps, [("20", "10"), ("20", "50"), ("20", "70")])
+        self.assertEqual(captures["after-legacy-target-notice.xml"], LEGACY_TARGET)
+        self.assertEqual(captures["after.xml"], AFTER)
+
+    def test_legacy_notice_does_not_repeat_action_or_count_as_success(self):
+        result, taps, _ = self.exercise([BEFORE, LEGACY_TARGET, LEGACY_TARGET])
+        self.assertEqual(result["result"], "insufficient")
+        self.assertEqual(taps, [("20", "10"), ("20", "70")])

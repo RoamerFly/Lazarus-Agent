@@ -212,6 +212,7 @@ def probe(serial,pkg,task,dest):
     dest.mkdir()
     path = "/data/local/tmp/reviver-task.xml"
     waited_for_system_ui = False
+    acknowledged_legacy_target = False
     def snapshot(label):
         shell(serial,"rm","-f",path,timeout=5)
         shell(serial,"uiautomator","dump",path,timeout=15)
@@ -231,8 +232,13 @@ def probe(serial,pkg,task,dest):
         if len(bounds)!=4 or bounds[0]>=bounds[2] or bounds[1]>=bounds[3]:
             raise ValueError("控件位置无效")
         shell(serial,"input","tap",str((bounds[0]+bounds[2])//2),str((bounds[1]+bounds[3])//2),timeout=10)
+    def preserve_dialog(label, evidence_label):
+        for suffix in (".xml", ".png"):
+            evidence = dest/(label+suffix)
+            if evidence.is_file():
+                evidence.replace(dest/(evidence_label+suffix))
     def observe(label, value):
-        nonlocal waited_for_system_ui
+        nonlocal waited_for_system_ui, acknowledged_legacy_target
         deadline = time.monotonic() + 25
         next_label = label
         for _ in range(6):
@@ -246,17 +252,18 @@ def probe(serial,pkg,task,dest):
                     if waited_for_system_ui or dialog != "system-ui-anr":
                         return None
                     # This probe runs on a disposable lab device. Leave other ANRs for diagnosis.
-                    for suffix in (".xml", ".png"):
-                        evidence = dest/(next_label+suffix)
-                        if evidence.is_file():
-                            evidence.replace(dest/(label+"-system-ui-wait"+suffix))
+                    preserve_dialog(next_label, label+"-system-ui-wait")
                     tap(button["bounds"])
                     waited_for_system_ui = True
                 elif dialog == "legacy-target-notice":
-                    if label != "before" or next_label != "before":
+                    if acknowledged_legacy_target:
                         return None
+                    acknowledged_legacy_target = True
+                    if label == "after":
+                        preserve_dialog(next_label, "after-legacy-target-notice")
                     tap(button["bounds"])
-                    next_label = "after-legacy-notice"
+                    if label == "before":
+                        next_label = "after-legacy-notice"
                 else:
                     matches = [n for n in tree.iter("node") if n.get("package")==pkg and is_match(n,value)]
                     if matches and (label == "after" or len(matches) == 1):
