@@ -1,0 +1,38 @@
+{
+  "scope": "Local Windows replay with prepared Android 16 x86_64 environment",
+  "package": {
+    "name": "v0.6.19-工程候选验证附录.zip",
+    "sha256": "c030c543ef109d0ea6f03fb8988a21cbd146b210f3597e8455ecc0b718054e42",
+    "bytes": 3250104
+  },
+  "cases": {
+    "demo": {
+      "status": "behavior-verified",
+      "steps": 10,
+      "candidate_and_device_sha256": "5bb47faab494d5167cce9f47b4205c6e3bee75824c67da3ca83098016790e8e6",
+      "report_sha256": "82453e79455ddd0f43872053d6800232c175910a537b7c388c6bfd7bfa094794"
+    },
+    "temperature": {
+      "status": "behavior-verified",
+      "steps": 16,
+      "candidate_and_device_sha256": "97da7ea89d00fb25c70a00521798ef7523866998f9391add401451767a5d1108",
+      "report_sha256": "c5a2fba0a2b831c9c5bdd862c4853879515db339a5cbea6d7b0e874fda61eb6a"
+    },
+    "counterexample": {
+      "status": "incomplete",
+      "steps": 2,
+      "candidate_and_device_sha256": "f860b2f55de10e46e30f22aa3ced169a74fff159696050f72bad812517e879fa",
+      "report_sha256": "e072009206cb24ebed63ba9e2780dcbf5f18b15996c55b2c8d39a50c9878b7a9",
+      "wrapper_exit": 0,
+      "exe_exit": 1
+    }
+  },
+  "counterexample": "Initial attempt has no terminal report and is preserved; retry completed with the specified contradiction.",
+  "exact_exe_sha256": "b4dd0f98b9e6ac36e6990bc35f6072018d218b4496b14ca1c313e3a341744b49",
+  "file_count": 35,
+  "local_links_checked": 12,
+  "source_commit": "c812e5b6d2da07499c4fce130163d7dda877786e",
+  "runtime": "existing prepared environment",
+  "chinese_paths": true,
+  "model_used_for_replay": false
+}
