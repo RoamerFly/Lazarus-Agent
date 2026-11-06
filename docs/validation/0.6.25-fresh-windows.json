@@ -1,0 +1,75 @@
+{
+  "scope": "Fresh Windows Server 2022 VM; offline Windows setup, input checks and desktop launch. Android runtime preparation and device steps not run in this VM.",
+  "vm_platform": "VMware Workstation 17",
+  "blank_virtual_disk": true,
+  "installer_image_index": 2,
+  "verified_archive_files": 16,
+  "guest": {
+    "status": "passed",
+    "baseline": {
+      "product": "Windows Server 2022 Standard",
+      "edition": "ServerStandard",
+      "build": "20348.1006",
+      "powershell": "5.1.20348.859",
+      "tool_commands": [],
+      "override_names": [],
+      "android_local_sdk": false,
+      "active_hardware_networks": 0
+    },
+    "samples": [
+      {
+        "case": "P03",
+        "status": "inputs-verified",
+        "candidate_sha256": "5ac5b547bf64215a9ef48159a1c2f7801e43e93e730e0a58eb4d5f37c6b2f578",
+        "steps": 4
+      },
+      {
+        "case": "P05",
+        "status": "inputs-verified",
+        "candidate_sha256": "617d2160b12bbe9bd5b134e63337d155cf169f7cb253786cb86555facd5806df",
+        "steps": 8
+      }
+    ],
+    "setup": {
+      "scope": "isolated install on existing Windows; no Android device",
+      "version": "0.6.25",
+      "source_commit": "c5f9799c748d700250a5b27d666bae00609acb50",
+      "installer_script_sha256": "07457811c226d7f56ed231bcd583202b5ed173dfdf9134273005cc0a32aa6944",
+      "nsis_version": "v3.11",
+      "installer_sha256": "72b97287e3e1d2f6484201c8fbdb70e6d121865da4bed16798796624c5058939",
+      "exe_sha256": "a13c8e81a26f73805b3d704b8ac5ecf486e68b4f4adfdf4be8ec8efe32f47cc0",
+      "installed_exe_sha256": "a13c8e81a26f73805b3d704b8ac5ecf486e68b4f4adfdf4be8ec8efe32f47cc0",
+      "install_exit": 0,
+      "installed_self_test_exit": 0,
+      "uninstall_exit": 0,
+      "system_only_path_for_self_test": true,
+      "isolated_registration_removed": true,
+      "exported_output_preserved": true
+    },
+    "sample_zip_sha256": "d3cd6538d7ae35db5d4fe99e43440292f9f74806e196d8d4a675822224c54b3e",
+    "network_model_calls": 0
+  },
+  "missing_webview2": {
+    "status": "webview2-missing-prompt",
+    "window": "Lazarus Agent",
+    "renderer_processes": 0
+  },
+  "webview2": {
+    "runtime_version": "157.0.4341.42",
+    "offline_installer_sha256": "2688308af55753c62fda4e8140024e230c1ffc16b7c091b25889572f38dff6e8",
+    "signature": "Valid",
+    "publisher": "Microsoft Corporation"
+  },
+  "desktop": {
+    "status": "workbench-started",
+    "window": "Lazarus Agent",
+    "workbench_http": 200,
+    "desktop_protocol": 1,
+    "android_16_ready": false,
+    "model_enabled": false,
+    "renderer_processes": 6,
+    "portable_sha256": "a13c8e81a26f73805b3d704b8ac5ecf486e68b4f4adfdf4be8ec8efe32f47cc0",
+    "network_model_calls": 0
+  },
+  "desktop_screenshot_sha256": "594c5751386941821550c8d2989cf10b1676147f37b1b1396c55d3669c747818"
+}
