@@ -1,0 +1,37 @@
+{
+  "scope": "Agent tool checks against the two actual compiled candidate APKs",
+  "checks": [
+    {
+      "trial": "P06-agent-1",
+      "apk_sha256": "760618588da691ac2c06f849fc1ebba29d361c51767d2171a5c345302537b1fe",
+      "components": [
+        {
+          "type": "activity",
+          "name": ".ShareActivity",
+          "exported": true,
+          "enabled": null
+        }
+      ],
+      "external_caller": "not-observed"
+    },
+    {
+      "trial": "P06-agent-2",
+      "apk_sha256": "442c1201a406e6ca76105a5a40ec500a6a220e1c0efa3775c2cbd4fad3ee0dbd",
+      "components": [
+        {
+          "type": "activity",
+          "name": ".ShareActivity",
+          "exported": true,
+          "enabled": null
+        },
+        {
+          "type": "provider",
+          "name": ".RecordProvider",
+          "exported": false,
+          "enabled": null
+        }
+      ],
+      "external_caller": "not-observed"
+    }
+  ]
+}

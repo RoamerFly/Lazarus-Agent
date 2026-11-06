@@ -109,11 +109,18 @@ class WorkspaceTests(unittest.TestCase):
         candidate.write_bytes(b"candidate")
         session = Session(self.root, original, candidate, self.root, 36,
                           {"sha256": digest(b"original")}, lambda _: None, None)
-        declarations = {"permissions": [], "components": [{"type": "activity", "exported": "0xffffffff"}]}
+        declarations = {"permissions": [], "components": [
+            {"type": "activity", "exported": "(type 0x12)0xffffffff"},
+            {"type": "provider", "exported": "(type 0x12)0x0", "enabled": "false"},
+            {"type": "service", "exported": "@0x7f010001"},
+        ]}
         with patch("feature_agent.manifest_surface", return_value=declarations) as inspect:
             result = session.dispatch("inspect_manifest", {"artifact": "original"})
             self.assertEqual(result["sha256"], digest(b"original"))
-            self.assertEqual(result["components"], declarations["components"])
+            self.assertEqual(result["external_caller"], "not-observed")
+            self.assertEqual([row["declared_exported"] for row in result["components"]], [True, False, None])
+            self.assertEqual([row["declared_enabled"] for row in result["components"]], [None, False, None])
+            self.assertEqual(result["components"][0]["exported"], declarations["components"][0]["exported"])
             inspect.assert_called_once_with(original, self.root)
             with self.assertRaises(ValueError):
                 session.dispatch("inspect_manifest", {"artifact": "candidate"})
@@ -255,15 +262,15 @@ class WorkspaceTests(unittest.TestCase):
         passed = {"function": "passed"}
         with patch("feature_agent.rehearse_candidate", side_effect=[failed, passed]) as rehearse:
             session.built(first, {"sha256": "a" * 64})
-            self.assertEqual(session.dispatch(name, {}), failed)
-            self.assertEqual(session.dispatch(name, {}), failed)
+            self.assertEqual(session.dispatch(name, {}), {**failed, "external_caller": "not-observed"})
+            self.assertEqual(session.dispatch(name, {}), {**failed, "external_caller": "not-observed"})
             path = "AndroidManifest.xml"
             read = session.workspace.read_text(path)
             session.workspace.replace_text(path, read["sha256"], "<manifest/>", "<manifest />")
             with self.assertRaises(ValueError):
                 session.dispatch(name, {})
             session.built(second, {"sha256": "b" * 64})
-            self.assertEqual(session.dispatch(name, {}), passed)
+            self.assertEqual(session.dispatch(name, {}), {**passed, "external_caller": "not-observed"})
             self.assertEqual([call.args for call in rehearse.call_args_list],
                              [(tester, first, "a" * 64, steps), (tester, second, "b" * 64, steps)])
         self.assertIsNone(session.candidate_verification())

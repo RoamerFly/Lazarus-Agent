@@ -57,6 +57,16 @@ STRING = {"type": "string"}
 INTEGER = {"type": "integer"}
 
 
+def _manifest_boolean(value):
+    if value in ("true", "false"):
+        return value == "true"
+    if isinstance(value, str):
+        match = re.fullmatch(r"(?:\(type 0x12\))?(0x[\da-fA-F]+)", value)
+        if match:
+            return int(match[1], 16) != 0
+    return None
+
+
 def tool_definitions(device_available, acceptance_steps=()):
     tools = [
         _tool("list_files", "按 glob 列出 APK 工作区文件，每页 80 个", {"pattern": STRING, "offset": INTEGER}, []),
@@ -75,7 +85,7 @@ def tool_definitions(device_available, acceptance_steps=()):
               {"path": STRING, "content": STRING}),
         _tool("restore_file", "撤销一个文件在本轮的全部修改", {"path": STRING}),
         _tool("inspect_manifest", "读取原包或当前候选编译清单中显式的权限、组件、导出、Intent 过滤器、URI 授权和共享库声明。"
-              "结合相关代码判断外部输入及访问范围。未声明的默认值需另查清单和目标系统规则。",
+              "同时给出可读的导出与启用值。结合代码判断外部输入及访问范围，未声明值需另查系统规则。",
               {"artifact": {"type": "string", "enum": ["original", "candidate"]}}),
         _tool("build_apk", "回编、对齐并签名当前修改。构建错误会返回，可继续修改重试", {}),
         _tool("localize_resources", "使用现有批量简体中文工具处理 APK 资源、游戏语言表、字体及图片并构建签名候选。仅当当前没有未提交的文件修改时可用", {}),
@@ -95,7 +105,7 @@ def tool_definitions(device_available, acceptance_steps=()):
         ])
         if acceptance_steps:
             tools.append(_tool("rehearse_acceptance", "重新安装当前候选并重放用户给出的验收步骤。"
-                               "返回通过数量、首个失败步骤和观察证据；交付前仍会另行独立验收", {}))
+                               "返回通过数量、首个失败步骤和观察证据。此工具不发起外部应用调用", {}))
     return tools
 
 
@@ -117,6 +127,7 @@ replace_text 的 old 必须来自当前文件内容，去掉 read_text 的行号
 若声明后仍失败或需求本身需要改写功能，继续按实际证据分析。
 兼容修复应保留原有权限和安全检查。文件交接保留实际写入、传递和读取，优先采用范围明确的只读内容 URI 或同应用的受限文件入口。检查接收端的 URI、授权范围和规范化后的路径边界。不能关闭进程范围的安全检查，也不能让导出组件接收可由外部指定的私有文件路径。
 新增或修改涉及 Intent、外部输入和私有数据的代码前，调用 inspect_manifest 检查组件导出、Intent 过滤器、权限与 URI 授权声明。构建后对候选再核对声明。目录边界校验只限制目录，还需确认外部调用者有权访问具体数据。仅供本应用使用的文件交接可新增非导出接收组件，保留原有主入口。需要对外提供的接口应按需求限制文件集合和调用权限。结合代码与设备结果说明已检查的范围。
+自定义 scheme、authority、路径、MIME 和固定 extra 用于识别请求内容。导出组件使用私有数据前还需约束调用来源或权限。应用内步骤只证明相应操作，外部调用未观测时请如实说明。
 交接目标已知时，在发送前用 setPackage、setComponent 或显式 Intent 构造器限定目标。用户确实要求选择其他应用时，使用系统分享面板，由用户选择接收方并仅授予必要权限。
 使用字节数组交接现有文件时，发送的字节必须来自读取同一个实际文件。保留读取失败路径，并由接收端读取和校验实际收到的数据。显式 Intent 只限定发送目标。若接收端仍可被外部应用调用，外部应用也能构造同样的 Extra。仅供本应用使用的接收逻辑应拒绝外部构造的数据，保留原有启动入口。
 有设备工具时应测试最新候选，基于界面执行与需求有关的操作。安装启动成功只能证明安装启动。
@@ -181,8 +192,12 @@ class Session:
                 raise ValueError("请选择原包或当前候选")
             if digest_file(artifact) != expected:
                 raise ValueError("清单检查的 APK 哈希与本轮记录不一致")
+            manifest = manifest_surface(artifact, self.tools)
+            components = [{**row, "declared_exported": _manifest_boolean(row.get("exported")),
+                           "declared_enabled": _manifest_boolean(row.get("enabled"))}
+                          for row in manifest["components"]]
             return {"artifact": role, "sha256": expected, "scope": "explicit-compiled-declarations",
-                    **manifest_surface(artifact, self.tools)}
+                    "external_caller": "not-observed", **manifest, "components": components}
         if name == "localize_resources" and not args:
             return self.localize()
         if name == "declare_platform_library" and set(args) == {"name"} and self.tester:
@@ -197,7 +212,7 @@ class Session:
                 self.device_report = None
                 self.rehearsals[sha256] = rehearse_candidate(self.tester, self.artifact, sha256,
                                                             self.acceptance_steps)
-            return self.observe_device_result(self.rehearsals[sha256])
+            return self.observe_device_result({**self.rehearsals[sha256], "external_caller": "not-observed"})
         if name in {"test_original", "test_apk"} and not args and self.tester:
             if name == "test_original":
                 artifact, expected_hash, role = self.source, self.facts["sha256"], "original"
