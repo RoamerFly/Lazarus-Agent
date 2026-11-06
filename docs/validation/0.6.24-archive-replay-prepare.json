@@ -1,0 +1,53 @@
+{
+  "version": "0.6.24",
+  "source_commit": "b60c33230318c526ec4fb831b870ce2569e2cc40",
+  "exe_sha256": "c1fe662ec1095eba4395777f3b2259dba89b80435c716addf0100d5bbc7d70b3",
+  "bundle_sha256": "203b43ba45890eb9efedd819282ca4de35486dbf7f185e539436ddc184e0f739",
+  "bundle_bytes": 19317,
+  "scope": "Existing Windows host; no new first-time runtime downloads or successful device run",
+  "check_only": {
+    "exit": 0,
+    "receipt_sha256": "796a2e60d85dabe60d86ebb5d186e4f05445417a7c0d0063553b8c35ec48a37f",
+    "status": "inputs-verified"
+  },
+  "initially_missing": {
+    "exit": 2,
+    "desktop_exit": 0,
+    "missing": [
+      "platform-tools",
+      "emulator",
+      "build-tools",
+      "system-image",
+      "java"
+    ],
+    "unicode_path_preserved": true,
+    "receipt_sha256": "a2fb7772c6d30b7b2bdceae9067a9cb933539ecf387ea77885a9dc6ef4040f55",
+    "ready_after": false,
+    "status": "runtime-not-ready",
+    "ready_before": false
+  },
+  "existing_components": {
+    "desktop_exit": 0,
+    "exit": 0,
+    "unicode_path_preserved": true,
+    "receipt_sha256": "f3cd1d1f203074e05da6dbfead2002868a6dce0cadba48a3c0e39a2a0e2afde3",
+    "ready_after": true,
+    "source": "Five junctions to existing local SDK and Java components",
+    "status": "runtime-already-ready",
+    "ready_before": true
+  },
+  "busy_device": {
+    "exit": 1,
+    "function": "not-run",
+    "install": "not-run",
+    "status": "incomplete",
+    "receipt_sha256": "2d316fad2e2cbb38974cdff09b9996ae21da3b183bdf005c276eaadfa49b7d01",
+    "failure": "验证环境正在使用，请退出其他工作台后复测",
+    "launch": "not-run"
+  },
+  "controlled_failure": {
+    "exit": 1,
+    "diagnostic": "Controlled runtime busy",
+    "diagnostic_visible": true
+  }
+}

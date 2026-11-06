@@ -51,17 +51,65 @@ $start.EnvironmentVariables['LAZARUS_STORAGE_ROOT'] = Join-Path $root '复核运
 $start.EnvironmentVariables['LAZARUS_MIGRATE_LEGACY'] = '0'
 $start.EnvironmentVariables['PATH'] = "$env:SystemRoot\System32;$env:SystemRoot"
 
-if ($Mode -eq 'Prepare') {
-    Write-Output '请在工作台的运行环境中准备 Android 16。准备完成后关闭窗口。'
-    $desktop = [Diagnostics.Process]::Start($start)
-    $desktop.WaitForExit()
-    if ($desktop.ExitCode -ne 0) { throw "工作台退出码 $($desktop.ExitCode)" }
-    return
-}
-
 $tag = [Guid]::NewGuid().ToString('N').Substring(0, 10)
 $output = Join-Path $root ("复测结果/" + (Get-Date -Format 'yyyyMMdd-HHmmss') + '-' + $tag)
 New-Item -ItemType Directory -Path $output | Out-Null
+if ($Mode -eq 'Prepare') {
+    $listener = [Net.Sockets.TcpListener]::new([Net.IPAddress]::Loopback, 0)
+    $listener.Start()
+    try { $port = $listener.LocalEndpoint.Port } finally { $listener.Stop() }
+    $start.EnvironmentVariables['REVIVER_PORT'] = [string]$port
+    $runtimeUrl = "http://127.0.0.1:$port/api/runtime"
+    $statePath = Join-Path $output 'prepare.json'
+    $desktop = [Diagnostics.Process]::Start($start)
+    $initial = $null
+    $last = $null
+    $clock = [Diagnostics.Stopwatch]::StartNew()
+    $readyAfter = $null
+    Write-Output '请在工作台中准备 Android 16。此窗口报告环境就绪后，再关闭工作台。'
+    while (!$desktop.HasExited) {
+        try {
+            $response = Invoke-WebRequest -Uri $runtimeUrl -UseBasicParsing -TimeoutSec 3
+            $last = [Text.Encoding]::UTF8.GetString($response.RawContentStream.ToArray()) | ConvertFrom-Json
+            if ($null -eq $initial) { $initial = $last.targets.'36' }
+            if ($last.targets.'36'.ready -and $null -eq $readyAfter) {
+                $readyAfter = [Math]::Round($clock.Elapsed.TotalSeconds, 2)
+                Write-Output '已观测到 Android 16 环境就绪，可以关闭工作台。'
+            }
+        } catch [Net.WebException] {
+            # The loopback service can be unavailable during startup and shutdown.
+        }
+        if ($null -eq $initial -and $clock.Elapsed.TotalSeconds -gt 90) { break }
+        Start-Sleep -Seconds 1
+    }
+    $desktop.Refresh()
+    $desktopExit = if ($desktop.HasExited) { $desktop.ExitCode } else { $null }
+    $final = $last.targets.'36'
+    $status = if ($null -eq $initial) { 'runtime-unobserved' }
+              elseif ($desktopExit -ne 0 -or !$final.ready) { 'runtime-not-ready' }
+              elseif ($initial.ready) { 'runtime-already-ready' }
+              else { 'runtime-became-ready' }
+    [ordered]@{
+        version = $build.version
+        source_commit = $build.source_commit
+        exe_sha256 = $build.exe_sha256
+        target_api = 36
+        status = $status
+        desktop_exit = $desktopExit
+        ready_observed_seconds_since_launch = $readyAfter
+        before = $initial
+        after = $final
+        preparation = $last.active
+        scope = 'Android runtime inventory on this Windows host; no device replay'
+    } | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $statePath -Encoding UTF8
+    Write-Output "环境回执 $statePath"
+    if ($status -notin 'runtime-already-ready', 'runtime-became-ready') {
+        [Console]::Error.WriteLine('未确认 Android 16 环境就绪，请查看环境回执。')
+        exit 2
+    }
+    return
+}
+
 $result = Join-Path $output 'replay.json'
 $log = Join-Path $output 'replay.log'
 $start.Arguments = '--replay-acceptance "{0}" "{1}" "{2}" --output "{3}" --log "{4}"' -f $planPath, $base, $candidate, $result, $log
@@ -73,6 +121,16 @@ if ($process.ExitCode -ne 0) {
     [Console]::Error.WriteLine("复测退出码 $($process.ExitCode)，请查看 $log")
     if (Test-Path -LiteralPath $log -PathType Leaf) {
         [Console]::Error.WriteLine((Get-Content -LiteralPath $log -Tail 1 -Encoding UTF8))
+    }
+    if (Test-Path -LiteralPath $result -PathType Leaf) {
+        try {
+            $incomplete = Get-Content -LiteralPath $result -Raw -Encoding UTF8 | ConvertFrom-Json
+            foreach ($row in $incomplete.rows) {
+                if ($row.candidate.failure) { [Console]::Error.WriteLine($row.candidate.failure) }
+            }
+        } catch {
+            [Console]::Error.WriteLine('复测回执无法读取，请查看日志。')
+        }
     }
     exit $process.ExitCode
 }
