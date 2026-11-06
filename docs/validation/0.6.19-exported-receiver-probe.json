@@ -1,0 +1,16 @@
+{
+  "candidate_and_installed_sha256": "2a40edd869d3d2246225fe191c7ea5f63cca0f6f3c00f898728456d69d4001e1",
+  "api": 36,
+  "abi": "x86_64",
+  "external_caller": "ADB shell",
+  "external_uid": 2000,
+  "app_uid": 10150,
+  "existing_synthetic_file": [
+    "Archive Reader",
+    "Shared"
+  ],
+  "missing_synthetic_file": [
+    "Archive Reader",
+    "Cannot read record"
+  ]
+}
