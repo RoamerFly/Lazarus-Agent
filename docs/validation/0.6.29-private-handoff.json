@@ -1,0 +1,44 @@
+{
+  "version": "0.6.29",
+  "source_commit": "0e95b5f14be122c2d06069db43ddeeeb473ffd6d",
+  "exe_sha256": "0f83908f99e9b2d39e0074bfd8eedb16f70ba1e51349c70f3d3edbec98ad30b8",
+  "mode": "offline-replayed-private-handoff",
+  "network_model_calls": 0,
+  "review_archive_sha256": "ea5978768bef41f447a50f4737a64f954bb6724982422d41002f979cfc1c7546",
+  "source_sha256": "55ca244e70ab959fbb179a04c757c1974821ff790578e8811a345f31e024d8da",
+  "candidate_sha256": "bffbb5b55ddfac6c501a7fd8bf1e25c6cc4c64164a908dd82a0b18398ed07cdb",
+  "app_steps": 5,
+  "external_rejections": 6,
+  "archive": "v0.6.29-P06-私有文件交接复测包.zip",
+  "archive_sha256": "878cf753b861e73055e9510a4ab5309b1def572abfd21fadfc7aab423b71463c",
+  "registered_files": 15,
+  "schema": 1,
+  "source_trace_version": "0.6.26",
+  "source_trace_sha256": "3b1fee04314221bfa60ba1f3cf10c84248cd4fe010f8f790782e46623a58365b",
+  "rebuilt_trace_sha256": "8ff329a5ce8c8de32868f033654ab5018434f85a41548a312bd418d316738904",
+  "build_receipt_sha256": "f1b21b8a5b499aeefbece6a25e551ab43764ffba391be5753b1a9dddc23a95a6",
+  "deterministic_package": true,
+  "device": {
+    "api": 36,
+    "abi": "x86_64",
+    "original_target_sdk": 22,
+    "candidate_target_sdk": 24
+  },
+  "extracted": {
+    "inputs_verified": true,
+    "input_report_sha256": "a04c66adadd3a70735f4141c9524da27a9445df0c442d0ec42c39cdd5c8234a9",
+    "app_steps_passed": 5,
+    "app_report_sha256": "18cd7dedbc4879cfc4b819f78acfbf587650782fc7b4d6fd9d2cdee286528ee0",
+    "installed_sha256": "bffbb5b55ddfac6c501a7fd8bf1e25c6cc4c64164a908dd82a0b18398ed07cdb",
+    "probe_apk_sha256": "3f3ac2834a8e4d22995049d5fdfd9fdb8314fc74a2ac9f21b7d35aec9982e95c",
+    "external_rejections": 6,
+    "boundary_report_sha256": "19c20f91b682438b18ee393ebe44ec2f1adc39a9230d4f8a453b6a9a5c1e11a8"
+  },
+  "verification_correction": "accept both in-memory tuple and deserialized list device observations",
+  "tamper_rejections": [
+    "external-shared",
+    "same-uid",
+    "wrong-installed-hash",
+    "missing-private-boundary-declaration"
+  ]
+}

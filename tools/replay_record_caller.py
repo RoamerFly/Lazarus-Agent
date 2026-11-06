@@ -115,6 +115,26 @@ def replay(device, apk, expected, probe, *, uri_after_share=False, compare_uri=F
     return result
 
 
+def replay_foreign_provider(device, apk, expected, probe):
+    result = replay(device, apk, expected, probe, compare_uri=True, record_uri=FOREIGN_PROVIDER + "/record")
+    caller = AgentDevice(device, "f01-record-caller", 36, bench.TOOLS, print)
+    caller.serial = device.serial
+    result["alternate_foreign_uri"] = FOREIGN_PROVIDER + "/other"
+    result["alternate_foreign_value"] = send_known_uri(caller, result["alternate_foreign_uri"])
+    result["input"] = "foreign-provider-byte-42-before-and-after-share"
+    return result
+
+
+def replay_private_boundary(device, apk, expected, probe):
+    fixed = replay(device, apk, expected, probe, compare_uri=True, forged_bytes_after_share=True)
+    foreign = replay_foreign_provider(device, apk, expected, probe)
+    observed = (fixed["before_share"], fixed, fixed["forged_bytes_after"],
+                foreign["before_share"], foreign, foreign["alternate_foreign_value"])
+    passed = all(row["outcome"] in {"target-rejected", "caller-rejected"} for row in observed)
+    return {"status": "boundary-verified" if passed else "boundary-failed", "network_model_calls": 0,
+            "candidate_sha256": expected, "fixed_probe_uri": fixed, "foreign_provider": foreign}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--apk", type=Path, required=True)
@@ -127,6 +147,8 @@ def main():
                      help="Send the same known URI before and after the target writes its record")
     uri.add_argument("--foreign-provider", action="store_true",
                      help="Replay two single-byte records, with values 42 and 41, from a separate app's provider")
+    uri.add_argument("--private-boundary", action="store_true",
+                     help="Check the fixed URI, forged bytes, and readable records from another UID")
     parser.add_argument("--forged-bytes-after-share", action="store_true",
                         help="After the URI comparison, send a forged record extra from the same external UID")
     address = parser.add_mutually_exclusive_group()
@@ -138,8 +160,8 @@ def main():
         parser.error("--record-uri requires a supported literal record URI and a URI replay mode")
     if args.forged_bytes_after_share and not args.uri_before_and_after_share:
         parser.error("--forged-bytes-after-share requires --uri-before-and-after-share")
-    if args.foreign_provider and args.record_path:
-        parser.error("--foreign-provider uses its own fixed paths")
+    if (args.foreign_provider or args.private_boundary) and args.record_path:
+        parser.error("These probe modes use their own fixed paths")
     out = args.out.resolve()
     if not out.is_relative_to(ROOT / "build"):
         parser.error("Store probe evidence under the ignored build directory")
@@ -153,22 +175,21 @@ def main():
     build_probe(probe, ROOT / "tools/fixtures/record-caller")
     device = bench.Device(allow_existing=False)
     try:
-        record_uri = FOREIGN_PROVIDER + "/record" if args.foreign_provider else args.record_uri
-        result = replay(device, args.apk, args.sha256, probe, uri_after_share=args.uri_after_share,
-                        compare_uri=args.uri_before_and_after_share or args.foreign_provider,
-                        record_path=args.record_path or RECORD_PATHS[0], record_uri=record_uri,
-                        forged_bytes_after_share=args.forged_bytes_after_share)
-        if args.foreign_provider:
-            caller = AgentDevice(device, "f01-record-caller", 36, bench.TOOLS, print)
-            caller.serial = device.serial
-            result["alternate_foreign_uri"] = FOREIGN_PROVIDER + "/other"
-            result["alternate_foreign_value"] = send_known_uri(caller, result["alternate_foreign_uri"])
-            result["input"] = "foreign-provider-byte-42-before-and-after-share"
+        if args.private_boundary:
+            result = replay_private_boundary(device, args.apk, args.sha256, probe)
+        elif args.foreign_provider:
+            result = replay_foreign_provider(device, args.apk, args.sha256, probe)
+        else:
+            result = replay(device, args.apk, args.sha256, probe, uri_after_share=args.uri_after_share,
+                            compare_uri=args.uri_before_and_after_share,
+                            record_path=args.record_path or RECORD_PATHS[0], record_uri=args.record_uri,
+                            forged_bytes_after_share=args.forged_bytes_after_share)
     finally:
         device.stop()
     (out / "result.json").write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(result["outcome"], flush=True)
+    print(result.get("status", result.get("outcome")), flush=True)
+    return int(result.get("status") == "boundary-failed")
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

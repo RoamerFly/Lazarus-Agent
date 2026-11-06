@@ -7,11 +7,34 @@ import unittest
 from unittest.mock import patch
 from zipfile import ZipFile
 
-from tools import review_evidence, verify_review_package
+from tools import package_private_handoff, review_evidence, verify_review_package
 from tools.verify_review_package import verify
 
 
 class ReviewPackageTests(unittest.TestCase):
+    def test_private_handoff_rejects_an_external_shared_observation(self):
+        target, caller = package_private_handoff.TARGET, package_private_handoff.CALLER
+        apk, probe = "a" * 64, "b" * 64
+        rejected = {"outcome": "target-rejected", "observed": [[target, "Rejected"]]}
+        run = {**rejected, "api": 36, "abis": ["x86_64"], "candidate_and_installed_sha256": apk,
+               "caller_apk_sha256": probe, "uids": {target: 10000, caller: 10001}, "before_share": rejected,
+               "in_app_share": [{"action": "cold_start", "status": "passed"},
+                                {"action": "tap", "value": "Share local record", "status": "passed"},
+                                {"action": "expect", "value": "Shared", "status": "passed", "match_count": 1}]}
+        fixed = {**run, "record_uri": f"content://{package_private_handoff.DEFAULT_AUTHORITY}/record.txt",
+                 "forged_bytes_after": rejected}
+        authority = package_private_handoff.FOREIGN_PROVIDER
+        foreign = {**run, "record_uri": authority + "/record", "alternate_foreign_uri": authority + "/other",
+                   "alternate_foreign_value": rejected}
+        proof = {"status": "boundary-verified", "candidate_sha256": apk, "network_model_calls": 0,
+                 "fixed_probe_uri": fixed, "foreign_provider": foreign}
+        self.assertEqual(package_private_handoff.verify_boundary(proof, apk, probe), 6)
+        foreign["observed"] = [(target, "Rejected")]
+        self.assertEqual(package_private_handoff.verify_boundary(proof, apk, probe), 6)
+        foreign["observed"] = [[target, "Rejected"], [target, "Shared"]]
+        with self.assertRaisesRegex(ValueError, "未被接收端"):
+            package_private_handoff.verify_boundary(proof, apk, probe)
+
     def test_supplemental_windows_receipt_rejects_a_different_executable(self):
         path = Path(__file__).resolve().parents[1] / "docs/validation/0.6.29-cold-runtime.json"
         receipt = json.loads(path.read_bytes())

@@ -1,0 +1,145 @@
+{
+  "source_sha256": "55ca244e70ab959fbb179a04c757c1974821ff790578e8811a345f31e024d8da",
+  "outcome": {
+    "outcome": "candidate"
+  },
+  "changes": [
+    {
+      "path": "smali/org/ggbond/archivereader/ShareActivity.smali",
+      "before_sha256": "a81a7b6a12f6f6009de40e2e5b0a052c481d901b5678108a4b3abd7a1fa08123",
+      "after_sha256": "3996c9390b7e0d86d0e64b07d6a02ffd6c7f292162bc4af412a3a73d1774f07a"
+    }
+  ],
+  "recorded_trace_sha256": "3b1fee04314221bfa60ba1f3cf10c84248cd4fe010f8f790782e46623a58365b",
+  "tools": [
+    {
+      "tool": "list_files",
+      "arguments": {
+        "pattern": "**/*"
+      },
+      "ok": true
+    },
+    {
+      "tool": "inspect_manifest",
+      "arguments": {
+        "artifact": "original"
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "original/AndroidManifest.xml"
+      },
+      "ok": false
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "smali/org/ggbond/archivereader/ShareActivity.smali"
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "smali/org/ggbond/archivereader/ShareActivity.smali",
+        "start_line": 100,
+        "line_count": 180
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "smali/org/ggbond/archivereader/ShareActivity$$ExternalSyntheticLambda0.smali"
+      },
+      "ok": true
+    },
+    {
+      "tool": "replace_text",
+      "arguments": {
+        "path": "smali/org/ggbond/archivereader/ShareActivity.smali",
+        "sha256": "a81a7b6a12f6f6009de40e2e5b0a052c481d901b5678108a4b3abd7a1fa08123",
+        "old": ".field private static final OPEN_RECORD:Ljava/lang/String; = \"org.ggbond.archivereader.OPEN_RECORD\"",
+        "new": ".field private static final HANDOFF_TOKEN:Ljava/lang/String;\n\n.field private static final OPEN_RECORD:Ljava/lang/String; = \"org.ggbond.archivereader.OPEN_RECORD\""
+      },
+      "ok": true
+    },
+    {
+      "tool": "replace_text",
+      "arguments": {
+        "path": "smali/org/ggbond/archivereader/ShareActivity.smali",
+        "sha256": "364589e9728bdd8b6e66f1f4075056c37743034760ae10c8b0c17cb8c039a5e2",
+        "old": "# direct methods\n.method public constructor <init>()V",
+        "new": "# direct methods\n.method static constructor <clinit>()V\n    .locals 1\n\n    invoke-static {}, Ljava/util/UUID;->randomUUID()Ljava/util/UUID;\n\n    move-result-object v0\n\n    invoke-virtual {v0}, Ljava/util/UUID;->toString()Ljava/lang/String;\n\n    move-result-object v0\n\n    sput-object v0, Lorg/ggbond/archivereader/ShareActivity;->HANDOFF_TOKEN:Ljava/lang/String;\n\n    return-void\n.end method\n\n\n.method public constructor <init>()V"
+      },
+      "ok": true
+    },
+    {
+      "tool": "replace_text",
+      "arguments": {
+        "new": ".method synthetic lambda$onCreate$0$org-ggbond-archivereader-ShareActivity(Landroid/widget/Button;Landroid/view/View;)V\n    .locals 3",
+        "old": ".method synthetic lambda$onCreate$0$org-ggbond-archivereader-ShareActivity(Landroid/widget/Button;Landroid/view/View;)V\n    .locals 2",
+        "path": "smali/org/ggbond/archivereader/ShareActivity.smali",
+        "sha256": "e08c230fa7332a86776b686f7545e64351a0192f12ff4b6b337fdcff74643b80"
+      },
+      "ok": true
+    },
+    {
+      "tool": "replace_text",
+      "arguments": {
+        "new": "    nop\n\n    new-instance v0, Landroid/content/Intent;\n\n    invoke-direct {v0}, Landroid/content/Intent;-><init>()V\n\n    const-class v1, Lorg/ggbond/archivereader/ShareActivity;\n\n    invoke-virtual {v0, p0, v1}, Landroid/content/Intent;->setClass(Landroid/content/Context;Ljava/lang/Class;)Landroid/content/Intent;\n\n    const-string v1, \"org.ggbond.archivereader.OPEN_RECORD\"\n\n    invoke-virtual {v0, v1}, Landroid/content/Intent;->setAction(Ljava/lang/String;)Landroid/content/Intent;\n\n    const-string v1, \"org.ggbond.archivereader.extra.HANDOFF_TOKEN\"\n\n    sget-object v2, Lorg/ggbond/archivereader/ShareActivity;->HANDOFF_TOKEN:Ljava/lang/String;\n\n    invoke-virtual {v0, v1, v2}, Landroid/content/Intent;->putExtra(Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;\n\n    invoke-virtual {p0, v0}, Lorg/ggbond/archivereader/ShareActivity;->startActivity(Landroid/content/Intent;)V\n\n    return-void",
+        "old": "    nop\n\n    .line 41\n    new-instance p1, Landroid/content/Intent;\n\n    const-string v0, \"org.ggbond.archivereader.OPEN_RECORD\"\n\n    invoke-direct {p1, v0}, Landroid/content/Intent;-><init>(Ljava/lang/String;)V\n\n    .line 42\n    invoke-static {p2}, Landroid/net/Uri;->fromFile(Ljava/io/File;)Landroid/net/Uri;\n\n    move-result-object p2\n\n    const-string v0, \"application/vnd.ggbond.record\"\n\n    invoke-virtual {p1, p2, v0}, Landroid/content/Intent;->setDataAndType(Landroid/net/Uri;Ljava/lang/String;)Landroid/content/Intent;\n\n    .line 43\n    invoke-virtual {p0, p1}, Lorg/ggbond/archivereader/ShareActivity;->startActivity(Landroid/content/Intent;)V\n\n    .line 44\n    return-void",
+        "path": "smali/org/ggbond/archivereader/ShareActivity.smali",
+        "sha256": "22cbf8ff44495e3d9841829b5c0bab6e70f0dc5ac94d49ec724631eb0e1664b0"
+      },
+      "ok": true
+    },
+    {
+      "tool": "read_text",
+      "arguments": {
+        "path": "smali/org/ggbond/archivereader/ShareActivity.smali",
+        "start_line": 130,
+        "line_count": 150
+      },
+      "ok": true
+    },
+    {
+      "tool": "replace_lines",
+      "arguments": {
+        "path": "smali/org/ggbond/archivereader/ShareActivity.smali",
+        "sha256": "c4350f42f0b8236f7b3cbbfbef5ee0f8977a638007d8a49148aea751c85aa9e5",
+        "start_line": 158,
+        "end_line": 259,
+        "content": "    if-eqz p1, :cond_3\n\n    # 只有携带本进程内交接令牌的请求才被接受\n    invoke-virtual {p0}, Lorg/ggbond/archivereader/ShareActivity;->getIntent()Landroid/content/Intent;\n\n    move-result-object p1\n\n    const-string v0, \"org.ggbond.archivereader.extra.HANDOFF_TOKEN\"\n\n    invoke-virtual {p1, v0}, Landroid/content/Intent;->getStringExtra(Ljava/lang/String;)Ljava/lang/String;\n\n    move-result-object p1\n\n    sget-object v0, Lorg/ggbond/archivereader/ShareActivity;->HANDOFF_TOKEN:Ljava/lang/String;\n\n    invoke-static {p1, v0}, Landroid/text/TextUtils;->equals(Ljava/lang/CharSequence;Ljava/lang/CharSequence;)Z\n\n    move-result p1\n\n    if-nez p1, :cond_authorized\n\n    # 拒绝外部应用的 OPEN_RECORD 交接请求\n    new-instance v0, Landroid/widget/TextView;\n\n    invoke-direct {v0, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V\n\n    const-string v1, \"Rejected\"\n\n    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V\n\n    invoke-virtual {p0, v0}, Lorg/ggbond/archivereader/ShareActivity;->setContentView(Landroid/view/View;)V\n\n    return-void\n\n    :cond_authorized\n    # 读取本应用刚刚写入的本次记录\n    new-instance v0, Landroid/widget/TextView;\n\n    invoke-direct {v0, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V\n\n    new-instance v1, Ljava/io/File;\n\n    invoke-virtual {p0}, Lorg/ggbond/archivereader/ShareActivity;->getFilesDir()Ljava/io/File;\n\n    move-result-object p1\n\n    const-string v2, \"record.txt\"\n\n    invoke-direct {v1, p1, v2}, Ljava/io/File;-><init>(Ljava/io/File;Ljava/lang/String;)V\n\n    :try_start_0\n    new-instance p1, Ljava/io/FileInputStream;\n\n    invoke-direct {p1, v1}, Ljava/io/FileInputStream;-><init>(Ljava/io/File;)V\n    :try_end_0\n    .catch Ljava/io/IOException; {:try_start_0 .. :try_end_0} :catch_0\n\n    :try_start_1\n    invoke-virtual {p1}, Ljava/io/InputStream;->read()I\n\n    move-result v1\n\n    const/16 v2, 0x2a\n\n    if-ne v1, v2, :cond_0\n\n    const-string v1, \"Shared\"\n\n    goto :goto_0\n\n    :cond_0\n    const-string v1, \"Unexpected file\"\n\n    :goto_0\n    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V\n    :try_end_1\n    .catchall {:try_start_1 .. :try_end_1} :catchall_0\n\n    if-eqz p1, :cond_1\n\n    :try_start_2\n    invoke-virtual {p1}, Ljava/io/InputStream;->close()V\n    :try_end_2\n    .catch Ljava/io/IOException; {:try_start_2 .. :try_end_2} :catch_0\n\n    :cond_1\n    goto :goto_2\n\n    :catchall_0\n    move-exception v1\n\n    if-eqz p1, :cond_2\n\n    :try_start_3\n    invoke-virtual {p1}, Ljava/io/InputStream;->close()V\n    :try_end_3\n    .catchall {:try_start_3 .. :try_end_3} :catchall_1\n\n    goto :goto_1\n\n    :catchall_1\n    move-exception p1\n\n    :try_start_4\n    invoke-virtual {v1, p1}, Ljava/lang/Throwable;->addSuppressed(Ljava/lang/Throwable;)V\n\n    :cond_2\n    :goto_1\n    throw v1\n    :try_end_4\n    .catch Ljava/io/IOException; {:try_start_4 .. :try_end_4} :catch_0\n\n    :catch_0\n    move-exception p1\n\n    const-string p1, \"Cannot read record\"\n\n    invoke-virtual {v0, p1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V\n\n    :goto_2\n    invoke-virtual {p0, v0}, Lorg/ggbond/archivereader/ShareActivity;->setContentView(Landroid/view/View;)V\n\n    return-void"
+      },
+      "ok": true
+    },
+    {
+      "tool": "build_apk",
+      "arguments": {},
+      "ok": true
+    },
+    {
+      "tool": "rehearse_acceptance",
+      "arguments": {},
+      "ok": true
+    },
+    {
+      "tool": "inspect_manifest",
+      "arguments": {
+        "artifact": "candidate"
+      },
+      "ok": true
+    },
+    {
+      "tool": "finish",
+      "arguments": {
+        "outcome": "candidate",
+        "summary": "修复点：原代码用 Uri.fromFile + 隐式 OPEN_RECORD Intent，targetSdk 36 下跨包传递 file:// 触发 FileUriExposedException 导致点击即闪退。改动仅 smali/org/ggbond/archivereader/ShareActivity.smali：1) 写记录逻辑不变（filesDir/record.txt 写 0x2a，失败仍提示 Cannot write record）；2) 发送端改为显式 setClass 指向 ShareActivity、不再携带 file:// URI，并附带 <clinit> 用 UUID 生成的进程内随机 HANDOFF_TOKEN；3) 接收端 OPEN_RECORD 分支先校验令牌，不通过即显示 Rejected 并结束，忽略 Intent 的 data，外部应用即携带有效记录地址也被拒绝；4) 通过后才读取本应用 filesDir/record.txt 实际字节，首字节 0x2a 显示 Shared，读失败仍为 Cannot read record，内容不符仍为 Unexpected file；5) 启动入口、按钮、接收页面、私有路径边界与既有安全检查全部保留，清单未改（候选清单与原包一致）。验证：build_apk 成功（候选 a6847a79…fd7d，revision 5，仅该类改动）；rehearse_acceptance 在 API 36 上安装启动通过，点击 Share local record 得 Shared，冷启动后再次点击仍得 Shared，5/5 步通过。未观测项：外部应用发起 OPEN_RECORD 的拒绝仅在代码层验证（令牌门禁先于读取、data 被忽略），本轮工具无法发起外部 Intent 调用，未在设备上实测。"
+      },
+      "ok": true
+    }
+  ]
+}
