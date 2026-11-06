@@ -1,0 +1,59 @@
+{
+  "scope": "existing ZIP validation with real signed manifests; no install or Android replay",
+  "checks": [
+    {
+      "case": "official-v0.6.18",
+      "archive_sha256": "ba683811039573ef78a9b9fe6560d06c5540b8c3aa5b382ec1b1e27fbfaf23c2",
+      "status": "archive-and-proofs-verified",
+      "signed_release": {
+        "version": "0.6.18",
+        "source_commit": "96fd175f304d84762160f90faf178de0aba47a47"
+      }
+    },
+    {
+      "case": "signed-local-v0.6.19",
+      "archive_sha256": "c030c543ef109d0ea6f03fb8988a21cbd146b210f3597e8455ecc0b718054e42",
+      "status": "archive-and-proofs-verified",
+      "signed_release": {
+        "version": "0.6.19",
+        "source_commit": "c812e5b6d2da07499c4fce130163d7dda877786e"
+      }
+    },
+    {
+      "case": "unsigned-local-v0.6.22",
+      "archive_sha256": "3572f1011d2f46953a627acaeabe269d14bddad32e7759ecf5680735b4bb0e5f",
+      "status": "archive-and-proofs-verified",
+      "signed_release": null
+    },
+    {
+      "case": "mixed-signed-version",
+      "archive_sha256": "8ccaa02ac08de53c750a3961bae09861707f23b23eab54536ccfac418ba79225",
+      "status": "rejected",
+      "diagnostic": "签名发布清单与复核包版本不一致"
+    },
+    {
+      "case": "mixed-demo-commit",
+      "archive_sha256": "1b02108bddc92f891e3c55f652cc9faf7096677e96125f6fbb3cf380b374d65f",
+      "status": "rejected",
+      "diagnostic": "演示录制的版本或源码与签名构建不一致"
+    },
+    {
+      "case": "mixed-source-archive",
+      "archive_sha256": "c3e16e5e270d83297784ab26218787be198365a0f1249703569823fb620b7aba",
+      "status": "rejected",
+      "diagnostic": "源码归档的提交与复核包不一致"
+    },
+    {
+      "case": "altered-signature",
+      "archive_sha256": "9e51fc7d3169098de1be0325f8ab6b843d3acea7ff16dd9fac744fb7c4d82309",
+      "status": "rejected",
+      "diagnostic": "更新清单签名校验失败，已拒绝更新。"
+    },
+    {
+      "case": "missing-signed-manifest",
+      "archive_sha256": "d9da80f83f584ead7f4ac2685d709121abb0e2618665e9b71dcd90fbe6f92eef",
+      "status": "rejected",
+      "diagnostic": "复核包缺少完整的签名发布清单"
+    }
+  ]
+}

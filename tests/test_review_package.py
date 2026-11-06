@@ -1,14 +1,58 @@
 from hashlib import sha256
+from io import BytesIO
 import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
+from unittest.mock import patch
 from zipfile import ZipFile
 
+from tools import verify_review_package
 from tools.verify_review_package import verify
 
 
 class ReviewPackageTests(unittest.TestCase):
+    def test_release_uses_distinct_source_archive_and_implementation_commits(self):
+        source_commit, implementation = "a" * 40, "b" * 40
+        release = {"schema": 1, "version": "0.6.18", "assets": {
+            "windows-x64-portable-exe": {"name": "Agent.exe", "url": "https://example.org/Agent.exe",
+                                         "sha256": "c" * 64},
+        }}
+        status = {"app_version": "0.6.18", "source_commit": source_commit,
+                  "release_source_commit": implementation}
+        identity = {"input_sha256": "d" * 64, "candidate_sha256": "e" * 64}
+        video = b"video fixture"
+        for archive_commit, demo_commit, reason in (
+            (source_commit, implementation, None),
+            (implementation, implementation, "源码归档的提交"),
+            (source_commit, source_commit, "演示录制的版本或源码"),
+        ):
+            with self.subTest(archive_commit=archive_commit, demo_commit=demo_commit):
+                source = BytesIO()
+                with ZipFile(source, "w") as code:
+                    code.comment = archive_commit.encode()
+                    code.writestr("app_version.py", 'APP_VERSION = "0.6.18"\n')
+                demo = {"app_version": "0.6.18", "video_sha256": sha256(video).hexdigest(),
+                        "capture": {**identity, "app_version": "0.6.18", "source_commit": demo_commit}}
+                files = {
+                    "Windows桌面版/latest.json": json.dumps(release).encode(),
+                    "Windows桌面版/latest.json.sig": b"signature fixture",
+                    "F01-源代码.zip": source.getvalue(),
+                    "遗留软件复活智能体演示.mp4": video,
+                    "演示记录.json": json.dumps(demo).encode(),
+                    "可分发样本/工作台演示/agent-acceptance.json": json.dumps(identity).encode(),
+                }
+                checksums = {name: sha256(data).hexdigest() for name, data in files.items()}
+                with ZipFile(BytesIO(), "w") as archive, patch.object(verify_review_package, "verify_manifest"):
+                    for name, data in files.items():
+                        archive.writestr(name, data)
+                    if reason:
+                        with self.assertRaisesRegex(ValueError, reason):
+                            verify_review_package.check_signed_release(archive, checksums, status)
+                    else:
+                        self.assertEqual(verify_review_package.check_signed_release(archive, checksums, status),
+                                         {"version": "0.6.18", "source_commit": implementation})
+
     def test_counterexample_device_versions_must_match_target(self):
         base = b"test APK input"
         candidate = b"test APK output"

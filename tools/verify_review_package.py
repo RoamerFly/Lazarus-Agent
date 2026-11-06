@@ -1,6 +1,7 @@
 """Verify review ZIP bytes and packaged APK proofs without extracting executable files."""
 import argparse
 import hashlib
+from io import BytesIO
 import json
 from pathlib import Path, PurePosixPath
 import posixpath
@@ -9,8 +10,10 @@ import sys
 from urllib.parse import unquote, urlsplit
 from zipfile import ZipFile
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 from agent_acceptance import verified_for
+from updater import parse_manifest, verify_manifest
 
 
 def check_local_links(archive, names):
@@ -27,6 +30,64 @@ def check_local_links(archive, names):
                 raise ValueError(f"复核文档引用缺失文件 {name} → {target}")
             count += 1
     return count
+
+
+def check_signed_release(archive, checksums, status):
+    manifest_name = "Windows桌面版/latest.json"
+    signature_name = manifest_name + ".sig"
+    delivery = status.get("windows_delivery")
+    commit = status.get("release_source_commit")
+    if not (manifest_name in checksums or signature_name in checksums or commit or delivery):
+        return None
+    if manifest_name not in checksums or signature_name not in checksums:
+        raise ValueError("复核包缺少完整的签名发布清单")
+    raw = archive.read(manifest_name)
+    verify_manifest(raw, archive.read(signature_name), ROOT / "update/lazarus-update-public.pem")
+    release = parse_manifest(raw)
+    if release.version != status.get("app_version"):
+        raise ValueError("签名发布清单与复核包版本不一致")
+
+    sources = [name for name in ("F01-源代码.zip", f"F01-源代码-v{release.version}.zip") if name in checksums]
+    if sources or "源码版本.txt" in checksums:
+        source_commit = status.get("source_commit", "")
+        if len(sources) != 1 or not isinstance(source_commit, str) or not re.fullmatch(r"[a-f0-9]{40}", source_commit):
+            raise ValueError("复核包缺少对应的源码归档或提交")
+        with ZipFile(BytesIO(archive.read(sources[0]))) as source:
+            if source.comment != source_commit.encode("ascii"):
+                raise ValueError("源码归档的提交与复核包不一致")
+            version_line = f'APP_VERSION = "{release.version}"'.encode("ascii")
+            if version_line not in source.read("app_version.py").splitlines():
+                raise ValueError("源码归档的程序版本与签名发布清单不一致")
+        if ("源码版本.txt" in checksums
+                and archive.read("源码版本.txt").decode("utf-8-sig").strip() != source_commit):
+            raise ValueError("源码版本文件的提交与复核包不一致")
+
+    if isinstance(delivery, dict):
+        commit = commit or delivery.get("source_commit")
+    elif delivery == "separate-local-installer":
+        commit = commit or status.get("source_commit")
+    regression = status.get("release_regression")
+    if regression and (regression.get("app_version") != release.version
+                       or (commit and regression.get("implementation_commit") != commit)):
+        raise ValueError("发布回归与签名构建的版本或源码不一致")
+
+    videos = [name for name in ("遗留软件复活智能体演示.mp4", "演示.mp4") if name in checksums]
+    if videos or "演示记录.json" in checksums:
+        if len(videos) != 1 or "演示记录.json" not in checksums:
+            raise ValueError("复核包缺少对应的演示视频或录制回执")
+        record = json.loads(archive.read("演示记录.json"))
+        capture = record["capture"]
+        if record.get("video_sha256") != checksums[videos[0]]:
+            raise ValueError("演示视频与录制回执不一致")
+        if (record.get("app_version") != release.version or capture.get("app_version") != release.version
+                or (commit and capture.get("source_commit") != commit)):
+            raise ValueError("演示录制的版本或源码与签名构建不一致")
+        demo = "可分发样本/工作台演示"
+        report = json.loads(archive.read(demo + "/agent-acceptance.json"))
+        if (capture.get("candidate_sha256") != report.get("candidate_sha256")
+                or capture.get("input_sha256") != report.get("input_sha256")):
+            raise ValueError("演示 APK 与设备验收记录不一致")
+    return {"version": release.version, "source_commit": commit}
 
 
 def verify(path):
@@ -50,6 +111,8 @@ def verify(path):
             with archive.open(name) as stream:
                 if hashlib.file_digest(stream, "sha256").hexdigest() != expected:
                     raise ValueError("文件哈希不一致：" + name)
+        status = json.loads(archive.read("复核状态.json"))
+        signed_release = check_signed_release(archive, checksums, status)
         samples = []
         for name in names:
             if "可分发样本" in PurePosixPath(name).parts and name.endswith("/agent-acceptance.json"):
@@ -99,7 +162,7 @@ def verify(path):
         return {"status": "archive-and-proofs-verified", "file_count": len(names),
                 "local_links_checked": check_local_links(archive, set(names)),
                 "samples": samples, "counterexamples": counterexamples,
-                "package_status": json.loads(archive.read("复核状态.json")),
+                "package_status": status, "signed_release": signed_release,
                 "scope": "Files, checksums and stored proofs. Device replay is a separate operation."}
 
 
