@@ -44,6 +44,32 @@ class WorkspaceTests(unittest.TestCase):
         self.ws.replace_lines(path.name, first["sha256"], 3, 3, "  <last/>")
         self.assertEqual(path.read_bytes(), b"<manifest>\r\n  <updated/>\r\n  <last/>\r\n</manifest>\r\n")
 
+    def test_exact_replacements_can_chain_but_line_edits_require_a_current_read(self):
+        path = self.root / "AndroidManifest.xml"
+        first = self.ws.read_text(path.name)
+        second = self.ws.replace_text(path.name, first["sha256"], "<manifest/>", "<manifest>\n</manifest>")
+        third = self.ws.replace_text(path.name, second["sha256"], "</manifest>", "<app/>\n</manifest>")
+        self.assertEqual(path.read_text(), "<manifest>\n<app/>\n</manifest>")
+        with self.assertRaisesRegex(ValueError, "先读取"):
+            self.ws.replace_lines(path.name, third["sha256"], 2, 2, "<updated/>")
+        row = self.ws.read_text(path.name, 2, 1)
+        self.ws.replace_lines(path.name, row["sha256"], 2, 2, "<updated/>")
+        self.assertEqual(path.read_text(), "<manifest>\n<updated/>\n</manifest>")
+
+    def test_written_hash_cannot_be_used_after_unobserved_change_or_restore(self):
+        name = "assets/sample.txt"
+        path = self.root / name
+        created = self.ws.create_text_file(name, "first")
+        edited = self.ws.replace_text(name, created["sha256"], "first", "second")
+        path.write_text("external", encoding="utf-8")
+        for sha256 in (edited["sha256"], digest(b"external")):
+            with self.assertRaisesRegex(ValueError, "最新 SHA-256"):
+                self.ws.replace_text(name, sha256, "external", "changed")
+        self.ws.restore_file(name)
+        path.write_text("second", encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "最新 SHA-256"):
+            self.ws.replace_text(name, edited["sha256"], "second", "changed")
+
     def test_new_smali_and_resource_files_share_the_same_tools(self):
         self.ws.create_text_file("smali/example/Helper.smali", ".class public Lexample/Helper;")
         self.ws.create_text_file("res/values/added.xml", "<resources/>")

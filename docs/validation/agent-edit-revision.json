@@ -1,0 +1,28 @@
+{
+  "source_apk_sha256": "55ca244e70ab959fbb179a04c757c1974821ff790578e8811a345f31e024d8da",
+  "historical_trace_sha256": "e9477e0ef78dce253445a6e885823ce856d0126abc1a0ecbfe8daf4b32291969",
+  "scope": "Replay historical edit calls on their original file revisions; no Android or model rerun",
+  "checks": [
+    {
+      "tool_call": 24,
+      "supplied_hash_equals_latest_written": true,
+      "before": "rejected-as-unread",
+      "after": "applied",
+      "updated_sha256": "e6c440840622aa07c1b93788225dbf3d9e700b68cd3361ef5eebece2ddfd8e06"
+    },
+    {
+      "tool_call": 31,
+      "supplied_hash_equals_latest_written": true,
+      "before": "rejected-as-unread",
+      "after": "applied",
+      "updated_sha256": "fad5aaa1f6633cccfca6d753094d18b9b54f4e85a139da7416f3684c3e363cc7"
+    },
+    {
+      "tool_call": 34,
+      "supplied_hash_equals_latest_written": true,
+      "before": "rejected-as-unread",
+      "after": "applied",
+      "updated_sha256": "033e3bfd0c53cfb3aafde1f85936567c32d7bc8eafa1cc54fd50baa6e5335a59"
+    }
+  ]
+}
