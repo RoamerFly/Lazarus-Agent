@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "scope": "GitHub draft release asset digests compared to local engineering candidate",
+  "release_id": 437264949,
+  "tag": "v0.6.30-candidate",
+  "url": "https://github.com/RoamerFly/Lazarus-Agent/releases/tag/untagged-c7962128a47221e79954",
+  "is_draft": true,
+  "is_prerelease": true,
+  "source_commit": "b25149059af357fd27c5bbbf0aaf4ba730678143",
+  "authenticode": "NotSigned",
+  "assets": [
+    {
+      "name": "Lazarus-Agent.exe",
+      "bytes": 131739131,
+      "sha256": "5dcffbe3f4b83865910d67fbb74cafe6891adac2bc87b017c569862f325f0825"
+    },
+    {
+      "name": "Lazarus-Agent-v0.6.30-review-r2.zip",
+      "bytes": 6388370,
+      "sha256": "652506b40cd46f7220abaef45d70409a01ba2eeff3bd09999468a8af36e129e3"
+    },
+    {
+      "name": "Lazarus-Agent-v0.6.30-proposal.pdf",
+      "bytes": 165303,
+      "sha256": "d63db101437e7a70fb7d0c337e861f22bbe973c6028d7c564be4463b76e96f6c"
+    },
+    {
+      "name": "Lazarus-Agent-v0.6.30-demo.mp4",
+      "bytes": 833337,
+      "sha256": "c6df17fafc158d60524be2705ed4416b8415eca66de888f33351d32ca8e6d710"
+    },
+    {
+      "name": "local-build.json",
+      "bytes": 314,
+      "sha256": "76cefc4bdaa3d6a01c488328990b29e0040e4653b59c4c7e200f649a7a74f504"
+    },
+    {
+      "name": "review-verification.json",
+      "bytes": 1263,
+      "sha256": "64d99346f6d5d0f381f2a227bad3e4182896ecd98a3e199cad33c6376d645d65"
+    },
+    {
+      "name": "windows-verification.json",
+      "bytes": 2944,
+      "sha256": "ef4a0c7c24c5c7bb62c9cae65831172faac0490ba813e621494eba5bb8914857"
+    }
+  ],
+  "hash_manifest_sha256": "0d96f8067ee5f154836097880c7b0a24b8a0afc0b27ade3ffec831451c64c2c9",
+  "network_model_calls": 0
+}
