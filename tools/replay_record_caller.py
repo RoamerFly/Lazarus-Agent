@@ -125,12 +125,18 @@ def replay_foreign_provider(device, apk, expected, probe):
     return result
 
 
+def explicitly_rejected(row):
+    """Recognize only an explicit rejection displayed by the target."""
+    outcomes = {tuple(node) for node in row["observed"]}.intersection(OUTCOMES)
+    return row["outcome"] == "target-rejected" and outcomes == {(TARGET, "Rejected")}
+
+
 def replay_private_boundary(device, apk, expected, probe):
     fixed = replay(device, apk, expected, probe, compare_uri=True, forged_bytes_after_share=True)
     foreign = replay_foreign_provider(device, apk, expected, probe)
     observed = (fixed["before_share"], fixed, fixed["forged_bytes_after"],
                 foreign["before_share"], foreign, foreign["alternate_foreign_value"])
-    passed = all(row["outcome"] in {"target-rejected", "caller-rejected"} for row in observed)
+    passed = all(explicitly_rejected(row) for row in observed)
     return {"status": "boundary-verified" if passed else "boundary-failed", "network_model_calls": 0,
             "candidate_sha256": expected, "fixed_probe_uri": fixed, "foreign_provider": foreign}
 

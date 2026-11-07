@@ -47,6 +47,26 @@ class RecordCallerProbeTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 probe.observe_outcome(Mock())
 
+    def test_private_boundary_requires_explicit_target_rejection_on_every_input(self):
+        def observation(package, label, outcome="target-rejected"):
+            return {"outcome": outcome, "observed": [[package, label]]}
+
+        rejected = observation(probe.TARGET, "Rejected")
+        fixed = {**rejected, "before_share": rejected, "forged_bytes_after": rejected}
+        foreign = {**rejected, "before_share": rejected, "alternate_foreign_value": rejected}
+        with (patch.object(probe, "replay", return_value=fixed),
+              patch.object(probe, "replay_foreign_provider", return_value=foreign)):
+            self.assertEqual(probe.replay_private_boundary(None, None, "hash", None)["status"], "boundary-verified")
+            for response in (
+                observation(probe.TARGET, "Cannot read record"),
+                observation(probe.TARGET, "Unexpected file"),
+                observation(probe.CALLER, "Caller rejected", "caller-rejected"),
+                {**rejected, "observed": [*rejected["observed"], [probe.TARGET, "Cannot read record"]]},
+            ):
+                with self.subTest(response=response):
+                    foreign["alternate_foreign_value"] = response
+                    self.assertEqual(probe.replay_private_boundary(None, None, "hash", None)["status"], "boundary-failed")
+
     def test_synthetic_application_scheme_is_accepted(self):
         self.assertIsNotNone(probe.RECORD_URI.fullmatch("ggbond-record://local/record.txt"))
         self.assertIsNone(probe.RECORD_URI.fullmatch("file://local/record.txt"))

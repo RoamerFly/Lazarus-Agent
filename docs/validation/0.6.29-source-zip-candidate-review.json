@@ -1,0 +1,887 @@
+{
+  "aapt_sha256": "c528418af0c5152650d9532485f371e8eed98e1436d1ab1a197580b97917b561",
+  "rows": [
+    {
+      "trial": "P01-agent-1",
+      "case": "P01",
+      "mode": "agent",
+      "candidate_and_installed_sha256": "820b740de9fb3d1fe52d1693790d9c28ab878be8663de6aea98f9c1ea474793e",
+      "input_sha256": "08ed16b9f6a149bd8063bae99dd72aad200dafea7d3a0504af004187bde20deb",
+      "device_report_sha256": "898801a8fc5da635536f65643b4479594fa65738c574d3dd7735f3b0e99a52d0",
+      "raw_diff_sha256": "575b54e8e712ea3e407fe1af8fbb29ee91617f98f24ccff1e0ae4f47eeae0256",
+      "build_attempts": 1,
+      "trial_duration_seconds": 66.873,
+      "steps": 10,
+      "target_sdk": [
+        22,
+        36
+      ],
+      "compiled_manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        },
+        "libraries": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "asset_changes": {
+        "modified": [],
+        "added": [],
+        "removed": []
+      },
+      "decoded_files_in_diff": [
+        "AndroidManifest.xml",
+        "smali/org/ggbond/fieldroute/RouteActivity.smali"
+      ],
+      "review": "新增读写当前路线的私有首选项方法，选择路线时保存，冷启动时读回。"
+    },
+    {
+      "trial": "P01-agent-2",
+      "case": "P01",
+      "mode": "agent",
+      "candidate_and_installed_sha256": "f003e93d453c930faaf38b3b07cb5546e87ac19103d7f9d50a42635f79431ae1",
+      "input_sha256": "08ed16b9f6a149bd8063bae99dd72aad200dafea7d3a0504af004187bde20deb",
+      "device_report_sha256": "c8fd0c1c0ecd904f8be14fb8b720166d4f793fa60bb7bad13a0820527bba65e3",
+      "raw_diff_sha256": "ffa6f32f8ac0cab7d12818c1ad9550ae765eaa2a3f689e7df29f5747ed9baa7d",
+      "build_attempts": 1,
+      "trial_duration_seconds": 74.386,
+      "steps": 10,
+      "target_sdk": [
+        22,
+        36
+      ],
+      "compiled_manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        },
+        "libraries": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "asset_changes": {
+        "modified": [],
+        "added": [],
+        "removed": []
+      },
+      "decoded_files_in_diff": [
+        "AndroidManifest.xml",
+        "smali/org/ggbond/fieldroute/RouteActivity.smali"
+      ],
+      "review": "切换路线和页面创建时直接写入与读取私有首选项。"
+    },
+    {
+      "trial": "P01-agent-3",
+      "case": "P01",
+      "mode": "agent",
+      "candidate_and_installed_sha256": "443898373ba6dd5569e7a14f96c2b8f8db4b09620b41b50b1216659e175c703e",
+      "input_sha256": "08ed16b9f6a149bd8063bae99dd72aad200dafea7d3a0504af004187bde20deb",
+      "device_report_sha256": "25631dc7a9559c9ffba3778fc14c1a6b498133a928c2d76be0667361d19de9c8",
+      "raw_diff_sha256": "7b8ae31ab1ef368eb2c88081281cdbf47ccc50b33bbbfedd2bc7132e9f80df2b",
+      "build_attempts": 3,
+      "trial_duration_seconds": 120.099,
+      "steps": 10,
+      "target_sdk": [
+        22,
+        34
+      ],
+      "compiled_manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        },
+        "libraries": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "asset_changes": {
+        "modified": [],
+        "added": [],
+        "removed": []
+      },
+      "decoded_files_in_diff": [
+        "AndroidManifest.xml",
+        "smali/org/ggbond/fieldroute/RouteActivity.smali"
+      ],
+      "review": "私有首选项和文件回退均存在。另有无法正确解析的首选项接口尝试和宽泛异常捕获。"
+    },
+    {
+      "trial": "P02-rules-1",
+      "case": "P02",
+      "mode": "rules",
+      "candidate_and_installed_sha256": "91b581c03a6d11f60b32a92c2e6cc407bf5d800fdb4cffd585f4b1ce7cab15c7",
+      "input_sha256": "7b8e200984dee500def40a9684fd2de9ced885ca1d04c63771d1d473b597dcce",
+      "device_report_sha256": "394ff7667c5f26d9899e01071b2e70a038cb3f77cefeb12d2a02cfb064e6bd9d",
+      "raw_diff_sha256": null,
+      "build_attempts": 1,
+      "trial_duration_seconds": 35.082,
+      "steps": 6,
+      "target_sdk": [
+        28,
+        28
+      ],
+      "compiled_manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        },
+        "libraries": {
+          "removed": [],
+          "added": [
+            {
+              "type": "uses-library",
+              "name": "org.apache.http.legacy"
+            }
+          ]
+        }
+      },
+      "asset_changes": {
+        "modified": [],
+        "added": [],
+        "removed": []
+      },
+      "decoded_files_in_diff": [],
+      "review": "本地规则声明旧 HTTP 共享库，省略 required 属性，默认要求设备提供该库。"
+    },
+    {
+      "trial": "P02-agent-1",
+      "case": "P02",
+      "mode": "agent",
+      "candidate_and_installed_sha256": "6dfdf85835db81c8602785e3d5fc9d133380efd7a5c0fce867cfb20cfab74988",
+      "input_sha256": "7b8e200984dee500def40a9684fd2de9ced885ca1d04c63771d1d473b597dcce",
+      "device_report_sha256": "69d97b8cd5a390149e8e8046ee00b5b7e71e5419e4035cff40d68b04a01539c2",
+      "raw_diff_sha256": "9db27fe54e42e4f4b9d3a90f30a575f6638b4af2981f2bb89deb33ff4882b0dc",
+      "build_attempts": 1,
+      "trial_duration_seconds": 80.257,
+      "steps": 6,
+      "target_sdk": [
+        28,
+        28
+      ],
+      "compiled_manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        },
+        "libraries": {
+          "removed": [],
+          "added": [
+            {
+              "type": "uses-library",
+              "name": "org.apache.http.legacy",
+              "required": "(type 0x12)0x0"
+            }
+          ]
+        }
+      },
+      "asset_changes": {
+        "modified": [],
+        "added": [],
+        "removed": []
+      },
+      "decoded_files_in_diff": [
+        "AndroidManifest.xml"
+      ],
+      "review": "只在清单中添加可选旧 HTTP 共享库。现有操作在本次已提供共享库的镜像上恢复。"
+    },
+    {
+      "trial": "P02-agent-2",
+      "case": "P02",
+      "mode": "agent",
+      "candidate_and_installed_sha256": "bff413643ab2f5838741b61da5961ccaf582f048b0ba6c374fcb07fbce8e8934",
+      "input_sha256": "7b8e200984dee500def40a9684fd2de9ced885ca1d04c63771d1d473b597dcce",
+      "device_report_sha256": "42cc143505660e6ca2d92ab5639d2cd3e1c0cd1bee34309b210326113dec1f39",
+      "raw_diff_sha256": "9db27fe54e42e4f4b9d3a90f30a575f6638b4af2981f2bb89deb33ff4882b0dc",
+      "build_attempts": 1,
+      "trial_duration_seconds": 69.72,
+      "steps": 6,
+      "target_sdk": [
+        28,
+        28
+      ],
+      "compiled_manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        },
+        "libraries": {
+          "removed": [],
+          "added": [
+            {
+              "type": "uses-library",
+              "name": "org.apache.http.legacy",
+              "required": "(type 0x12)0x0"
+            }
+          ]
+        }
+      },
+      "asset_changes": {
+        "modified": [],
+        "added": [],
+        "removed": []
+      },
+      "decoded_files_in_diff": [
+        "AndroidManifest.xml"
+      ],
+      "review": "只在清单中添加可选旧 HTTP 共享库。现有操作在本次已提供共享库的镜像上恢复。"
+    },
+    {
+      "trial": "P02-agent-3",
+      "case": "P02",
+      "mode": "agent",
+      "candidate_and_installed_sha256": "e2ad71a7f4d34d61199d0cf3a76715a3f65b444ea83a0ea588b142316f76d52d",
+      "input_sha256": "7b8e200984dee500def40a9684fd2de9ced885ca1d04c63771d1d473b597dcce",
+      "device_report_sha256": "f2f3526c7f2d25467d7067f393aeb9375daec60305e102077f84f4120a6fd865",
+      "raw_diff_sha256": "9db27fe54e42e4f4b9d3a90f30a575f6638b4af2981f2bb89deb33ff4882b0dc",
+      "build_attempts": 1,
+      "trial_duration_seconds": 79.919,
+      "steps": 6,
+      "target_sdk": [
+        28,
+        28
+      ],
+      "compiled_manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        },
+        "libraries": {
+          "removed": [],
+          "added": [
+            {
+              "type": "uses-library",
+              "name": "org.apache.http.legacy",
+              "required": "(type 0x12)0x0"
+            }
+          ]
+        }
+      },
+      "asset_changes": {
+        "modified": [],
+        "added": [],
+        "removed": []
+      },
+      "decoded_files_in_diff": [
+        "AndroidManifest.xml"
+      ],
+      "review": "只在清单中添加可选旧 HTTP 共享库。现有操作在本次已提供共享库的镜像上恢复。"
+    },
+    {
+      "trial": "P03-one-build-1",
+      "case": "P03",
+      "mode": "one-build",
+      "candidate_and_installed_sha256": "e25bf02d7f1149c2e3f2dbf44df14db216cbcaa4d19d77b9b353c6867f69ec94",
+      "input_sha256": "1476a30063a68f27a2e3c10d3d99383aeee0afbf5177e09fbc44f36cc6f237da",
+      "device_report_sha256": "9c0af6433a0d2b9d3f622a5af313fa7c09098de754b3c04f7acbc1523885bcca",
+      "raw_diff_sha256": "81aeeb4301cac579d0235f2b30fddd8900f94a20a9dfd249b33bdbdbed125057",
+      "build_attempts": 1,
+      "trial_duration_seconds": 26.801,
+      "steps": 4,
+      "target_sdk": [
+        28,
+        28
+      ],
+      "compiled_manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        },
+        "libraries": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "asset_changes": {
+        "modified": [],
+        "added": [],
+        "removed": []
+      },
+      "decoded_files_in_diff": [
+        "res/values/strings.xml"
+      ],
+      "review": "仅替换开始按钮和带次数的启动提示两项资源。保留整数格式占位符。"
+    },
+    {
+      "trial": "P03-agent-1",
+      "case": "P03",
+      "mode": "agent",
+      "candidate_and_installed_sha256": "77f9913738e3717bc5c2a88ee3fcf5d2d23accae0853554219b5dcdb2e94b6cd",
+      "input_sha256": "1476a30063a68f27a2e3c10d3d99383aeee0afbf5177e09fbc44f36cc6f237da",
+      "device_report_sha256": "c7f4bdb2bc1b8b0ebd8c0f322ecd57a0b60f17ea100a639e62d19a43e6b74eb4",
+      "raw_diff_sha256": "81aeeb4301cac579d0235f2b30fddd8900f94a20a9dfd249b33bdbdbed125057",
+      "build_attempts": 1,
+      "trial_duration_seconds": 42.307,
+      "steps": 4,
+      "target_sdk": [
+        28,
+        28
+      ],
+      "compiled_manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        },
+        "libraries": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "asset_changes": {
+        "modified": [],
+        "added": [],
+        "removed": []
+      },
+      "decoded_files_in_diff": [
+        "res/values/strings.xml"
+      ],
+      "review": "仅替换开始按钮和带次数的启动提示两项资源。保留整数格式占位符。"
+    },
+    {
+      "trial": "P03-agent-2",
+      "case": "P03",
+      "mode": "agent",
+      "candidate_and_installed_sha256": "2835ea34586dd57cbc2e808acd8331775ffe6c8c43297ec8e1cf86725e78528c",
+      "input_sha256": "1476a30063a68f27a2e3c10d3d99383aeee0afbf5177e09fbc44f36cc6f237da",
+      "device_report_sha256": "32f4e036059e76fded18c1092d198c35185178d922b17c370656c71f992d7bd7",
+      "raw_diff_sha256": "81aeeb4301cac579d0235f2b30fddd8900f94a20a9dfd249b33bdbdbed125057",
+      "build_attempts": 1,
+      "trial_duration_seconds": 57.655,
+      "steps": 4,
+      "target_sdk": [
+        28,
+        28
+      ],
+      "compiled_manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        },
+        "libraries": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "asset_changes": {
+        "modified": [],
+        "added": [],
+        "removed": []
+      },
+      "decoded_files_in_diff": [
+        "res/values/strings.xml"
+      ],
+      "review": "仅替换开始按钮和带次数的启动提示两项资源。保留整数格式占位符。"
+    },
+    {
+      "trial": "P03-agent-3",
+      "case": "P03",
+      "mode": "agent",
+      "candidate_and_installed_sha256": "78e807e91bacced30fe6f959eb1afeaec0249ec36c32863b236433e71019b89b",
+      "input_sha256": "1476a30063a68f27a2e3c10d3d99383aeee0afbf5177e09fbc44f36cc6f237da",
+      "device_report_sha256": "5fe4ef5097f3365f6f83ac6c327493e7fae8f6aeb6fa1becbb2748af68aa5a45",
+      "raw_diff_sha256": "81aeeb4301cac579d0235f2b30fddd8900f94a20a9dfd249b33bdbdbed125057",
+      "build_attempts": 1,
+      "trial_duration_seconds": 57.148,
+      "steps": 4,
+      "target_sdk": [
+        28,
+        28
+      ],
+      "compiled_manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        },
+        "libraries": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "asset_changes": {
+        "modified": [],
+        "added": [],
+        "removed": []
+      },
+      "decoded_files_in_diff": [
+        "res/values/strings.xml"
+      ],
+      "review": "仅替换开始按钮和带次数的启动提示两项资源。保留整数格式占位符。"
+    },
+    {
+      "trial": "P04-agent-1",
+      "case": "P04",
+      "mode": "agent",
+      "candidate_and_installed_sha256": "759e4cae07acb949aa4800e382b13c5648d8ef7991791ce648a28b0e1c804cfe",
+      "input_sha256": "ffce5821e6eeb1c0b9faaa5d0c79fadaa17dcdcc1a77d5b3062d4d947189a85b",
+      "device_report_sha256": "259746d95d5f0a3d9ee65f1ba6233c77dc08ce220830395eaddf9b7e14f0e780",
+      "raw_diff_sha256": "78e4d5d6049ccc73678222bfc17a16647e60df463b25d306e8c435af1e25c5ad",
+      "build_attempts": 2,
+      "trial_duration_seconds": 126.195,
+      "steps": 16,
+      "target_sdk": [
+        28,
+        28
+      ],
+      "compiled_manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        },
+        "libraries": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "asset_changes": {
+        "modified": [],
+        "added": [],
+        "removed": []
+      },
+      "decoded_files_in_diff": [
+        "smali/org/ggbond/temperaturecard/TemperatureActivity$$ExternalSyntheticLambda1.smali",
+        "smali/org/ggbond/temperaturecard/TemperatureActivity.smali"
+      ],
+      "review": "从当前温度输入计算华氏值，单精度运算后取整，使用私有首选项记住单位。通过范围为固定输入和冷启动。"
+    },
+    {
+      "trial": "P04-agent-2",
+      "case": "P04",
+      "mode": "agent",
+      "candidate_and_installed_sha256": "80648ead34248451e729c1a93ae3af63685e6261f6264b3ebb43dd0ed09c5932",
+      "input_sha256": "ffce5821e6eeb1c0b9faaa5d0c79fadaa17dcdcc1a77d5b3062d4d947189a85b",
+      "device_report_sha256": "8bb760bd1d8de9d5de7532bd71fed0b761577b97379ec17fbe29703aaff01daf",
+      "raw_diff_sha256": "61a5bc02122d504fca98358685c67300dca1896a9574408fe875c187a1809f71",
+      "build_attempts": 1,
+      "trial_duration_seconds": 118.052,
+      "steps": 16,
+      "target_sdk": [
+        28,
+        28
+      ],
+      "compiled_manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        },
+        "libraries": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "asset_changes": {
+        "modified": [],
+        "added": [],
+        "removed": []
+      },
+      "decoded_files_in_diff": [
+        "smali/org/ggbond/temperaturecard/TemperatureActivity$$ExternalSyntheticLambda1.smali",
+        "smali/org/ggbond/temperaturecard/TemperatureActivity.smali"
+      ],
+      "review": "从当前温度输入计算华氏值，单精度运算后取整，使用私有首选项记住单位。通过范围为固定输入和冷启动。"
+    },
+    {
+      "trial": "P04-agent-3",
+      "case": "P04",
+      "mode": "agent",
+      "candidate_and_installed_sha256": "f7105795439e10d792b45ce9d1b5a644fc26b61deb0f7558c58ad23c4e9efa45",
+      "input_sha256": "ffce5821e6eeb1c0b9faaa5d0c79fadaa17dcdcc1a77d5b3062d4d947189a85b",
+      "device_report_sha256": "89793059e648f3e0f865e5575abfc9ffd4827b4e9ee959365848f0e4fbdf77f9",
+      "raw_diff_sha256": "e158238dc69b96443d10ea9abcba675bb4ce95feb3c2672d00bc1c3c78795d6a",
+      "build_attempts": 1,
+      "trial_duration_seconds": 119.147,
+      "steps": 16,
+      "target_sdk": [
+        28,
+        28
+      ],
+      "compiled_manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        },
+        "libraries": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "asset_changes": {
+        "modified": [],
+        "added": [],
+        "removed": []
+      },
+      "decoded_files_in_diff": [
+        "smali/org/ggbond/temperaturecard/TemperatureActivity$$ExternalSyntheticLambda1.smali",
+        "smali/org/ggbond/temperaturecard/TemperatureActivity.smali"
+      ],
+      "review": "从当前温度输入计算华氏值，单精度运算后取整，使用私有首选项记住单位。通过范围为固定输入和冷启动。"
+    },
+    {
+      "trial": "P05-rules-1",
+      "case": "P05",
+      "mode": "rules",
+      "candidate_and_installed_sha256": "e9c55fb1214aef07c339f7e568dac138b549200491ad532a0a3c54f8c70b8949",
+      "input_sha256": "4049359b01c7c7348d7d2bc4c4efdb27a7844975f3dc147a1cef0996632de9ac",
+      "device_report_sha256": "d3c8b113c7d79955c64fcb4600fb3a1f558a52f24fe099a4cbc60e4ae0a354dc",
+      "raw_diff_sha256": null,
+      "build_attempts": 1,
+      "trial_duration_seconds": 44.647,
+      "steps": 8,
+      "target_sdk": [
+        28,
+        28
+      ],
+      "compiled_manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        },
+        "libraries": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "asset_changes": {
+        "modified": [],
+        "added": [],
+        "removed": []
+      },
+      "decoded_files_in_diff": [],
+      "review": "规则回执记录成功打开流后写入最后记录。APK 资源条目和清单声明未变。"
+    },
+    {
+      "trial": "P05-one-build-1",
+      "case": "P05",
+      "mode": "one-build",
+      "candidate_and_installed_sha256": "59990df8e8d710e8cdf3de2a8a7134a3ba9588cd61de29a8d638e6fc0fc41713",
+      "input_sha256": "4049359b01c7c7348d7d2bc4c4efdb27a7844975f3dc147a1cef0996632de9ac",
+      "device_report_sha256": "c85f925fc798521829c3de5e99e2fd32091d7d2654c39a77b4ebc925085041d3",
+      "raw_diff_sha256": "bbf7bdd416244e4ffdd1c9f10e906ca2ab8313771c4a5a6d9a1749c0cd094014",
+      "build_attempts": 1,
+      "trial_duration_seconds": 45.189,
+      "steps": 8,
+      "target_sdk": [
+        28,
+        28
+      ],
+      "compiled_manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        },
+        "libraries": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "asset_changes": {
+        "modified": [],
+        "added": [],
+        "removed": []
+      },
+      "decoded_files_in_diff": [
+        "smali/org/ggbond/filereader/FileReaderActivity.smali"
+      ],
+      "review": "从私有首选项保存和恢复实际打开的记录名。"
+    },
+    {
+      "trial": "P05-agent-1",
+      "case": "P05",
+      "mode": "agent",
+      "candidate_and_installed_sha256": "a84ab0ec2f35ce80eb9a45c184bcf2274456fda5e816025d36ef498426537b74",
+      "input_sha256": "4049359b01c7c7348d7d2bc4c4efdb27a7844975f3dc147a1cef0996632de9ac",
+      "device_report_sha256": "6e6810f7773ed292335e987ae147a65463a5ea538e6957da5a74939ef8f14861",
+      "raw_diff_sha256": "efac1f852e7ebc847fbf10d6d6e7fd3f5a54f9cbf8f4991b30b6015329a81be5",
+      "build_attempts": 1,
+      "trial_duration_seconds": 71.923,
+      "steps": 8,
+      "target_sdk": [
+        28,
+        28
+      ],
+      "compiled_manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        },
+        "libraries": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "asset_changes": {
+        "modified": [],
+        "added": [],
+        "removed": []
+      },
+      "decoded_files_in_diff": [
+        "smali/org/ggbond/filereader/FileReaderActivity.smali"
+      ],
+      "review": "从私有首选项保存和恢复实际打开的记录名。"
+    },
+    {
+      "trial": "P05-agent-2",
+      "case": "P05",
+      "mode": "agent",
+      "candidate_and_installed_sha256": "ff27992fbf08fbc30041d2aeeeb4505447125a83be6122db2a11749ef1437f2b",
+      "input_sha256": "4049359b01c7c7348d7d2bc4c4efdb27a7844975f3dc147a1cef0996632de9ac",
+      "device_report_sha256": "6ddd39d2f5aa88d9f75e0fc7031732f5a2924f34e752d663dbcb875b3784aec0",
+      "raw_diff_sha256": "bbcb7b1fba873f68a7969d237564e3db36b1f17eb59e1dbbc5174289b33baf3c",
+      "build_attempts": 2,
+      "trial_duration_seconds": 103.263,
+      "steps": 8,
+      "target_sdk": [
+        28,
+        28
+      ],
+      "compiled_manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        },
+        "libraries": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "asset_changes": {
+        "modified": [],
+        "added": [],
+        "removed": []
+      },
+      "decoded_files_in_diff": [
+        "smali/org/ggbond/filereader/FileReaderActivity.smali"
+      ],
+      "review": "在应用私有目录写入最后记录名，读取失败时回退到默认记录。"
+    },
+    {
+      "trial": "P05-agent-3",
+      "case": "P05",
+      "mode": "agent",
+      "candidate_and_installed_sha256": "89ec5e185b7c33354947e4227c78426417ded5ceec2d6ff479b6277703ba704b",
+      "input_sha256": "4049359b01c7c7348d7d2bc4c4efdb27a7844975f3dc147a1cef0996632de9ac",
+      "device_report_sha256": "918c3db66738fd47fdcefc95a1989c5a38663329d64d40fc655015449a10ba03",
+      "raw_diff_sha256": "ea1aa34b46d727cb8508d211c439abf275416d31f77970c24c6709e0f8603fea",
+      "build_attempts": 2,
+      "trial_duration_seconds": 80.626,
+      "steps": 8,
+      "target_sdk": [
+        28,
+        28
+      ],
+      "compiled_manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        },
+        "libraries": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "asset_changes": {
+        "modified": [],
+        "added": [],
+        "removed": []
+      },
+      "decoded_files_in_diff": [
+        "smali/org/ggbond/filereader/FileReaderActivity.smali"
+      ],
+      "review": "通过应用私有文件持久化实际选择，读取失败时回退到默认记录。"
+    },
+    {
+      "trial": "P06-agent-2",
+      "case": "P06",
+      "mode": "agent",
+      "candidate_and_installed_sha256": "ae82bffe781e5ac923a0685a2fe949dd460885ddcb815996761533ad2e7ed7a4",
+      "input_sha256": "55ca244e70ab959fbb179a04c757c1974821ff790578e8811a345f31e024d8da",
+      "device_report_sha256": "2cf6dc46e5f4539b5a2729ff24bffefe78fcbdc7b28c9275cc39b8bafe48f3ad",
+      "raw_diff_sha256": "de6333f34e67d9f356e5afdd140f0af5e562160dd46e9df5154744cc663a4872",
+      "build_attempts": 3,
+      "trial_duration_seconds": 117.522,
+      "steps": 5,
+      "target_sdk": [
+        22,
+        24
+      ],
+      "compiled_manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": [
+            {
+              "type": "provider",
+              "name": ".RecordProvider",
+              "exported": "(type 0x12)0x0",
+              "authorities": "org.ggbond.archivereader.records",
+              "grantUriPermissions": "(type 0x12)0xffffffff"
+            }
+          ]
+        },
+        "libraries": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "asset_changes": {
+        "modified": [],
+        "added": [],
+        "removed": []
+      },
+      "decoded_files_in_diff": [
+        "AndroidManifest.xml",
+        "smali/org/ggbond/archivereader/RecordProvider.smali",
+        "smali/org/ggbond/archivereader/ShareActivity.smali"
+      ],
+      "review": "新增可按 URI 授权的非导出提供器，发送方改用内容 URI。接收方仍按读到的首字节处理。"
+    },
+    {
+      "trial": "P06-agent-3",
+      "case": "P06",
+      "mode": "agent",
+      "candidate_and_installed_sha256": "176b0bac39df4b60d4b6490354b02dbd7c6eec340247338ec6dc8229c458c50e",
+      "input_sha256": "55ca244e70ab959fbb179a04c757c1974821ff790578e8811a345f31e024d8da",
+      "device_report_sha256": "b76a941fa491000acc2141868e403151a2e020281e38eddc9218a241e1c7161d",
+      "raw_diff_sha256": "e1909ad01cecb2d84560cd6afdd52d2140f462cd9fffe9301743887f9d4edd6c",
+      "build_attempts": 1,
+      "trial_duration_seconds": 65.777,
+      "steps": 5,
+      "target_sdk": [
+        22,
+        24
+      ],
+      "compiled_manifest_changes": {
+        "permissions": {
+          "removed": [],
+          "added": []
+        },
+        "components": {
+          "removed": [],
+          "added": []
+        },
+        "libraries": {
+          "removed": [],
+          "added": []
+        }
+      },
+      "asset_changes": {
+        "modified": [],
+        "added": [],
+        "removed": []
+      },
+      "decoded_files_in_diff": [
+        "smali/org/ggbond/archivereader/ShareActivity.smali"
+      ],
+      "review": "发送方改成显式接收组件。已有接收组件和读流路径仍在。"
+    }
+  ],
+  "schema": 1,
+  "app_build": {
+    "version": "0.6.29",
+    "source_commit": "0e95b5f14be122c2d06069db43ddeeeb473ffd6d",
+    "exe_sha256": "0f83908f99e9b2d39e0074bfd8eedb16f70ba1e51349c70f3d3edbec98ad30b8",
+    "bytes": 131737386,
+    "self_test_exit": 0,
+    "packager": "6.22.3",
+    "scope": "Local PyInstaller build and executable self-test"
+  },
+  "r3_sha256": "32ff888af2a967984e2aa70339515153acc607caac23d85abcc6bf359cadad61",
+  "frozen_plan_sha256": "a23dfd83bc507cd5ed166e78d83072e073bed1ad720c7ac53376cd9237971de6",
+  "cohort_audit_sha256": "dff2571c1d33103801f513c9ad648524cc22468f8aabe1515182ef3142d76b0e",
+  "scope": "21 Android 16 x86_64 behavior-passed APKs from the same-build source ZIP replay",
+  "counts": {
+    "agent": 17,
+    "rules": 2,
+    "one-build": 2
+  },
+  "main_trial_seconds": [
+    66.873,
+    74.386,
+    120.099
+  ],
+  "agent_median_trial_seconds": 79.92,
+  "api": 36,
+  "abi": "x86_64",
+  "network_model_calls": 0
+}

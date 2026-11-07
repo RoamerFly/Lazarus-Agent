@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from agent_acceptance import verified_for
 from tools.replay_agent_edit_trace import sha256 as digest_file
-from tools.replay_record_caller import CALLER, DEFAULT_AUTHORITY, FOREIGN_PROVIDER, TARGET
+from tools.replay_record_caller import CALLER, DEFAULT_AUTHORITY, FOREIGN_PROVIDER, TARGET, explicitly_rejected
 
 MODE = "offline-replayed-private-handoff"
 SAMPLE = "可分发样本/P06/"
@@ -52,9 +52,7 @@ def verify_boundary(boundary, apk_hash, probe_hash):
                     "伪造字节": fixed["forged_bytes_after"], "外部记录交接前": foreign["before_share"],
                     "外部记录交接后": foreign, "不同字节记录": foreign["alternate_foreign_value"]}
     for name, row in observations.items():
-        nodes = {tuple(node) for node in row["observed"]}
-        if (row["outcome"] != "target-rejected" or (TARGET, "Rejected") not in nodes
-                or (TARGET, "Shared") in nodes):
+        if not explicitly_rejected(row):
             raise ValueError(f"P06 外部输入未被接收端明确拒绝（{name}，{row['outcome']}）")
     return len(observations)
 
