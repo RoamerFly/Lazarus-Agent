@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "archive": "v0.6.30-F01-同版离线评审包.zip",
+  "archive_sha256": "2b1cef505bb439a6b9e6ab4e612c3c365f5db9b58ba489f0433161e591922f92",
+  "bytes": 3589288,
+  "registered_files": 72,
+  "windows": null,
+  "cohort": {
+    "terminal": 42,
+    "unobserved": 1,
+    "positive_passed": 17,
+    "positive_planned": 18,
+    "primary_passed": 3,
+    "historical_holdout_passed": 3,
+    "negative_rejected": 6,
+    "negative_false_acceptances": 0,
+    "negative_planned": 6,
+    "controls": {
+      "roundtrip": {
+        "failed": 6
+      },
+      "rules": {
+        "failed": 4,
+        "passed": 2
+      },
+      "one-build": {
+        "failed": 4,
+        "passed": 2
+      }
+    }
+  },
+  "device_reports": 32,
+  "network_model_calls": 0,
+  "archive_replay": "same-build-source-zip",
+  "build": {
+    "version": "0.6.30",
+    "source_commit": "b25149059af357fd27c5bbbf0aaf4ba730678143",
+    "exe_sha256": "5dcffbe3f4b83865910d67fbb74cafe6891adac2bc87b017c569862f325f0825",
+    "bytes": 131739131,
+    "self_test_exit": 0,
+    "packager": "6.22.3",
+    "scope": "Local PyInstaller build and executable self-test"
+  },
+  "same_outcome_and_diff_as_r3_trials": 42,
+  "retained_initial_stopped_run": {
+    "counted_trials": 0,
+    "stage": "first-trial-device-boot"
+  },
+  "windows_powershell_inputs_verified": 3,
+  "deterministic_archive": true,
+  "archive_replay_without_git": {
+    "plan_matches": true,
+    "raw_trials_audited": 42,
+    "third_party_python_packages": false
+  },
+  "rehashed_tamper_rejections": [
+    "host-contradiction-installed-hash",
+    "wrong-cohort-exe",
+    "fake-windows-scope"
+  ],
+  "proposal": {
+    "pages": 6,
+    "sha256": "d63db101437e7a70fb7d0c337e861f22bbe973c6028d7c564be4463b76e96f6c",
+    "pages_visually_reviewed": 6
+  },
+  "demo": {
+    "seconds": 57,
+    "sha256": "c6df17fafc158d60524be2705ed4416b8415eca66de888f33351d32ca8e6d710",
+    "keyframes_reviewed": 11,
+    "candidate_and_installed_sha256": "fb4e99e46a8ca41dc07268fd140e5ad7e4045c022d7a6310b82b6b151922862d",
+    "acceptance_steps": 10,
+    "network_model_calls": 0
+  },
+  "guest_specialized_package": {
+    "status": "tools-unavailable-before-transfer",
+    "device_steps_run": false
+  }
+}
