@@ -1,0 +1,1922 @@
+{
+  "schema": 1,
+  "scope": "Android 16 external UID supplement to the frozen P06 behavior trials",
+  "build": {
+    "version": "0.6.29",
+    "source_commit": "0e95b5f14be122c2d06069db43ddeeeb473ffd6d",
+    "exe_sha256": "0f83908f99e9b2d39e0074bfd8eedb16f70ba1e51349c70f3d3edbec98ad30b8",
+    "bytes": 131737386,
+    "self_test_exit": 0,
+    "packager": "6.22.3",
+    "scope": "Local PyInstaller build and executable self-test"
+  },
+  "archive_sha256": "32ff888af2a967984e2aa70339515153acc607caac23d85abcc6bf359cadad61",
+  "cohort_audit_sha256": "dff2571c1d33103801f513c9ad648524cc22468f8aabe1515182ef3142d76b0e",
+  "private_handoff_archive_sha256": "878cf753b861e73055e9510a4ab5309b1def572abfd21fadfc7aab423b71463c",
+  "caller_apk_sha256": "3f3ac2834a8e4d22995049d5fdfd9fdb8314fc74a2ac9f21b7d35aec9982e95c",
+  "api": 36,
+  "abi": "x86_64",
+  "boot": "isolated fresh AVD, foreground host launcher with kernel logging",
+  "network_model_calls": 0,
+  "results": [
+    {
+      "trial": "P06-agent-2",
+      "candidate_and_installed_sha256": "ae82bffe781e5ac923a0685a2fe949dd460885ddcb815996761533ad2e7ed7a4",
+      "status": "boundary-failed",
+      "checks": {
+        "fixed_uri_before_share": {
+          "outcome": "target-rejected",
+          "target_or_caller_text": [
+            "Cannot read record"
+          ],
+          "explicit_target_rejection": false
+        },
+        "fixed_uri_after_share": {
+          "outcome": "external-record-status",
+          "target_or_caller_text": [
+            "Shared"
+          ],
+          "explicit_target_rejection": false
+        },
+        "forged_bytes_after_share": {
+          "outcome": "unobserved",
+          "target_or_caller_text": [],
+          "explicit_target_rejection": false
+        },
+        "foreign_byte_42_before_share": {
+          "outcome": "external-record-status",
+          "target_or_caller_text": [
+            "Shared"
+          ],
+          "explicit_target_rejection": false
+        },
+        "foreign_byte_42_after_share": {
+          "outcome": "external-record-status",
+          "target_or_caller_text": [
+            "Shared"
+          ],
+          "explicit_target_rejection": false
+        },
+        "foreign_byte_41_after_share": {
+          "outcome": "target-rejected",
+          "target_or_caller_text": [
+            "Unexpected file"
+          ],
+          "explicit_target_rejection": false
+        }
+      },
+      "raw_sha256": "360d321c29e6bc7c2f8f44bcb40083ad1bbaec2745fb67edda2d15f51367a690",
+      "repeat_raw_sha256": "6f3c5ab24a6634c6b4a6878bac34e9e4c9c24277788277092a21a778c1814f01",
+      "raw": {
+        "status": "boundary-failed",
+        "network_model_calls": 0,
+        "candidate_sha256": "ae82bffe781e5ac923a0685a2fe949dd460885ddcb815996761533ad2e7ed7a4",
+        "fixed_probe_uri": {
+          "api": 36,
+          "abis": [
+            "x86_64"
+          ],
+          "candidate_and_installed_sha256": "ae82bffe781e5ac923a0685a2fe949dd460885ddcb815996761533ad2e7ed7a4",
+          "caller_apk_sha256": "3f3ac2834a8e4d22995049d5fdfd9fdb8314fc74a2ac9f21b7d35aec9982e95c",
+          "uids": {
+            "org.ggbond.archivereader": 10150,
+            "org.ggbond.recordcaller": 10151
+          },
+          "outcome": "external-record-status",
+          "observed": [
+            [
+              "org.ggbond.archivereader",
+              "android:id/decor_content_parent"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/action_bar_container"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/action_bar"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "Archive Reader"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/content"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "Shared"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/statusBarBackground"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/navigationBarBackground"
+            ]
+          ],
+          "input": "known-record-uri-after-share",
+          "before_share": {
+            "outcome": "target-rejected",
+            "observed": [
+              [
+                "org.ggbond.archivereader",
+                "android:id/decor_content_parent"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/action_bar_container"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/action_bar"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "Archive Reader"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/content"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "Cannot read record"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/statusBarBackground"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/navigationBarBackground"
+              ]
+            ]
+          },
+          "in_app_share": [
+            {
+              "action": "cold_start",
+              "launch_observations": [
+                {
+                  "target_nodes": 9
+                }
+              ],
+              "status": "passed"
+            },
+            {
+              "action": "tap",
+              "value": "Share local record",
+              "matches": [
+                {
+                  "text": "Share local record",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,120][720,1208]"
+                }
+              ],
+              "match_count": 1,
+              "observed": [
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/decor_content_parent",
+                  "bounds": "[0,0][720,1208]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/action_bar_container",
+                  "bounds": "[0,36][720,120]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/action_bar",
+                  "bounds": "[0,36][720,120]"
+                },
+                {
+                  "text": "Archive Reader",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,57][229,98]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/content",
+                  "bounds": "[0,120][720,1208]"
+                },
+                {
+                  "text": "Share local record",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,120][720,1208]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/statusBarBackground",
+                  "bounds": "[0,0][720,36]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/navigationBarBackground",
+                  "bounds": "[0,1208][720,1280]"
+                }
+              ],
+              "status": "passed"
+            },
+            {
+              "action": "expect",
+              "value": "Shared",
+              "matches": [
+                {
+                  "text": "Shared",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,120][720,1208]"
+                }
+              ],
+              "match_count": 1,
+              "observed": [
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/decor_content_parent",
+                  "bounds": "[0,0][720,1208]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/action_bar_container",
+                  "bounds": "[0,36][720,120]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/action_bar",
+                  "bounds": "[0,36][720,120]"
+                },
+                {
+                  "text": "Archive Reader",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,57][229,98]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/content",
+                  "bounds": "[0,120][720,1208]"
+                },
+                {
+                  "text": "Shared",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,120][720,1208]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/statusBarBackground",
+                  "bounds": "[0,0][720,36]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/navigationBarBackground",
+                  "bounds": "[0,1208][720,1280]"
+                }
+              ],
+              "status": "passed"
+            }
+          ],
+          "record_uri": "content://org.ggbond.archivereader.records/record.txt",
+          "forged_bytes_after": {
+            "outcome": "unobserved",
+            "observed": [
+              [
+                "com.android.launcher3",
+                "android:id/content"
+              ],
+              [
+                "com.android.launcher3",
+                "com.android.launcher3:id/launcher"
+              ],
+              [
+                "com.android.launcher3",
+                "com.android.launcher3:id/drag_layer"
+              ],
+              [
+                "com.android.launcher3",
+                "com.android.launcher3:id/scrim_view"
+              ],
+              [
+                "com.android.launcher3",
+                "com.android.launcher3:id/workspace"
+              ],
+              [
+                "com.android.launcher3",
+                "com.android.launcher3:id/search_container_workspace"
+              ],
+              [
+                "com.android.launcher3",
+                "Search"
+              ],
+              [
+                "com.android.quicksearchbox",
+                "com.android.quicksearchbox:id/search_plate"
+              ],
+              [
+                "com.android.quicksearchbox",
+                "com.android.quicksearchbox:id/search_icon"
+              ],
+              [
+                "com.android.quicksearchbox",
+                "com.android.quicksearchbox:id/search_widget_text"
+              ],
+              [
+                "com.android.launcher3",
+                "Gallery"
+              ],
+              [
+                "com.android.launcher3",
+                "Home"
+              ],
+              [
+                "com.android.launcher3",
+                "com.android.launcher3:id/overview_actions_view"
+              ],
+              [
+                "com.android.launcher3",
+                "com.android.launcher3:id/page_indicator"
+              ],
+              [
+                "com.android.launcher3",
+                "com.android.launcher3:id/hotseat"
+              ],
+              [
+                "com.android.launcher3",
+                "Phone"
+              ],
+              [
+                "com.android.launcher3",
+                "Messaging"
+              ],
+              [
+                "com.android.launcher3",
+                "WebView Browser Tester"
+              ],
+              [
+                "com.android.launcher3",
+                "Camera"
+              ]
+            ]
+          }
+        },
+        "foreign_provider": {
+          "api": 36,
+          "abis": [
+            "x86_64"
+          ],
+          "candidate_and_installed_sha256": "ae82bffe781e5ac923a0685a2fe949dd460885ddcb815996761533ad2e7ed7a4",
+          "caller_apk_sha256": "3f3ac2834a8e4d22995049d5fdfd9fdb8314fc74a2ac9f21b7d35aec9982e95c",
+          "uids": {
+            "org.ggbond.archivereader": 10152,
+            "org.ggbond.recordcaller": 10153
+          },
+          "outcome": "external-record-status",
+          "observed": [
+            [
+              "org.ggbond.archivereader",
+              "android:id/decor_content_parent"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/action_bar_container"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/action_bar"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "Archive Reader"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/content"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "Shared"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/statusBarBackground"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/navigationBarBackground"
+            ]
+          ],
+          "input": "foreign-provider-byte-42-before-and-after-share",
+          "before_share": {
+            "outcome": "external-record-status",
+            "observed": [
+              [
+                "org.ggbond.archivereader",
+                "android:id/decor_content_parent"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/action_bar_container"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/action_bar"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "Archive Reader"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/content"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "Shared"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/statusBarBackground"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/navigationBarBackground"
+              ]
+            ]
+          },
+          "in_app_share": [
+            {
+              "action": "cold_start",
+              "launch_observations": [
+                {
+                  "target_nodes": 9
+                }
+              ],
+              "status": "passed"
+            },
+            {
+              "action": "tap",
+              "value": "Share local record",
+              "matches": [
+                {
+                  "text": "Share local record",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,120][720,1208]"
+                }
+              ],
+              "match_count": 1,
+              "observed": [
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/decor_content_parent",
+                  "bounds": "[0,0][720,1208]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/action_bar_container",
+                  "bounds": "[0,36][720,120]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/action_bar",
+                  "bounds": "[0,36][720,120]"
+                },
+                {
+                  "text": "Archive Reader",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,57][229,98]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/content",
+                  "bounds": "[0,120][720,1208]"
+                },
+                {
+                  "text": "Share local record",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,120][720,1208]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/statusBarBackground",
+                  "bounds": "[0,0][720,36]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/navigationBarBackground",
+                  "bounds": "[0,1208][720,1280]"
+                }
+              ],
+              "status": "passed"
+            },
+            {
+              "action": "expect",
+              "value": "Shared",
+              "matches": [
+                {
+                  "text": "Shared",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,120][720,1208]"
+                }
+              ],
+              "match_count": 1,
+              "observed": [
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/decor_content_parent",
+                  "bounds": "[0,0][720,1208]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/action_bar_container",
+                  "bounds": "[0,36][720,120]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/action_bar",
+                  "bounds": "[0,36][720,120]"
+                },
+                {
+                  "text": "Archive Reader",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,57][229,98]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/content",
+                  "bounds": "[0,120][720,1208]"
+                },
+                {
+                  "text": "Shared",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,120][720,1208]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/statusBarBackground",
+                  "bounds": "[0,0][720,36]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/navigationBarBackground",
+                  "bounds": "[0,1208][720,1280]"
+                }
+              ],
+              "status": "passed"
+            }
+          ],
+          "record_uri": "content://org.ggbond.recordcaller.records/record",
+          "alternate_foreign_uri": "content://org.ggbond.recordcaller.records/other",
+          "alternate_foreign_value": {
+            "outcome": "target-rejected",
+            "observed": [
+              [
+                "org.ggbond.archivereader",
+                "android:id/decor_content_parent"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/action_bar_container"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/action_bar"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "Archive Reader"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/content"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "Unexpected file"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/statusBarBackground"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/navigationBarBackground"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    {
+      "trial": "P06-agent-3",
+      "candidate_and_installed_sha256": "176b0bac39df4b60d4b6490354b02dbd7c6eec340247338ec6dc8229c458c50e",
+      "status": "boundary-failed",
+      "checks": {
+        "fixed_uri_before_share": {
+          "outcome": "target-rejected",
+          "target_or_caller_text": [
+            "Cannot read record"
+          ],
+          "explicit_target_rejection": false
+        },
+        "fixed_uri_after_share": {
+          "outcome": "target-rejected",
+          "target_or_caller_text": [
+            "Cannot read record"
+          ],
+          "explicit_target_rejection": false
+        },
+        "forged_bytes_after_share": {
+          "outcome": "unobserved",
+          "target_or_caller_text": [],
+          "explicit_target_rejection": false
+        },
+        "foreign_byte_42_before_share": {
+          "outcome": "external-record-status",
+          "target_or_caller_text": [
+            "Shared"
+          ],
+          "explicit_target_rejection": false
+        },
+        "foreign_byte_42_after_share": {
+          "outcome": "external-record-status",
+          "target_or_caller_text": [
+            "Shared"
+          ],
+          "explicit_target_rejection": false
+        },
+        "foreign_byte_41_after_share": {
+          "outcome": "target-rejected",
+          "target_or_caller_text": [
+            "Unexpected file"
+          ],
+          "explicit_target_rejection": false
+        }
+      },
+      "raw_sha256": "e301f023f379825783b495d10129afb19a494da673e452179821aa314edb87b7",
+      "repeat_raw_sha256": "903eb6f390609477de2a3fa5d24e255cd29e358aa9cca94bdb3f5a0f639c9edf",
+      "raw": {
+        "status": "boundary-failed",
+        "network_model_calls": 0,
+        "candidate_sha256": "176b0bac39df4b60d4b6490354b02dbd7c6eec340247338ec6dc8229c458c50e",
+        "fixed_probe_uri": {
+          "api": 36,
+          "abis": [
+            "x86_64"
+          ],
+          "candidate_and_installed_sha256": "176b0bac39df4b60d4b6490354b02dbd7c6eec340247338ec6dc8229c458c50e",
+          "caller_apk_sha256": "3f3ac2834a8e4d22995049d5fdfd9fdb8314fc74a2ac9f21b7d35aec9982e95c",
+          "uids": {
+            "org.ggbond.archivereader": 10154,
+            "org.ggbond.recordcaller": 10155
+          },
+          "outcome": "target-rejected",
+          "observed": [
+            [
+              "org.ggbond.archivereader",
+              "android:id/decor_content_parent"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/action_bar_container"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/action_bar"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "Archive Reader"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/content"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "Cannot read record"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/statusBarBackground"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/navigationBarBackground"
+            ]
+          ],
+          "input": "known-record-uri-after-share",
+          "before_share": {
+            "outcome": "target-rejected",
+            "observed": [
+              [
+                "org.ggbond.archivereader",
+                "android:id/decor_content_parent"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/action_bar_container"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/action_bar"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "Archive Reader"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/content"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "Cannot read record"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/statusBarBackground"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/navigationBarBackground"
+              ]
+            ]
+          },
+          "in_app_share": [
+            {
+              "action": "cold_start",
+              "launch_observations": [
+                {
+                  "target_nodes": 9
+                }
+              ],
+              "status": "passed"
+            },
+            {
+              "action": "tap",
+              "value": "Share local record",
+              "matches": [
+                {
+                  "text": "Share local record",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,120][720,1208]"
+                }
+              ],
+              "match_count": 1,
+              "observed": [
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/decor_content_parent",
+                  "bounds": "[0,0][720,1208]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/action_bar_container",
+                  "bounds": "[0,36][720,120]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/action_bar",
+                  "bounds": "[0,36][720,120]"
+                },
+                {
+                  "text": "Archive Reader",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,57][229,98]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/content",
+                  "bounds": "[0,120][720,1208]"
+                },
+                {
+                  "text": "Share local record",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,120][720,1208]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/statusBarBackground",
+                  "bounds": "[0,0][720,36]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/navigationBarBackground",
+                  "bounds": "[0,1208][720,1280]"
+                }
+              ],
+              "status": "passed"
+            },
+            {
+              "action": "expect",
+              "value": "Shared",
+              "matches": [
+                {
+                  "text": "Shared",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,120][720,1208]"
+                }
+              ],
+              "match_count": 1,
+              "observed": [
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/decor_content_parent",
+                  "bounds": "[0,0][720,1208]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/action_bar_container",
+                  "bounds": "[0,36][720,120]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/action_bar",
+                  "bounds": "[0,36][720,120]"
+                },
+                {
+                  "text": "Archive Reader",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,57][229,98]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/content",
+                  "bounds": "[0,120][720,1208]"
+                },
+                {
+                  "text": "Shared",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,120][720,1208]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/statusBarBackground",
+                  "bounds": "[0,0][720,36]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/navigationBarBackground",
+                  "bounds": "[0,1208][720,1280]"
+                }
+              ],
+              "status": "passed"
+            }
+          ],
+          "record_uri": "content://org.ggbond.archivereader.records/record.txt",
+          "forged_bytes_after": {
+            "outcome": "unobserved",
+            "observed": [
+              [
+                "com.android.launcher3",
+                "android:id/content"
+              ],
+              [
+                "com.android.launcher3",
+                "com.android.launcher3:id/launcher"
+              ],
+              [
+                "com.android.launcher3",
+                "com.android.launcher3:id/drag_layer"
+              ],
+              [
+                "com.android.launcher3",
+                "com.android.launcher3:id/scrim_view"
+              ],
+              [
+                "com.android.launcher3",
+                "com.android.launcher3:id/workspace"
+              ],
+              [
+                "com.android.launcher3",
+                "com.android.launcher3:id/search_container_workspace"
+              ],
+              [
+                "com.android.launcher3",
+                "Search"
+              ],
+              [
+                "com.android.quicksearchbox",
+                "com.android.quicksearchbox:id/search_plate"
+              ],
+              [
+                "com.android.quicksearchbox",
+                "com.android.quicksearchbox:id/search_icon"
+              ],
+              [
+                "com.android.quicksearchbox",
+                "com.android.quicksearchbox:id/search_widget_text"
+              ],
+              [
+                "com.android.launcher3",
+                "Gallery"
+              ],
+              [
+                "com.android.launcher3",
+                "Home"
+              ],
+              [
+                "com.android.launcher3",
+                "com.android.launcher3:id/overview_actions_view"
+              ],
+              [
+                "com.android.launcher3",
+                "com.android.launcher3:id/page_indicator"
+              ],
+              [
+                "com.android.launcher3",
+                "com.android.launcher3:id/hotseat"
+              ],
+              [
+                "com.android.launcher3",
+                "Phone"
+              ],
+              [
+                "com.android.launcher3",
+                "Messaging"
+              ],
+              [
+                "com.android.launcher3",
+                "WebView Browser Tester"
+              ],
+              [
+                "com.android.launcher3",
+                "Camera"
+              ]
+            ]
+          }
+        },
+        "foreign_provider": {
+          "api": 36,
+          "abis": [
+            "x86_64"
+          ],
+          "candidate_and_installed_sha256": "176b0bac39df4b60d4b6490354b02dbd7c6eec340247338ec6dc8229c458c50e",
+          "caller_apk_sha256": "3f3ac2834a8e4d22995049d5fdfd9fdb8314fc74a2ac9f21b7d35aec9982e95c",
+          "uids": {
+            "org.ggbond.archivereader": 10156,
+            "org.ggbond.recordcaller": 10157
+          },
+          "outcome": "external-record-status",
+          "observed": [
+            [
+              "org.ggbond.archivereader",
+              "android:id/decor_content_parent"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/action_bar_container"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/action_bar"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "Archive Reader"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/content"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "Shared"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/statusBarBackground"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/navigationBarBackground"
+            ]
+          ],
+          "input": "foreign-provider-byte-42-before-and-after-share",
+          "before_share": {
+            "outcome": "external-record-status",
+            "observed": [
+              [
+                "org.ggbond.archivereader",
+                "android:id/decor_content_parent"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/action_bar_container"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/action_bar"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "Archive Reader"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/content"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "Shared"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/statusBarBackground"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/navigationBarBackground"
+              ]
+            ]
+          },
+          "in_app_share": [
+            {
+              "action": "cold_start",
+              "launch_observations": [
+                {
+                  "target_nodes": 9
+                }
+              ],
+              "status": "passed"
+            },
+            {
+              "action": "tap",
+              "value": "Share local record",
+              "matches": [
+                {
+                  "text": "Share local record",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,120][720,1208]"
+                }
+              ],
+              "match_count": 1,
+              "observed": [
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/decor_content_parent",
+                  "bounds": "[0,0][720,1208]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/action_bar_container",
+                  "bounds": "[0,36][720,120]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/action_bar",
+                  "bounds": "[0,36][720,120]"
+                },
+                {
+                  "text": "Archive Reader",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,57][229,98]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/content",
+                  "bounds": "[0,120][720,1208]"
+                },
+                {
+                  "text": "Share local record",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,120][720,1208]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/statusBarBackground",
+                  "bounds": "[0,0][720,36]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/navigationBarBackground",
+                  "bounds": "[0,1208][720,1280]"
+                }
+              ],
+              "status": "passed"
+            },
+            {
+              "action": "expect",
+              "value": "Shared",
+              "matches": [
+                {
+                  "text": "Shared",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,120][720,1208]"
+                }
+              ],
+              "match_count": 1,
+              "observed": [
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/decor_content_parent",
+                  "bounds": "[0,0][720,1208]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/action_bar_container",
+                  "bounds": "[0,36][720,120]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/action_bar",
+                  "bounds": "[0,36][720,120]"
+                },
+                {
+                  "text": "Archive Reader",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,57][229,98]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/content",
+                  "bounds": "[0,120][720,1208]"
+                },
+                {
+                  "text": "Shared",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,120][720,1208]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/statusBarBackground",
+                  "bounds": "[0,0][720,36]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/navigationBarBackground",
+                  "bounds": "[0,1208][720,1280]"
+                }
+              ],
+              "status": "passed"
+            }
+          ],
+          "record_uri": "content://org.ggbond.recordcaller.records/record",
+          "alternate_foreign_uri": "content://org.ggbond.recordcaller.records/other",
+          "alternate_foreign_value": {
+            "outcome": "target-rejected",
+            "observed": [
+              [
+                "org.ggbond.archivereader",
+                "android:id/decor_content_parent"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/action_bar_container"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/action_bar"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "Archive Reader"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/content"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "Unexpected file"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/statusBarBackground"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/navigationBarBackground"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    {
+      "trial": "P06-private-handoff",
+      "candidate_and_installed_sha256": "bffbb5b55ddfac6c501a7fd8bf1e25c6cc4c64164a908dd82a0b18398ed07cdb",
+      "status": "boundary-verified",
+      "checks": {
+        "fixed_uri_before_share": {
+          "outcome": "target-rejected",
+          "target_or_caller_text": [
+            "Rejected"
+          ],
+          "explicit_target_rejection": true
+        },
+        "fixed_uri_after_share": {
+          "outcome": "target-rejected",
+          "target_or_caller_text": [
+            "Rejected"
+          ],
+          "explicit_target_rejection": true
+        },
+        "forged_bytes_after_share": {
+          "outcome": "target-rejected",
+          "target_or_caller_text": [
+            "Rejected"
+          ],
+          "explicit_target_rejection": true
+        },
+        "foreign_byte_42_before_share": {
+          "outcome": "target-rejected",
+          "target_or_caller_text": [
+            "Rejected"
+          ],
+          "explicit_target_rejection": true
+        },
+        "foreign_byte_42_after_share": {
+          "outcome": "target-rejected",
+          "target_or_caller_text": [
+            "Rejected"
+          ],
+          "explicit_target_rejection": true
+        },
+        "foreign_byte_41_after_share": {
+          "outcome": "target-rejected",
+          "target_or_caller_text": [
+            "Rejected"
+          ],
+          "explicit_target_rejection": true
+        }
+      },
+      "raw_sha256": "d3eb0179b5c7e8548ac79a1e5fa03c6b546b187c1ec907fd52ff892f9827d3e4",
+      "repeat_raw_sha256": "31f8680f46e0c597cdc5d5288cc2c6e92db321198b6825de260acbe6b7f6b907",
+      "raw": {
+        "status": "boundary-verified",
+        "network_model_calls": 0,
+        "candidate_sha256": "bffbb5b55ddfac6c501a7fd8bf1e25c6cc4c64164a908dd82a0b18398ed07cdb",
+        "fixed_probe_uri": {
+          "api": 36,
+          "abis": [
+            "x86_64"
+          ],
+          "candidate_and_installed_sha256": "bffbb5b55ddfac6c501a7fd8bf1e25c6cc4c64164a908dd82a0b18398ed07cdb",
+          "caller_apk_sha256": "3f3ac2834a8e4d22995049d5fdfd9fdb8314fc74a2ac9f21b7d35aec9982e95c",
+          "uids": {
+            "org.ggbond.archivereader": 10158,
+            "org.ggbond.recordcaller": 10159
+          },
+          "outcome": "target-rejected",
+          "observed": [
+            [
+              "org.ggbond.archivereader",
+              "android:id/decor_content_parent"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/action_bar_container"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/action_bar"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "Archive Reader"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/content"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "Rejected"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/statusBarBackground"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/navigationBarBackground"
+            ]
+          ],
+          "input": "known-record-uri-after-share",
+          "before_share": {
+            "outcome": "target-rejected",
+            "observed": [
+              [
+                "org.ggbond.archivereader",
+                "android:id/decor_content_parent"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/action_bar_container"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/action_bar"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "Archive Reader"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/content"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "Rejected"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/statusBarBackground"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/navigationBarBackground"
+              ]
+            ]
+          },
+          "in_app_share": [
+            {
+              "action": "cold_start",
+              "launch_observations": [
+                {
+                  "target_nodes": 9
+                }
+              ],
+              "status": "passed"
+            },
+            {
+              "action": "tap",
+              "value": "Share local record",
+              "matches": [
+                {
+                  "text": "Share local record",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,120][720,1208]"
+                }
+              ],
+              "match_count": 1,
+              "observed": [
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/decor_content_parent",
+                  "bounds": "[0,0][720,1208]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/action_bar_container",
+                  "bounds": "[0,36][720,120]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/action_bar",
+                  "bounds": "[0,36][720,120]"
+                },
+                {
+                  "text": "Archive Reader",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,57][229,98]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/content",
+                  "bounds": "[0,120][720,1208]"
+                },
+                {
+                  "text": "Share local record",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,120][720,1208]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/statusBarBackground",
+                  "bounds": "[0,0][720,36]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/navigationBarBackground",
+                  "bounds": "[0,1208][720,1280]"
+                }
+              ],
+              "status": "passed"
+            },
+            {
+              "action": "expect",
+              "value": "Shared",
+              "matches": [
+                {
+                  "text": "Shared",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,120][720,1208]"
+                }
+              ],
+              "match_count": 1,
+              "observed": [
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/decor_content_parent",
+                  "bounds": "[0,0][720,1208]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/action_bar_container",
+                  "bounds": "[0,36][720,120]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/action_bar",
+                  "bounds": "[0,36][720,120]"
+                },
+                {
+                  "text": "Archive Reader",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,57][229,98]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/content",
+                  "bounds": "[0,120][720,1208]"
+                },
+                {
+                  "text": "Shared",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,120][720,1208]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/statusBarBackground",
+                  "bounds": "[0,0][720,36]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/navigationBarBackground",
+                  "bounds": "[0,1208][720,1280]"
+                }
+              ],
+              "status": "passed"
+            }
+          ],
+          "record_uri": "content://org.ggbond.archivereader.records/record.txt",
+          "forged_bytes_after": {
+            "outcome": "target-rejected",
+            "observed": [
+              [
+                "org.ggbond.archivereader",
+                "android:id/decor_content_parent"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/action_bar_container"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/action_bar"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "Archive Reader"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/content"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "Rejected"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/statusBarBackground"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/navigationBarBackground"
+              ]
+            ]
+          }
+        },
+        "foreign_provider": {
+          "api": 36,
+          "abis": [
+            "x86_64"
+          ],
+          "candidate_and_installed_sha256": "bffbb5b55ddfac6c501a7fd8bf1e25c6cc4c64164a908dd82a0b18398ed07cdb",
+          "caller_apk_sha256": "3f3ac2834a8e4d22995049d5fdfd9fdb8314fc74a2ac9f21b7d35aec9982e95c",
+          "uids": {
+            "org.ggbond.archivereader": 10160,
+            "org.ggbond.recordcaller": 10161
+          },
+          "outcome": "target-rejected",
+          "observed": [
+            [
+              "org.ggbond.archivereader",
+              "android:id/decor_content_parent"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/action_bar_container"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/action_bar"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "Archive Reader"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/content"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "Rejected"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/statusBarBackground"
+            ],
+            [
+              "org.ggbond.archivereader",
+              "android:id/navigationBarBackground"
+            ]
+          ],
+          "input": "foreign-provider-byte-42-before-and-after-share",
+          "before_share": {
+            "outcome": "target-rejected",
+            "observed": [
+              [
+                "org.ggbond.archivereader",
+                "android:id/decor_content_parent"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/action_bar_container"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/action_bar"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "Archive Reader"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/content"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "Rejected"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/statusBarBackground"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/navigationBarBackground"
+              ]
+            ]
+          },
+          "in_app_share": [
+            {
+              "action": "cold_start",
+              "launch_observations": [
+                {
+                  "target_nodes": 9
+                }
+              ],
+              "status": "passed"
+            },
+            {
+              "action": "tap",
+              "value": "Share local record",
+              "matches": [
+                {
+                  "text": "Share local record",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,120][720,1208]"
+                }
+              ],
+              "match_count": 1,
+              "observed": [
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/decor_content_parent",
+                  "bounds": "[0,0][720,1208]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/action_bar_container",
+                  "bounds": "[0,36][720,120]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/action_bar",
+                  "bounds": "[0,36][720,120]"
+                },
+                {
+                  "text": "Archive Reader",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,57][229,98]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/content",
+                  "bounds": "[0,120][720,1208]"
+                },
+                {
+                  "text": "Share local record",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,120][720,1208]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/statusBarBackground",
+                  "bounds": "[0,0][720,36]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/navigationBarBackground",
+                  "bounds": "[0,1208][720,1280]"
+                }
+              ],
+              "status": "passed"
+            },
+            {
+              "action": "expect",
+              "value": "Shared",
+              "matches": [
+                {
+                  "text": "Shared",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,120][720,1208]"
+                }
+              ],
+              "match_count": 1,
+              "observed": [
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,0][720,1280]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/decor_content_parent",
+                  "bounds": "[0,0][720,1208]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/action_bar_container",
+                  "bounds": "[0,36][720,120]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/action_bar",
+                  "bounds": "[0,36][720,120]"
+                },
+                {
+                  "text": "Archive Reader",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[24,57][229,98]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/content",
+                  "bounds": "[0,120][720,1208]"
+                },
+                {
+                  "text": "Shared",
+                  "content-desc": "",
+                  "resource-id": "",
+                  "bounds": "[0,120][720,1208]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/statusBarBackground",
+                  "bounds": "[0,0][720,36]"
+                },
+                {
+                  "text": "",
+                  "content-desc": "",
+                  "resource-id": "android:id/navigationBarBackground",
+                  "bounds": "[0,1208][720,1280]"
+                }
+              ],
+              "status": "passed"
+            }
+          ],
+          "record_uri": "content://org.ggbond.recordcaller.records/record",
+          "alternate_foreign_uri": "content://org.ggbond.recordcaller.records/other",
+          "alternate_foreign_value": {
+            "outcome": "target-rejected",
+            "observed": [
+              [
+                "org.ggbond.archivereader",
+                "android:id/decor_content_parent"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/action_bar_container"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/action_bar"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "Archive Reader"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/content"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "Rejected"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/statusBarBackground"
+              ],
+              [
+                "org.ggbond.archivereader",
+                "android:id/navigationBarBackground"
+              ]
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

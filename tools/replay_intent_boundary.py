@@ -58,12 +58,14 @@ def snapshot(tester):
             for n in tester.observe()["nodes"]]
 
 
-def wait_for(tester, labels):
+def wait_for(tester, labels, *, return_last=False):
     for _ in range(8):
         observed = snapshot(tester)
         if labels.intersection(label for _, label in observed):
             return observed
         time.sleep(.5)
+    if return_last:
+        return observed
     raise RuntimeError(f"Expected {labels!r}, last device observation {observed!r}")
 
 

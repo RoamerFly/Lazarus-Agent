@@ -890,26 +890,38 @@
       "P06-agent-3",
       "P06-private-handoff"
     ],
-    "completed_trials": 0,
-    "observed_target_installations": 0,
-    "stage_reached": "emulator-boot",
-    "attempts": [
-      {
-        "mode": "hardware-accelerated",
-        "outcome": "boot-timeout-adb-offline"
-      },
-      {
-        "mode": "hardware-accelerated",
-        "outcome": "boot-timeout-adb-offline"
-      },
-      {
-        "mode": "software",
-        "outcome": "exited-before-boot-after-resuming-test-process",
-        "suspended_threads_observed": 65
-      }
-    ],
-    "fresh_external_uid_results": "unobserved",
+    "fresh_external_uid_results": {
+      "completed_full_sequences": 3,
+      "boundary_verified": [
+        "P06-private-handoff"
+      ],
+      "boundary_failed": [
+        "P06-agent-2",
+        "P06-agent-3"
+      ],
+      "evidence_sha256": "704bf3dd02cbe98f557051f0f06e5edabc2c6b00b3c0bff92cd9aba0b719c543"
+    },
     "previous_companion_archive_sha256": "878cf753b861e73055e9510a4ab5309b1def572abfd21fadfc7aab423b71463c",
-    "previous_companion_rejections_reaudited": 6
+    "previous_companion_rejections_reaudited": 6,
+    "initial_boot_attempts": {
+      "completed_trials": 0,
+      "observed_target_installations": 0,
+      "stage_reached": "emulator-boot",
+      "attempts": [
+        {
+          "mode": "hardware-accelerated",
+          "outcome": "boot-timeout-adb-offline"
+        },
+        {
+          "mode": "hardware-accelerated",
+          "outcome": "boot-timeout-adb-offline"
+        },
+        {
+          "mode": "software",
+          "outcome": "exited-before-boot-after-resuming-test-process",
+          "suspended_threads_observed": 65
+        }
+      ]
+    }
   }
 }

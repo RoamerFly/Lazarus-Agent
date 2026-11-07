@@ -47,6 +47,12 @@ class RecordCallerProbeTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 probe.observe_outcome(Mock())
 
+    def test_unobserved_external_attempt_retains_the_last_device_view(self):
+        nodes = [("com.android.launcher3", "Home")]
+        with patch.object(probe, "wait_for", return_value=nodes) as wait:
+            self.assertEqual(probe.observe_outcome(Mock()), {"outcome": "unobserved", "observed": nodes})
+        self.assertTrue(wait.call_args.kwargs["return_last"])
+
     def test_private_boundary_requires_explicit_target_rejection_on_every_input(self):
         def observation(package, label, outcome="target-rejected"):
             return {"outcome": outcome, "observed": [[package, label]]}
@@ -61,6 +67,7 @@ class RecordCallerProbeTests(unittest.TestCase):
                 observation(probe.TARGET, "Cannot read record"),
                 observation(probe.TARGET, "Unexpected file"),
                 observation(probe.CALLER, "Caller rejected", "caller-rejected"),
+                observation("com.android.launcher3", "Home", "unobserved"),
                 {**rejected, "observed": [*rejected["observed"], [probe.TARGET, "Cannot read record"]]},
             ):
                 with self.subTest(response=response):

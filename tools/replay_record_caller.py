@@ -31,7 +31,10 @@ OUTCOMES = {
 
 
 def observe_outcome(caller):
-    observed = wait_for(caller, {text for _, text in OUTCOMES})
+    labels = {text for _, text in OUTCOMES}
+    observed = wait_for(caller, labels, return_last=True)
+    if not labels.intersection(text for _, text in observed):
+        return {"outcome": "unobserved", "observed": observed}
     outcomes = {OUTCOMES[node] for node in observed if node in OUTCOMES}
     if len(outcomes) != 1:
         raise ValueError("The observed response has ambiguous or unexpected ownership")
@@ -194,7 +197,10 @@ def main():
         device.stop()
     (out / "result.json").write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(result.get("status", result.get("outcome")), flush=True)
-    return int(result.get("status") == "boundary-failed")
+    checks = (result, result.get("before_share", {}), result.get("forged_bytes_after", {}),
+              result.get("alternate_foreign_value", {}))
+    return int(result.get("status") == "boundary-failed"
+               or any(row.get("outcome") == "unobserved" for row in checks))
 
 
 if __name__ == "__main__":
