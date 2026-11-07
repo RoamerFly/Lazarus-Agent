@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "scope": "requirement audit against the original F01 delivery plan",
+  "build": {
+    "version": "0.6.30",
+    "source_commit": "b25149059af357fd27c5bbbf0aaf4ba730678143",
+    "exe_sha256": "5dcffbe3f4b83865910d67fbb74cafe6891adac2bc87b017c569862f325f0825",
+    "bytes": 131739131,
+    "self_test_exit": 0,
+    "packager": "6.22.3",
+    "scope": "Local PyInstaller build and executable self-test"
+  },
+  "review_archive_sha256": "652506b40cd46f7220abaef45d70409a01ba2eeff3bd09999468a8af36e129e3",
+  "requirements": [
+    {
+      "id": "P0",
+      "result": "engineering-evidence-present",
+      "evidence": [
+        "0.6.30-workbench-coverage.json",
+        "0.6.30-workbench-coverage.md"
+      ]
+    },
+    {
+      "id": "P1",
+      "result": "historical-model-gate-and-current-replay-evidence-present",
+      "historical_model_positives": 18,
+      "current_offline_positives": 17,
+      "denominator": 18,
+      "counterexamples_rejected": 6,
+      "counterexamples_planned": 6,
+      "evidence": [
+        "f01-p1c/results.json",
+        "0.6.30-recorded-cohort-audit.json"
+      ]
+    },
+    {
+      "id": "P2-runtime",
+      "result": "version-specific-evidence-present",
+      "first_download_version": "0.6.29",
+      "native_desktop_version": "0.6.30",
+      "evidence": [
+        "0.6.29-cold-runtime.json",
+        "0.6.30-isolated-desktop.json"
+      ]
+    },
+    {
+      "id": "P2-nondeveloper",
+      "result": "missing-external-feedback",
+      "evidence": "初赛复核说明.md contains an unfilled trial record"
+    },
+    {
+      "id": "P3-artifacts",
+      "result": "same-build-delivery-present",
+      "registered_files": 75,
+      "evidence": [
+        "0.6.30-reviewer-r2.json",
+        "0.6.30-release-draft.json"
+      ]
+    },
+    {
+      "id": "P3-platform",
+      "result": "missing-authenticated-field-review-and-submission-receipt"
+    }
+  ],
+  "known_limits": [
+    "Current executable is unsigned and archived as a draft release",
+    "Current complete cohort replays prior model tool decisions",
+    "Two historical P06 behavior-passed candidates accepted external readable records; private-handoff companion is separately tested"
+  ],
+  "completion": "not-proven",
+  "network_model_calls": 0
+}
