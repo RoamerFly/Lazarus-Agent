@@ -44,6 +44,32 @@ class WorkspaceTests(unittest.TestCase):
         self.ws.replace_lines(path.name, first["sha256"], 3, 3, "  <last/>")
         self.assertEqual(path.read_bytes(), b"<manifest>\r\n  <updated/>\r\n  <last/>\r\n</manifest>\r\n")
 
+    def test_exact_replacements_can_chain_but_line_edits_require_a_current_read(self):
+        path = self.root / "AndroidManifest.xml"
+        first = self.ws.read_text(path.name)
+        second = self.ws.replace_text(path.name, first["sha256"], "<manifest/>", "<manifest>\n</manifest>")
+        third = self.ws.replace_text(path.name, second["sha256"], "</manifest>", "<app/>\n</manifest>")
+        self.assertEqual(path.read_text(), "<manifest>\n<app/>\n</manifest>")
+        with self.assertRaisesRegex(ValueError, "先读取"):
+            self.ws.replace_lines(path.name, third["sha256"], 2, 2, "<updated/>")
+        row = self.ws.read_text(path.name, 2, 1)
+        self.ws.replace_lines(path.name, row["sha256"], 2, 2, "<updated/>")
+        self.assertEqual(path.read_text(), "<manifest>\n<updated/>\n</manifest>")
+
+    def test_written_hash_cannot_be_used_after_unobserved_change_or_restore(self):
+        name = "assets/sample.txt"
+        path = self.root / name
+        created = self.ws.create_text_file(name, "first")
+        edited = self.ws.replace_text(name, created["sha256"], "first", "second")
+        path.write_text("external", encoding="utf-8")
+        for sha256 in (edited["sha256"], digest(b"external")):
+            with self.assertRaisesRegex(ValueError, "最新 SHA-256"):
+                self.ws.replace_text(name, sha256, "external", "changed")
+        self.ws.restore_file(name)
+        path.write_text("second", encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "最新 SHA-256"):
+            self.ws.replace_text(name, edited["sha256"], "second", "changed")
+
     def test_new_smali_and_resource_files_share_the_same_tools(self):
         self.ws.create_text_file("smali/example/Helper.smali", ".class public Lexample/Helper;")
         self.ws.create_text_file("res/values/added.xml", "<resources/>")
@@ -83,11 +109,18 @@ class WorkspaceTests(unittest.TestCase):
         candidate.write_bytes(b"candidate")
         session = Session(self.root, original, candidate, self.root, 36,
                           {"sha256": digest(b"original")}, lambda _: None, None)
-        declarations = {"permissions": [], "components": [{"type": "activity", "exported": "0xffffffff"}]}
+        declarations = {"permissions": [], "components": [
+            {"type": "activity", "exported": "(type 0x12)0xffffffff"},
+            {"type": "provider", "exported": "(type 0x12)0x0", "enabled": "false"},
+            {"type": "service", "exported": "@0x7f010001"},
+        ]}
         with patch("feature_agent.manifest_surface", return_value=declarations) as inspect:
             result = session.dispatch("inspect_manifest", {"artifact": "original"})
             self.assertEqual(result["sha256"], digest(b"original"))
-            self.assertEqual(result["components"], declarations["components"])
+            self.assertEqual(result["external_caller"], "not-observed")
+            self.assertEqual([row["declared_exported"] for row in result["components"]], [True, False, None])
+            self.assertEqual([row["declared_enabled"] for row in result["components"]], [None, False, None])
+            self.assertEqual(result["components"][0]["exported"], declarations["components"][0]["exported"])
             inspect.assert_called_once_with(original, self.root)
             with self.assertRaises(ValueError):
                 session.dispatch("inspect_manifest", {"artifact": "candidate"})
@@ -229,19 +262,46 @@ class WorkspaceTests(unittest.TestCase):
         passed = {"function": "passed"}
         with patch("feature_agent.rehearse_candidate", side_effect=[failed, passed]) as rehearse:
             session.built(first, {"sha256": "a" * 64})
-            self.assertEqual(session.dispatch(name, {}), failed)
-            self.assertEqual(session.dispatch(name, {}), failed)
+            self.assertEqual(session.dispatch(name, {}), {**failed, "external_caller": "not-observed"})
+            self.assertEqual(session.dispatch(name, {}), {**failed, "external_caller": "not-observed"})
             path = "AndroidManifest.xml"
             read = session.workspace.read_text(path)
             session.workspace.replace_text(path, read["sha256"], "<manifest/>", "<manifest />")
             with self.assertRaises(ValueError):
                 session.dispatch(name, {})
             session.built(second, {"sha256": "b" * 64})
-            self.assertEqual(session.dispatch(name, {}), passed)
+            self.assertEqual(session.dispatch(name, {}), {**passed, "external_caller": "not-observed"})
             self.assertEqual([call.args for call in rehearse.call_args_list],
                              [(tester, first, "a" * 64, steps), (tester, second, "b" * 64, steps)])
         self.assertIsNone(session.candidate_verification())
         self.assertEqual(session.build_count, 0)
+
+    def test_device_actions_resume_after_a_fresh_rehearsal_only_for_the_installed_candidate(self):
+        tester = Mock()
+        tester.test.return_value = {"installed_sha256": "original"}
+        tester.action.return_value = {"ui": {"nodes": []}}
+        session = Session(self.root, Path("original.apk"), self.root / "out.apk",
+                          Path("tools"), 36, {"sha256": "original"}, lambda _: None, tester,
+                          [{"action": "expect", "value": "Ready"}])
+        session.built(self.root / "built.apk", {"sha256": "candidate"})
+        failed = {"install": "passed", "installed_sha256": "candidate", "function": "failed",
+                  "verification": "candidate-rehearsal"}
+        with patch("feature_agent.rehearse_candidate", return_value=failed) as rehearse:
+            session.dispatch("rehearse_acceptance", {})
+            self.assertEqual(session.dispatch("device_action", {"action": "read"})["tested_input"], "candidate")
+            self.assertIsNone(session.candidate_verification())
+            tester.test.assert_not_called()
+
+            session.dispatch("test_original", {})
+            session.dispatch("rehearse_acceptance", {})
+            self.assertEqual(session.dispatch("device_action", {"action": "read"})["tested_input"], "original")
+            rehearse.assert_called_once()
+
+        session.built(self.root / "another.apk", {"sha256": "another"})
+        with patch("feature_agent.rehearse_candidate", return_value={**failed, "installed_sha256": "wrong"}):
+            session.dispatch("rehearse_acceptance", {})
+            with self.assertRaisesRegex(ValueError, "成功安装"):
+                session.dispatch("device_action", {"action": "read"})
 
     def test_rollback_reuses_the_exact_previous_build_after_a_failed_attempt(self):
         session = Session(self.root, Path("source.apk"), self.root/"candidate.apk",
