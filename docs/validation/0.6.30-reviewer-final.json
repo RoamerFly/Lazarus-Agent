@@ -72,7 +72,31 @@
     "network_model_calls": 0
   },
   "guest_specialized_package": {
-    "status": "tools-unavailable-before-transfer",
-    "device_steps_run": false
+    "status": "archive-exe-and-two-inputs-verified",
+    "windows": "Windows Server 2022 Standard",
+    "build": "20348.1006",
+    "desktop": {
+      "status": "native-window-opened",
+      "title": "Lazarus Agent",
+      "protocol": 1,
+      "new_coverage_labels_present": true,
+      "screenshot_sha256": "f0cb53afb851cb41a7db9dc46128e81cd3500b3dea8f0314cb7c5930761056b3"
+    },
+    "version": "0.6.30",
+    "self_test_exit": 0,
+    "prior_commands": [],
+    "active_hardware_networks": 0,
+    "archive_sha256": "ef9330371975a3c190ad62c8b027ccad446e7980335dab57e279a2b784c870f6",
+    "exe_sha256": "5dcffbe3f4b83865910d67fbb74cafe6891adac2bc87b017c569862f325f0825",
+    "registered_files": 14,
+    "steps": [
+      2,
+      10
+    ],
+    "guest_device_steps_run": false,
+    "network_model_calls": 0,
+    "rendered_ui_sha256": "3cf574d14db02b242ebbb7b67d7d3d0141962fbd898078d7cfeacaf0cacf4a0f",
+    "native_controls_observed": true,
+    "test_auto_login_cleared": true
   }
 }
