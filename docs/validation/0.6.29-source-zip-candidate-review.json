@@ -883,5 +883,33 @@
   "agent_median_trial_seconds": 79.92,
   "api": 36,
   "abi": "x86_64",
-  "network_model_calls": 0
+  "network_model_calls": 0,
+  "external_uid_followup": {
+    "planned_trials": [
+      "P06-agent-2",
+      "P06-agent-3",
+      "P06-private-handoff"
+    ],
+    "completed_trials": 0,
+    "observed_target_installations": 0,
+    "stage_reached": "emulator-boot",
+    "attempts": [
+      {
+        "mode": "hardware-accelerated",
+        "outcome": "boot-timeout-adb-offline"
+      },
+      {
+        "mode": "hardware-accelerated",
+        "outcome": "boot-timeout-adb-offline"
+      },
+      {
+        "mode": "software",
+        "outcome": "exited-before-boot-after-resuming-test-process",
+        "suspended_threads_observed": 65
+      }
+    ],
+    "fresh_external_uid_results": "unobserved",
+    "previous_companion_archive_sha256": "878cf753b861e73055e9510a4ab5309b1def572abfd21fadfc7aab423b71463c",
+    "previous_companion_rejections_reaudited": 6
+  }
 }
