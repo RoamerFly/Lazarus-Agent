@@ -12,20 +12,25 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from tools.package_agent_review import digest, read
 from tools.verify_review_package import (
-    COLD_WINDOWS_FILE, DESKTOP_FILE, HANDOFF_FILE, HANDOFF_PAIR, LOCAL_DEMO, REVIEWER_GUIDE, RULE_FILE, RULE_SAMPLE,
+    COLD_WINDOWS_FILE, DESKTOP_FILE, HANDOFF_FILE, HANDOFF_PAIR, HOST_CONTRADICTION, LOCAL_DEMO, REVIEWER_GUIDE,
+    RULE_FILE, RULE_SAMPLE,
     SAMPLE_NOTICE, INSTALL_RECHECK, INSTALL_SCRIPT, INSTALL_SAMPLES, verify,
 )
 
 
 def build(delivery, materials, capture, output, reviewer_guide=None, rule_sample=None, evidence_dir=None,
-          negative_evidence=None, sample_archive=None, isolated_install=None, installer_script=None):
+          negative_evidence=None, sample_archive=None, isolated_install=None, installer_script=None,
+          host_contradiction=None):
     if output.exists():
         raise ValueError("请选择新的同版评审包输出路径")
     version = read(delivery / "本地构建回执.json")["version"]
     samples = sample_archive or delivery / f"v{version}-离线样本与Windows复核包.zip"
     original = verify(samples)
     status = original["package_status"]
-    if (not (original["offline_windows"] or original["offline_cold_runtime"] or isolated_install)
+    host_only = status.get("mode") == "workbench-coverage-development-check" and not isolated_install
+    if host_only != bool(host_contradiction):
+        raise ValueError("宿主工作台复核需要对应的矛盾断言报告")
+    if (not (original["offline_windows"] or original["offline_cold_runtime"] or isolated_install or host_only)
             or original["offline_materials"] or status["version"] != version
             or status["exe_sha256"] != digest(delivery / "Lazarus-Agent.exe")):
         raise ValueError("样本包与交付 EXE 不一致或已包含同版材料")
@@ -56,7 +61,11 @@ def build(delivery, materials, capture, output, reviewer_guide=None, rule_sample
                "video_seconds": read(record)["duration_planned_seconds"],
                "device_screen_sha256": digest(capture / "device-final.png"),
                "acceptance_sha256": digest(capture / "agent-acceptance.json")}
-    status["offline_materials"] = "same-build-offline-review"
+    status["offline_materials"] = "same-build-host-review" if host_only else "same-build-offline-review"
+    if host_only:
+        files[HOST_CONTRADICTION] = host_contradiction.read_bytes()
+        with ZipFile(source) as code:
+            files["可复跑轨迹/P01.json"] = code.read("docs/validation/recorded-edit-fixtures/P01.json")
     guide_note = ""
     if reviewer_guide:
         files[REVIEWER_GUIDE] = reviewer_guide.read_bytes()
@@ -99,7 +108,10 @@ N01 在安装阶段被拒绝。N02 使用未修改原包验证缺失信息断言
 """
     files["复核状态.json"] = json.dumps(status, ensure_ascii=False, indent=2).encode()
     files["同版材料校验回执.json"] = json.dumps(receipt, ensure_ascii=False, indent=2).encode()
-    if isolated_install:
+    if host_only:
+        windows_note = (f"[宿主工作台矛盾断言报告]({HOST_CONTRADICTION})。"
+                        "空盘 Windows 安装和环境首次下载的实测对应 v0.6.29。")
+    elif isolated_install:
         windows_note = (f"[隔离 Windows 安装与卸载复核]({INSTALL_RECHECK})\n\n"
                         "复用隔离 Windows 来宾，通过同版样本输入、安装、自检和默认卸载。"
                         "安装器脚本单独记录修订提交。Android 行为在宿主机实测，空白系统首次准备见 v0.6.28。")
@@ -164,5 +176,6 @@ if __name__ == "__main__":
     parser.add_argument("--sample-archive", type=Path)
     parser.add_argument("--isolated-install", type=Path)
     parser.add_argument("--installer-script", type=Path)
+    parser.add_argument("--host-contradiction", type=Path)
     paths = {name: path.resolve() if path else None for name, path in vars(parser.parse_args()).items()}
     print(json.dumps(build(**paths), ensure_ascii=False, indent=2))

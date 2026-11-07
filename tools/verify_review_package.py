@@ -18,6 +18,7 @@ from tools.review_evidence import verify_extension
 from updater import parse_manifest, verify_manifest
 
 LOCAL_DEMO = "可分发样本/工作台演示/"
+HOST_CONTRADICTION = "工作台证据/矛盾断言报告.json"
 OFFLINE_WINDOWS_FILES = {
     "Windows复核/干净Windows复测回执.json": "干净 Windows 复测回执.json",
     "Windows复核/工作台.png": "干净 Windows 工作台.png",
@@ -404,7 +405,37 @@ def check_offline_materials(archive, checksums, status, windows):
     scope = status.get("offline_materials")
     if scope is None and "遗留软件复活智能体离线演示.mp4" not in checksums:
         return None
-    if scope != "same-build-offline-review" or windows is None:
+    host_only = scope == "same-build-host-review"
+    if host_only:
+        build = json.loads(archive.read("本地构建回执.json"))
+        workbench = json.loads(archive.read("功能验收回执.json"))
+        cases = {row["case"]: row for row in workbench["cases"]}
+        negative = json.loads(archive.read(HOST_CONTRADICTION))
+        positive = json.loads(archive.read("可分发样本/P01/agent-acceptance.json"))
+        observed = negative["rows"][0]["candidate"]
+        steps = negative["steps"]
+        if (windows is not None or status["mode"] != "workbench-coverage-development-check"
+                or workbench["build"] != build or workbench["network_model_calls"] != 0
+                or build["self_test_exit"] != 0 or len(workbench["cases"]) != 2
+                or set(cases) != {"P01", "contradiction"}
+                or (cases["P01"]["verified_download_http"], cases["contradiction"]["verified_download_http"])
+                   != (200, 409)
+                or cases["P01"]["report_sha256"] != checksums.get("可分发样本/P01/agent-acceptance.json")
+                or cases["P01"]["candidate_and_installed_sha256"] != checksums.get("可分发样本/P01/candidate.apk")
+                or cases["contradiction"]["report_sha256"] != checksums[HOST_CONTRADICTION]
+                or negative["status"] != "incomplete" or negative["targets"] != [36]
+                or negative["input_sha256"] != positive["input_sha256"]
+                or len(negative["rows"]) != 1 or negative["rows"][0]["api"] != 36
+                or observed["install"] != observed["launch"] or observed["install"] != "passed"
+                or observed["function"] != "failed"
+                or observed["device"]["installed_sha256"] != negative["candidate_sha256"]
+                or negative["candidate_sha256"] != cases["contradiction"]["candidate_and_installed_sha256"]
+                or [step["status"] for step in observed["steps"]] != ["passed"] * 10 + ["failed"]
+                or len(steps) != 11 or steps[-1] != {"action": "absent", "value": steps[-2]["value"]}
+                or steps[:-1] != positive["steps"] or observed["steps"][-1]["match_count"] < 1
+                or any(build[key] != status[key] for key in ("version", "source_commit", "exe_sha256"))):
+            raise ValueError("同版材料缺少可核对的宿主工作台证据")
+    elif scope != "same-build-offline-review" or windows is None:
         raise ValueError("同版材料缺少离线复核范围或 Windows 证据")
     version, commit = status["version"], status["source_commit"]
     receipt = json.loads(archive.read("同版材料校验回执.json"))

@@ -96,8 +96,12 @@ def verify_extension(archive, checksums, status):
     present = {name for name in checksums if name == RUNTIME or name.startswith(PREFIX)}
     if declared is None and not present:
         return None
-    required = {AUDIT, GUIDE, HISTORY, PLAN, REPLAY, RUNTIME, TRACE}
-    if declared != "windows-and-recorded-cohort" or not required <= present:
+    required = {AUDIT, GUIDE, HISTORY, PLAN, REPLAY, TRACE}
+    if declared == "windows-and-recorded-cohort":
+        required.add(RUNTIME)
+    elif declared != "recorded-cohort-only" or status.get("offline_materials") != "same-build-host-review":
+        raise ValueError("缺少完整的同版补充复核材料")
+    if not required <= present:
         raise ValueError("缺少完整的同版补充复核材料")
     archive_replay = status.get("archive_replay")
     if archive_replay is not None or ARCHIVE_TOOLS & present:
@@ -108,7 +112,7 @@ def verify_extension(archive, checksums, status):
         return json.loads(archive.read(name))
 
     build = load("本地构建回执.json")
-    runtime = verify_runtime(load(RUNTIME), build)
+    runtime = verify_runtime(load(RUNTIME), build) if RUNTIME in required else None
     plan, audit, history, traces = (load(name) for name in (PLAN, AUDIT, HISTORY, TRACE))
     if (any(build[key] != status[key] for key in ("version", "source_commit", "exe_sha256"))
             or build["self_test_exit"] != 0 or plan["schema"] != 1 or audit["schema"] != 1
@@ -186,10 +190,12 @@ def extend(base, output, runtime, audit, batch):
     with ZipFile(base) as archive:
         files = {name: archive.read(name) for name in archive.namelist() if name != "SHA256SUMS.txt"}
     status = verified["package_status"]
-    status["same_build_evidence"] = "windows-and-recorded-cohort"
+    status["same_build_evidence"] = "windows-and-recorded-cohort" if runtime else "recorded-cohort-only"
     status["archive_replay"] = "same-build-source-zip"
     files["复核状态.json"] = json.dumps(status, ensure_ascii=False, indent=2).encode()
-    files.update({RUNTIME: runtime.read_bytes(), AUDIT: audit.read_bytes(), PLAN: (batch / "plan.json").read_bytes(),
+    if runtime:
+        files[RUNTIME] = runtime.read_bytes()
+    files.update({AUDIT: audit.read_bytes(), PLAN: (batch / "plan.json").read_bytes(),
                   REPLAY: (ROOT / "tools/replay_f01_recorded_cohort.py").read_bytes(),
                   HISTORY: HISTORICAL.read_bytes(), TRACE: RECORDED_INPUT.read_bytes()})
     files.update({name: (ROOT / "tools" / Path(name).name).read_bytes() for name in ARCHIVE_TOOLS})
@@ -202,7 +208,10 @@ def extend(base, output, runtime, audit, batch):
     files[GUIDE] = guide(status, audited["counts"]).encode()
     intro = files["从这里开始.md"].decode("utf-8")
     intro = intro.replace("空白系统首次准备见 v0.6.28。", "空白 Windows 系统安装见 v0.6.28。")
-    intro += f"\n[同版首次下载回执]({RUNTIME}) · [42 轮冻结评测和源码 ZIP 离线复跑]({GUIDE})\n"
+    intro += "\n"
+    if runtime:
+        intro += f"[同版首次下载回执]({RUNTIME}) · "
+    intro += f"[42 轮冻结评测和源码 ZIP 离线复跑]({GUIDE})\n"
     files["从这里开始.md"] = intro.encode()
     files["SHA256SUMS.txt"] = "".join(f"{sha256(data).hexdigest()}  {name}\n"
                                      for name, data in sorted(files.items())).encode()
@@ -220,11 +229,16 @@ def extend(base, output, runtime, audit, batch):
 
 
 def guide(status, counts):
+    runtime = status["same_build_evidence"] == "windows-and-recorded-cohort"
+    download_link = f"[Windows 首次下载和复用](../{RUNTIME}) · " if runtime else ""
+    windows = ("Windows 回执覆盖专用来宾从空应用数据目录下载五项组件及复用。"
+               if runtime else "干净 Windows 安装及首次组件准备请查阅 v0.6.29 的历史回执。")
+    components = (f"首次准备可按[下载回执](../{RUNTIME})核对组件。" if runtime else "")
     return rf"""# v{status['version']} 同版冻结评测复核
 
-[Windows 首次下载和复用](../{RUNTIME}) · [42 轮结果](audit.json) · [冻结计划](plan.json)
+{download_link}[42 轮结果](audit.json) · [冻结计划](plan.json)
 
-Windows 回执覆盖专用来宾从空应用数据目录下载五项组件及复用。Android 设备行为在宿主机专用 Android 16 x86_64 模拟器验证。空白 Windows 系统安装见此前版本的单独回执。
+{windows}Android 设备行为在宿主机专用 Android 16 x86_64 模拟器验证。
 
 复跑使用历史模型留档的工具参数，真实模型调用为零。正例功能通过 {counts['positive_passed']}/{counts['positive_planned']}，反例拒绝 {counts['negative_rejected']}/{counts['negative_planned']}，错误验收 {counts['negative_false_acceptances']}。设备结果未观测的 {counts['unobserved']} 轮保留在原计划分母。一次构建、无改动回编、本地规则和 Agent 各自计分。历史模型的独立决策记录另列。
 
@@ -236,7 +250,7 @@ Windows 回执覆盖专用来宾从空应用数据目录下载五项组件及复
 
     python -I -B -X utf8 tools/review_archive.py --exe "..\..\Lazarus-Agent.exe" --workspace "..\..\离线复跑" --check-only
 
-实跑使用工作台已准备的 Android 16 x86_64 SDK、Java 和已下载并校验的 Apktool JAR。指定的 SDK 目录必须包含目标系统镜像，缺失时预检会停止。将示例路径改为实际路径。首次准备可按[下载回执](../{RUNTIME})核对组件，Apktool 通常保存在工作台应用数据目录的 `runtimes/apktool` 下。
+实跑使用工作台已准备的 Android 16 x86_64 SDK、Java 和已下载并校验的 Apktool JAR。指定的 SDK 目录必须包含目标系统镜像，缺失时预检会停止。将示例路径改为实际路径。{components}Apktool 通常保存在工作台应用数据目录的 `runtimes/apktool` 下。
 
     python -I -B -X utf8 tools/review_archive.py --exe "..\..\Lazarus-Agent.exe" --workspace "..\..\离线复跑" --sdk "SDK 目录" --java-home "Java 目录" --apktool "Apktool JAR 路径"
 
@@ -248,6 +262,7 @@ Windows 回执覆盖专用来宾从空应用数据目录下载五项组件及复
 
 if __name__ == "__main__":
     parser = ArgumentParser(description=__doc__)
-    for field in ("base", "output", "runtime", "audit", "batch"):
+    for field in ("base", "output", "audit", "batch"):
         parser.add_argument("--" + field, type=Path, required=True)
+    parser.add_argument("--runtime", type=Path)
     print(json.dumps(extend(**vars(parser.parse_args())), ensure_ascii=False, indent=2))
