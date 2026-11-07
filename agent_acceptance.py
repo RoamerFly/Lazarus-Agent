@@ -220,10 +220,14 @@ def rehearse_candidate(tester, apk, expected_hash, steps):
     return result
 
 
+def verification_coverage(steps):
+    return {"specified_ui_steps": len(steps), "external_app_calls": "not-tested"}
+
+
 def verify(source, source_hash, candidate, candidate_hash, targets, steps, make_tester, available, progress):
     """Install the same candidate bytes across targets and replay fixed checks."""
     report = {"schema": 1, "targets": targets, "steps": steps, "input_sha256": source_hash,
-              "candidate_sha256": candidate_hash, "rows": []}
+              "candidate_sha256": candidate_hash, "coverage": verification_coverage(steps), "rows": []}
     for api in targets:
         if not available(api):
             report["rows"].append({"api": api, "status": "unavailable"})

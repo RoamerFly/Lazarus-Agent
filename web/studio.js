@@ -242,19 +242,21 @@ function renderChat(busy){
       const endpoint=m.feature_candidate_id?"/feature-candidates/":"/localized/";
       const filePath=path(endpoint+encodeURIComponent(m.feature_candidate_id||m.localization_id));
       const acceptance=job.feature_candidates?.[m.feature_candidate_id]?.acceptance;
-      link.textContent=acceptance?.status==="behavior-verified"?"下载已验收 APK":"下载候选 APK";
+      link.textContent=acceptance?.status==="behavior-verified"?"下载功能已验收 APK":"下载候选 APK";
       link.href=filePath+(acceptance?.status==="behavior-verified"?"/verified":"");
       if(acceptance){
         const scope=document.createElement("div");
-        scope.textContent=acceptance.rows.map(row=>{
+        const checks=acceptance.rows.map(row=>{
           const c=row.candidate;
           if(!c)return androidName(row.api)+"：环境不可用";
-          if(row.status==="behavior-verified")return androidName(row.api)+"：功能通过"+(row.comparison==="baseline-already-passed"?"（基线也通过）":"");
+          if(row.status==="behavior-verified")return androidName(row.api)+"：通过 "+c.steps.length+" 步"+(row.comparison==="baseline-already-passed"?"（基线也通过）":"");
           if(row.status==="launch-verified")return androidName(row.api)+"：安装启动通过";
           if(c.launch==="passed")return androidName(row.api)+"：功能未通过";
           if(c.install==="passed")return androidName(row.api)+"：启动未通过";
           return androidName(row.api)+"：未通过安装校验";
-        }).join(" · ");
+        });
+        if(!acceptance.coverage||acceptance.coverage.external_app_calls==="not-tested")checks.push("外部应用调用未测");
+        scope.textContent=checks.join(" · ");
         bubble.append(scope);
       }
       bubble.append(link);

@@ -152,7 +152,7 @@ def capture(source, output, port, device_followup=False):
                         or followup["result"]["tested_input"] != "candidate"):
                     raise ValueError("录制未验证预检后的候选前台读取")
             with page.expect_download() as download:
-                page.get_by_role("link", name="下载已验收 APK").last.click()
+                page.get_by_role("link", name=re.compile(r"^下载(?:功能)?已验收 APK$")).last.click()
             download.value.save_as(output / "candidate.apk")
             if digest_file(output / "candidate.apk") != candidate["sha256"]:
                 raise ValueError("工作台下载 APK 与设备验收不一致")

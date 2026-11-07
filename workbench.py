@@ -368,7 +368,7 @@ def run_chat_feature(folder, state, source, expected_hash, run_id, body, config,
             state["latest_feature_candidate"] = run_id
             level = "已回编并校验签名。"
             if acceptance["status"] == "behavior-verified":
-                level += "全部所选系统的指定操作已通过独立验收。"
+                level += "所选系统的指定操作均通过功能验收。"
             elif acceptance["status"] == "launch-verified":
                 level += "全部所选系统已安装启动，尚未指定功能验收步骤。"
             else:
@@ -392,24 +392,34 @@ def run_chat_feature(folder, state, source, expected_hash, run_id, body, config,
 
 @app.get("/api/jobs/{job}/feature-candidates/{run_id}")
 def feature_candidate(job: str, run_id: str):
+    from agent_workspace import digest_file
+
     folder = job_dir(job)
     state = read(folder)
-    if not re.fullmatch("[a-f0-9]{32}", run_id) or run_id not in state.get("feature_candidates", {}):
+    candidate = state.get("feature_candidates", {}).get(run_id)
+    if not re.fullmatch("[a-f0-9]{32}", run_id) or candidate is None:
         raise HTTPException(404, "功能修改候选不存在")
     path = folder / "feature-candidates" / run_id / "candidate.apk"
     if not path.is_file():
         raise HTTPException(404, "候选文件缺失")
-    api = state["feature_candidates"][run_id].get("api", state["api"])
+    if digest_file(path) != candidate["sha256"]:
+        raise HTTPException(409, "候选文件哈希与任务记录不匹配")
+    api = candidate.get("api", state["api"])
     return FileResponse(path, filename=f"{state['package']['package']}-feature-api{api}.apk")
 
 
 @app.get("/api/jobs/{job}/feature-candidates/{run_id}/acceptance")
 def feature_acceptance(job: str, run_id: str):
+    from agent_acceptance import verification_coverage
+
     state = read(job_dir(job))
     candidate = state.get("feature_candidates", {}).get(run_id)
     if not re.fullmatch("[a-f0-9]{32}", run_id) or not candidate or "acceptance" not in candidate:
         raise HTTPException(404, "该候选暂无独立验收报告")
-    return Response(json.dumps(candidate["acceptance"], ensure_ascii=False, indent=2),
+    report = candidate["acceptance"]
+    if "coverage" not in report:
+        report = {**report, "coverage": verification_coverage(report["steps"])}
+    return Response(json.dumps(report, ensure_ascii=False, indent=2),
                     media_type="application/json",
                     headers={"Content-Disposition": 'attachment; filename="agent-acceptance.json"'})
 

@@ -197,6 +197,29 @@ class AcceptanceTests(unittest.TestCase):
             self.assertFalse(verified_for(report, digest))
             passed = verify(base, baseline_digest, apk, digest, [36], steps, tester, lambda api: True, lambda _: None)
             self.assertTrue(verified_for(passed, digest))
+            self.assertEqual(passed["coverage"], {"specified_ui_steps": 2, "external_app_calls": "not-tested"})
             self.assertEqual(passed["rows"][0]["comparison"], "baseline-check-failed")
             passed["rows"][0]["candidate"]["device"]["installed_sha256"] = baseline_digest
             self.assertFalse(verified_for(passed, digest))
+
+    def test_candidate_download_binds_legacy_report_to_the_original_bytes(self):
+        from fastapi.testclient import TestClient
+        import workbench
+
+        job, run = "a" * 32, "b" * 32
+        sha256 = hashlib.sha256(b"candidate").hexdigest()
+        with TemporaryDirectory() as temporary, patch.object(workbench, "STORAGE", Path(temporary)):
+            folder = Path(temporary) / job
+            apk = folder / "feature-candidates" / run / "candidate.apk"
+            apk.parent.mkdir(parents=True)
+            apk.write_bytes(b"candidate")
+            report = {"steps": [{"action": "expect", "value": "Open"}]}
+            workbench.save(folder, {"api": 36, "package": {"package": "example.app"},
+                                    "feature_candidates": {run: {"sha256": sha256, "acceptance": report}}})
+            url = f"/api/jobs/{job}/feature-candidates/{run}"
+            with TestClient(workbench.app, base_url=f"http://127.0.0.1:{workbench.PORT}") as client:
+                self.assertEqual(client.get(url + "/acceptance").json()["coverage"],
+                                 {"specified_ui_steps": 1, "external_app_calls": "not-tested"})
+                self.assertEqual(client.get(url).content, b"candidate")
+                apk.write_bytes(b"changed")
+                self.assertEqual(client.get(url).status_code, 409)
