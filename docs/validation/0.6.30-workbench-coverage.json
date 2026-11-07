@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "build": {
+    "version": "0.6.30",
+    "source_commit": "b25149059af357fd27c5bbbf0aaf4ba730678143",
+    "exe_sha256": "5dcffbe3f4b83865910d67fbb74cafe6891adac2bc87b017c569862f325f0825",
+    "bytes": 131739131,
+    "self_test_exit": 0,
+    "packager": "6.22.3",
+    "scope": "Local PyInstaller build and executable self-test"
+  },
+  "api": 36,
+  "abi": "x86_64",
+  "network_model_calls": 0,
+  "cases": [
+    {
+      "case": "P01",
+      "input_sha256": "08ed16b9f6a149bd8063bae99dd72aad200dafea7d3a0504af004187bde20deb",
+      "candidate_and_installed_sha256": "178906ec3ff5e2792e79262ea54e171541ff7b13153604fb23d6bafa4965b169",
+      "report_sha256": "9114c597f46a1bfe3d1a8523ab624511a0872c53f9421aa4674791def3b85349",
+      "coverage": {
+        "specified_ui_steps": 10,
+        "external_app_calls": "not-tested"
+      },
+      "steps": [
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "verified_download_http": 200,
+      "both_download_routes_rejected_replaced_bytes": true,
+      "browser": [
+        {
+          "width": 960,
+          "height": 640,
+          "label": "下载功能已验收 APK",
+          "scope_visible": true,
+          "text_overlaps": false,
+          "horizontal_overflow": false,
+          "page_errors": 0
+        },
+        {
+          "width": 1440,
+          "height": 900,
+          "label": "下载功能已验收 APK",
+          "scope_visible": true,
+          "text_overlaps": false,
+          "horizontal_overflow": false,
+          "page_errors": 0
+        }
+      ],
+      "local_recorded_calls": 14,
+      "network_model_calls": 0
+    },
+    {
+      "case": "contradiction",
+      "input_sha256": "08ed16b9f6a149bd8063bae99dd72aad200dafea7d3a0504af004187bde20deb",
+      "candidate_and_installed_sha256": "33b73de8024d3cd5a68456f2bb02ec74718b8e525bf2842cc1661221a3de763c",
+      "report_sha256": "f599511bdefde22807ba83da8182d66e3f16f25ec55db2284043c0cb9a9c592c",
+      "coverage": {
+        "specified_ui_steps": 11,
+        "external_app_calls": "not-tested"
+      },
+      "steps": [
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "passed",
+        "failed"
+      ],
+      "verified_download_http": 409,
+      "both_download_routes_rejected_replaced_bytes": false,
+      "browser": [
+        {
+          "width": 960,
+          "height": 640,
+          "label": "下载候选 APK",
+          "scope_visible": true,
+          "text_overlaps": false,
+          "horizontal_overflow": false,
+          "page_errors": 0
+        },
+        {
+          "width": 1440,
+          "height": 900,
+          "label": "下载候选 APK",
+          "scope_visible": true,
+          "text_overlaps": false,
+          "horizontal_overflow": false,
+          "page_errors": 0
+        }
+      ],
+      "local_recorded_calls": 14,
+      "network_model_calls": 0
+    }
+  ],
+  "local_tests": {
+    "total": 244,
+    "skipped": 4,
+    "failed": 0
+  },
+  "specialized_package": {
+    "archive": "v0.6.30-F01-功能验收复测包.zip",
+    "mode": "workbench-coverage-development-check",
+    "version": "0.6.30",
+    "source_commit": "b25149059af357fd27c5bbbf0aaf4ba730678143",
+    "exe_sha256": "5dcffbe3f4b83865910d67fbb74cafe6891adac2bc87b017c569862f325f0825",
+    "source_archive_sha256": "04dd25d652ae889135ad9c751f82a95e203f2b76e674634f39826f078ab3e20c",
+    "network_model_calls": 0,
+    "archive_sha256": "ef9330371975a3c190ad62c8b027ccad446e7980335dab57e279a2b784c870f6",
+    "bytes": 2533900,
+    "registered_files": 14,
+    "deterministic_build": true,
+    "windows_powershell_inputs_verified": 2
+  },
+  "standalone_contradiction": {
+    "exit_code": 1,
+    "steps": [
+      "passed",
+      "failed"
+    ],
+    "report_sha256": "e667564d5b882f2a41df1b6f7137661cc3ad96f8d4f478c76cb1809f2e7ab980",
+    "candidate_and_installed_sha256": "178906ec3ff5e2792e79262ea54e171541ff7b13153604fb23d6bafa4965b169"
+  },
+  "frozen_plan_preflight": {
+    "trials": 42,
+    "plan_sha256": "bc69f38283333c1a81ed42d9b99e93de6406b16c543254f45c8bc9b0065c4827",
+    "same_as_r3_except_build_identity": true,
+    "device_trials_executed": 0
+  },
+  "unpacked_positive_replay": {
+    "report_sha256": "14cbddbf67b2c569dc44a6d7b8b8e52c0fa4ecbca123b61259cfe57d10e03100",
+    "steps_passed": 10,
+    "candidate_and_installed_sha256": "178906ec3ff5e2792e79262ea54e171541ff7b13153604fb23d6bafa4965b169",
+    "network_model_calls": 0
+  },
+  "isolated_windows_guest_attempt": {
+    "status": "tools-unavailable-before-transfer",
+    "guest_device_steps_run": false
+  }
+}
