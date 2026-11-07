@@ -1,0 +1,51 @@
+{
+  "archive": "v0.6.30-F01-同版离线评审包-r2.zip",
+  "archive_sha256": "652506b40cd46f7220abaef45d70409a01ba2eeff3bd09999468a8af36e129e3",
+  "bytes": 6388370,
+  "registered_files": 75,
+  "base_archive_sha256": "2b1cef505bb439a6b9e6ab4e612c3c365f5db9b58ba489f0433161e591922f92",
+  "preserved_payloads": 70,
+  "cohort": {
+    "terminal": 42,
+    "unobserved": 1,
+    "positive_passed": 17,
+    "positive_planned": 18,
+    "primary_passed": 3,
+    "historical_holdout_passed": 3,
+    "negative_rejected": 6,
+    "negative_false_acceptances": 0,
+    "negative_planned": 6,
+    "controls": {
+      "roundtrip": {
+        "failed": 6
+      },
+      "rules": {
+        "failed": 4,
+        "passed": 2
+      },
+      "one-build": {
+        "failed": 4,
+        "passed": 2
+      }
+    }
+  },
+  "desktop": {
+    "status": "same-build-rendered-controls",
+    "files_checked": 14,
+    "input_steps": [
+      2,
+      10
+    ],
+    "guest_device_steps_run": false,
+    "network_model_calls": 0
+  },
+  "schema": 1,
+  "deterministic_build": true,
+  "inputs_verified": 3,
+  "network_model_calls": 0,
+  "rehashed_tamper_rejections": [
+    "different-exe",
+    "missing-rendered-control",
+    "guest-device-claim"
+  ]
+}

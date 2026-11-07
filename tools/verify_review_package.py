@@ -19,6 +19,9 @@ from updater import parse_manifest, verify_manifest
 
 LOCAL_DEMO = "可分发样本/工作台演示/"
 HOST_CONTRADICTION = "工作台证据/矛盾断言报告.json"
+DESKTOP_SUPPLEMENT = "Windows复核/同版桌面补充回执.json"
+DESKTOP_SCREEN = "Windows复核/同版原生工作台.png"
+DESKTOP_INPUTS = "Windows复核/当时专项复测包.zip"
 OFFLINE_WINDOWS_FILES = {
     "Windows复核/干净Windows复测回执.json": "干净 Windows 复测回执.json",
     "Windows复核/工作台.png": "干净 Windows 工作台.png",
@@ -629,6 +632,42 @@ def verify_frozen_counterexamples(archive, checksums, status, addendum, countere
                 raise ValueError("反例与同版源码中的冻结用例不一致：" + case["id"])
 
 
+def check_desktop_supplement(archive, checksums, status):
+    files = {DESKTOP_SUPPLEMENT, DESKTOP_SCREEN, DESKTOP_INPUTS}
+    if not files.intersection(checksums) and "desktop_supplement" not in status:
+        return None
+    if not files <= checksums.keys() or status.get("desktop_supplement") != "same-build-rendered-controls":
+        raise ValueError("缺少同版桌面补充材料")
+    proof = json.loads(archive.read(DESKTOP_SUPPLEMENT))
+    build = json.loads(archive.read("本地构建回执.json"))
+    guest, rendered = proof["guest"], proof["rendered"]
+    if (proof["build"] != build or proof["schema"] != 1 or build["self_test_exit"] != 0
+            or any(build[key] != status[key] for key in ("version", "source_commit", "exe_sha256"))
+            or guest["version"] != build["version"] or guest["exe_sha256"] != build["exe_sha256"]
+            or guest["status"] != "archive-exe-and-two-inputs-verified" or guest["self_test_exit"] != 0
+            or guest["prior_commands"] or guest["active_hardware_networks"] != 0
+            or guest["guest_device_steps_run"] is not False or guest["steps"] != [2, 10]
+            or guest["archive_sha256"] != checksums[DESKTOP_INPUTS]
+            or rendered["status"] != "native-controls-rendered" or rendered["auto_login_cleared"] is not True
+            or rendered["screenshot_sha256"] != checksums[DESKTOP_SCREEN]
+            or not {"选择 APK", "模型配置", "修复对话", "运行环境"} <= set(rendered["controls"])
+            or any(item["network_model_calls"] != 0 for item in (proof, guest, rendered))):
+        raise ValueError("同版桌面回执与程序、输入或渲染证据不一致")
+    with ZipFile(BytesIO(archive.read(DESKTOP_INPUTS))) as inputs:
+        registered = inputs.read("SHA256SUMS.txt").decode("utf-8").splitlines()
+        if guest["registered_files"] != len(registered):
+            raise ValueError("同版桌面输入清单数量不一致")
+        for line in registered:
+            expected, name = line.split("  ", 1)
+            same_payload = (name.startswith(("可分发样本/", "反例样本/"))
+                            or name in {"本地构建回执.json", "功能验收回执.json", f"F01-源代码-v{build['version']}.zip"})
+            if (hashlib.sha256(inputs.read(name)).hexdigest() != expected
+                    or same_payload and checksums.get(name) != expected):
+                raise ValueError("同版桌面输入与评审包字节不一致")
+    return {"status": "same-build-rendered-controls", "files_checked": guest["registered_files"],
+            "input_steps": guest["steps"], "guest_device_steps_run": False, "network_model_calls": 0}
+
+
 def verify(path):
     with ZipFile(path) as archive:
         names = archive.namelist()
@@ -686,6 +725,7 @@ def verify(path):
         addendum = check_offline_addendum(archive, checksums, status, offline_materials)
         same_build_evidence = verify_extension(archive, checksums, status)
         private_handoff = verify_private_handoff(archive, checksums, status)
+        desktop_supplement = check_desktop_supplement(archive, checksums, status)
         if ("offline_negative_cases" in status
                 or any(item["sample"] in {"反例样本/N01", "反例样本/N02"} for item in counterexamples)):
             verify_frozen_counterexamples(archive, checksums, status, addendum, counterexamples)
@@ -700,6 +740,7 @@ def verify(path):
                 "offline_addendum": addendum, "offline_install_recheck": install_recheck,
                 "same_build_evidence": same_build_evidence,
                 "private_handoff": private_handoff,
+                "desktop_supplement": desktop_supplement,
                 "scope": "Files, checksums and stored proofs. Device replay is a separate operation."}
 
 
