@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "archive": "v0.6.29-F01-同版离线评审包-r3.zip",
+  "archive_sha256": "32ff888af2a967984e2aa70339515153acc607caac23d85abcc6bf359cadad61",
+  "bytes": 3508586,
+  "registered_files": 94,
+  "deterministic_build": true,
+  "base_archive_sha256": "ea5978768bef41f447a50f4737a64f954bb6724982422d41002f979cfc1c7546",
+  "preserved_base_payloads": 87,
+  "windows_powershell_inputs_verified": 6,
+  "build": {
+    "version": "0.6.29",
+    "source_commit": "0e95b5f14be122c2d06069db43ddeeeb473ffd6d",
+    "exe_sha256": "0f83908f99e9b2d39e0074bfd8eedb16f70ba1e51349c70f3d3edbec98ad30b8",
+    "bytes": 131737386,
+    "self_test_exit": 0,
+    "packager": "6.22.3",
+    "scope": "Local PyInstaller build and executable self-test"
+  },
+  "plan_sha256": "a23dfd83bc507cd5ed166e78d83072e073bed1ad720c7ac53376cd9237971de6",
+  "no_git_preflight_matches_frozen_plan": true,
+  "previous_raw_receipts_audited": 42,
+  "host": {
+    "git_on_path": false,
+    "third_party_python_packages": false,
+    "api": 36,
+    "abi": "x86_64",
+    "specified_sdk": {
+      "image_sha256": "e4a0d85f11c5996ff3eded87800ac55a441829fb193502841ea128af82027d86",
+      "adb_sha256": "957e46b8615f7af5b7292a2ddabe98d2e61940c3fb2b0545756507f080613e71",
+      "emulator_sha256": "7f101ca769c15e8b6311801c1487f28583ce643fa87d19a9e0da4cc230be7653",
+      "build_tool_sha256": "3716d9311e55d2b0918a2fd9d54ba9e406c5f6abeea700b287f11259bc163dec"
+    },
+    "incomplete_sdk_rejected_before_device_start": true,
+    "preliminary_rounds_excluded_due_to_sdk_fallback": 7,
+    "counts": {
+      "terminal": 42,
+      "unobserved": 1,
+      "positive_passed": 17,
+      "positive_planned": 18,
+      "primary_passed": 3,
+      "historical_holdout_passed": 3,
+      "negative_rejected": 6,
+      "negative_false_acceptances": 0,
+      "negative_planned": 6,
+      "controls": {
+        "roundtrip": {
+          "failed": 6
+        },
+        "rules": {
+          "failed": 4,
+          "passed": 2
+        },
+        "one-build": {
+          "failed": 4,
+          "passed": 2
+        }
+      }
+    },
+    "different_outcome_fields_from_prior_run": [],
+    "audit_sha256": "dff2571c1d33103801f513c9ad648524cc22468f8aabe1515182ef3142d76b0e"
+  },
+  "network_model_calls": 0,
+  "source_archive_sha256": "07e1577c3c156320040b7949e7ceaf28405597a0ea6e59ced72d7ccd7b09ada2",
+  "guest": {
+    "status": "no-git-preflight-and-audit-verified",
+    "windows": "Windows Server 2022 Standard",
+    "build": "20348.1006",
+    "python": "3.13.13",
+    "prior_commands": [],
+    "active_hardware_networks": 0,
+    "third_party_python_packages": false,
+    "registered_files": 94,
+    "archive_sha256": "32ff888af2a967984e2aa70339515153acc607caac23d85abcc6bf359cadad61",
+    "exe_sha256": "0f83908f99e9b2d39e0074bfd8eedb16f70ba1e51349c70f3d3edbec98ad30b8",
+    "trial_evidence_sha256": "773f990057379d7c2b7f11e779b524d17265aa206574a7b8b1ebbe43130b4fc1",
+    "python_transfer_sha256": "9ddc71fcc7b30efc4c70e1736146479a1d676705b534674cad960e35ec685169",
+    "counts": {
+      "terminal": 42,
+      "unobserved": 1,
+      "positive_passed": 17,
+      "positive_planned": 18,
+      "primary_passed": 3,
+      "historical_holdout_passed": 3,
+      "negative_rejected": 6,
+      "negative_false_acceptances": 0,
+      "negative_planned": 6,
+      "controls": {
+        "roundtrip": {
+          "failed": 6
+        },
+        "rules": {
+          "failed": 4,
+          "passed": 2
+        },
+        "one-build": {
+          "failed": 4,
+          "passed": 2
+        }
+      }
+    },
+    "plan_sha256": "a23dfd83bc507cd5ed166e78d83072e073bed1ad720c7ac53376cd9237971de6",
+    "guest_device_steps_run": false,
+    "network_model_calls": 0
+  }
+}
