@@ -184,6 +184,6 @@ if __name__=="__main__":
         main()
     except Exception as error:
         logging.exception("Desktop startup failed")
-        if "--serve-arm-lab" not in sys.argv:
+        if "--serve-arm-lab" not in sys.argv and "--self-test" not in sys.argv:
             ctypes.windll.user32.MessageBoxW(None,str(error),"Lazarus Agent",0x10)
         sys.exit(1)
