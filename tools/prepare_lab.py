@@ -26,6 +26,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+from hash_compat import file_digest  # noqa: E402
 from storage_paths import APP_NAME, configure_environment  # noqa: E402
 from offline_kit import discover_java_home, discover_sdk  # noqa: E402
 
@@ -53,7 +54,7 @@ HTTP_HEADERS = {"User-Agent": "Lazarus-Agent/0.1 (+local Android compatibility v
 
 def _verify_archive(path: Path, expected_size: int, expected_digest: str, algorithm: str = "sha1") -> None:
     with path.open("rb") as raw:
-        actual_digest = hashlib.file_digest(raw, algorithm).hexdigest()
+        actual_digest = file_digest(raw, algorithm).hexdigest()
     if path.stat().st_size != expected_size or actual_digest != expected_digest:
         raise ValueError(f"Archive does not match official catalog: {path}")
 
