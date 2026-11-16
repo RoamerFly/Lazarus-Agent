@@ -1,4 +1,5 @@
 """Read compatibility evidence without installing or modifying an APK."""
+from hash_compat import file_digest
 import argparse
 import hashlib
 import json
@@ -38,7 +39,7 @@ def inspect_package(apk, tools):
         abis = list(libraries)
     minimum = int(field(r"^sdkVersion:'(\d+)'", "1"))
     with apk.open("rb") as f:
-        digest = hashlib.file_digest(f,"sha256").hexdigest()
+        digest = file_digest(f,"sha256").hexdigest()
     return {"package":pkg, "version":field(r"^package: .*?versionName='([^']*)'"),
             "label":field(r"^application-label:'(.*)'",pkg),
             "min_sdk":minimum, "target_sdk":int(field(r"^targetSdkVersion:'(\d+)'",str(minimum))),

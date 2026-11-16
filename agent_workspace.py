@@ -1,4 +1,5 @@
 """File tools confined to one disposable Apktool tree."""
+from hash_compat import file_digest
 import fnmatch
 import hashlib
 from pathlib import PurePosixPath
@@ -18,7 +19,7 @@ def digest(data):
 
 def digest_file(path):
     with path.open("rb") as stream:
-        return hashlib.file_digest(stream, "sha256").hexdigest()
+        return file_digest(stream, "sha256").hexdigest()
 
 
 class Workspace:

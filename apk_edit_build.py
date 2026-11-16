@@ -8,6 +8,7 @@ desktop executable.
 """
 from __future__ import annotations
 
+from hash_compat import file_digest
 import hashlib
 import os
 from pathlib import Path
@@ -45,7 +46,7 @@ class ApkEditBuildError(RuntimeError):
 
 def _sha256(path: Path) -> str:
     with path.open("rb") as stream:
-        return hashlib.file_digest(stream, "sha256").hexdigest()
+        return file_digest(stream, "sha256").hexdigest()
 
 
 def _apktool_cache() -> Path:

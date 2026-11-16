@@ -1,4 +1,5 @@
 """Execute one reviewed capability against immutable APKs in the private lab."""
+from hash_compat import file_digest
 import hashlib
 import re
 import uuid
@@ -10,7 +11,7 @@ from repair_history import add_message, archive_version
 
 def digest(path):
     with path.open("rb") as stream:
-        return hashlib.file_digest(stream, "sha256").hexdigest()
+        return file_digest(stream, "sha256").hexdigest()
 
 
 def capability(kind):

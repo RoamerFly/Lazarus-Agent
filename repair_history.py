@@ -1,4 +1,5 @@
 """Versioned artifacts and local feedback for a workbench repair job."""
+from hash_compat import file_digest
 import base64
 import binascii
 import hashlib
@@ -53,7 +54,7 @@ def archive_version(folder, state):
     try:
         shutil.copyfile(folder / export["file"], temp)
         with temp.open("rb") as f:
-            if hashlib.file_digest(f, "sha256").hexdigest() != export["sha256"]:
+            if file_digest(f, "sha256").hexdigest() != export["sha256"]:
                 raise ValueError("历史版本校验失败")
         os.replace(temp, directory / f"{number}.apk")
     finally:

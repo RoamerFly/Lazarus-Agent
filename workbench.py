@@ -1,4 +1,5 @@
 """Loopback-only Android repair workbench, Python 3.11+ / Windows."""
+from hash_compat import file_digest
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -699,7 +700,7 @@ def work(folder,action):
             if not matrix or not targets:
                 return True
             with path.open("rb") as artifact_file:
-                digest=hashlib.file_digest(artifact_file,"sha256").hexdigest()
+                digest=file_digest(artifact_file,"sha256").hexdigest()
             log("开始对同一候选包逐个执行所选 Android 版本的全新安装、启动与功能复测")
             for target_api in targets:
                 set_row(matrix,target_api,status="running")
@@ -1040,7 +1041,7 @@ def work(folder,action):
                     installed_hash=shell(serial,"sha256sum","'"+installed[0].removeprefix("package:")+"'",
                                          timeout=120).split()[0]
                     with path.open("rb") as apk:
-                        digest=hashlib.file_digest(apk,"sha256").hexdigest()
+                        digest=file_digest(apk,"sha256").hexdigest()
                     generated_hash=state["patch"]["sha256"] if path==modified else facts["sha256"]
                     if digest!=generated_hash:
                         raise ValueError("待导出 APK 与本次构建或导入的哈希不符")

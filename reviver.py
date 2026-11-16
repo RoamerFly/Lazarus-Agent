@@ -1,4 +1,5 @@
 """APK-only compatibility repair. An exported candidate still requires runtime validation."""
+from hash_compat import file_digest
 import argparse
 from contextlib import contextmanager
 import hashlib
@@ -295,14 +296,14 @@ def repair(source, output, api, tools, rule="installation-floor", remove_abis=()
             run(signer+["sign","--ks",key.name,"--ks-pass","env:REVIVER_KEYPASS","--out",signed,aligned],tool_env,key.parent)
             run(signer+["verify","--min-sdk-version",str(api),"--verbose",signed],tool_env,work)
         with signed.open("rb") as f:
-            digest = hashlib.file_digest(f,"sha256").hexdigest()
+            digest = file_digest(f,"sha256").hexdigest()
         # Signing tools need an ASCII path, which may be on a different drive
         # from a portable job. Publish only a complete, hash-checked copy.
         with tempfile.TemporaryDirectory(dir=output.parent) as staging:
             staged=Path(staging)/"verified.apk"
             shutil.copyfile(signed,staged)
             with staged.open("rb") as f:
-                if hashlib.file_digest(f,"sha256").hexdigest()!=digest:
+                if file_digest(f,"sha256").hexdigest()!=digest:
                     raise ValueError("复制后的候选 APK 哈希不一致")
             if os.name=="nt":
                 staged.rename(output)
