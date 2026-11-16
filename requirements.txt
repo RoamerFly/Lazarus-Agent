@@ -10,4 +10,6 @@ ctranslate2==4.8.3
 sentencepiece==0.1.99
 opencc-python-reimplemented==0.1.7
 rapidocr_onnxruntime==1.2.3
+onnxruntime==1.17.3
+protobuf>=3.20,<4
 pywebview==6.2.1
