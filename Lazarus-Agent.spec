@@ -2,8 +2,16 @@
 from pathlib import Path
 from PyInstaller.utils.hooks import collect_data_files, collect_dynamic_libs, collect_submodules
 root = Path(SPECPATH)
+onnx_capi = root.parent / "Python" / "Python310" / "lib" / "site-packages" / "onnxruntime" / "capi"
+if not onnx_capi.is_dir():
+    import onnxruntime
+    onnx_capi = Path(onnxruntime.__file__).parent / "capi"
+onnx_binaries = [(str(path), "onnxruntime/capi") for path in onnx_capi.glob("*.dll")]
+onnx_binaries += [(str(path), "onnxruntime/capi") for path in onnx_capi.glob("*.pyd")]
+onnx_binaries += [(str(path), ".") for path in onnx_capi.glob("*.dll")]
 a = Analysis([str(root/"desktop.py")], pathex=[str(root)],
-    binaries=collect_dynamic_libs("ctranslate2"),
+    binaries=collect_dynamic_libs("ctranslate2") + onnx_binaries,
+    runtime_hooks=[str(root/"pyi_rth_onnxruntime.py")],
     datas=collect_data_files("rapidocr_onnxruntime")+collect_data_files("opencc")+collect_data_files("UnityPy")+[(str(root/"web"),"web"),(str(root/"tools/start_lab.ps1"),"tools"),
            (str(root/"update/lazarus-update-public.pem"),"update"),
            (str(root/"fixtures/archive-reader/archive-reader-broken.apk"),"fixtures/archive-reader")],
