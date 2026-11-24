@@ -55,6 +55,11 @@ def claim_desktop():
 def show_window(url):
     import webview
 
+    from offline_kit import default_kit_root
+    bundled_webview = default_kit_root() / "webview2"
+    if (bundled_webview / "msedgewebview2.exe").is_file():
+        webview.settings["WEBVIEW2_RUNTIME_PATH"] = str(bundled_webview)
+
     from webview.platforms.winforms import is_chromium
     if not is_chromium:
         raise RuntimeError("请安装 Microsoft Edge WebView2 Runtime 后重新打开工作台。下载地址 https://go.microsoft.com/fwlink/p/?LinkId=2124703")
@@ -121,6 +126,15 @@ def main():
         if not all(callable(entry) for entry in (verify, verified_for, read_inputs)):
             raise RuntimeError("候选独立验收与复测工具未完整打包")
         payload["acceptance_replay"] = "--replay-acceptance"
+        from offline_kit import default_kit_root, discover_sdk, discover_java_home
+        sdk, java = discover_sdk(), discover_java_home()
+        payload["environment"] = {"root": str(default_kit_root()),
+                                  "sdk": str(sdk) if sdk else None,
+                                  "java": str(java) if java else None,
+                                  "webview2_bundled": (default_kit_root()/"webview2/msedgewebview2.exe").is_file()}
+        if "--self-test-report" in sys.argv:
+            report_path = Path(sys.argv[sys.argv.index("--self-test-report") + 1])
+            report_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
         print(json.dumps(payload, ensure_ascii=False))
         return
     if "--apply-update" in sys.argv:

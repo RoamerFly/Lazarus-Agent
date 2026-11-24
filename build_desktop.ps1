@@ -2,7 +2,8 @@ param(
     [switch]$BuildOfflineKit,
     [string]$Sdk,
     [string]$ImageSdk,
-    [string]$JavaHome
+    [string]$JavaHome,
+    [string]$WebViewRuntime
 )
 $ErrorActionPreference="Stop"
 Set-Location -LiteralPath $PSScriptRoot
@@ -32,6 +33,12 @@ if (!(Test-Path $python)){& $basePython -m venv $venv; if($LASTEXITCODE){exit $L
 & $python -m pip install -r requirements.txt pyinstaller
 if ($LASTEXITCODE){exit $LASTEXITCODE}
 & $python -m PyInstaller --noconfirm Lazarus-Agent.spec
+if ($LASTEXITCODE){exit $LASTEXITCODE}
+$envArguments=@('tools/build_portable_env.py')
+if($Sdk){$envArguments += @('--sdk',$Sdk)}
+if($JavaHome){$envArguments += @('--java',$JavaHome)}
+if($WebViewRuntime){$envArguments += @('--webview',$WebViewRuntime)}
+& $python @envArguments
 if ($LASTEXITCODE){exit $LASTEXITCODE}
 if ($BuildOfflineKit){
     $arguments=@('offline_kit.py','build','--out',(Join-Path $PSScriptRoot 'dist\Lazarus-Agent-Offline-Lab-Windows-x64'))

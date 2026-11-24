@@ -126,6 +126,10 @@ def apktool_jar() -> Path:
         if not _validate_apktool(candidate):
             raise ApkEditBuildError("REVIVER_APKTOOL_JAR 不存在、版本不符或哈希未通过校验")
         return candidate.resolve(strict=True)
+    from offline_kit import default_kit_root
+    bundled = default_kit_root() / "apktool" / f"apktool_{APKTOOL_VERSION}.jar"
+    if _validate_apktool(bundled):
+        return bundled
     destination = _apktool_cache()
     destination.parent.mkdir(parents=True, exist_ok=True)
     if _validate_apktool(destination):

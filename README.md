@@ -30,6 +30,8 @@ Windows 桌面版「遗留软件复活智能体」。导入旧 APK，选择 Andr
 
 ## 轻量安装与按需准备
 
+本地完整便携交付现为 `dist/Lazarus-Agent.exe` 加同级 `dist/env`，复制整个目录即可迁移。env 内含固定版 WebView2、Java、Apktool、SDK 和已准备的 Android 16 x86_64 镜像。使用方法见[便携版使用说明](便携版使用说明.md)。不要只复制 EXE；构建后可运行 `python tools/verify_portable_env.py` 检查清单与无开发机 PATH 的运行结果。
+
 普通用户只需下载一个 Windows 安装器或便携 ZIP。安装器和便携 ZIP 是两种交付方式，任选其一。选择目标 Android 版本后会检查环境；未选择的系统镜像不会随安装器下载。工具按发布方摘要校验、在暂存目录完整解压后发布，成功安装的压缩包会被移除。需要离线现场演示时，可提前在同一台设备上准备相应版本，或由 SDK 许可持有人按 [离线资源说明](OFFLINE_LAB.md) 自行组装可选资源包。
 
 ## 同一份 APK 的多版本验证

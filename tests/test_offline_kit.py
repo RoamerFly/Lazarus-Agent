@@ -87,6 +87,17 @@ class OfflineKitTests(unittest.TestCase):
             os.environ.clear()
             os.environ.update(saved)
 
+    def test_env_remains_discoverable_after_move_without_machine_config(self):
+        program = self.root / 'release'
+        kit = program / 'env'
+        offline_kit.build_kit(kit, self.sdk, self.java, self.images)
+        moved = self.root / 'moved release'
+        program.rename(moved)
+        with patch.dict(os.environ, {'PATH': '', 'LOCALAPPDATA': str(self.root/'empty')}, clear=True), \
+             patch.object(offline_kit, '_program_root', return_value=moved):
+            self.assertEqual(offline_kit.discover_sdk(), moved/'env/android-sdk')
+            self.assertEqual(offline_kit.discover_java_home(), moved/'env/jre')
+
 
 if __name__ == "__main__":
     unittest.main()

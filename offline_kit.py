@@ -41,6 +41,9 @@ def default_kit_root() -> Path:
     if override:
         return Path(override).expanduser().resolve(strict=False)
     program = _program_root()
+    portable = program / "env"
+    if portable.is_dir():
+        return portable
     sibling = program / KIT_NAME
     if sibling.is_dir():
         return sibling
