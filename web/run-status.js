@@ -3,7 +3,7 @@
   function result(job){
     if(!job)return {tone:"neutral",title:"等待导入 APK",detail:"",preview:false};
     const tests=job.tests||[], active=Number.isInteger(job.run_test_offset)?tests.slice(job.run_test_offset):tests;
-    const test=active.at(-1), label=test?.file||"应用";
+    const test=active.at(-1), label=(test?.environment==="usb-phone"?"真机 · ":"模拟器 · ")+(test?.file||"应用");
     if(job.status==="running")return {tone:"busy",title:"正在执行",detail:job.events?.at(-1)?.text||"正在准备运行环境…",preview:!!test&&test.install?.exit===0};
     if(job.status==="error")return {tone:"error",title:"执行失败",detail:job.events?.at(-1)?.text||"请查看运行记录。",preview:false};
     if(["original","legacy","candidate","repair"].includes(job.action)&&test){

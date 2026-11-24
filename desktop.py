@@ -110,6 +110,10 @@ def main():
         from sentencepiece import SentencePieceProcessor
         from opencc import OpenCC
         from rapidocr_onnxruntime import RapidOCR
+        import cv2
+        if not cv2.videoio_registry.hasBackend(cv2.CAP_FFMPEG):
+            raise RuntimeError("缺少便携预览视频解码器")
+        payload["preview_video_backend"] = "bundled-opencv-ffmpeg"
         if not callable(Translator) or not callable(SentencePieceProcessor) or OpenCC("t2s").convert("龍") != "龙":
             raise RuntimeError("英译中推理组件不可用")
         RapidOCR(intra_op_num_threads=1, inter_op_num_threads=1)

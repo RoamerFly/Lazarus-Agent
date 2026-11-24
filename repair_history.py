@@ -117,7 +117,7 @@ def record_feedback(folder, state, body, *, existing_message=None):
         m = re.search(r'点击[「“"](.+?)[」”"].*?(?:应显示|应出现|预期(?:显示)?)[「“"](.+?)[」”"]', text)
         if m and max(map(len,m.groups()))<=120:
             task={"tap":m[1],"expect":m[2]}
-    image = attachment(folder, body.get("attachment"))
+    image = (existing_message or {}).get("attachment") or attachment(folder, body.get("attachment"))
     feedback_id = uuid.uuid4().hex
     metadata = {"version": number, "kind": kind, "attachment": image, "id": feedback_id}
     if existing_message is None:
@@ -133,7 +133,7 @@ def record_feedback(folder, state, body, *, existing_message=None):
     else:
         if version:
             version["phone"]="用户反馈有问题"
-        state["pending_feedback"]={"id":feedback_id,"version":number,"task":task,"text":text.strip()}
+        state["pending_feedback"]={"id":feedback_id,"version":number,"task":task,"text":text.strip(),"attachment":image}
         answer=("已记录复现步骤。点击「继续修复」后，我会重新运行原包、检查故障并复测。"
                 if task else "已记录问题。请补充点击的控件和预期内容，或使用「继续修复」重新执行现有诊断。截图会随本次反馈保存在本机。")
     add_message(state,"assistant",answer,version=number)

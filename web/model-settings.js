@@ -88,6 +88,7 @@
     fields.key.value = ""; setBusy(true); setStatus("正在保存到本机…");
     try {
       const config = await request("/api/model/settings", "POST", payload);
+      document.dispatchEvent(new CustomEvent("lazarus-model-changed", {detail:{enabled:config.enabled,model:config.model}}));
       if (generation !== requestGeneration || !dialog.open) return;
       apply(config); resetDraftKey();
       setStatus(config.source === "environment" ? "配置已保存。当前会话仍优先使用环境变量。" : (config.enabled ? "配置已保存，后续修复会调用模型。" : "配置已保存，后续修复使用本地规则。"));

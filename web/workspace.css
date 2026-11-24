@@ -80,6 +80,16 @@ dialog::-webkit-scrollbar, .modal-content::-webkit-scrollbar, .messages::-webkit
 .run-result { flex-shrink:0; display:grid; gap:3px; padding:12px 16px; border:1px solid #bccfd3; border-left-width:5px; border-radius:12px; background:#edf3f5; color:#304c57; overflow-wrap:anywhere; }
 .run-result strong { font-size:18px; line-height:1.35; }
 .run-result span { font-size:13px; line-height:1.5; }
+#runDevice { width:160px; min-width:110px; max-width:100%; font-size:13px; }
+#refreshDevices { min-width:34px; padding-inline:8px; }
+.preview-device { position:absolute; bottom:10px; left:12px; padding:3px 8px; border-radius:8px; background:#102e38d9; color:#ddf3ef; font-size:11px; pointer-events:none; }
+#screen { touch-action:none; user-select:none; -webkit-user-drag:none; }
+#previewTouch { position:absolute; width:24px; height:24px; margin:-12px; border:2px solid #b3ffe2; border-radius:50%; background:#39cda648; opacity:0; pointer-events:none; }
+#previewTouch.pulse { animation:preview-tap 350ms ease-out; }
+@keyframes preview-tap { from { opacity:1; transform:scale(.6); } to { opacity:0; transform:scale(1.8); } }
+#feedbackImageRow { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+#feedbackImage { width:72px; height:54px; object-fit:contain; border:1px solid #c8ded9; border-radius:6px; }
+#feedbackImageRow button { min-height:32px; font-size:12px; padding:4px 8px; }
 #notice[data-tone="error"] { color:#a51c2c; background:#fff0f0; border-radius:8px; padding:6px 10px; font-size:14px; font-weight:600; }
 .run-result[data-tone="error"] { background:#fff0f0; border-color:#d23a45; color:#a51c2c; }
 .run-result[data-tone="success"] { background:#e9f9ef; border-color:#20854b; color:#126335; }

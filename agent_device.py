@@ -51,6 +51,13 @@ class AgentDevice:
         except ET.ParseError as exc:
             raise ValueError("设备返回的界面树无效") from exc
 
+    def runtime_evidence(self):
+        from preview_device import runtime_evidence
+        if not self.facts or not self.serial:
+            raise ValueError("请先安装并测试当前 APK")
+        self.device.check(self.owner)
+        return runtime_evidence(self.serial, self.facts["package"])
+
     def window_context(self):
         self.device.check(self.owner)
         windows = bench_device.shell(self.serial, "dumpsys", "window", "displays", timeout=12)

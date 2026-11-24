@@ -41,6 +41,8 @@ INSTANCE=uuid.uuid4().hex
 PORT=int(os.environ.get("REVIVER_PORT","8767"))
 app=FastAPI(docs_url=None,redoc_url=None,openapi_url=None)
 device=Device()
+from preview_device import Preview, UsbDevice
+preview=Preview(device)
 operation=threading.Lock()
 state_lock=threading.RLock()
 STATE_IO_ATTEMPTS=6
@@ -345,7 +347,8 @@ def run_chat_feature(folder, state, source, expected_hash, run_id, body, config,
         try:
             result = run_feature(source, output, TOOLS, primary, expected_hash,
                                  body["text"], config, progress, history=history, tester=tester,
-                                 acceptance_steps=steps)
+                                 acceptance_steps=steps, feedback_image=body.get("attachment"),
+                                 runtime_context=body.get("runtime_context"))
         except ModelToolError as exc:
             add_message(state, "assistant", "本轮模型未能完成修改。" + str(exc))
             result = None
@@ -439,7 +442,7 @@ def chat_message(job: str, body: dict):
 
     task = body.get("task")
     sequence = isinstance(task, dict) and "steps" in task
-    if body.get("kind") != "issue" or body.get("attachment"):
+    if body.get("kind") != "issue":
         if sequence:
             raise HTTPException(400, "请单独发送多步验收，不附带截图")
         return feedback(job, body)
@@ -454,6 +457,14 @@ def chat_message(job: str, body: dict):
             localize = False
     if sequence and model_config is None:
         raise HTTPException(400, "请先配置并启用模型，再从对话发送多步验收")
+    if body.get("attachment") and model_config is None:
+        return feedback(job, body)
+    if body.get("attachment"):
+        from model_feedback import validate_vision_model
+        try:
+            validate_vision_model(model_config)
+        except ValueError as exc:
+            raise HTTPException(400, str(exc)) from exc
     if not localize:
         text = body.get("text")
         if not isinstance(text, str) or not 0 < len(text.strip()) <= 2000 or model_config is None:
@@ -463,6 +474,20 @@ def chat_message(job: str, body: dict):
         raise HTTPException(409, "请等待当前任务结束")
     try:
         state = read(folder)
+        if body.get("reuse_feedback") is True and not body.get("attachment") and model_config is not None:
+            recent = next((m.get("attachment") for m in reversed(state.get("messages", []))
+                           if m.get("role") == "user" and m.get("attachment")), None)
+            if recent and re.fullmatch(r"[a-f0-9]{32}\.(?:png|jpg)", recent):
+                import base64
+                image_path = folder / "attachments" / recent
+                if image_path.is_file():
+                    from model_feedback import validate_vision_model
+                    try:
+                        validate_vision_model(model_config)
+                    except ValueError as exc:
+                        raise HTTPException(400, str(exc)) from exc
+                    mime = "image/png" if recent.endswith(".png") else "image/jpeg"
+                    body = {**body, "attachment": "data:" + mime + ";base64," + base64.b64encode(image_path.read_bytes()).decode("ascii")}
         if not localize:
             from agent_acceptance import parse_steps
             try:
@@ -487,7 +512,11 @@ def chat_message(job: str, body: dict):
                 source = folder / "feature-candidates" / latest / "candidate.apk"
                 expected_hash = candidate["sha256"]
         run_id = uuid.uuid4().hex
-        add_message(state, "user", body["text"].strip())
+        from repair_history import attachment
+        image_name = attachment(folder, body.get("attachment"))
+        if body.get("include_runtime_context") is True:
+            body = {**body, "runtime_context": preview.evidence(job, state["package"]["package"])}
+        add_message(state, "user", body["text"].strip(), **({"attachment": image_name} if image_name else {}))
         user_message = state["messages"][-1]
         if not localize:
             user_message["base_sha256"] = expected_hash
@@ -500,7 +529,7 @@ def chat_message(job: str, body: dict):
         else:
             action, worker = "chat-feature", run_chat_feature
             args = (folder, state, source, expected_hash, run_id, body, model_config, user_message, steps, targets)
-            add_message(state, "assistant", "开始分析这条需求。", agent_progress=True)
+            add_message(state, "assistant", "开始分析这条需求。" + ("将结合截图和当前应用的运行证据进行诊断。" if image_name else ""), agent_progress=True)
         state.update(status="running", action=action, worker=INSTANCE, updated=now())
         save(folder,state)
         initial = read(folder)
@@ -1176,6 +1205,46 @@ def run_modification(job:str,body:dict):
         raise
 
 
+def run_usb_preview(folder, action, serial):
+    state = read(folder)
+    def log(text):
+        state["events"].append({"time": now(), "text": text[:1200]})
+        save(folder, state)
+    try:
+        source = folder / "original.apk"
+        label = "原包"
+        if action == "candidate":
+            label = "修复包"
+            latest = state.get("latest_feature_candidate")
+            if latest in state.get("feature_candidates", {}):
+                source = folder / "feature-candidates" / latest / "candidate.apk"
+            elif state.get("export"):
+                source = folder / state["export"]["file"]
+            else:
+                source = folder / "candidate.apk"
+        if not source.is_file():
+            raise ValueError("没有可运行的 APK，请先生成候选")
+        facts = inspect_package(source, TOOLS)
+        if facts["package"] != state["package"]["package"]:
+            raise ValueError("候选包名与任务不符")
+        phone = UsbDevice(serial)
+        phone.ensure(folder.name, state["api"], log)
+        log("正在真机安装并启动；如遇签名冲突，将保留原应用并报告失败")
+        result = phone.install_run(source, facts)
+        result.update(file=label, time=now())
+        state["tests"].append(result)
+        log(result["install"]["output"][-800:])
+        state["status"] = "ready"
+    except Exception as exc:
+        state["status"] = "error"
+        log(str(exc))
+    finally:
+        try:
+            save(folder, state)
+        finally:
+            operation.release()
+
+
 @app.post("/api/jobs/{job}/action/{action}")
 def begin(job:str,action:str,body:dict|None=None):
     folder=job_dir(job)
@@ -1220,11 +1289,64 @@ def begin(job:str,action:str,body:dict|None=None):
                 state.pop(key,None)
         state.update(status="running",action=action,worker=INSTANCE,run_test_offset=len(state.get("tests",[])))
         save(folder,state)
-        threading.Thread(target=work,args=(folder,action),daemon=True).start()
+        if preview.selected != "emulator" and action in {"original", "candidate"}:
+            target, args = run_usb_preview, (folder, action, preview.selected)
+        else:
+            target, args = work, (folder, action)
+        threading.Thread(target=target,args=args,daemon=True).start()
         return {"started":True,"targets":state.get("compatibility",{}).get("targets",[state["api"]])}
     except Exception:
         operation.release()
         raise
+
+
+@app.get("/api/devices")
+def connected_devices():
+    try:
+        return preview.inventory()
+    except (ValueError, OSError, subprocess.SubprocessError) as exc:
+        raise HTTPException(409, str(exc)[:300]) from exc
+
+
+@app.post("/api/device")
+def select_device(body: dict):
+    if not operation.acquire(blocking=False):
+        raise HTTPException(409, "当前正在自动验证，请稍后切换设备")
+    try:
+        return preview.select(body.get("device"))
+    except (ValueError, OSError, subprocess.SubprocessError) as exc:
+        raise HTTPException(400, str(exc)[:300]) from exc
+    finally:
+        operation.release()
+
+
+@app.get("/api/preview/screen")
+def preview_screen(job: str | None = None):
+    if job is not None:
+        job_dir(job)
+    try:
+        frame = preview.frame(job)
+        return Response(frame["data"], media_type="image/jpeg", headers={
+            "X-Device-Width": str(frame["width"]), "X-Device-Height": str(frame["height"]),
+            "X-Device-Generation": str(frame["generation"]), "X-Capture-Ms": str(frame["capture_ms"]),
+            "X-Preview-Mode": frame["capture_mode"]})
+    except Exception as exc:
+        raise HTTPException(409, str(exc)[:300]) from exc
+
+
+@app.post("/api/preview/input")
+def preview_input(body: dict):
+    job = body.get("job")
+    if job is not None:
+        job_dir(job)
+    if not operation.acquire(blocking=False):
+        raise HTTPException(409, "自动验证期间暂时锁定设备操作")
+    try:
+        return preview.interact(job, body)
+    except Exception as exc:
+        raise HTTPException(400, str(exc)[:300]) from exc
+    finally:
+        operation.release()
 
 
 @app.get("/api/jobs/{job}/screen")
