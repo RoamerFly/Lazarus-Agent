@@ -2,7 +2,23 @@ const el=id=>document.getElementById(id);
 let config, job=null, sending=false, screenBusy=false, polling=false;
 let askUi, runtimeUi, modificationUi;
 const PROCESSING_NOTICE="正在处理，进度和结果会显示在对话中。";
-function notice(s){el("notice").textContent=s;}
+function notice(s,tone="neutral"){el("notice").textContent=s;el("notice").dataset.tone=tone;}
+function renderRunResult(){
+  const result=LazarusRunStatus.result(job);
+  for(const id of ["runResult","diagnosticResult"]){
+    const box=el(id);box.hidden=!job;box.dataset.tone=result.tone;box.replaceChildren();
+    const title=document.createElement("strong"),detail=document.createElement("span");
+    title.textContent=({error:"✕ ",success:"✓ ",busy:"◌ ",warning:"! ",neutral:""})[result.tone]+result.title;
+    detail.textContent=result.detail;box.append(title,detail);
+  }
+  el("badge").textContent=result.title;el("badge").dataset.tone=result.tone;
+  if(!result.preview)for(const id of ["back","send","refresh"])el(id).disabled=true;
+  if(!result.preview){
+    el("screen").hidden=true;el("standby").hidden=false;
+    el("standby").lastElementChild.textContent=result.tone==="error"?"应用未运行 · 请查看红色提示":result.tone==="busy"?"正在准备应用画面…":"等待应用运行";
+  }
+  return result;
+}
 async function api(url,method="GET",body=null){
   const headers={};
   if(method==="POST") headers["x-reviver-token"]=config.token;
@@ -30,6 +46,7 @@ function render(){
   renderChat(busy);
   renderScope(busy);
   renderMatrix(job);
+  renderRunResult();
   if(!job)return;
   const f=job.package;
   el("appname").textContent=f.label;
@@ -59,7 +76,6 @@ function render(){
   events.replaceChildren();
   job.events.forEach(x=>{const li=document.createElement("li");li.textContent=new Date(x.time).toLocaleTimeString()+"　"+x.text;events.append(li);});
   events.scrollTop=atEnd?events.scrollHeight:offset;
-  el("badge").textContent=({ready:"就绪",running:"执行中",error:"需检查"})[job.status];
   el("report").hidden=false;el("report").href=path("/export/report");
   el("apk").hidden=!job.export;el("apk").href=path("/export/apk");el("verdict").textContent=job.export?.level||"";
   if(job.export && !matchesTestedScope(job)){
@@ -81,27 +97,55 @@ async function refreshScreen(){
   if(!job||screenBusy)return;screenBusy=true;
   const id=job.id;
   try{
+    if(!LazarusRunStatus.result(job).preview)return;
     const r=await fetch(path("/screen"));
-    if(!r.ok||job?.id!==id)return;
+    if(!r.ok||job?.id!==id||!LazarusRunStatus.result(job).preview)return;
     const url=URL.createObjectURL(await r.blob()),img=el("screen");
-    if(job?.id!==id){URL.revokeObjectURL(url);return;}
+    if(job?.id!==id||!LazarusRunStatus.result(job).preview){URL.revokeObjectURL(url);return;}
     const previous=img.src;img.src=url;if(previous.startsWith("blob:"))URL.revokeObjectURL(previous);
     img.hidden=false;el("standby").hidden=true;
   }finally{screenBusy=false;}
 }
 let lastFile=null,isDemo=false;
-async function loadJob(file,demo){
+async function loadJob(file,demo,native=false){
+  if(sending||job?.status==="running")return;
   sending=true;render();notice("正在校验签名、读取清单…");
   try{
     const targets=selectedTargets();
     if(!targets.length)throw Error("请至少选择一个目标版本。");
-    if(!config.editing_ready && !await ensureRuntime(targets,()=>loadJob(file,demo)))return;
-    job=await api("/api/import/"+Math.max(...targets)+(demo?"?demo=true":""),"POST",file);
+    if(!config.editing_ready && !await ensureRuntime(targets,()=>loadJob(file,demo,native)))return;
+    if(native){
+      const selected=await window.pywebview.api.choose_apk(Math.max(...targets));
+      if(selected.cancelled){notice("");return;}
+      if(selected.error)throw Error(selected.error);
+      job=selected.job;
+    }else job=await api("/api/import/"+Math.max(...targets)+(demo?"?demo=true":""),"POST",file);
     el("message").value="";el("attachment").value="";el("attachmentName").textContent="";
     el("taskTap").value="";el("taskExpect").value="";el("acceptanceSteps").value="";lastFile=file;isDemo=demo;localStorage.setItem("reviverJob",job.id);el("screen").hidden=true;el("standby").hidden=false;notice("已导入 · Android "+(job.api-20));
-  }catch(e){notice(e.message);if(job)el("target").value=job.api;}finally{sending=false;render();}
+  }catch(e){notice(e.message,"error");if(job)el("target").value=job.api;}finally{sending=false;render();}
 }
-el("file").onchange=e=>{if(e.target.files[0])loadJob(e.target.files[0],false);};
+el("file").onchange=e=>{const file=e.target.files[0];e.target.value="";if(file)loadJob(file,false);};
+el("apkPicker").onclick=e=>{
+  if(window.pywebview?.api?.choose_apk){e.preventDefault();if(config)loadJob(null,false,true);}
+};
+let dragDepth=0;
+for(const name of ["dragenter","dragover","dragleave","drop"])document.addEventListener(name,e=>{
+  const files=Array.from(e.dataTransfer?.types||[]).includes("Files");
+  if(!files)return;
+  e.preventDefault();
+  if(name==="dragenter")dragDepth++;
+  if(name==="dragleave")dragDepth=Math.max(0,dragDepth-1);
+  if(name==="drop"){
+    dragDepth=0;document.body.classList.remove("apk-dragging");
+    if(!config||sending||job?.status==="running"){notice("请等待当前任务完成后再导入 APK。");return;}
+    const dropped=Array.from(e.dataTransfer.files);
+    if(dropped.length!==1||!dropped[0].name.toLowerCase().endsWith(".apk")){notice("请拖入一个 APK 文件。","error");return;}
+    loadJob(dropped[0],false);return;
+  }
+  if(name==="dragover")e.dataTransfer.dropEffect=(sending||job?.status==="running")?"none":"copy";
+  document.body.classList.toggle("apk-dragging",dragDepth>0&&!sending&&job?.status!=="running");
+});
+window.addEventListener("blur",()=>{dragDepth=0;document.body.classList.remove("apk-dragging");});
 el("demo").onclick=()=>loadJob(null,true);
 el("target").onchange=async()=>{
   const requested=Number(el("target").value);
@@ -121,7 +165,7 @@ el("target").onchange=async()=>{
     localStorage.setItem("reviverJob",job.id);
     el("screen").hidden=true;el("standby").hidden=false;
     notice("已沿用原包 · Android "+(job.api-20));
-  }catch(e){notice(e.message);el("target").value=job.api;}
+  }catch(e){notice(e.message,"error");el("target").value=job.api;}
   finally{sending=false;render();}
 };
 document.querySelectorAll("[data-act]").forEach(b=>b.onclick=async()=>{
@@ -144,9 +188,9 @@ document.querySelectorAll("[data-act]").forEach(b=>b.onclick=async()=>{
     }
     await api(path("/action/"+act),"POST",body?JSON.stringify(body):null);
     job=await api(path(""));notice("可在运行记录中查看进展。");
-  }catch(e){notice(e.message);}finally{sending=false;render();}
+  }catch(e){notice(e.message,"error");}finally{sending=false;render();}
 });
-async function sendInput(body){try{await api(path("/input"),"POST",JSON.stringify(body));await refreshScreen();}catch(e){notice(e.message);}}
+async function sendInput(body){try{await api(path("/input"),"POST",JSON.stringify(body));await refreshScreen();}catch(e){notice(e.message,"error");}}
 el("screen").onclick=e=>{const rect=e.target.getBoundingClientRect(),img=e.target;
   sendInput({event:"tap",x:Math.floor((e.clientX-rect.left)*img.naturalWidth/rect.width),y:Math.floor((e.clientY-rect.top)*img.naturalHeight/rect.height)});
 };
@@ -171,7 +215,7 @@ el("send").onclick=()=>sendInput({event:"text",value:el("text").value});
   el("scope").onchange=()=>render();
   const old=localStorage.getItem("reviverJob");if(old){try{job=await api("/api/jobs/"+old);restoreScope(job);}catch{localStorage.removeItem("reviverJob");}}
   render();
-}catch(e){notice(e.message);}})();
+}catch(e){notice(e.message,"error");}})();
 setInterval(async()=>{if(!job||sending||polling)return;polling=true;const current=job;
   try{
     const next=await api(path(""));
@@ -180,7 +224,7 @@ setInterval(async()=>{if(!job||sending||polling)return;polling=true;const curren
       if(job.status!=="running"&&el("notice").textContent===PROCESSING_NOTICE)notice("");
       render();
     }
-  }catch(e){if(job===current&&!sending)notice(e.message);}finally{polling=false;}
+  }catch(e){if(job===current&&!sending)notice(e.message,"error");}finally{polling=false;}
 },1400);
 let lastPreview=0;
 setInterval(()=>{
@@ -316,7 +360,7 @@ async function feedback(kind){
     job=await api(path("/message"),"POST",JSON.stringify(body));
     el("message").value="";el("attachment").value="";el("attachmentName").textContent="";
     notice(job.status==="running"?PROCESSING_NOTICE:kind==="issue"?"反馈已保存，可继续修复。":"真机复测结果已保存。");
-  }catch(e){notice(e.message);}finally{sending=false;render();}
+  }catch(e){notice(e.message,"error");}finally{sending=false;render();}
 }
 el("toModification").onclick=()=>{
   if(!job||sending||job.status==="running"){notice("请先导入 APK 并等待当前操作结束。");return;}
@@ -336,7 +380,7 @@ el("history").onclick=async()=>{
       b.onclick=async()=>{try{job=await api("/api/jobs/"+j.id);localStorage.setItem("reviverJob",job.id);restoreScope(job);
         el("screen").hidden=true;el("standby").hidden=false;el("message").value="";el("attachment").value="";el("attachmentName").textContent="";
         el("taskTap").value=job.task?.tap||"";el("taskExpect").value=job.task?.expect||"";el("acceptanceSteps").value="";el("historyDialog").close();render();
-      }catch(e){notice(e.message);}};list.append(b);}
+      }catch(e){notice(e.message,"error");}};list.append(b);}
     if(!jobs.length)list.textContent="还没有修复记录";el("historyDialog").showModal();
-  }catch(e){notice(e.message);}
+  }catch(e){notice(e.message,"error");}
 };

@@ -1218,7 +1218,7 @@ def begin(job:str,action:str,body:dict|None=None):
                 state.pop("compatibility",None)
             for key in ("training","acceptance","candidate_diagnosis"):
                 state.pop(key,None)
-        state.update(status="running",action=action,worker=INSTANCE)
+        state.update(status="running",action=action,worker=INSTANCE,run_test_offset=len(state.get("tests",[])))
         save(folder,state)
         threading.Thread(target=work,args=(folder,action),daemon=True).start()
         return {"started":True,"targets":state.get("compatibility",{}).get("targets",[state["api"]])}

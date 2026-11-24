@@ -77,6 +77,21 @@ dialog::-webkit-scrollbar, .modal-content::-webkit-scrollbar, .messages::-webkit
 .modal-footer .buttons { margin:0; }
 .modal-header .row { flex-wrap:wrap; justify-content:flex-end; }
 
+.run-result { flex-shrink:0; display:grid; gap:3px; padding:12px 16px; border:1px solid #bccfd3; border-left-width:5px; border-radius:12px; background:#edf3f5; color:#304c57; overflow-wrap:anywhere; }
+.run-result strong { font-size:18px; line-height:1.35; }
+.run-result span { font-size:13px; line-height:1.5; }
+#notice[data-tone="error"] { color:#a51c2c; background:#fff0f0; border-radius:8px; padding:6px 10px; font-size:14px; font-weight:600; }
+.run-result[data-tone="error"] { background:#fff0f0; border-color:#d23a45; color:#a51c2c; }
+.run-result[data-tone="success"] { background:#e9f9ef; border-color:#20854b; color:#126335; }
+.run-result[data-tone="busy"] { background:#eaf4ff; border-color:#3179b8; color:#1d5485; }
+.run-result[data-tone="warning"] { background:#fff6e6; border-color:#a66a12; color:#7b4c08; }
+#diagnosticResult { margin-bottom:16px; }
+#badge { display:inline-block; font-size:14px; white-space:normal; background:#edf3f5; color:#304c57; }
+#badge[data-tone="error"] { background:#ffe1e4; color:#a51c2c; }
+#badge[data-tone="success"] { background:#d8f4e2; color:#126335; }
+#badge[data-tone="busy"] { background:#e0efff; color:#1d5485; }
+#badge[data-tone="warning"] { background:#fff0d3; color:#7b4c08; }
+body.apk-dragging::after { content:"松开以导入 APK"; position:fixed; inset:12px; z-index:1000; display:grid; place-items:center; pointer-events:none; border:3px dashed #08766a; border-radius:22px; background:#ecfff4ed; color:#075a50; font-size:clamp(24px,4vw,42px); font-weight:700; }
 /* Dialog sizes follow the task and content, including empty states. */
 dialog { width:min(680px,calc(100vw - 32px)); max-height:calc(100dvh - 48px); }
 .workspace-modal { width:min(720px,calc(100vw - 32px)); height:auto; min-height:min(360px,calc(100dvh - 48px)); max-height:calc(100dvh - 48px); }
