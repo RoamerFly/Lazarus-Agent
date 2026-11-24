@@ -22,8 +22,11 @@
       "signer_sha256": [
         "07fd6aeb1a2db8f2ac041ccd3f945e98946aaa9a607c8df525f6577f3bb40939"
       ],
-      "runtime_status": "not-tested",
-      "repair_status": "not-attempted"
+      "runtime_status": "default-install-rejected",
+      "repair_status": "not-attempted",
+      "baseline_api": 36,
+      "baseline_abi": "x86_64",
+      "core_function_status": "not-tested"
     },
     {
       "file": "ODK-Collect-1.2.2.apk",
@@ -44,8 +47,11 @@
       "signer_sha256": [
         "993643d4d2dba5ea1b4b892b9c88f03adba27db47cf9f61f13c061445f49f752"
       ],
-      "runtime_status": "not-tested",
-      "repair_status": "not-attempted"
+      "runtime_status": "default-install-rejected",
+      "repair_status": "not-attempted",
+      "baseline_api": 36,
+      "baseline_abi": "x86_64",
+      "core_function_status": "not-tested"
     },
     {
       "file": "GPSLogger-27-fdroid.apk",
@@ -66,8 +72,11 @@
       "signer_sha256": [
         "dc3507919aad1c981423f7563ad699830518900f943632bc36eeb7250c390235"
       ],
-      "runtime_status": "not-tested",
-      "repair_status": "not-attempted"
+      "runtime_status": "default-install-rejected",
+      "repair_status": "not-attempted",
+      "baseline_api": 36,
+      "baseline_abi": "x86_64",
+      "core_function_status": "not-tested"
     },
     {
       "file": "WiFiAnalyzer-1.4.2.33.apk",
@@ -88,8 +97,11 @@
       "signer_sha256": [
         "3a14f8bbead3d530ae0aa0b578b945bdd7667b6e2e27da30cd46349356998f3e"
       ],
-      "runtime_status": "not-tested",
-      "repair_status": "not-attempted"
+      "runtime_status": "default-install-rejected",
+      "repair_status": "not-attempted",
+      "baseline_api": 36,
+      "baseline_abi": "x86_64",
+      "core_function_status": "not-tested"
     },
     {
       "file": "Open-Camera-1.32.apk",
@@ -110,8 +122,11 @@
       "signer_sha256": [
         "438991c968e8d308ca34078d37511c90c502d596baf9f0d0c5fbd1c9bf67df6d"
       ],
-      "runtime_status": "not-tested",
-      "repair_status": "not-attempted"
+      "runtime_status": "default-install-rejected",
+      "repair_status": "not-attempted",
+      "baseline_api": 36,
+      "baseline_abi": "x86_64",
+      "core_function_status": "not-tested"
     },
     {
       "file": "phyphox-1.1.0.apk",
@@ -140,8 +155,11 @@
       "signer_sha256": [
         "de2141760030164a6e2b155f91843b91f060cb16644809542addbb04cac2f30c"
       ],
-      "runtime_status": "not-tested",
-      "repair_status": "not-attempted"
+      "runtime_status": "app-screen-observed",
+      "repair_status": "not-attempted",
+      "baseline_api": 36,
+      "baseline_abi": "x86_64",
+      "core_function_status": "not-tested"
     }
   ]
 }

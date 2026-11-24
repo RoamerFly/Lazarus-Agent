@@ -1,0 +1,186 @@
+{
+  "tested_at": "2026-11-24T06:29:49.839257+00:00",
+  "scope": "unchanged APK, default install policy, private Android 16 x86_64",
+  "installation_bypass_used": false,
+  "cases": [
+    {
+      "file": "Sensor-Readout-2.4.apk",
+      "package": "de.onyxbits.sensorreadout",
+      "sha256": "75b6eef24b1a236ca597396158d1e1089dc3879e65720c9d4703062639b80ed7",
+      "test": {
+        "api": 36,
+        "environment": "private-workbench-device",
+        "install": {
+          "exit": 1,
+          "output": "Performing Streamed Install\r\nad: failed to install Sensor-Readout-2.4.apk: Failure [INSTALL_FAILED_DEPRECATED_SDK_VERSION: App package must target at least SDK version 24, but found 17]"
+        },
+        "launch": null,
+        "installed_sha256": null,
+        "abis": [
+          "x86_64"
+        ],
+        "ui": null,
+        "verification": "device-check-failed",
+        "steps": []
+      },
+      "status": "default-install-rejected",
+      "reason": [
+        "INSTALL_FAILED_DEPRECATED_SDK_VERSION"
+      ],
+      "crash_log": ""
+    },
+    {
+      "file": "ODK-Collect-1.2.2.apk",
+      "package": "org.odk.collect.android",
+      "sha256": "066faf06a73d1a71d323d0d0ac318f084dc3574b6860c72e8ca66c9a4800d2ce",
+      "test": {
+        "api": 36,
+        "environment": "private-workbench-device",
+        "install": {
+          "exit": 1,
+          "output": "Performing Streamed Install\r\nad: failed to install ODK-Collect-1.2.2.apk: Failure [INSTALL_FAILED_DEPRECATED_SDK_VERSION: App package must target at least SDK version 24, but found 7]"
+        },
+        "launch": null,
+        "installed_sha256": null,
+        "abis": [
+          "x86_64"
+        ],
+        "ui": null,
+        "verification": "device-check-failed",
+        "steps": []
+      },
+      "status": "default-install-rejected",
+      "reason": [
+        "INSTALL_FAILED_DEPRECATED_SDK_VERSION"
+      ],
+      "crash_log": ""
+    },
+    {
+      "file": "GPSLogger-27-fdroid.apk",
+      "package": "com.mendhak.gpslogger",
+      "sha256": "652b939b8040d703d6332ff1a33b2cc7f6e9274197f656c3b6ee4f8a24958302",
+      "test": {
+        "api": 36,
+        "environment": "private-workbench-device",
+        "install": {
+          "exit": 1,
+          "output": "Performing Streamed Install\r\nad: failed to install GPSLogger-27-fdroid.apk: Failure [INSTALL_FAILED_DEPRECATED_SDK_VERSION: App package must target at least SDK version 24, but found 5]"
+        },
+        "launch": null,
+        "installed_sha256": null,
+        "abis": [
+          "x86_64"
+        ],
+        "ui": null,
+        "verification": "device-check-failed",
+        "steps": []
+      },
+      "status": "default-install-rejected",
+      "reason": [
+        "INSTALL_FAILED_DEPRECATED_SDK_VERSION"
+      ],
+      "crash_log": ""
+    },
+    {
+      "file": "WiFiAnalyzer-1.4.2.33.apk",
+      "package": "com.vrem.wifianalyzer",
+      "sha256": "8155bb9f17bde1e62c2479012817f48faa640ab9f3d8f4a481d55d57a7d12de1",
+      "test": {
+        "api": 36,
+        "environment": "private-workbench-device",
+        "install": {
+          "exit": 1,
+          "output": "Performing Streamed Install\r\nad: failed to install WiFiAnalyzer-1.4.2.33.apk: Failure [INSTALL_FAILED_DEPRECATED_SDK_VERSION: App package must target at least SDK version 24, but found 22]"
+        },
+        "launch": null,
+        "installed_sha256": null,
+        "abis": [
+          "x86_64"
+        ],
+        "ui": null,
+        "verification": "device-check-failed",
+        "steps": []
+      },
+      "status": "default-install-rejected",
+      "reason": [
+        "INSTALL_FAILED_DEPRECATED_SDK_VERSION"
+      ],
+      "crash_log": ""
+    },
+    {
+      "file": "Open-Camera-1.32.apk",
+      "package": "net.sourceforge.opencamera",
+      "sha256": "8dc81a3cdb500497e3ee88546d18d15f6e708bac0ee860edada5568e408770b1",
+      "test": {
+        "api": 36,
+        "environment": "private-workbench-device",
+        "install": {
+          "exit": 1,
+          "output": "Performing Streamed Install\r\nad: failed to install Open-Camera-1.32.apk: Failure [INSTALL_FAILED_DEPRECATED_SDK_VERSION: App package must target at least SDK version 24, but found 22]"
+        },
+        "launch": null,
+        "installed_sha256": null,
+        "abis": [
+          "x86_64"
+        ],
+        "ui": null,
+        "verification": "device-check-failed",
+        "steps": []
+      },
+      "status": "default-install-rejected",
+      "reason": [
+        "INSTALL_FAILED_DEPRECATED_SDK_VERSION"
+      ],
+      "crash_log": ""
+    },
+    {
+      "file": "phyphox-1.1.0.apk",
+      "package": "de.rwth_aachen.phyphox",
+      "sha256": "d1b3f3d67627be6a392a020a4868d555c383f602e9dc5588c804c5a581f5ab76",
+      "test": {
+        "api": 36,
+        "environment": "private-workbench-device",
+        "install": {
+          "exit": 0,
+          "output": "Performing Streamed Install\r\nSuccess"
+        },
+        "launch": {
+          "exit": 0,
+          "output": "Starting: Intent { cmp=de.rwth_aachen.phyphox/.ExperimentList }\r\nStatus: ok\r\nLaunchState: COLD\r\nActivity: de.rwth_aachen.phyphox/.ExperimentList\r\nTotalTime: 457\r\nWaitTime: 461\r\nComplete",
+          "focused_package": "de.rwth_aachen.phyphox"
+        },
+        "installed_sha256": "d1b3f3d67627be6a392a020a4868d555c383f602e9dc5588c804c5a581f5ab76",
+        "abis": [
+          "x86_64"
+        ],
+        "ui": null,
+        "verification": "install-and-launch",
+        "steps": []
+      },
+      "ui_text": [
+        "Warning",
+        "Please be careful not to damage your phone while experimenting. Please take special care to avoid dropping it on hard surfaces and do not expose it to excessive magnetic fields. The authors of phyphox are not responsible for any damage to your phone.",
+        "Do not show again",
+        "OK"
+      ],
+      "app_nodes": 18,
+      "window": {
+        "display_fields": [
+          "mCurrentFocus=Window{848e766 u0 de.rwth_aachen.phyphox/de.rwth_aachen.phyphox.ExperimentList}",
+          "mFocusedApp=ActivityRecord{66637974 u0 de.rwth_aachen.phyphox/.ExperimentList t8}",
+          "mObscuringWindow=Window{dfdc0ec u0 de.rwth_aachen.phyphox/de.rwth_aachen.phyphox.ExperimentList}"
+        ]
+      },
+      "status": "app-screen-observed",
+      "core_function_status": "not-tested",
+      "crash_log": ""
+    }
+  ],
+  "environment": {
+    "ro.build.version.sdk": "36",
+    "ro.build.version.release": "16",
+    "ro.product.cpu.abilist": "x86_64",
+    "ro.build.fingerprint": "Android/sdk_phone64_x86_64/emu64x:16/BE2A.250530.026.D1/13818094:userdebug/test-keys",
+    "avd": "ReviverBench36"
+  }
+}
