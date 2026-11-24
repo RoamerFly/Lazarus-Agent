@@ -49,6 +49,7 @@ def assemble(output, sdk, java, webview, apktool):
         'files': files, 'bytes': sum(f['bytes'] for f in files)}
     (output/'manifest.json').write_text(json.dumps(manifest, indent=2), encoding='utf-8')
     (output.parent/'portable.flag').write_text('portable\n', encoding='ascii')
+    (output.parent/'old_apk').mkdir(exist_ok=True)
     (output.parent/'环境自检.cmd').write_bytes(
         b'@echo off\r\ncd /d "%~dp0"\r\nstart /wait "" Lazarus-Agent.exe --self-test --self-test-report portable-check.json\r\n'
         b'echo Exit code: %errorlevel%\r\npause\r\n')
