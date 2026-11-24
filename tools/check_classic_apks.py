@@ -33,6 +33,8 @@ def main():
         report['environment']['avd'] = shell(serial, 'getprop', 'ro.boot.qemu.avd_name')
         for sample in catalog['samples']:
             apk = ROOT/'old_apk'/sample['file']
+            if not apk.is_file() and sample.get('control_archive'):
+                apk = ROOT/sample['control_archive']
             assert hashlib.sha256(apk.read_bytes()).hexdigest() == sample['sha256']
             folder = output/sample['package']
             folder.mkdir()

@@ -26,7 +26,8 @@
       "repair_status": "not-attempted",
       "baseline_api": 36,
       "baseline_abi": "x86_64",
-      "core_function_status": "not-tested"
+      "core_function_status": "not-tested",
+      "demo_enabled": true
     },
     {
       "file": "ODK-Collect-1.2.2.apk",
@@ -51,7 +52,8 @@
       "repair_status": "not-attempted",
       "baseline_api": 36,
       "baseline_abi": "x86_64",
-      "core_function_status": "not-tested"
+      "core_function_status": "not-tested",
+      "demo_enabled": true
     },
     {
       "file": "GPSLogger-27-fdroid.apk",
@@ -76,7 +78,8 @@
       "repair_status": "not-attempted",
       "baseline_api": 36,
       "baseline_abi": "x86_64",
-      "core_function_status": "not-tested"
+      "core_function_status": "not-tested",
+      "demo_enabled": true
     },
     {
       "file": "WiFiAnalyzer-1.4.2.33.apk",
@@ -101,7 +104,8 @@
       "repair_status": "not-attempted",
       "baseline_api": 36,
       "baseline_abi": "x86_64",
-      "core_function_status": "not-tested"
+      "core_function_status": "not-tested",
+      "demo_enabled": true
     },
     {
       "file": "Open-Camera-1.32.apk",
@@ -126,7 +130,8 @@
       "repair_status": "not-attempted",
       "baseline_api": 36,
       "baseline_abi": "x86_64",
-      "core_function_status": "not-tested"
+      "core_function_status": "not-tested",
+      "demo_enabled": true
     },
     {
       "file": "phyphox-1.1.0.apk",
@@ -159,7 +164,11 @@
       "repair_status": "not-attempted",
       "baseline_api": 36,
       "baseline_abi": "x86_64",
-      "core_function_status": "not-tested"
+      "core_function_status": "not-tested",
+      "demo_enabled": false,
+      "exclusion_reason": "Original installs and opens on API 36; excluded from failing-APK demonstrations",
+      "control_archive": "build/apk-controls/source-phyphox-1.1.0.apk"
     }
-  ]
+  ],
+  "demo_policy": "Keep only original APKs with observed default installation or runtime failure on the stated environment"
 }
