@@ -2,6 +2,7 @@ fastapi==0.162.0
 annotated-types>=0.7,<1
 uvicorn==0.54.0
 opencv-python==4.10.0.84
+av==17.1.0
 numpy>=1.24,<2
 cryptography>=43,<47
 UnityPy==1.25.4

@@ -82,10 +82,43 @@ class PreviewTests(unittest.TestCase):
     def test_switch_does_not_retain_old_device_frame(self):
         preview = Preview(Mock())
         preview._frame = ("old", 0, {})
-        with patch("preview_device.usb_devices", return_value=[{"id": "phone", "available": True}]):
+        with patch("preview_device.usb_devices", return_value=[{"id": "phone", "available": True}]), \
+                patch.object(preview, "_usb_geometry", return_value=None):
             preview.select("phone")
         self.assertIsNone(preview._frame)
         self.assertEqual(preview.generation, 1)
+
+    def test_usb_starts_video_early_and_uses_compressed_fallback(self):
+        preview = Preview(Mock())
+        png = cv2.imencode(".png", np.zeros((120, 80, 3), dtype=np.uint8))[1].tobytes()
+        with patch("preview_device.usb_devices", return_value=[{"id": "phone", "available": True}]), \
+                patch.object(preview, "_usb_geometry", return_value=(80, 120)), \
+                patch("usb_video.UsbVideo") as video_class, \
+                patch("preview_device.bench.invoke", return_value=completed(png)) as invoke:
+            video_class.return_value.latest.return_value = None
+            video_class.return_value._stop.is_set.return_value = False
+            preview.select("phone")
+            frame = preview.frame(None)
+        video_class.assert_called_once_with("phone", 80, 120)
+        self.assertEqual(frame["capture_mode"], "png-usb")
+        commands = [list(map(str, call.args[0])) for call in invoke.call_args_list]
+        self.assertEqual(len(commands), 1)
+        self.assertEqual(commands[0][-2:], ["screencap", "-p"])
+
+    def test_first_usb_frame_prefers_ready_stream_over_screenshot(self):
+        preview = Preview(Mock())
+        stream_frame = {"data": b"jpeg", "width": 80, "height": 120,
+                        "capture_mode": "h264-stream", "capture_ms": 0}
+        with patch("preview_device.usb_devices", return_value=[{"id": "phone", "available": True}]), \
+                patch.object(preview, "_usb_geometry", return_value=(80, 120)), \
+                patch("usb_video.UsbVideo") as video_class, \
+                patch("preview_device.bench.invoke") as invoke:
+            video_class.return_value.latest.side_effect = [None, stream_frame]
+            video_class.return_value._stop.is_set.return_value = False
+            preview.select("phone")
+            frame = preview.frame(None)
+        self.assertEqual(frame["capture_mode"], "h264-stream")
+        invoke.assert_not_called()
 
     def test_phone_signature_failure_never_uninstalls_or_clears_data(self):
         device = UsbDevice("phone")

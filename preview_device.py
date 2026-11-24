@@ -56,7 +56,7 @@ class Preview:
         self.last_capture_ms = None
         self._png_only = set()
         self._video = None
-        self._video_failed = set()
+        self._video_retry_after = {}
         self._geometry_checked = 0
 
     def inventory(self):
@@ -74,8 +74,17 @@ class Preview:
             self.generation += 1
             self._frame = None
             self._checked = (None, 0)
-            self._video_failed.clear()
+            self._video_retry_after.clear()
+            if value != "emulator" and os.environ.get("REVIVER_PREVIEW_STREAM") != "0":
+                geometry = self._usb_geometry(value)
+                if geometry:
+                    self._start_video(value, *geometry)
         return {"selected": self.selected, "generation": self.generation}
+
+    def _start_video(self, serial, width, height):
+        from usb_video import UsbVideo
+        self._video = UsbVideo(serial, width, height)
+        self._geometry_checked = time.monotonic()
 
     def serial(self, owner):
         if self.selected != "emulator":
@@ -95,6 +104,13 @@ class Preview:
             key = (self.generation, owner, serial)
             if self._video:
                 video = self._video.latest()
+                if video is None and self._frame is None and self.selected != "emulator":
+                    # On first selection, give the already-starting encoder a
+                    # short head start before paying for a full USB screenshot.
+                    deadline = time.monotonic() + .45
+                    while video is None and not self._video._stop.is_set() and time.monotonic() < deadline:
+                        time.sleep(.02)
+                        video = self._video.latest()
                 if time.monotonic() - self._geometry_checked > 2:
                     self._geometry_checked = time.monotonic()
                     geometry = self._usb_geometry(serial)
@@ -105,15 +121,19 @@ class Preview:
                     self._frame = (key, time.monotonic(), frame)
                     return frame
                 if self._video and self._video._stop.is_set():
-                    if not self._video.frames:
-                        self._video_failed.add(serial)
+                    if not self._video.frames or self._video.error:
+                        # A sleeping phone can refuse screenrecord. Retry after it wakes,
+                        # without starting a new encoder on every screenshot request.
+                        self._video_retry_after[serial] = time.monotonic() + 5
                     self._video = None
             if self._frame and self._frame[0] == key and time.monotonic() - self._frame[1] < .18:
                 return self._frame[2]
             start = time.monotonic()
             image = None
             capture_mode = "raw"
-            if serial not in self._png_only:
+            # A physical phone's raw screencap transfers ~14 MB per frame over USB.
+            # Its compressed PNG is substantially faster and is used until H.264 starts.
+            if self.selected == "emulator" and serial not in self._png_only:
                 result = bench.invoke([bench.ADB, "-s", serial, "exec-out", "screencap"], 8)
                 if result.returncode == 0 and len(result.stdout) >= 16:
                     width, height, pixel_format = struct.unpack("<3I", result.stdout[:12])
@@ -127,7 +147,7 @@ class Preview:
                             image = cv2.cvtColor(pixels, conversion)
             if image is None:
                 self._png_only.add(serial)
-                capture_mode = "png-fallback"
+                capture_mode = "png-usb" if self.selected != "emulator" else "png-fallback"
                 result = bench.invoke([bench.ADB, "-s", serial, "exec-out", "screencap", "-p"], 8)
                 if result.returncode or not result.stdout.startswith(b"\x89PNG"):
                     raise ValueError("无法取得设备画面，请检查 USB 连接、调试授权或模拟器状态")
@@ -145,10 +165,15 @@ class Preview:
             frame = {"data": jpeg.tobytes(), "width": width, "height": height,
                      "generation": self.generation, "capture_ms": self.last_capture_ms, "capture_mode": capture_mode}
             self._frame = (key, time.monotonic(), frame)
-            if self.selected != "emulator" and not self._video and serial not in self._video_failed and os.environ.get("REVIVER_PREVIEW_STREAM") != "0":
-                from usb_video import UsbVideo
-                self._video = UsbVideo(serial, width, height)
-                self._geometry_checked = time.monotonic()
+            if (self.selected != "emulator" and not self._video
+                    and time.monotonic() >= self._video_retry_after.get(serial, 0)
+                    and os.environ.get("REVIVER_PREVIEW_STREAM") != "0"):
+                self._start_video(serial, width, height)
+            if self._video:
+                video = self._video.latest()
+                if video:
+                    frame = {**video, "generation": self.generation}
+                    self._frame = (key, time.monotonic(), frame)
             return frame
 
     @staticmethod
