@@ -1,0 +1,147 @@
+{
+  "collected_at": "2026-11-24T06:26:01.446547+00:00",
+  "repository": "https://f-droid.org/archive/",
+  "index_sha256": "77cafe4fd20a45fafcee244fa26b1ded567fa7563ad30224a3628bb03b6845d0",
+  "samples": [
+    {
+      "file": "Sensor-Readout-2.4.apk",
+      "package": "de.onyxbits.sensorreadout",
+      "version": "2.4",
+      "version_code": 8,
+      "archive_added": "2015-04-02",
+      "bytes": 183185,
+      "sha256": "75b6eef24b1a236ca597396158d1e1089dc3879e65720c9d4703062639b80ed7",
+      "download": "https://f-droid.org/archive/de.onyxbits.sensorreadout_8.apk",
+      "source": "https://github.com/onyxbits/sensorreadout",
+      "license": "Apache-2.0",
+      "source_tarball": "https://f-droid.org/archive/de.onyxbits.sensorreadout_8_src.tar.gz",
+      "min_sdk": "9",
+      "target_sdk": "17",
+      "native_abis": [],
+      "signature_verified": true,
+      "signer_sha256": [
+        "07fd6aeb1a2db8f2ac041ccd3f945e98946aaa9a607c8df525f6577f3bb40939"
+      ],
+      "runtime_status": "not-tested",
+      "repair_status": "not-attempted"
+    },
+    {
+      "file": "ODK-Collect-1.2.2.apk",
+      "package": "org.odk.collect.android",
+      "version": "1.2.2",
+      "version_code": 1023,
+      "archive_added": "2013-01-02",
+      "bytes": 1506075,
+      "sha256": "066faf06a73d1a71d323d0d0ac318f084dc3574b6860c72e8ca66c9a4800d2ce",
+      "download": "https://f-droid.org/archive/org.odk.collect.android_1023.apk",
+      "source": "https://code.google.com/p/opendatakit/source",
+      "license": "Apache-2.0",
+      "source_tarball": "https://f-droid.org/archive/org.odk.collect.android_1023_src.tar.gz",
+      "min_sdk": "7",
+      "target_sdk": null,
+      "native_abis": [],
+      "signature_verified": true,
+      "signer_sha256": [
+        "993643d4d2dba5ea1b4b892b9c88f03adba27db47cf9f61f13c061445f49f752"
+      ],
+      "runtime_status": "not-tested",
+      "repair_status": "not-attempted"
+    },
+    {
+      "file": "GPSLogger-27-fdroid.apk",
+      "package": "com.mendhak.gpslogger",
+      "version": "27-fdroid",
+      "version_code": 27,
+      "archive_added": "2013-03-05",
+      "bytes": 966000,
+      "sha256": "652b939b8040d703d6332ff1a33b2cc7f6e9274197f656c3b6ee4f8a24958302",
+      "download": "https://f-droid.org/archive/com.mendhak.gpslogger_27.apk",
+      "source": "https://github.com/mendhak/gpslogger",
+      "license": "GPL-2.0-only",
+      "source_tarball": "https://f-droid.org/archive/com.mendhak.gpslogger_27_src.tar.gz",
+      "min_sdk": "5",
+      "target_sdk": "5",
+      "native_abis": [],
+      "signature_verified": true,
+      "signer_sha256": [
+        "dc3507919aad1c981423f7563ad699830518900f943632bc36eeb7250c390235"
+      ],
+      "runtime_status": "not-tested",
+      "repair_status": "not-attempted"
+    },
+    {
+      "file": "WiFiAnalyzer-1.4.2.33.apk",
+      "package": "com.vrem.wifianalyzer",
+      "version": "1.4.2.33",
+      "version_code": 9,
+      "archive_added": "2016-04-17",
+      "bytes": 935951,
+      "sha256": "8155bb9f17bde1e62c2479012817f48faa640ab9f3d8f4a481d55d57a7d12de1",
+      "download": "https://f-droid.org/archive/com.vrem.wifianalyzer_9.apk",
+      "source": "https://github.com/VREMSoftwareDevelopment/WifiAnalyzer",
+      "license": "GPL-3.0-only",
+      "source_tarball": "https://f-droid.org/archive/com.vrem.wifianalyzer_9_src.tar.gz",
+      "min_sdk": "22",
+      "target_sdk": "22",
+      "native_abis": [],
+      "signature_verified": true,
+      "signer_sha256": [
+        "3a14f8bbead3d530ae0aa0b578b945bdd7667b6e2e27da30cd46349356998f3e"
+      ],
+      "runtime_status": "not-tested",
+      "repair_status": "not-attempted"
+    },
+    {
+      "file": "Open-Camera-1.32.apk",
+      "package": "net.sourceforge.opencamera",
+      "version": "1.32",
+      "version_code": 38,
+      "archive_added": "2016-07-22",
+      "bytes": 1327995,
+      "sha256": "8dc81a3cdb500497e3ee88546d18d15f6e708bac0ee860edada5568e408770b1",
+      "download": "https://f-droid.org/archive/net.sourceforge.opencamera_38.apk",
+      "source": "https://sourceforge.net/p/opencamera/code",
+      "license": "GPL-3.0-or-later",
+      "source_tarball": "https://f-droid.org/archive/net.sourceforge.opencamera_38_src.tar.gz",
+      "min_sdk": "15",
+      "target_sdk": "22",
+      "native_abis": [],
+      "signature_verified": true,
+      "signer_sha256": [
+        "438991c968e8d308ca34078d37511c90c502d596baf9f0d0c5fbd1c9bf67df6d"
+      ],
+      "runtime_status": "not-tested",
+      "repair_status": "not-attempted"
+    },
+    {
+      "file": "phyphox-1.1.0.apk",
+      "package": "de.rwth_aachen.phyphox",
+      "version": "1.1.0",
+      "version_code": 1010007,
+      "archive_added": "2019-06-22",
+      "bytes": 8027901,
+      "sha256": "d1b3f3d67627be6a392a020a4868d555c383f602e9dc5588c804c5a581f5ab76",
+      "download": "https://f-droid.org/archive/de.rwth_aachen.phyphox_1010007.apk",
+      "source": "https://github.com/phyphox/phyphox-android",
+      "license": "GPL-3.0-only",
+      "source_tarball": "https://f-droid.org/archive/de.rwth_aachen.phyphox_1010007_src.tar.gz",
+      "min_sdk": "14",
+      "target_sdk": "28",
+      "native_abis": [
+        "arm64-v8a",
+        "armeabi",
+        "armeabi-v7a",
+        "mips",
+        "mips64",
+        "x86",
+        "x86_64"
+      ],
+      "signature_verified": true,
+      "signer_sha256": [
+        "de2141760030164a6e2b155f91843b91f060cb16644809542addbb04cac2f30c"
+      ],
+      "runtime_status": "not-tested",
+      "repair_status": "not-attempted"
+    }
+  ]
+}
