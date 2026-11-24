@@ -24,6 +24,26 @@
     if(acceptance==="failed"||acceptance==="incomplete")return {tone:"error",title:"候选验证未通过",detail:"请查看对话中的验收结果；可能是安装、运行失败或验证环境不可用。",preview:false};
     return {tone:"neutral",title:"待运行验证",detail:"导入完成，尚无本轮运行结果。",preview:false};
   }
-  root.LazarusRunStatus={result};
-  if(typeof module!=="undefined")module.exports={result};
+  function createSession(){
+    const restored=new Set(),current=new Set();
+    const observe=job=>{if(job?.status==="running")current.add(job.id);};
+    const historical=job=>!!job&&restored.has(job.id)&&!current.has(job.id);
+    return {
+      restore(job){if(job){restored.add(job.id);observe(job);}},
+      started(job){if(job)current.add(job.id);},
+      historical,
+      main(job){
+        observe(job);
+        if(historical(job))return {tone:"neutral",title:"本次尚未运行",detail:"已恢复上次任务。可运行原包或发起修复，历史结果见「运行记录」。",preview:false};
+        return result(job);
+      },
+      diagnostic(job){
+        const value=result(job);
+        if(historical(job))return {...value,title:"历史记录 · "+value.title};
+        return value;
+      },
+    };
+  }
+  root.LazarusRunStatus={result,createSession};
+  if(typeof module!=="undefined")module.exports={result,createSession};
 })(typeof window!=="undefined"?window:globalThis);

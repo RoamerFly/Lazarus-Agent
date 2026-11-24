@@ -2,6 +2,7 @@ const el=id=>document.getElementById(id);
 let config, job=null, sending=false, screenBusy=false, polling=false;
 let askUi, runtimeUi, modificationUi, previewUi;
 let capturedAttachment=null;
+const runSession=LazarusRunStatus.createSession();
 document.addEventListener("lazarus-model-changed",event=>{
   if(config){config.model=event.detail.enabled?event.detail.model:null;render();}
 });
@@ -10,19 +11,20 @@ el("clearFeedbackImage").onclick=()=>{clearCapturedImage();el("attachment").valu
 const PROCESSING_NOTICE="正在处理，进度和结果会显示在对话中。";
 function notice(s,tone="neutral"){el("notice").textContent=s;el("notice").dataset.tone=tone;}
 function renderRunResult(){
-  const result=LazarusRunStatus.result(job);
+  const result=runSession.main(job),diagnostic=runSession.diagnostic(job);
   for(const id of ["runResult","diagnosticResult"]){
-    const box=el(id);box.hidden=!job;box.dataset.tone=result.tone;box.replaceChildren();
+    const value=id==="runResult"?result:diagnostic;
+    const box=el(id);box.hidden=!job;box.dataset.tone=value.tone;box.replaceChildren();
     const title=document.createElement("strong"),detail=document.createElement("span");
-    title.textContent=({error:"✕ ",success:"✓ ",busy:"◌ ",warning:"! ",neutral:""})[result.tone]+result.title;
-    detail.textContent=result.detail;box.append(title,detail);
+    title.textContent=({error:"✕ ",success:"✓ ",busy:"◌ ",warning:"! ",neutral:""})[value.tone]+value.title;
+    detail.textContent=value.detail;box.append(title,detail);
   }
-  el("badge").textContent=result.title;el("badge").dataset.tone=result.tone;
+  el("badge").textContent=diagnostic.title;el("badge").dataset.tone=diagnostic.tone;
   const showPreview=result.preview||previewUi?.phone();
   if(!showPreview)for(const id of ["back","send","refresh"])el(id).disabled=true;
   if(!showPreview){
     el("screen").hidden=true;el("standby").hidden=false;
-    el("standby").lastElementChild.textContent=result.tone==="error"?"应用未运行 · 请查看红色提示":result.tone==="busy"?"正在准备应用画面…":"等待应用运行";
+    el("standby").lastElementChild.textContent=runSession.historical(job)?"本次尚未运行":result.tone==="error"?"应用未运行 · 请查看红色提示":result.tone==="busy"?"正在准备应用画面…":"等待应用运行";
   }
   previewUi?.sync(job?.status==="running"||sending);
   return result;
@@ -187,6 +189,7 @@ document.querySelectorAll("[data-act]").forEach(b=>b.onclick=async()=>{
       if(el("scope").value!=="single")body.targets=targets;
     }
     await api(path("/action/"+act),"POST",body?JSON.stringify(body):null);
+    runSession.started(job);
     job=await api(path(""));notice("可在运行记录中查看进展。");
   }catch(e){notice(e.message,"error");}finally{sending=false;render();}
 });
@@ -199,7 +202,7 @@ el("send").onclick=()=>sendInput({event:"text",value:el("text").value});
   el("demo").textContent="载入示例";el("demo").title=config.demo_label||"旧版记事本";
   if(config.targets[35])el("target").value=35;
   buildScopeControls();
-  previewUi=LazarusPreview.bind({api,getJob:()=>job,isBusy:()=>sending||job?.status==="running",canPreview:()=>LazarusRunStatus.result(job).preview,notice,capture:data=>{
+  previewUi=LazarusPreview.bind({api,getJob:()=>job,isBusy:()=>sending||job?.status==="running",canPreview:()=>runSession.main(job).preview,notice,capture:data=>{
     capturedAttachment=data;el("attachment").value="";el("attachmentName").textContent="当前运行画面";
     el("feedbackImage").src=data;el("feedbackImageRow").hidden=false;
     if(!el("message").value.trim())el("message").value="运行过程中出现了截图中的问题，请分析原因并尝试修复。";
@@ -209,6 +212,7 @@ el("send").onclick=()=>sendInput({event:"text",value:el("text").value});
   bindResources();
   askUi=LazarusAsk.bind({api,getJob:()=>job,notice});
   modificationUi=LazarusModifications.bind({api,getJob:()=>job,notice,selectedTargets,ensureRuntime,onStarted:async()=>{
+    runSession.started(job);
     job=await api(path(""));notice("改造任务已开始，可在运行记录中查看进展。");
   }});
   // Range/multi-select edits only update the stated validation scope.  A
@@ -216,7 +220,7 @@ el("send").onclick=()=>sendInput({event:"text",value:el("text").value});
   // avoiding a premature image download while a checkbox combination is
   // still being chosen.
   el("scope").onchange=()=>render();
-  const old=localStorage.getItem("reviverJob");if(old){try{job=await api("/api/jobs/"+old);restoreScope(job);}catch{localStorage.removeItem("reviverJob");}}
+  const old=localStorage.getItem("reviverJob");if(old){try{job=await api("/api/jobs/"+old);runSession.restore(job);restoreScope(job);}catch{localStorage.removeItem("reviverJob");}}
   render();
 }catch(e){notice(e.message,"error");}})();
 setInterval(async()=>{if(!job||sending||polling)return;polling=true;const current=job;
@@ -373,7 +377,7 @@ el("history").onclick=async()=>{
   try{
     const jobs=await api("/api/jobs"),list=el("jobList");list.replaceChildren();list.classList.toggle("empty-state",jobs.length===0);
     for(const j of jobs){const b=document.createElement("button");b.textContent=j.label+" · Android "+(j.api-20)+" · "+new Date(j.updated||j.created).toLocaleString()+(j.phone?" · "+j.phone:"");
-      b.onclick=async()=>{try{job=await api("/api/jobs/"+j.id);localStorage.setItem("reviverJob",job.id);restoreScope(job);
+      b.onclick=async()=>{try{job=await api("/api/jobs/"+j.id);runSession.restore(job);localStorage.setItem("reviverJob",job.id);restoreScope(job);
         el("screen").hidden=true;el("standby").hidden=false;el("message").value="";el("attachment").value="";el("attachmentName").textContent="";clearCapturedImage();
         el("taskTap").value=job.task?.tap||"";el("taskExpect").value=job.task?.expect||"";el("acceptanceSteps").value="";el("historyDialog").close();render();
       }catch(e){notice(e.message,"error");}};list.append(b);}
